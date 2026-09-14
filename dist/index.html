@@ -28,7 +28,7 @@
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <div class="hero-copy">
+        <div class="hero-copy" data-reveal>
           <p class="hero-intro">We are getting married.</p>
           <h1 id="hero-title">
             <span>Bagas</span>
@@ -53,8 +53,30 @@
         </div>
 
         <figure class="mark-stage">
+          <div class="botanical-rain" aria-hidden="true">
+            <img src="assets/falling-flower.png" alt="" style="--x: 4%; --delay: -2.3s; --duration: 13s; --size: 2.6rem; --drift: 3.5rem; --turn: 310deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 13%; --delay: -9.1s; --duration: 17s; --size: 1.5rem; --drift: -2rem; --turn: -250deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 22%; --delay: -5.8s; --duration: 15s; --size: 2rem; --drift: 4.2rem; --turn: 370deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 34%; --delay: -12.6s; --duration: 19s; --size: 1.25rem; --drift: -3.2rem; --turn: -420deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 43%; --delay: -1.4s; --duration: 14s; --size: 1.8rem; --drift: 2.5rem; --turn: 290deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 52%; --delay: -8.2s; --duration: 18s; --size: 2.9rem; --drift: -4.5rem; --turn: -360deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 61%; --delay: -4.5s; --duration: 16s; --size: 1.35rem; --drift: 2.8rem; --turn: 410deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 70%; --delay: -14.2s; --duration: 20s; --size: 2.2rem; --drift: -3.6rem; --turn: -300deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 79%; --delay: -6.7s; --duration: 14.5s; --size: 1.7rem; --drift: 4rem; --turn: 340deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 88%; --delay: -10.9s; --duration: 18.5s; --size: 2.4rem; --drift: -2.6rem; --turn: -390deg" />
+            <img src="assets/falling-flower.png" alt="" style="--x: 95%; --delay: -3.2s; --duration: 16.5s; --size: 1.3rem; --drift: 2rem; --turn: 280deg" />
+          </div>
+          <img
+            class="botanical-branch botanical-branch-hero"
+            src="assets/botanical-branch.png"
+            alt=""
+            aria-hidden="true"
+            width="1024"
+            height="1536"
+          />
           <div class="mark-halo" aria-hidden="true"></div>
           <img
+            class="couple-mark"
             src="assets/bagas-iga-mark.jpg"
             alt="Bagas and Iga mark: a B embracing a bending I, inspired by a missing rib"
             width="1200"
@@ -70,12 +92,22 @@
       </section>
 
       <section class="details" id="details" aria-labelledby="details-title">
-        <div class="section-heading">
+        <img
+          class="botanical-branch botanical-branch-details botanical-reveal"
+          src="assets/botanical-branch.png"
+          alt=""
+          aria-hidden="true"
+          width="1024"
+          height="1536"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="section-heading" data-reveal>
           <p>Everything you need to know.</p>
           <h2 id="details-title">The wedding</h2>
         </div>
 
-        <div class="details-grid">
+        <div class="details-grid" data-reveal>
           <article class="schedule-panel" aria-labelledby="schedule-title">
             <h3 id="schedule-title">1 November 2026</h3>
             <div class="schedule-row">
@@ -104,7 +136,7 @@
           </article>
         </div>
 
-        <p class="formal-names">
+        <p class="formal-names" data-reveal>
           Bagas Marsya Pratama Nugraha<br />
           <span>&amp;</span><br />
           Iga Noviyanti Rohman
@@ -112,12 +144,28 @@
       </section>
 
       <section class="transition-panel" aria-labelledby="transition-title">
-        <p>That is the practical part.</p>
-        <h2 id="transition-title">We kept a few other things, too.</h2>
+        <div class="transition-copy" data-reveal>
+          <p>That is the practical part.</p>
+          <span aria-hidden="true">The garden continues below.</span>
+        </div>
+        <h2 id="transition-title" data-reveal>We kept a few other things, too.</h2>
+        <div class="transition-flower" aria-hidden="true">
+          <img src="assets/falling-flower.png" alt="" />
+        </div>
       </section>
 
       <section class="archive" id="archive" aria-labelledby="archive-title">
-        <div class="archive-heading">
+        <img
+          class="botanical-branch botanical-branch-archive botanical-reveal"
+          src="assets/botanical-branch.png"
+          alt=""
+          aria-hidden="true"
+          width="1024"
+          height="1536"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="archive-heading" data-reveal>
           <div>
             <p>A collection of things we thought were worth keeping.</p>
             <h2 id="archive-title">The archive</h2>
@@ -129,7 +177,7 @@
         </div>
 
         <div class="archive-grid">
-          <article class="archive-entry archive-entry-featured">
+          <article class="archive-entry archive-entry-featured" data-reveal>
             <div class="entry-meta">
               <span>Record 001</span>
               <span>Conversation</span>
@@ -145,7 +193,7 @@
             <p class="entry-closing">It aged surprisingly well.</p>
           </article>
 
-          <article class="archive-entry archive-entry-object">
+          <article class="archive-entry archive-entry-object" data-reveal>
             <div class="entry-meta">
               <span>Collection</span>
               <span>Objects</span>
@@ -156,7 +204,7 @@
             </div>
           </article>
 
-          <article class="archive-entry archive-entry-index">
+          <article class="archive-entry archive-entry-index" data-reveal>
             <div class="entry-meta">
               <span>Index</span>
               <span>Ongoing</span>
@@ -174,7 +222,7 @@
       </section>
 
       <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
-        <div class="rsvp-intro">
+        <div class="rsvp-intro" data-reveal>
           <p>Attendance</p>
           <h2 id="rsvp-title">RSVP</h2>
           <p class="rsvp-copy">
@@ -198,7 +246,7 @@
           </dl>
         </div>
 
-        <form class="rsvp-form" id="rsvp-form">
+        <form class="rsvp-form" id="rsvp-form" data-reveal>
           <div class="field-group">
             <label for="guest-name">Your name</label>
             <input
