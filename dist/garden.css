@@ -7,7 +7,7 @@ body.invitation-active { overflow:hidden; }
 .site-header .nav-rsvp { color:var(--vellum); background:transparent; border:1px solid #ecdfc057; }
 .site-header .brand-link { font-style:italic; }
 body::before { opacity:.07; }
-.garden-hero { min-height:850px; min-height:100svh; position:relative; display:grid; place-items:center; overflow:hidden; background:var(--forest); color:var(--vellum); isolation:isolate; }
+.garden-hero { width:100vw; height:100svh; min-height:100svh; position:relative; display:grid; place-items:center; overflow:hidden; background:var(--forest); color:var(--vellum); isolation:isolate; }
 .garden-world { position:absolute; inset:0; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 50% 44%,#52604a 0%,#263e32 36%,#132922 75%); }
 .garden-world::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent 28%,#061b1640 80%),linear-gradient(0deg,#112b25 0%,transparent 25%); pointer-events:none; z-index:2; }
 .garden-moonlight { position:absolute; left:28%; top:-20%; width:45%; height:100%; background:linear-gradient(100deg,transparent,#f1e6b914,transparent); transform:rotate(23deg); filter:blur(28px); }
@@ -99,6 +99,19 @@ body::before { opacity:.07; }
 .skip-opening { position:absolute; right:2rem; bottom:1.5rem; z-index:30; background:none; border:0; border-bottom:1px solid currentColor; font:inherit; font-size:.8rem; color:#74614e; padding:.5rem 0; cursor:pointer; }
 .invitation-gate button:focus-visible { outline:2px solid #956151; outline-offset:5px; }
 .invitation-gate[data-state="opening"] .skip-opening { color:#f8ead0; background:#23382fc9; padding:.5rem .8rem; border-radius:2px; }
+.threshold-scene { position:absolute; inset:0; z-index:23; overflow:hidden; pointer-events:none; opacity:0; clip-path:circle(0 at 50% 50%); background:var(--forest-deep); will-change:clip-path,opacity; }
+.threshold-world { position:absolute; inset:0; overflow:hidden; background:radial-gradient(ellipse at 50% 44%,#52604a 0%,#263e32 36%,#132922 75%); }
+.threshold-world::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent 28%,#061b1655 80%),linear-gradient(0deg,#112b25 0%,transparent 25%); pointer-events:none; z-index:2; }
+.threshold-world .garden-moonlight { opacity:.85; }
+.threshold-world .garden-architecture { inset:11% 26% -30%; }
+.threshold-world .garden-plant { filter:saturate(.78); }
+.threshold-world .plant-wisteria { width:34%; left:-4%; top:-24%; transform:rotate(-18deg); opacity:.85; }
+.threshold-world .plant-wisteria-small { width:17%; right:5%; top:-18%; transform:rotate(15deg); opacity:.72; }
+.threshold-world .plant-ivy { width:32%; left:-15%; bottom:-11%; transform:rotate(26deg); opacity:.9; }
+.threshold-world .plant-freesia { width:29%; left:4%; bottom:-25%; transform:rotate(-17deg); opacity:.9; }
+.threshold-world .plant-hypericum { width:25%; right:13%; bottom:-33%; transform:rotate(-17deg); opacity:.9; }
+.threshold-world .plant-strelitzia { width:31%; right:-9%; bottom:-15%; transform:rotate(-13deg); }
+.threshold-world .plant-branch { width:32%; right:-14%; top:-13%; transform:rotate(135deg); opacity:.6; }
 .flight-particles { position:absolute; inset:0; z-index:25; overflow:hidden; pointer-events:none; }
 .flight-particles img { position:absolute; left:50%; top:50%; width:var(--size); height:auto; opacity:0; }
 .garden-threshold { position:absolute; inset:0; z-index:24; overflow:hidden; pointer-events:none; }
@@ -118,6 +131,14 @@ body::before { opacity:.07; }
   .garden-times { font-size:.85rem; }
   .garden-times span { margin:0 .25rem; }
   .garden-architecture { inset:13% 9% -20%; }
+  .threshold-world .garden-architecture { inset:13% 9% -20%; }
+  .threshold-world .plant-wisteria { width:57%; left:-16%; top:-12%; opacity:.65; }
+  .threshold-world .plant-wisteria-small { width:27%; right:-7%; top:-7%; }
+  .threshold-world .plant-strelitzia { width:54%; right:-22%; bottom:-4%; opacity:.85; }
+  .threshold-world .plant-freesia { width:55%; left:-24%; bottom:-5%; opacity:.76; }
+  .threshold-world .plant-ivy { width:56%; left:-30%; bottom:24%; opacity:.5; }
+  .threshold-world .plant-hypericum { width:40%; right:8%; bottom:-20%; opacity:.7; }
+  .threshold-world .plant-branch { width:54%; right:-34%; top:15%; }
   .plant-wisteria { width:57%; left:-16%; top:-12%; opacity:.65; }
   .plant-wisteria-small { width:27%; right:-7%; top:-7%; }
   .plant-strelitzia { width:54%; right:-22%; bottom:-4%; opacity:.85; }

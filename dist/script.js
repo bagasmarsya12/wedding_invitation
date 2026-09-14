@@ -132,6 +132,13 @@ function openGarden() {
       {transform:"translateY(12%) rotate(0deg) scale(1.08)", offset:.36},
       {transform:"translateY(48%) rotate(0deg) scale(3.6)", offset:1}
     ], 1450, 2550, "cubic-bezier(.55,.02,.18,1)");
+    // The little green world becomes the full viewport before the paper leaves the lens.
+    const thresholdScene = q(".threshold-scene");
+    animate(thresholdScene, [
+      {clipPath:"circle(0% at 50% 50%)", opacity:0},
+      {clipPath:"circle(145% at 50% 50%)", opacity:1}
+    ], 1250, 2580, "cubic-bezier(.18,.78,.18,1)");
+    animate(thresholdScene, [{opacity:1},{opacity:0}], 950, 4070, "cubic-bezier(.4,0,.2,1)");
     // Drop the physical sleeve out of the lens before the brief garden match-dissolve.
     [q(".sleeve-back"), q(".sleeve-pocket")].forEach(el => animate(el, [
       {transform:"translateY(0)", opacity:1},
