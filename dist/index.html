@@ -11,67 +11,63 @@
     <title>Bagas × Iga — 1 November 2026</title>
     <link rel="icon" type="image/jpeg" href="assets/bagas-iga-mark.jpg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="garden.css" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to wedding details</a>
 
-    <section
-      class="opening-gate"
-      id="opening-gate"
-      data-opening-gate
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="opening-greeting"
-      aria-describedby="opening-instruction"
-    >
-      <div class="opening-atmosphere" aria-hidden="true">
-        <img class="opening-firefly-veil" src="assets/05-opening-firefly-veil.png" alt="" />
-        <span class="opening-orbit opening-orbit-one"></span>
-        <span class="opening-orbit opening-orbit-two"></span>
-      </div>
 
-      <div class="opening-stage">
-        <img
-          class="opening-paper-burst"
-          src="assets/04-opening-paper-burst.png"
-          alt=""
-          aria-hidden="true"
-          width="1774"
-          height="887"
-        />
-        <img
-          class="opening-letter-art"
-          src="assets/02-opening-letter.png"
-          alt=""
-          aria-hidden="true"
-          width="1024"
-          height="1536"
-        />
-        <img
-          class="opening-envelope-art"
-          src="assets/01-opening-envelope.png"
-          alt=""
-          aria-hidden="true"
-          width="1536"
-          height="1024"
-        />
-
-        <div class="opening-note">
-          <p>Teruntuk Tamu Spesial Kami,</p>
-          <h1 id="opening-greeting" data-guest-name>Tamu Spesial Kami</h1>
-          <button class="opening-enter" id="opening-enter" type="button">
-            <span id="opening-instruction">Klik untuk memasuki taman kami</span>
-            <span class="opening-enter-mark" aria-hidden="true">↗</span>
-          </button>
-        </div>
-
-        <div class="opening-seal" aria-hidden="true">
-          <img src="assets/03-opening-seal.png" alt="" width="1254" height="1254" />
-          <img class="opening-seal-mark" src="assets/opening-mark.svg" alt="" />
+    <section class="invitation-gate" id="invitation-gate" role="dialog" aria-modal="true"
+      aria-labelledby="guest-greeting" lang="id" hidden>
+      <div class="invitation-backdrop" aria-hidden="true"></div>
+      <div class="invitation-corner corner-left" aria-hidden="true"><img src="assets/07-ivy-sprig.webp" alt="" /></div>
+      <div class="invitation-corner corner-right" aria-hidden="true"><img src="assets/08-wisteria-sprig.webp" alt="" /></div>
+      <p class="invitation-dateline">Bagas &amp; Iga <span>1 November 2026</span></p>
+      <div class="invitation-perspective">
+        <div class="invitation-object">
+          <div class="sleeve-back paper-surface" aria-hidden="true"></div>
+          <div class="letter">
+            <div class="letter-garden" aria-hidden="true">
+              <div class="miniature-world">
+  <img class="garden-plant plant-wisteria" src="assets/05-wisteria.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-wisteria-small" src="assets/08-wisteria-sprig.webp" alt="" width="887" height="1774" />
+  <img class="garden-plant plant-ivy" src="assets/04-hedera-helix.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-freesia" src="assets/02-freesia-refracta.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-hypericum" src="assets/03-hypericum-perforatum.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-strelitzia" src="assets/01-strelitzia-reginae.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-branch" src="assets/06-signature-branch.webp" alt="" width="1024" height="1536" /></div>
+              <div class="miniature-light"></div>
+            </div>
+            <div class="letter-wing wing-left paper-surface" aria-hidden="true"></div>
+            <div class="letter-wing wing-right paper-surface" aria-hidden="true"></div>
+            <div class="letter-address paper-surface">
+              <p id="guest-salutation">Teruntuk Tamu Spesial Kami,</p>
+              <h2 id="guest-greeting" dir="auto">Tamu Spesial Kami</h2>
+              <span class="letter-rule" aria-hidden="true"></span>
+              <p class="letter-signature">Dengan cinta, Bagas &amp; Iga</p>
+            </div>
+          </div>
+          <div class="sleeve-pocket paper-surface" aria-hidden="true">
+            <span class="pocket-fold fold-left"></span><span class="pocket-fold fold-right"></span>
+            <span class="pocket-caption">Sebuah undangan untukmu</span>
+          </div>
+          <div class="sleeve-cover" aria-hidden="true">
+            <div class="cover-face paper-surface"></div>
+            <div class="cover-reverse paper-surface"></div>
+          </div>
+          <div class="invitation-seal" aria-hidden="true">
+            <img src="assets/bagas-iga-mark.jpg" alt="" width="1200" height="1200" />
+          </div>
         </div>
       </div>
-
-      <button class="opening-skip" id="opening-skip" type="button">Lewati pembukaan</button>
+      <div class="invitation-action">
+        <button id="enter-garden" type="button"><span>Masuki taman kami</span><span class="enter-flourish" aria-hidden="true">✧</span></button>
+        <p>Klik untuk membuka undangan</p>
+      </div>
+      <button class="skip-opening" id="skip-opening" type="button">Lewati pembukaan</button>
+      <p class="opening-status sr-only" aria-live="polite"></p>
+      <div class="flight-particles" aria-hidden="true"></div>
+      <div class="garden-threshold" aria-hidden="true"></div>
     </section>
 
     <header class="site-header" aria-label="Primary navigation">
@@ -86,82 +82,36 @@
     </header>
 
     <main id="main">
-      <section class="hero" id="top" aria-labelledby="hero-title">
-        <div class="hero-copy" data-reveal>
-          <p class="hero-intro">We are getting married.</p>
-          <h1 id="hero-title">
-            <span>Bagas</span>
-            <span>Iga</span>
-          </h1>
 
-          <div class="hero-facts" aria-label="Wedding summary">
-            <p>
-              <span class="fact-label">Date</span>
-              <strong>1 November 2026</strong>
-            </p>
-            <p>
-              <span class="fact-label">Place</span>
-              <strong>Pandiga, Cimahi</strong>
-            </p>
-          </div>
+      <section class="garden-hero" id="top" aria-labelledby="hero-title">
+        <div class="garden-world" aria-hidden="true">
+          <div class="garden-moonlight"></div>
+          <div class="garden-architecture"><span></span><span></span><span></span></div>
 
-          <div class="hero-actions">
-            <a class="button button-primary" href="#details">Wedding details</a>
-            <a class="button button-secondary" href="#rsvp">RSVP</a>
-          </div>
+  <img class="garden-plant plant-wisteria" src="assets/05-wisteria.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-wisteria-small" src="assets/08-wisteria-sprig.webp" alt="" width="887" height="1774" />
+  <img class="garden-plant plant-ivy" src="assets/04-hedera-helix.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-freesia" src="assets/02-freesia-refracta.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-hypericum" src="assets/03-hypericum-perforatum.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-strelitzia" src="assets/01-strelitzia-reginae.webp" alt="" width="1024" height="1536" />
+  <img class="garden-plant plant-branch" src="assets/06-signature-branch.webp" alt="" width="1024" height="1536" />
+          <div class="garden-fireflies"></div>
         </div>
-
-        <figure class="mark-stage">
-          <div class="botanical-rain" aria-hidden="true">
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 4%; --delay: -2.3s; --duration: 13s; --size: 2.6rem; --drift: 3.5rem; --turn: 310deg" />
-            <img src="assets/10-dried-leaf.png" alt="" style="--x: 13%; --delay: -9.1s; --duration: 17s; --size: 1.5rem; --drift: -2rem; --turn: -250deg" />
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 22%; --delay: -5.8s; --duration: 15s; --size: 2rem; --drift: 4.2rem; --turn: 370deg" />
-            <img src="assets/10-dried-leaf.png" alt="" style="--x: 34%; --delay: -12.6s; --duration: 19s; --size: 1.25rem; --drift: -3.2rem; --turn: -420deg" />
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 43%; --delay: -1.4s; --duration: 14s; --size: 1.8rem; --drift: 2.5rem; --turn: 290deg" />
-            <img src="assets/10-dried-leaf.png" alt="" style="--x: 52%; --delay: -8.2s; --duration: 18s; --size: 2.9rem; --drift: -4.5rem; --turn: -360deg" />
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 61%; --delay: -4.5s; --duration: 16s; --size: 1.35rem; --drift: 2.8rem; --turn: 410deg" />
-            <img src="assets/10-dried-leaf.png" alt="" style="--x: 70%; --delay: -14.2s; --duration: 20s; --size: 2.2rem; --drift: -3.6rem; --turn: -300deg" />
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 79%; --delay: -6.7s; --duration: 14.5s; --size: 1.7rem; --drift: 4rem; --turn: 340deg" />
-            <img src="assets/10-dried-leaf.png" alt="" style="--x: 88%; --delay: -10.9s; --duration: 18.5s; --size: 2.4rem; --drift: -2.6rem; --turn: -390deg" />
-            <img src="assets/09-falling-petal.png" alt="" style="--x: 95%; --delay: -3.2s; --duration: 16.5s; --size: 1.3rem; --drift: 2rem; --turn: 280deg" />
-          </div>
-          <img
-            class="botanical-branch botanical-branch-hero"
-            src="assets/06-signature-branch.png"
-            alt=""
-            aria-hidden="true"
-            width="1024"
-            height="1536"
-          />
-          <img
-            class="botanical-hero-flower"
-            src="assets/01-strelitzia-reginae.png"
-            alt=""
-            aria-hidden="true"
-            width="1024"
-            height="1536"
-          />
-          <div class="mark-halo" aria-hidden="true"></div>
-          <img
-            class="couple-mark"
-            src="assets/bagas-iga-mark.jpg"
-            alt="Bagas and Iga mark: a B embracing a bending I, inspired by a missing rib"
-            width="1200"
-            height="1200"
-          />
-          <figcaption>
-            <span>The mark</span>
-            <span>A B, a bending I, and a story we kept.</span>
-          </figcaption>
-        </figure>
-
-        <p class="hero-index" aria-hidden="true">01 / 11 / 26</p>
+        <div class="garden-center">
+          <p class="garden-welcome" lang="id">Di taman ini, kita merayakan cinta.</p>
+          <h1 class="garden-title" id="hero-title" tabindex="-1"><span>Bagas</span><em>&amp;</em><span>Iga</span></h1>
+          <p class="garden-date">1 November 2026</p>
+          <p class="garden-place">Pandiga, Cimahi</p>
+          <p class="garden-times">Akad 14:00 WIB <span>·</span> Reception 18:00 WIB</p>
+          <div class="garden-actions"><a href="#details">Detail acara</a><a href="#rsvp">RSVP</a></div>
+        </div>
+        <div class="garden-bottom"><button type="button" id="replay-opening" hidden>Buka kembali undangan</button><a href="#details">Taman ini berlanjut <span aria-hidden="true">↓</span></a></div>
       </section>
 
       <section class="details" id="details" aria-labelledby="details-title">
         <img
           class="botanical-branch botanical-branch-details botanical-reveal"
-          src="assets/06-signature-branch.png"
+          src="assets/06-signature-branch.webp"
           alt=""
           aria-hidden="true"
           width="1024"
@@ -171,7 +121,7 @@
         />
         <img
           class="botanical-ivy-sprig"
-          src="assets/07-ivy-sprig.png"
+          src="assets/07-ivy-sprig.webp"
           alt=""
           aria-hidden="true"
           width="887"
@@ -181,7 +131,7 @@
         />
         <img
           class="botanical-freesia"
-          src="assets/02-freesia-refracta.png"
+          src="assets/02-freesia-refracta.webp"
           alt=""
           aria-hidden="true"
           width="1024"
@@ -237,14 +187,14 @@
         </div>
         <h2 id="transition-title" data-reveal>We kept a few other things, too.</h2>
         <div class="transition-plant" aria-hidden="true">
-          <img src="assets/03-hypericum-perforatum.png" alt="" />
+          <img src="assets/03-hypericum-perforatum.webp" alt="" />
         </div>
       </section>
 
       <section class="archive" id="archive" aria-labelledby="archive-title">
         <img
           class="botanical-branch botanical-branch-archive botanical-reveal"
-          src="assets/06-signature-branch.png"
+          src="assets/06-signature-branch.webp"
           alt=""
           aria-hidden="true"
           width="1024"
@@ -253,8 +203,8 @@
           decoding="async"
         />
         <div class="archive-botany" aria-hidden="true">
-          <img class="archive-wisteria" src="assets/05-wisteria.png" alt="" />
-          <img class="archive-wisteria-sprig" src="assets/08-wisteria-sprig.png" alt="" />
+          <img class="archive-wisteria" src="assets/05-wisteria.webp" alt="" />
+          <img class="archive-wisteria-sprig" src="assets/08-wisteria-sprig.webp" alt="" />
         </div>
         <div class="archive-heading" data-reveal>
           <div>
@@ -270,7 +220,7 @@
         <div class="archive-grid">
           <article class="archive-entry archive-entry-featured" data-reveal>
             <div class="archive-paper-layer" aria-hidden="true">
-              <img src="assets/13-torn-paper-edges.png" alt="" />
+              <img src="assets/13-torn-paper-edges.webp" alt="" />
             </div>
             <div class="entry-meta">
               <span>Record 001</span>
@@ -289,8 +239,8 @@
 
           <article class="archive-entry archive-entry-object" data-reveal>
             <div class="archive-object-art" aria-hidden="true">
-              <img class="archive-envelope" src="assets/11-archive-envelope.png" alt="" />
-              <img class="archive-tape" src="assets/14-paper-tape.png" alt="" />
+              <img class="archive-envelope" src="assets/11-archive-envelope.webp" alt="" />
+              <img class="archive-tape" src="assets/14-paper-tape.webp" alt="" />
             </div>
             <div class="entry-meta">
               <span>Collection</span>
@@ -305,7 +255,7 @@
           <article class="archive-entry archive-entry-index" data-reveal>
             <img
               class="archive-ephemera"
-              src="assets/12-blank-ephemera.png"
+              src="assets/12-blank-ephemera.webp"
               alt=""
               aria-hidden="true"
               loading="lazy"
@@ -399,7 +349,7 @@
       <footer class="site-footer">
         <img
           class="footer-ivy"
-          src="assets/04-hedera-helix.png"
+          src="assets/04-hedera-helix.webp"
           alt=""
           aria-hidden="true"
           width="1024"
