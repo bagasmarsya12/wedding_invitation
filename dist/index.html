@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,6 +15,7 @@
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to wedding details</a>
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
 
 
     <section class="invitation-gate" id="invitation-gate" role="dialog" aria-modal="true"
@@ -66,19 +67,7 @@
       </div>
       <button class="skip-opening" id="skip-opening" type="button">Lewati pembukaan</button>
       <p class="opening-status sr-only" aria-live="polite"></p>
-      <div class="threshold-scene" aria-hidden="true">
-        <div class="threshold-world">
-          <div class="garden-moonlight"></div>
-          <div class="garden-architecture"><span></span><span></span><span></span></div>
-          <img class="garden-plant plant-wisteria" src="assets/05-wisteria.webp" alt="" width="1024" height="1536" />
-          <img class="garden-plant plant-wisteria-small" src="assets/08-wisteria-sprig.webp" alt="" width="887" height="1774" />
-          <img class="garden-plant plant-ivy" src="assets/04-hedera-helix.webp" alt="" width="1024" height="1536" />
-          <img class="garden-plant plant-freesia" src="assets/02-freesia-refracta.webp" alt="" width="1024" height="1536" />
-          <img class="garden-plant plant-hypericum" src="assets/03-hypericum-perforatum.webp" alt="" width="1024" height="1536" />
-          <img class="garden-plant plant-strelitzia" src="assets/01-strelitzia-reginae.webp" alt="" width="1024" height="1536" />
-          <img class="garden-plant plant-branch" src="assets/06-signature-branch.webp" alt="" width="1024" height="1536" />
-        </div>
-      </div>
+      <div class="threshold-scene" aria-hidden="true"></div>
       <div class="flight-particles" aria-hidden="true"></div>
       <div class="garden-threshold" aria-hidden="true"></div>
     </section>
@@ -90,6 +79,7 @@
       <nav class="desktop-nav" aria-label="Wedding sections">
         <a href="#details">Details</a>
         <a href="#archive">Archive</a>
+        <a href="#guest-notes">Guest notes</a>
         <a class="nav-rsvp" href="#rsvp">RSVP</a>
       </nav>
     </header>
@@ -119,6 +109,19 @@
           <div class="garden-actions"><a href="#details">Detail acara</a><a href="#rsvp">RSVP</a></div>
         </div>
         <div class="garden-bottom"><button type="button" id="replay-opening" hidden>Buka kembali undangan</button><a href="#details">Taman ini berlanjut <span aria-hidden="true">↓</span></a></div>
+      </section>
+
+      <section class="countdown-strip" aria-label="Hitung mundur menuju hari pernikahan">
+        <img src="assets/08-wisteria-sprig.webp" alt="" aria-hidden="true" width="887" height="1774" />
+        <div class="countdown-intro" data-reveal>
+          <p>Menuju 1 November 2026</p>
+          <span>Sampai kita bertemu di Cimahi.</span>
+        </div>
+        <div class="countdown-grid" id="countdown" data-reveal aria-live="off">
+          <p><strong id="countdown-days">—</strong><span>hari</span></p>
+          <p><strong id="countdown-hours">—</strong><span>jam</span></p>
+          <p><strong id="countdown-minutes">—</strong><span>menit</span></p>
+        </div>
       </section>
 
       <section class="details" id="details" aria-labelledby="details-title">
@@ -153,8 +156,8 @@
           decoding="async"
         />
         <div class="section-heading" data-reveal>
-          <p>Everything you need to know.</p>
-          <h2 id="details-title">The wedding</h2>
+          <p>Hal penting, terlebih dahulu.</p>
+          <h2 id="details-title">Hari pernikahan</h2>
         </div>
 
         <div class="details-grid" data-reveal>
@@ -164,14 +167,14 @@
               <time datetime="2026-11-01T14:00:00+07:00">14:00</time>
               <div>
                 <h4>Akad</h4>
-                <p>Ceremony details to follow.</p>
+                <p>Rangkaian akad nikah. Detail acara akan diperbarui.</p>
               </div>
             </div>
             <div class="schedule-row">
               <time datetime="2026-11-01T18:00:00+07:00">18:00</time>
               <div>
-                <h4>Reception</h4>
-                <p>Evening reception at Pandiga.</p>
+                <h4>Resepsi</h4>
+                <p>Perayaan malam bersama keluarga dan sahabat di Pandiga.</p>
               </div>
             </div>
           </article>
@@ -181,8 +184,8 @@
               <p class="panel-kicker">Venue</p>
               <h3 id="venue-title">Pandiga<br />Cimahi</h3>
             </div>
-            <p>Full address, entrance notes, and directions will follow.</p>
-            <span class="placeholder-link" aria-disabled="true">Maps coming soon</span>
+            <p>Alamat lengkap, akses masuk, dan informasi parkir akan ditambahkan di sini.</p>
+            <span class="placeholder-link" aria-disabled="true">Tautan peta menyusul</span>
           </article>
         </div>
 
@@ -193,16 +196,54 @@
         </p>
       </section>
 
+      <section class="day-flow" id="day-flow" aria-labelledby="day-flow-title">
+        <img
+          class="day-flow-flower"
+          src="assets/01-strelitzia-reginae.webp"
+          alt=""
+          aria-hidden="true"
+          width="1024"
+          height="1536"
+          loading="lazy"
+          decoding="async"
+          data-parallax="0.055"
+        />
+        <div class="day-flow-heading" data-reveal>
+          <p>Urutan hari</p>
+          <h2 id="day-flow-title">Dua momen.<br />Satu hari.</h2>
+        </div>
+        <div class="day-line" data-reveal>
+          <article class="day-stop">
+            <div><span>01</span><time datetime="2026-11-01T14:00:00+07:00">14:00 WIB</time></div>
+            <h3>Akad</h3>
+            <p>Bagian paling tenang dari hari kami—saat janji itu diucapkan.</p>
+          </article>
+          <p class="day-interlude"><span>Di antaranya</span> Ada jeda sebelum taman menyala untuk perayaan malam.</p>
+          <article class="day-stop">
+            <div><span>02</span><time datetime="2026-11-01T18:00:00+07:00">18:00 WIB</time></div>
+            <h3>Resepsi</h3>
+            <p>Malam untuk bertemu, merayakan, dan berbagi meja dengan orang-orang terdekat.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="transition-panel" aria-labelledby="transition-title">
         <div class="transition-copy" data-reveal>
-          <p>That is the practical part.</p>
-          <span aria-hidden="true">The garden continues below.</span>
+          <p>Bagian praktis selesai.</p>
+          <span aria-hidden="true">Sekarang, taman berlanjut.</span>
         </div>
-        <h2 id="transition-title" data-reveal>We kept a few other things, too.</h2>
-        <div class="transition-plant" aria-hidden="true">
+        <h2 id="transition-title" data-reveal>Ada hal-hal kecil yang ingin kami simpan.</h2>
+        <div class="transition-plant" aria-hidden="true" data-parallax="0.045">
           <img src="assets/03-hypericum-perforatum.webp" alt="" />
         </div>
       </section>
+
+      <div class="garden-marquee" aria-hidden="true">
+        <div class="garden-marquee-track">
+          <span>Bagas &amp; Iga · 1 November 2026 · Pandiga Cimahi ·</span>
+          <span>Bagas &amp; Iga · 1 November 2026 · Pandiga Cimahi ·</span>
+        </div>
+      </div>
 
       <section class="archive" id="archive" aria-labelledby="archive-title">
         <img
@@ -221,12 +262,12 @@
         </div>
         <div class="archive-heading" data-reveal>
           <div>
-            <p>A collection of things we thought were worth keeping.</p>
+            <p>Kumpulan kecil dari hal-hal yang layak disimpan.</p>
             <h2 id="archive-title">The archive</h2>
           </div>
           <p class="archive-note">
-            Not a timeline. Just objects, conversations, places, and small things
-            that somehow became ours.
+            Bukan linimasa. Hanya percakapan, tempat, benda, dan detail kecil yang
+            perlahan menjadi milik kami.
           </p>
         </div>
 
@@ -260,8 +301,8 @@
               <span>Objects</span>
             </div>
             <div class="entry-content">
-              <h3>Things We Kept</h3>
-              <p>Receipts, photographs, notes, and other evidence. Entries coming soon.</p>
+              <h3>Yang Akan Kami Simpan</h3>
+              <p>Foto, catatan, dan benda yang benar-benar milik kami akan tinggal di sini saat siap.</p>
             </div>
           </article>
 
@@ -290,13 +331,93 @@
         </div>
       </section>
 
+      <section class="guest-notes" id="guest-notes" aria-labelledby="guest-notes-title">
+        <img
+          class="guest-notes-ivy"
+          src="assets/04-hedera-helix.webp"
+          alt=""
+          aria-hidden="true"
+          width="1024"
+          height="1536"
+          loading="lazy"
+          decoding="async"
+          data-parallax="0.04"
+        />
+        <header class="guest-notes-heading" data-reveal>
+          <p>Untuk hari itu</p>
+          <h2 id="guest-notes-title">A few notes<br />before you arrive.</h2>
+          <p>Bagian ini akan terus diperbarui sampai semua detail siap.</p>
+        </header>
+
+        <div class="guest-note-grid">
+          <article class="guest-note-card" data-reveal>
+            <span>01</span>
+            <h3>Busana &amp; suasana</h3>
+            <p>Panduan dress code dan palet warna akan diumumkan mendekati hari pernikahan.</p>
+            <small>Detail menyusul</small>
+          </article>
+          <article class="guest-note-card" data-reveal>
+            <span>02</span>
+            <h3>Arah &amp; parkir</h3>
+            <p>Tautan Maps, titik masuk, dan arahan parkir akan tersedia di halaman ini.</p>
+            <small>Detail menyusul</small>
+          </article>
+          <article class="guest-note-card" data-reveal>
+            <span>03</span>
+            <h3>Tentang hadiah</h3>
+            <p>Kehadiran dan doa baikmu sudah berarti. Informasi tambahan, bila ada, akan kami tambahkan.</p>
+            <small>Dengan hangat</small>
+          </article>
+          <article class="guest-note-card" data-reveal>
+            <span>04</span>
+            <h3>Konfirmasi tamu</h3>
+            <p>Gunakan nama pada undanganmu saat mengisi RSVP agar kami dapat menyiapkan penyambutan.</p>
+            <a href="#rsvp">Menuju RSVP</a>
+          </article>
+        </div>
+
+        <div class="guest-faq" data-reveal>
+          <div>
+            <p>Quick answers</p>
+            <h3>Pertanyaan yang mungkin kamu punya.</h3>
+          </div>
+          <div class="faq-list">
+            <details>
+              <summary>Apakah alamat lengkap sudah tersedia?</summary>
+              <p>Belum. Tautan Maps dan petunjuk kedatangan akan ditambahkan setelah detail akses final.</p>
+            </details>
+            <details>
+              <summary>Undangan ini berlaku untuk berapa orang?</summary>
+              <p>Jumlah tamu akan mengikuti informasi personal pada undangan digital yang kamu terima.</p>
+            </details>
+            <details>
+              <summary>Kapan batas akhir RSVP?</summary>
+              <p>Tanggal batas konfirmasi akan ditambahkan di sini. Untuk sekarang, formulir masih berupa preview.</p>
+            </details>
+            <details>
+              <summary>Siapa yang bisa dihubungi pada hari acara?</summary>
+              <p>Nomor kontak keluarga atau PIC akan ditambahkan setelah susunan acara selesai.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing-note" aria-label="Pesan dari Bagas dan Iga">
+        <img src="assets/02-freesia-refracta.webp" alt="" aria-hidden="true" width="1024" height="1536" loading="lazy" decoding="async" data-parallax="0.055" />
+        <div data-reveal>
+          <p>Dari kami, untukmu</p>
+          <blockquote>Yang kami harapkan sederhana: kamu hadir, dan hari itu terasa sedikit lebih lengkap.</blockquote>
+          <span>— Bagas &amp; Iga</span>
+        </div>
+      </section>
+
       <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
         <div class="rsvp-intro" data-reveal>
-          <p>Attendance</p>
+          <p>Konfirmasi kehadiran</p>
           <h2 id="rsvp-title">RSVP</h2>
           <p class="rsvp-copy">
-            We would love to know if you can make it. This first version previews
-            the experience; responses are not stored yet.
+            Kami ingin tahu apakah kamu bisa hadir. Versi ini masih berupa preview;
+            jawabanmu belum disimpan.
           </p>
 
           <dl class="event-summary">
@@ -305,7 +426,7 @@
               <dd>14:00</dd>
             </div>
             <div>
-              <dt>Reception</dt>
+              <dt>Resepsi</dt>
               <dd>18:00</dd>
             </div>
             <div>
@@ -317,44 +438,44 @@
 
         <form class="rsvp-form" id="rsvp-form" data-reveal>
           <div class="field-group">
-            <label for="guest-name">Your name</label>
+            <label for="guest-name">Nama kamu</label>
             <input
               id="guest-name"
               name="guest-name"
               type="text"
               autocomplete="name"
-              placeholder="Name on the invitation"
+              placeholder="Nama pada undangan"
               required
             />
           </div>
 
           <fieldset class="field-group choice-group">
-            <legend>Will you attend?</legend>
+            <legend>Apakah kamu akan hadir?</legend>
             <label class="choice">
               <input type="radio" name="attendance" value="yes" required />
-              <span>Yes, I will be there</span>
+              <span>Ya, saya akan hadir</span>
             </label>
             <label class="choice">
               <input type="radio" name="attendance" value="no" required />
-              <span>I cannot attend</span>
+              <span>Maaf, saya tidak dapat hadir</span>
             </label>
           </fieldset>
 
           <div class="field-row">
             <div class="field-group">
-              <label for="party-size">Number of guests</label>
+              <label for="party-size">Jumlah tamu</label>
               <select id="party-size" name="party-size">
-                <option value="1">1 guest</option>
-                <option value="2">2 guests</option>
+                <option value="1">1 tamu</option>
+                <option value="2">2 tamu</option>
               </select>
             </div>
             <div class="field-group">
-              <label for="guest-note">A short note <span>(optional)</span></label>
+              <label for="guest-note">Pesan singkat <span>(opsional)</span></label>
               <input id="guest-note" name="guest-note" type="text" />
             </div>
           </div>
 
-          <button class="submit-button" type="submit">Confirm attendance</button>
+          <button class="submit-button" type="submit">Konfirmasi kehadiran</button>
           <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
         </form>
       </section>
@@ -379,9 +500,9 @@
         />
         <div>
           <p>Bagas × Iga</p>
-          <p>1 November 2026 · Pandiga, Cimahi</p>
+          <p>1 November 2026 · Pandiga, Cimahi · Sampai bertemu di taman.</p>
         </div>
-        <a href="#top">Back to top</a>
+        <a href="#top">Kembali ke atas</a>
       </footer>
     </main>
     <script src="script.js"></script>

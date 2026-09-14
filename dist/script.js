@@ -19,6 +19,22 @@ const guestLabel = document.querySelector("#guest-greeting");
 guestLabel.textContent = suppliedName || "Tamu Spesial Kami";
 if (!suppliedName) document.querySelector("#guest-salutation").textContent = "Teruntuk";
 if (suppliedName.length > 35) gate.classList.add("guest-long");
+if (suppliedName) document.querySelector("#guest-name").value = suppliedName;
+
+const countdownTarget = new Date("2026-11-01T14:00:00+07:00").getTime();
+function updateCountdown() {
+  const remaining = Math.max(0, countdownTarget - Date.now());
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor(remaining / 3600000) % 24;
+  const minutes = Math.floor(remaining / 60000) % 60;
+  const values = { days, hours, minutes };
+  Object.entries(values).forEach(([unit, value]) => {
+    const element = document.querySelector(`#countdown-${unit}`);
+    if (element) element.textContent = new Intl.NumberFormat("id-ID", { minimumIntegerDigits: unit === "days" ? 1 : 2 }).format(value);
+  });
+}
+updateCountdown();
+window.setInterval(updateCountdown, 60000);
 
 function animate(element, frames, duration, delay = 0, easing = "cubic-bezier(.22,.72,.18,1)") {
   if (!element) return;
@@ -37,6 +53,7 @@ function finishOpening() {
   gate.hidden = true;
   stopAnimations();
   gate.querySelector(".flight-particles").replaceChildren();
+  gate.querySelector(".threshold-scene").classList.remove("threshold-transform-mode");
   gate.querySelector(".garden-threshold").replaceChildren();
   gate.querySelector(".opening-status").textContent = "";
   main.inert = false;
@@ -80,7 +97,7 @@ function emitPetals() {
       { opacity:0, transform:"translate(-50%, -50%) scale(.2) rotate(0deg)", offset:0 },
       { opacity:.4, transform:`translate(${x * .22}px,${y * .18}px) scale(.65) rotate(${turn * .35}deg)`, offset:.28 },
       { opacity:0, transform:`translate(${x}px,${y}px) scale(1.5) rotate(${turn}deg)`, offset:1 }
-    ], 2100 + i % 4 * 90, 3600 + i % 5 * 55, "cubic-bezier(.12,.52,.28,1)");
+    ], 1100 + i % 4 * 55, 4100 + i % 5 * 45, "cubic-bezier(.12,.52,.28,1)");
   }
 }
 function openGarden() {
@@ -104,42 +121,41 @@ function openGarden() {
       { transform:"rotate(-18deg) translate3d(24px,32px,30px) scale(.92)", opacity:0, offset:1 }
     ], 980, 80, "cubic-bezier(.22,.72,.18,1)");
     animate(q(".sleeve-cover"), [
-      { transform:"rotateX(0deg) translateZ(0)", filter:"brightness(1)", offset:0 },
-      { transform:"rotateX(-24deg) translateZ(2px)", filter:"brightness(.98)", offset:.24 },
-      { transform:"rotateX(-128deg) translateZ(4px)", filter:"brightness(.91)", offset:.72 },
-      { transform:"rotateX(-165deg) translateZ(0)", filter:"brightness(.88)", offset:1 }
-    ], 1350, 420, "cubic-bezier(.22,.72,.18,1)");
+      { transform:"rotateX(0deg) translate3d(0,0,0)", offset:0 },
+      { transform:"rotateX(-18deg) translate3d(0,-1px,2px)", offset:.22 },
+      { transform:"rotateX(-116deg) translate3d(0,-3px,4px)", offset:.7 },
+      { transform:"rotateX(-165deg) translate3d(0,-2px,0)", offset:1 }
+    ], 1480, 420, "cubic-bezier(.2,.72,.16,1)");
     animate(q(".letter"), [
-      { transform:"translateY(0) rotate(0) scale(1)", zIndex:1, offset:0 },
-      { transform:"translateY(-7%) rotate(.4deg) scale(1.005)", zIndex:1, offset:.24 },
-      { transform:"translateY(-31%) rotate(1deg) scale(1.025)", zIndex:1, offset:.72 },
-      { transform:"translateY(-40%) rotate(1.2deg) scale(1.06)", zIndex:8, offset:1 }
-    ], 1600, 860, "cubic-bezier(.22,.72,.18,1)");
+      { transform:"translate3d(0,0,0) rotate(0deg) scale(1)", offset:0 },
+      { transform:"translate3d(0,-6%,0) rotate(.25deg) scale(1.004)", offset:.22 },
+      { transform:"translate3d(0,-27%,0) rotate(.72deg) scale(1.02)", offset:.68 },
+      { transform:"translate3d(0,-40%,0) rotate(1deg) scale(1.06)", offset:1 }
+    ], 1740, 900, "cubic-bezier(.2,.72,.16,1)");
     animate(q(".letter-address"), [
-      { transform:"perspective(900px) translateZ(24px) rotateX(0deg) translateY(0)", opacity:1, offset:0 },
-      { transform:"perspective(900px) translateZ(24px) rotateX(-4deg) translateY(-4px)", opacity:.96, offset:.48 },
-      { transform:"perspective(900px) translateZ(24px) rotateX(-12deg) translateY(-20px)", opacity:0, offset:1 }
-    ], 550, 1950, "cubic-bezier(.22,.72,.18,1)");
+      { transform:"translate3d(0,0,0) rotateX(0deg)", opacity:1, offset:0 },
+      { transform:"translate3d(0,-3px,0) rotateX(-3deg)", opacity:.96, offset:.45 },
+      { transform:"translate3d(0,-18px,0) rotateX(-10deg)", opacity:0, offset:1 }
+    ], 680, 2020, "cubic-bezier(.2,.72,.16,1)");
     animate(q(".wing-left"), [
       {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
       {transform:"perspective(800px) rotateY(-28deg) translateX(-6px)", opacity:1, offset:.28},
       {transform:"perspective(800px) rotateY(-72deg) translateX(-16px)", opacity:.42, offset:.68},
       {transform:"perspective(800px) rotateY(-100deg) translateX(-26px)", opacity:0, offset:1}
-    ], 950, 1950, "cubic-bezier(.22,.72,.18,1)");
+    ], 1080, 2020, "cubic-bezier(.2,.72,.16,1)");
     animate(q(".wing-right"), [
       {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
       {transform:"perspective(800px) rotateY(28deg) translateX(6px)", opacity:1, offset:.28},
       {transform:"perspective(800px) rotateY(72deg) translateX(16px)", opacity:.42, offset:.68},
       {transform:"perspective(800px) rotateY(100deg) translateX(26px)", opacity:0, offset:1}
-    ], 950, 2070, "cubic-bezier(.22,.72,.18,1)");
-    q(".miniature-world").querySelectorAll(".garden-plant").forEach((plant, i) => {
-      const resting = getComputedStyle(plant).transform;
-      animate(plant, [
-        {transform:resting + " rotateX(82deg) scale(.65)", opacity:0},
-        {transform:resting + " rotateX(0deg) scale(1)", opacity:1}
-      ], 850, 1740 + i * 75);
-    });
-    animate(q(".miniature-light"), [{opacity:.1},{opacity:1}], 550, 2250);
+    ], 1080, 2110, "cubic-bezier(.2,.72,.16,1)");
+    // Keep the botanical composition on one compositor layer. Individual plant
+    // transforms caused frame drops while the paper was unfolding on mobile.
+    animate(q(".miniature-world"), [
+      {transform:"translate3d(0,8px,0) scale(.985)", opacity:.72},
+      {transform:"translate3d(0,0,0) scale(1)", opacity:1}
+    ], 1120, 1900, "cubic-bezier(.2,.72,.16,1)");
+    animate(q(".miniature-light"), [{opacity:.1},{opacity:1}], 720, 2250);
     // The half-second reveal breath gives the miniature garden time to register.
     animate(q(".invitation-object"), [
       {transform:"rotate(-3deg) scale(1)", offset:0},
@@ -149,38 +165,41 @@ function openGarden() {
     // The little green world appears as a quiet panel before it opens into the viewport.
     const thresholdScene = q(".threshold-scene");
     const boxClip = getComputedStyle(thresholdScene).clipPath;
-    animate(thresholdScene, [
-      {clipPath:boxClip, opacity:0, offset:0},
-      {clipPath:boxClip, opacity:1, offset:.19},
-      {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:1, offset:.79},
-      {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:0, offset:1}
-    ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
-    animate(q(".threshold-world"), [
-      {transform:"scale(1.06)"},
-      {transform:"scale(1)"}
-    ], 1850, 3150, "cubic-bezier(.22,.72,.18,1)");
+    if (innerWidth > 760) {
+      const frame = q(".invitation-perspective").getBoundingClientRect();
+      const scaleX = frame.width / innerWidth;
+      const scaleY = frame.height / innerHeight;
+      thresholdScene.classList.add("threshold-transform-mode");
+      animate(thresholdScene, [
+        {transform:`translate3d(0,0,0) scale(${scaleX},${scaleY})`, opacity:0, offset:0},
+        {transform:`translate3d(0,0,0) scale(${scaleX},${scaleY})`, opacity:1, offset:.19},
+        {transform:"translate3d(0,0,0) scale(1,1)", opacity:1, offset:.79},
+        {transform:"translate3d(0,0,0) scale(1,1)", opacity:0, offset:1}
+      ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
+    } else {
+      animate(thresholdScene, [
+        {clipPath:boxClip, opacity:0, offset:0},
+        {clipPath:boxClip, opacity:1, offset:.19},
+        {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:1, offset:.79},
+        {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:0, offset:1}
+      ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
+    }
     animate(q(".letter-garden"), [{opacity:1},{opacity:0}], 700, 2550, "cubic-bezier(.22,.72,.18,1)");
     // Let the paper settle behind the green panel instead of flying toward the camera.
     [q(".sleeve-back"), q(".sleeve-pocket")].forEach(el => animate(el, [
       {transform:"translateY(0)", opacity:1},
       {transform:"translateY(120%)", opacity:0}
     ], 620, 3150));
-    [q(".sleeve-cover"), q(".wing-left"), q(".wing-right")].forEach(el =>
-      animate(el, [{opacity:1},{opacity:0}], 520, 3180));
+    // The wings own their opacity. Animating it again here made them reappear
+    // for a frame because delayed WAAPI animations apply their first keyframe.
+    animate(q(".sleeve-cover"), [{opacity:1},{opacity:0}], 620, 3230);
     animate(q(".invitation-object"), [{opacity:1},{opacity:0}], 500, 3300, "ease-in-out");
     animate(q(".invitation-backdrop"), [{opacity:1},{opacity:0}], 1100, 3400);
-    gate.querySelectorAll(".invitation-corner").forEach(el => animate(el,[{opacity:.6},{opacity:0}],850,3200));
-    [q(".invitation-action"), q(".invitation-dateline")].forEach(el=>animate(el,[{opacity:1},{opacity:0}],350,100));
-    const world = document.querySelector(".garden-world");
-    animate(world, [{transform:"scale(1.22)",filter:"brightness(.72)"},{transform:"scale(1)",filter:"brightness(1)"}], 2350, 3150);
-    world.querySelectorAll(".garden-plant").forEach((plant,i)=>{
-      const resting = getComputedStyle(plant).transform;
-      const direction = plant.classList.contains("plant-strelitzia") || plant.classList.contains("plant-branch") ? -1 : 1;
-      animate(plant, [
-        {transform:resting + ` translateX(${direction * 75}px) scale(1.13)`},
-        {transform:resting + " translateX(0) scale(1)"}
-      ], 2100, 2850 + i * 40);
+    gate.querySelectorAll(".invitation-corner").forEach(el => {
+      const restingOpacity = Number.parseFloat(getComputedStyle(el).opacity);
+      animate(el,[{opacity:restingOpacity},{opacity:0}],850,3200);
     });
+    [q(".invitation-action"), q(".invitation-dateline")].forEach(el=>animate(el,[{opacity:1},{opacity:0}],350,100));
     animate(document.querySelector(".garden-center"), [
       {opacity:0,transform:"translateY(16px)"},
       {opacity:1,transform:"translateY(0)"}
@@ -216,6 +235,78 @@ for(let i=0;i<15;i++) {
   fireflies.append(dot);
 }
 
+const progressBar = document.querySelector(".scroll-progress span");
+const parallaxItems = [...document.querySelectorAll("[data-parallax]")];
+const activeParallaxItems = new Set();
+let scrollFrame = 0;
+
+function renderPageMotion() {
+  scrollFrame = 0;
+  const scrollRange = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const scrollProgress = Math.min(1, Math.max(0, scrollY / scrollRange));
+  if (progressBar) progressBar.style.transform = `scaleX(${scrollProgress})`;
+
+  if (!reducedMotion.matches) {
+    activeParallaxItems.forEach(element => {
+      const bounds = element.parentElement.getBoundingClientRect();
+      const distanceFromCenter = bounds.top + bounds.height / 2 - innerHeight / 2;
+      const speed = Number.parseFloat(element.dataset.parallax || "0.04");
+      const shift = Math.max(-46, Math.min(46, -distanceFromCenter * speed));
+      element.style.translate = `0 ${shift.toFixed(2)}px`;
+    });
+  }
+}
+
+function requestPageMotion() {
+  if (!scrollFrame) scrollFrame = requestAnimationFrame(renderPageMotion);
+}
+
+addEventListener("scroll", requestPageMotion, { passive:true });
+addEventListener("resize", requestPageMotion, { passive:true });
+renderPageMotion();
+
+if (!reducedMotion.matches && "IntersectionObserver" in window) {
+  const parallaxObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) activeParallaxItems.add(entry.target);
+      else activeParallaxItems.delete(entry.target);
+    });
+    requestPageMotion();
+  }, { rootMargin:"20% 0px 20%" });
+  parallaxItems.forEach(element => parallaxObserver.observe(element));
+}
+
+if (!reducedMotion.matches && matchMedia("(hover:hover) and (pointer:fine)").matches) {
+  const hero = document.querySelector(".garden-hero");
+  const heroPlants = [...hero.querySelectorAll(".garden-world .garden-plant")];
+  let pointerFrame = 0;
+  let pointerX = 0;
+  let pointerY = 0;
+
+  function renderPointerMotion() {
+    pointerFrame = 0;
+    hero.style.setProperty("--pointer-x", `${50 + pointerX * 16}%`);
+    hero.style.setProperty("--pointer-y", `${44 + pointerY * 12}%`);
+    heroPlants.forEach((plant, index) => {
+      const depth = 2.5 + index * 0.7;
+      plant.style.translate = `${(pointerX * depth).toFixed(2)}px ${(pointerY * depth).toFixed(2)}px`;
+    });
+  }
+
+  hero.addEventListener("pointermove", event => {
+    const bounds = hero.getBoundingClientRect();
+    pointerX = (event.clientX - bounds.left) / bounds.width - 0.5;
+    pointerY = (event.clientY - bounds.top) / bounds.height - 0.5;
+    if (!pointerFrame) pointerFrame = requestAnimationFrame(renderPointerMotion);
+  }, { passive:true });
+
+  hero.addEventListener("pointerleave", () => {
+    pointerX = 0;
+    pointerY = 0;
+    if (!pointerFrame) pointerFrame = requestAnimationFrame(renderPointerMotion);
+  });
+}
+
 if (!reducedMotion.matches && "IntersectionObserver" in window) {
   document.documentElement.classList.add("motion-ready");
   const observer = new IntersectionObserver(entries => entries.forEach(entry=>{
@@ -227,5 +318,5 @@ const form=document.querySelector("#rsvp-form");
 const status=document.querySelector("#form-status");
 if(form && status) form.addEventListener("submit",event=>{
   event.preventDefault();
-  if(form.reportValidity()) status.textContent="Preview complete. Your response has not been stored yet.";
+  if(form.reportValidity()) status.textContent="Preview selesai. Jawabanmu belum disimpan.";
 });
