@@ -15,6 +15,65 @@
   <body>
     <a class="skip-link" href="#main">Skip to wedding details</a>
 
+    <section
+      class="opening-gate"
+      id="opening-gate"
+      data-opening-gate
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="opening-greeting"
+      aria-describedby="opening-instruction"
+    >
+      <div class="opening-atmosphere" aria-hidden="true">
+        <img class="opening-firefly-veil" src="assets/05-opening-firefly-veil.png" alt="" />
+        <span class="opening-orbit opening-orbit-one"></span>
+        <span class="opening-orbit opening-orbit-two"></span>
+      </div>
+
+      <div class="opening-stage">
+        <img
+          class="opening-paper-burst"
+          src="assets/04-opening-paper-burst.png"
+          alt=""
+          aria-hidden="true"
+          width="1774"
+          height="887"
+        />
+        <img
+          class="opening-letter-art"
+          src="assets/02-opening-letter.png"
+          alt=""
+          aria-hidden="true"
+          width="1024"
+          height="1536"
+        />
+        <img
+          class="opening-envelope-art"
+          src="assets/01-opening-envelope.png"
+          alt=""
+          aria-hidden="true"
+          width="1536"
+          height="1024"
+        />
+
+        <div class="opening-note">
+          <p>Teruntuk Tamu Spesial Kami,</p>
+          <h1 id="opening-greeting" data-guest-name>Tamu Spesial Kami</h1>
+          <button class="opening-enter" id="opening-enter" type="button">
+            <span id="opening-instruction">Klik untuk memasuki taman kami</span>
+            <span class="opening-enter-mark" aria-hidden="true">↗</span>
+          </button>
+        </div>
+
+        <div class="opening-seal" aria-hidden="true">
+          <img src="assets/03-opening-seal.png" alt="" width="1254" height="1254" />
+          <img class="opening-seal-mark" src="assets/opening-mark.svg" alt="" />
+        </div>
+      </div>
+
+      <button class="opening-skip" id="opening-skip" type="button">Lewati pembukaan</button>
+    </section>
+
     <header class="site-header" aria-label="Primary navigation">
       <a class="brand-link" href="#top" aria-label="Bagas and Iga, back to top">
         <span aria-hidden="true">B × I</span>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="mark-title mark-desc">
+  <title id="mark-title">Bagas and Iga mark</title>
+  <desc id="mark-desc">A curved B embracing a bent I, inspired by a missing rib.</desc>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      class="mark-line mark-line-b"
+      d="M470 602C462 470 460 305 510 187C547 99 610 49 676 58C744 67 773 141 760 226C748 306 706 383 645 470L495 668C439 742 386 805 373 873C359 950 407 1016 468 1048C500 1065 534 1072 565 1074"
+      stroke="#34312b"
+      stroke-width="24"
+    />
+    <path
+      class="mark-line mark-line-bowl"
+      d="M699 258C787 294 848 377 870 486C897 620 855 739 766 814C738 837 708 858 681 873"
+      stroke="#34312b"
+      stroke-width="27"
+    />
+    <path
+      class="mark-line mark-line-rib"
+      d="M627 506C595 572 562 643 553 712C543 799 576 886 647 972"
+      stroke="#c86f7c"
+      stroke-width="12"
+    />
+  </g>
+</svg>
