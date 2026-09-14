@@ -99,25 +99,39 @@ function openGarden() {
   try {
     animate(q(".invitation-seal"), [
       { transform:"rotate(8deg) translateZ(0) scale(1)", opacity:1, offset:0 },
-      { transform:"rotate(8deg) translateZ(0) scale(.94)", opacity:1, offset:.18 },
-      { transform:"rotate(-14deg) translate3d(14px,-20px,60px) scale(1.08)", opacity:1, offset:.62 },
-      { transform:"rotate(-38deg) translate3d(85px,150px,120px) scale(.85)", opacity:0, offset:1 }
-    ], 740);
+      { transform:"rotate(5deg) translate3d(0,-2px,0) scale(.94)", opacity:1, offset:.2 },
+      { transform:"rotate(-5deg) translate3d(5px,-9px,16px) scale(1.02)", opacity:1, offset:.62 },
+      { transform:"rotate(-18deg) translate3d(24px,32px,30px) scale(.92)", opacity:0, offset:1 }
+    ], 980, 80, "cubic-bezier(.22,.72,.18,1)");
     animate(q(".sleeve-cover"), [
-      { transform:"rotateX(0deg)", filter:"brightness(1)" },
-      { transform:"rotateX(-165deg)", filter:"brightness(.88)" }
-    ], 900, 360);
+      { transform:"rotateX(0deg) translateZ(0)", filter:"brightness(1)", offset:0 },
+      { transform:"rotateX(-24deg) translateZ(2px)", filter:"brightness(.98)", offset:.24 },
+      { transform:"rotateX(-128deg) translateZ(4px)", filter:"brightness(.91)", offset:.72 },
+      { transform:"rotateX(-165deg) translateZ(0)", filter:"brightness(.88)", offset:1 }
+    ], 1350, 420, "cubic-bezier(.22,.72,.18,1)");
     animate(q(".letter"), [
       { transform:"translateY(0) rotate(0) scale(1)", zIndex:1, offset:0 },
-      { transform:"translateY(-43%) rotate(2deg) scale(1)", zIndex:1, offset:.62 },
-      { transform:"translateY(-43%) rotate(3deg) scale(1.18)", zIndex:8, offset:1 }
-    ], 1250, 820);
+      { transform:"translateY(-7%) rotate(.4deg) scale(1.005)", zIndex:1, offset:.24 },
+      { transform:"translateY(-31%) rotate(1deg) scale(1.025)", zIndex:1, offset:.72 },
+      { transform:"translateY(-40%) rotate(1.2deg) scale(1.06)", zIndex:8, offset:1 }
+    ], 1600, 860, "cubic-bezier(.22,.72,.18,1)");
     animate(q(".letter-address"), [
-      { transform:"perspective(900px) rotateY(0deg)", opacity:1 },
-      { transform:"perspective(900px) rotateY(-125deg)", opacity:0 }
-    ], 880, 1620);
-    animate(q(".wing-left"), [{transform:"rotateY(0deg)"},{transform:"perspective(800px) rotateY(-135deg)"}], 900, 1700);
-    animate(q(".wing-right"), [{transform:"rotateY(0deg)"},{transform:"perspective(800px) rotateY(135deg)"}], 900, 1830);
+      { transform:"perspective(900px) translateZ(24px) rotateX(0deg) translateY(0)", opacity:1, offset:0 },
+      { transform:"perspective(900px) translateZ(24px) rotateX(-4deg) translateY(-4px)", opacity:.96, offset:.48 },
+      { transform:"perspective(900px) translateZ(24px) rotateX(-12deg) translateY(-20px)", opacity:0, offset:1 }
+    ], 550, 1950, "cubic-bezier(.22,.72,.18,1)");
+    animate(q(".wing-left"), [
+      {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
+      {transform:"perspective(800px) rotateY(-28deg) translateX(-6px)", opacity:1, offset:.28},
+      {transform:"perspective(800px) rotateY(-72deg) translateX(-16px)", opacity:.42, offset:.68},
+      {transform:"perspective(800px) rotateY(-100deg) translateX(-26px)", opacity:0, offset:1}
+    ], 950, 1950, "cubic-bezier(.22,.72,.18,1)");
+    animate(q(".wing-right"), [
+      {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
+      {transform:"perspective(800px) rotateY(28deg) translateX(6px)", opacity:1, offset:.28},
+      {transform:"perspective(800px) rotateY(72deg) translateX(16px)", opacity:.42, offset:.68},
+      {transform:"perspective(800px) rotateY(100deg) translateX(26px)", opacity:0, offset:1}
+    ], 950, 2070, "cubic-bezier(.22,.72,.18,1)");
     q(".miniature-world").querySelectorAll(".garden-plant").forEach((plant, i) => {
       const resting = getComputedStyle(plant).transform;
       animate(plant, [
@@ -136,19 +150,16 @@ function openGarden() {
     const thresholdScene = q(".threshold-scene");
     const boxClip = getComputedStyle(thresholdScene).clipPath;
     animate(thresholdScene, [
-      {clipPath:boxClip, opacity:0},
-      {clipPath:boxClip, opacity:1}
-    ], 600, 2550, "cubic-bezier(.22,.72,.18,1)");
-    animate(thresholdScene, [
-      {clipPath:boxClip},
-      {clipPath:"inset(0% 0% 0% 0% round 0px)"}
-    ], 1850, 3150, "cubic-bezier(.22,.72,.18,1)");
+      {clipPath:boxClip, opacity:0, offset:0},
+      {clipPath:boxClip, opacity:1, offset:.19},
+      {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:1, offset:.79},
+      {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:0, offset:1}
+    ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
     animate(q(".threshold-world"), [
       {transform:"scale(1.06)"},
       {transform:"scale(1)"}
     ], 1850, 3150, "cubic-bezier(.22,.72,.18,1)");
-    animate(thresholdScene, [{opacity:1},{opacity:0}], 900, 4450, "cubic-bezier(.4,0,.2,1)");
-    animate(q(".letter-garden"), [{opacity:1},{opacity:0}], 450, 2100, "cubic-bezier(.22,.72,.18,1)");
+    animate(q(".letter-garden"), [{opacity:1},{opacity:0}], 700, 2550, "cubic-bezier(.22,.72,.18,1)");
     // Let the paper settle behind the green panel instead of flying toward the camera.
     [q(".sleeve-back"), q(".sleeve-pocket")].forEach(el => animate(el, [
       {transform:"translateY(0)", opacity:1},
