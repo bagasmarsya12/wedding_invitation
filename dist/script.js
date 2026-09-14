@@ -65,12 +65,12 @@ function showInvitation() {
 }
 function emitPetals() {
   const host = gate.querySelector(".flight-particles");
-  const count = innerWidth < 760 ? 14 : 24;
+  const count = innerWidth < 760 ? 8 : 12;
   for (let i = 0; i < count; i++) {
     const petal = document.createElement("img");
     petal.src = i % 3 === 0 ? "assets/10-dried-leaf.webp" : "assets/09-falling-petal.webp";
     petal.alt = "";
-    petal.style.setProperty("--size", (18 + (i * 13 % 34)) + "px");
+    petal.style.setProperty("--size", (14 + (i * 11 % 22)) + "px");
     host.append(petal);
     const angle = i / count * Math.PI * 2 + .2;
     const x = Math.cos(angle) * innerWidth * (.55 + i % 3 * .08);
@@ -78,9 +78,9 @@ function emitPetals() {
     const turn = (i % 2 ? -1 : 1) * (100 + i * 19);
     animate(petal, [
       { opacity:0, transform:"translate(-50%, -50%) scale(.2) rotate(0deg)", offset:0 },
-      { opacity:.85, transform:`translate(${x * .28}px,${y * .23}px) scale(.65) rotate(${turn * .35}deg)`, offset:.28 },
+      { opacity:.4, transform:`translate(${x * .22}px,${y * .18}px) scale(.65) rotate(${turn * .35}deg)`, offset:.28 },
       { opacity:0, transform:`translate(${x}px,${y}px) scale(1.5) rotate(${turn}deg)`, offset:1 }
-    ], 1800 + i % 4 * 90, 2700 + i % 5 * 45, "cubic-bezier(.12,.52,.28,1)");
+    ], 2100 + i % 4 * 90, 3600 + i % 5 * 55, "cubic-bezier(.12,.52,.28,1)");
   }
 }
 function openGarden() {
@@ -129,29 +129,39 @@ function openGarden() {
     // The half-second reveal breath gives the miniature garden time to register.
     animate(q(".invitation-object"), [
       {transform:"rotate(-3deg) scale(1)", offset:0},
-      {transform:"translateY(12%) rotate(0deg) scale(1.08)", offset:.36},
-      {transform:"translateY(48%) rotate(0deg) scale(3.6)", offset:1}
-    ], 1450, 2550, "cubic-bezier(.55,.02,.18,1)");
-    // The little green world becomes the full viewport before the paper leaves the lens.
+      {transform:"translateY(8%) rotate(0deg) scale(1.04)", offset:.54},
+      {transform:"translateY(8%) rotate(0deg) scale(1.08)", offset:1}
+    ], 1700, 2400, "cubic-bezier(.22,.72,.18,1)");
+    // The little green world appears as a quiet panel before it opens into the viewport.
     const thresholdScene = q(".threshold-scene");
+    const boxClip = getComputedStyle(thresholdScene).clipPath;
     animate(thresholdScene, [
-      {clipPath:"circle(0% at 50% 50%)", opacity:0},
-      {clipPath:"circle(145% at 50% 50%)", opacity:1}
-    ], 1250, 2580, "cubic-bezier(.18,.78,.18,1)");
-    animate(thresholdScene, [{opacity:1},{opacity:0}], 950, 4070, "cubic-bezier(.4,0,.2,1)");
-    // Drop the physical sleeve out of the lens before the brief garden match-dissolve.
+      {clipPath:boxClip, opacity:0},
+      {clipPath:boxClip, opacity:1}
+    ], 600, 2550, "cubic-bezier(.22,.72,.18,1)");
+    animate(thresholdScene, [
+      {clipPath:boxClip},
+      {clipPath:"inset(0% 0% 0% 0% round 0px)"}
+    ], 1850, 3150, "cubic-bezier(.22,.72,.18,1)");
+    animate(q(".threshold-world"), [
+      {transform:"scale(1.06)"},
+      {transform:"scale(1)"}
+    ], 1850, 3150, "cubic-bezier(.22,.72,.18,1)");
+    animate(thresholdScene, [{opacity:1},{opacity:0}], 900, 4450, "cubic-bezier(.4,0,.2,1)");
+    animate(q(".letter-garden"), [{opacity:1},{opacity:0}], 450, 2100, "cubic-bezier(.22,.72,.18,1)");
+    // Let the paper settle behind the green panel instead of flying toward the camera.
     [q(".sleeve-back"), q(".sleeve-pocket")].forEach(el => animate(el, [
       {transform:"translateY(0)", opacity:1},
       {transform:"translateY(120%)", opacity:0}
-    ], 500, 2700));
+    ], 620, 3150));
     [q(".sleeve-cover"), q(".wing-left"), q(".wing-right")].forEach(el =>
-      animate(el, [{opacity:1},{opacity:0}], 320, 2740));
-    animate(q(".invitation-object"), [{opacity:1},{opacity:0}], 350, 3400, "ease-in-out");
-    animate(q(".invitation-backdrop"), [{opacity:1},{opacity:0}], 1050, 2650);
-    gate.querySelectorAll(".invitation-corner").forEach(el => animate(el,[{opacity:.6},{opacity:0}],700,2550));
+      animate(el, [{opacity:1},{opacity:0}], 520, 3180));
+    animate(q(".invitation-object"), [{opacity:1},{opacity:0}], 500, 3300, "ease-in-out");
+    animate(q(".invitation-backdrop"), [{opacity:1},{opacity:0}], 1100, 3400);
+    gate.querySelectorAll(".invitation-corner").forEach(el => animate(el,[{opacity:.6},{opacity:0}],850,3200));
     [q(".invitation-action"), q(".invitation-dateline")].forEach(el=>animate(el,[{opacity:1},{opacity:0}],350,100));
     const world = document.querySelector(".garden-world");
-    animate(world, [{transform:"scale(1.55)",filter:"brightness(.65)"},{transform:"scale(1)",filter:"brightness(1)"}], 2450, 2750);
+    animate(world, [{transform:"scale(1.22)",filter:"brightness(.72)"},{transform:"scale(1)",filter:"brightness(1)"}], 2350, 3150);
     world.querySelectorAll(".garden-plant").forEach((plant,i)=>{
       const resting = getComputedStyle(plant).transform;
       const direction = plant.classList.contains("plant-strelitzia") || plant.classList.contains("plant-branch") ? -1 : 1;
@@ -163,24 +173,10 @@ function openGarden() {
     animate(document.querySelector(".garden-center"), [
       {opacity:0,transform:"translateY(16px)"},
       {opacity:1,transform:"translateY(0)"}
-    ], 1250, 3700);
-    animate(document.querySelector(".garden-bottom"), [{opacity:0},{opacity:1}],600,4500);
+    ], 1250, 4300);
+    animate(document.querySelector(".garden-bottom"), [{opacity:0},{opacity:1}],600,4900);
     emitPetals();
-    const threshold = q(".garden-threshold");
-    ["04-hedera-helix", "02-freesia-refracta", "08-wisteria-sprig"].forEach((asset, i) => {
-      const bloom = document.createElement("img");
-      bloom.src = `assets/${asset}.webp`;
-      bloom.alt = "";
-      threshold.append(bloom);
-      const x = i === 0 ? -innerWidth * .9 : i === 1 ? innerWidth * .85 : innerWidth * .25;
-      const y = i === 2 ? -innerHeight * 1.3 : innerHeight * .15;
-      animate(bloom, [
-        {opacity:0, transform:`translate(-50%,-30%) scale(.35) rotate(${i * 20 - 30}deg)`, offset:0},
-        {opacity:1, transform:`translate(calc(-50% + ${x * .3}px),calc(-40% + ${y * .25}px)) scale(1.2) rotate(${i * 25 - 35}deg)`, offset:.4},
-        {opacity:0, transform:`translate(calc(-50% + ${x}px),calc(-40% + ${y}px)) scale(2.4) rotate(${i * 35 - 40}deg)`, offset:1}
-      ], 1650, 2680 + i * 100, "cubic-bezier(.35,.02,.2,1)");
-    });
-    finishTimer = window.setTimeout(finishOpening, 5250);
+    finishTimer = window.setTimeout(finishOpening, 5650);
   } catch {
     finishOpening();
   }
