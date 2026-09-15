@@ -8,6 +8,7 @@
     <title>Bagas × Iga — 1 November 2026</title>
     <link rel="icon" type="image/jpeg" href="assets/bagas-iga-mark.jpg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="interior.css" />
   </head>
   <body class="invitation-locked">
     <a class="skip-link" href="#invitation">Langsung ke isi undangan</a>
@@ -39,175 +40,187 @@
       <p class="sr-only" id="opening-status" aria-live="polite"></p>
     </section>
 
-    <div class="page-shell" id="page-shell" inert>
+    <div class="page-shell interior-v2" id="page-shell" inert>
       <header class="site-header">
         <a class="wordmark" href="#invitation" aria-label="Bagas dan Iga, kembali ke awal">Bagas <span>×</span> Iga</a>
         <nav aria-label="Navigasi undangan">
-          <a href="#wedding">Wedding</a>
           <a href="#profiles">Us</a>
+          <a href="#symbol">Our mark</a>
           <a href="#archive">Archive</a>
+          <a href="#wedding">Wedding</a>
           <a href="#rsvp">RSVP</a>
         </nav>
       </header>
 
       <main id="invitation">
-        <section class="hero" aria-labelledby="hero-title">
-          <aside class="hero-margin">
-            <p class="margin-brand">Bagas × Iga</p>
-            <div class="margin-copy">
-              <p>Elegant<br />Personal<br />Playful<br />Timeless</p>
-              <span></span>
-              <em>Not only an invitation,<br />but a collection of things we keep.</em>
+        <section class="story-cover" aria-labelledby="hero-title">
+          <div class="cover-copy">
+            <img class="cover-mark" src="assets/bagas-iga-mark.jpg" alt="Monogram Bagas memeluk Iga" />
+            <p class="cover-names">Bagas Marsya <span>×</span> Iga Noviyanti</p>
+            <h1 id="hero-title" tabindex="-1">We’re getting married.</h1>
+            <p class="cover-date"><time datetime="2026-11-01">Sunday, 1 November 2026</time></p>
+            <p class="cover-place">Pandiga · Cimahi</p>
+            <div class="cover-actions">
+              <a href="#wedding">Wedding details</a>
+              <a href="#rsvp">RSVP</a>
             </div>
-            <p class="margin-index">Cimahi, Indonesia<br />MMXXVI</p>
-          </aside>
-
-          <div class="hero-paper">
-            <div class="hero-navline" aria-hidden="true">
-              <span>Home</span><span>Wedding</span><span>Archive</span><span>RSVP</span>
-            </div>
-            <div class="hero-center">
-              <img class="hero-mark" src="assets/bagas-iga-mark.jpg" alt="Monogram Bagas memeluk Iga" />
-              <p class="hero-names">Bagas Marsya <span>×</span> Iga Noviyanti</p>
-              <span class="hero-rule" aria-hidden="true"></span>
-              <h1 id="hero-title" tabindex="-1">We’re getting married.</h1>
-              <p class="hero-date"><time datetime="2026-11-01">1 November 2026</time></p>
-              <p class="hero-place">Pandiga · Cimahi</p>
-            </div>
-
-            <div class="hero-landscape" aria-hidden="true">
-              <div class="hero-wall"></div>
-              <img class="hero-branch" src="assets/06-signature-branch.webp" alt="" />
-              <img class="hero-freesia" src="assets/02-freesia-refracta.webp" alt="" />
-              <p>Same people.<br />A brighter chapter.</p>
-            </div>
-
-            <a class="hero-scroll" href="#wedding" aria-label="Lanjut ke detail pernikahan"><span></span></a>
           </div>
+
+          <figure class="cover-visual photo-slot" data-photo-slot="cover">
+            <div class="photo-slot-copy">
+              <span>Cover photograph</span>
+              <p>Foto kalian atau arsitektur venue</p>
+              <small>Landscape · 4:3</small>
+            </div>
+            <figcaption>A place for the photograph that opens our story.</figcaption>
+          </figure>
+
+          <img class="cover-shadow" src="assets/04-hedera-helix.webp" alt="" aria-hidden="true" />
+          <img class="cover-botanical cover-botanical-left" src="assets/02-freesia-refracta.webp" alt="" aria-hidden="true" />
+          <img class="cover-botanical cover-botanical-right" src="assets/06-signature-branch.webp" alt="" aria-hidden="true" />
+          <a class="cover-scroll" href="#profiles" aria-label="Lanjut mengenal Bagas dan Iga"><span></span></a>
         </section>
 
-        <section class="wedding section-frame" id="wedding" aria-labelledby="wedding-title">
-          <div class="section-intro reveal">
-            <p class="section-number">01</p>
-            <h2 id="wedding-title">The Wedding</h2>
-            <span></span>
-          </div>
-
-          <div class="wedding-grid">
-            <article class="date-card reveal">
-              <p>Sunday</p>
-              <h3>1 November<br />2026</h3>
-              <div class="date-times">
-                <p><time datetime="2026-11-01T14:00:00+07:00">14:00</time><span>Akad</span></p>
-                <p><time datetime="2026-11-01T18:00:00+07:00">18:00</time><span>Reception</span></p>
-              </div>
-            </article>
-
-            <article class="venue-card reveal">
-              <div>
-                <p>Location</p>
-                <h3>Pandiga<br />Cimahi</h3>
-                <a href="https://www.google.com/maps/search/?api=1&amp;query=Pandiga+Cimahi" target="_blank" rel="noreferrer">Open maps</a>
-              </div>
-              <img src="assets/04-hedera-helix.webp" alt="" aria-hidden="true" />
-            </article>
-
-            <article class="schedule-card reveal">
-              <p>Order of the day</p>
-              <ol>
-                <li><time datetime="2026-11-01T14:00:00+07:00">14:00</time><span><strong>Akad</strong>Prosesi pernikahan</span></li>
-                <li><time datetime="2026-11-01T18:00:00+07:00">18:00</time><span><strong>Reception</strong>Perayaan bersama</span></li>
-              </ol>
-            </article>
-
-            <article class="note-card reveal">
-              <img src="assets/01-strelitzia-reginae.webp" alt="" aria-hidden="true" />
-              <p>Detail pakaian, akses masuk, dan informasi tambahan akan kami perbarui mendekati hari acara.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="profiles" id="profiles" aria-labelledby="profiles-title">
-          <div class="profiles-heading reveal">
+        <section class="couple-spread" id="profiles" aria-labelledby="profiles-title">
+          <div class="spread-intro reveal">
             <p>The two of us</p>
-            <h2 id="profiles-title">Before we become one.</h2>
+            <h2 id="profiles-title">A little about<br />the people inviting you.</h2>
           </div>
 
-          <div class="profile-pair">
-            <article class="profile profile-bagas reveal">
-              <div class="profile-portrait" aria-hidden="true">
-                <span>B</span>
-                <img src="assets/01-strelitzia-reginae.webp" alt="" />
-              </div>
-              <div class="profile-copy">
-                <p>Groom</p>
-                <h3>Bagas</h3>
-                <strong>Bagas Marsya Pratama Nugraha</strong>
-                <span></span>
-                <p class="profile-placeholder">Cerita singkat tentang Bagas akan tinggal di sini—ditulis dengan kata-kata yang benar-benar terasa seperti dirinya.</p>
-              </div>
-            </article>
-
-            <div class="profile-join" aria-hidden="true"><span></span><img src="assets/bagas-iga-mark.jpg" alt="" /><span></span></div>
-
-            <article class="profile profile-iga reveal">
-              <div class="profile-copy">
-                <p>Bride</p>
-                <h3>Iga</h3>
-                <strong>Iga Noviyanti Rohman</strong>
-                <span></span>
-                <p class="profile-placeholder">Cerita singkat tentang Iga akan tinggal di sini—bukan biodata formal, melainkan hal kecil yang ingin kami kenalkan.</p>
-              </div>
-              <div class="profile-portrait" aria-hidden="true">
-                <span>I</span>
-                <img src="assets/05-wisteria.webp" alt="" />
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="archive section-frame" id="archive" aria-labelledby="archive-title">
-          <div class="archive-heading reveal">
-            <div>
-              <p class="section-number">02</p>
-              <h2 id="archive-title">Our Archive</h2>
+          <article class="person person-bagas">
+            <figure class="person-photo photo-slot reveal" data-photo-slot="bagas">
+              <div class="photo-slot-copy"><span>Portrait 01</span><p>Foto Bagas</p><small>Portrait · 4:5</small></div>
+              <figcaption>Bagas, as himself.</figcaption>
+            </figure>
+            <div class="person-copy reveal">
+              <p class="person-role">The groom</p>
+              <h3>Bagas</h3>
+              <p class="person-fullname">Bagas Marsya Pratama Nugraha</p>
+              <p class="person-bio">Dua kalimat tentang Bagas akan ditulis di sini. Cukup kebiasaan kecil atau hal yang membuatnya terasa seperti dirinya sendiri.</p>
+              <blockquote>“Satu kalimat tentang Bagas, dari Iga.”</blockquote>
             </div>
-            <p>Bukan cerita yang dipaksakan menjadi sempurna. Hanya beberapa hal nyata yang ingin kami simpan.</p>
+          </article>
+
+          <div class="couple-interlude" aria-hidden="true">
+            <span></span><img src="assets/bagas-iga-mark.jpg" alt="" /><span></span>
           </div>
 
-          <div class="archive-ledger">
-            <article class="record record-feature reveal">
-              <div class="record-meta"><span>Record 001</span><span>Conversation</span></div>
-              <div class="record-body">
-                <p class="record-year">The beginning</p>
-                <h3>A name,<br />then a missing rib.</h3>
-                <p>Salah satu percakapan pertama kami dimulai dari pertanyaan Bagas tentang nama Iga. Lalu datang candaan tentang <em>tulang iga</em> yang hilang. Bertahun-tahun kemudian, candaan itu menjadi lambang kami—huruf B yang memeluk I yang melengkung.</p>
-              </div>
-              <img src="assets/bagas-iga-mark.jpg" alt="Monogram Bagas dan Iga" />
-            </article>
+          <article class="person person-iga">
+            <div class="person-copy reveal">
+              <p class="person-role">The bride</p>
+              <h3>Iga</h3>
+              <p class="person-fullname">Iga Noviyanti Rohman</p>
+              <p class="person-bio">Dua kalimat tentang Iga akan ditulis di sini. Bukan biodata formal—cukup sesuatu yang membuat tamu merasa sedikit mengenalnya.</p>
+              <blockquote>“Satu kalimat tentang Iga, dari Bagas.”</blockquote>
+            </div>
+            <figure class="person-photo photo-slot reveal" data-photo-slot="iga">
+              <div class="photo-slot-copy"><span>Portrait 02</span><p>Foto Iga</p><small>Portrait · 4:5</small></div>
+              <figcaption>Iga, as herself.</figcaption>
+            </figure>
+          </article>
 
-            <article class="record record-open reveal">
-              <div class="record-meta"><span>Record 002</span><span>Reserved</span></div>
-              <p>Cerita berikutnya akan ditambahkan ketika kami siap menceritakannya dengan benar.</p>
-            </article>
-
-            <article class="record record-future reveal">
-              <div class="record-meta"><span>Record 003</span><span>Next chapter</span></div>
-              <div>
-                <p>1 November 2026</p>
-                <h3>The day this archive becomes ours.</h3>
-              </div>
-              <img src="assets/03-hypericum-perforatum.webp" alt="" aria-hidden="true" />
-            </article>
-          </div>
+          <img class="profiles-strelitzia" src="assets/01-strelitzia-reginae.webp" alt="" aria-hidden="true" />
+          <img class="profiles-wisteria" src="assets/05-wisteria.webp" alt="" aria-hidden="true" />
         </section>
 
-        <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
-          <img class="rsvp-flower" src="assets/02-freesia-refracta.webp" alt="" aria-hidden="true" />
-          <div class="rsvp-copy reveal">
+        <section class="symbol-story" id="symbol" aria-labelledby="symbol-title">
+          <div class="symbol-copy reveal">
+            <p>Where the mark began</p>
+            <h2 id="symbol-title">A name,<br />then a missing rib.</h2>
+            <p>Salah satu percakapan pertama kami dimulai dari nama Iga. Bagas bertanya, lalu bercanda tentang <em>tulang iga</em> yang hilang.</p>
+            <p>Bertahun-tahun kemudian, candaan itu menjadi simbol kami: B yang menemukan dan memeluk I yang melengkung.</p>
+          </div>
+
+          <div class="symbol-stage reveal">
+            <img src="assets/bagas-iga-mark.jpg" alt="Logo berupa huruf B yang memeluk huruf I melengkung" />
+            <div class="symbol-note symbol-note-b"><span>B</span><p>Bagas<br />the embrace</p></div>
+            <div class="symbol-note symbol-note-i"><span>I</span><p>Iga<br />the missing rib</p></div>
+            <p class="symbol-caption">A private joke that stayed long enough to become an identity.</p>
+          </div>
+          <img class="symbol-sprig" src="assets/08-wisteria-sprig.webp" alt="" aria-hidden="true" />
+        </section>
+
+        <section class="archive-gallery" id="archive" aria-labelledby="archive-title">
+          <header class="archive-gallery-heading reveal">
+            <div>
+              <p>A few things we keep</p>
+              <h2 id="archive-title">The archive</h2>
+            </div>
+            <p>Tiga tempat untuk cerita yang nyata. Foto dan teksnya bisa ditambahkan nanti tanpa mengubah komposisi halaman.</p>
+          </header>
+
+          <div class="archive-composition">
+            <details class="memory-card memory-place reveal">
+              <summary>
+                <figure class="memory-photo photo-slot" data-photo-slot="archive-place">
+                  <div class="photo-slot-copy"><span>Archive 01</span><p>Sebuah tempat</p><small>Landscape · 3:2</small></div>
+                </figure>
+                <span class="memory-index">01</span>
+                <h3>A place</h3>
+                <p>Tempat yang ingin kami ingat.</p>
+              </summary>
+              <div class="memory-detail">Satu paragraf pendek tentang tempat ini dapat ditambahkan di sini.</div>
+            </details>
+
+            <details class="memory-card memory-day reveal">
+              <summary>
+                <figure class="memory-photo photo-slot" data-photo-slot="archive-day">
+                  <div class="photo-slot-copy"><span>Archive 02</span><p>Sebuah hari</p><small>Portrait · 4:5</small></div>
+                </figure>
+                <span class="memory-index">02</span>
+                <h3>A day</h3>
+                <p>Hari yang layak disimpan.</p>
+              </summary>
+              <div class="memory-detail">Tanggal dan dua atau tiga kalimat tentang momen ini dapat ditambahkan nanti.</div>
+            </details>
+
+            <details class="memory-card memory-object reveal">
+              <summary>
+                <figure class="memory-photo photo-slot" data-photo-slot="archive-object">
+                  <div class="photo-slot-copy"><span>Archive 03</span><p>Sebuah hal kecil</p><small>Detail · 1:1</small></div>
+                </figure>
+                <span class="memory-index">03</span>
+                <h3>A small thing</h3>
+                <p>Sederhana, tetapi berarti.</p>
+              </summary>
+              <div class="memory-detail">Cerita singkat tentang benda, catatan, atau kebiasaan kecil ini dapat tinggal di sini.</div>
+            </details>
+          </div>
+          <img class="archive-ivy" src="assets/07-ivy-sprig.webp" alt="" aria-hidden="true" />
+        </section>
+
+        <section class="wedding-editorial" id="wedding" aria-labelledby="wedding-title">
+          <div class="wedding-copy reveal">
+            <p>The invitation</p>
+            <h2 id="wedding-title">Come celebrate<br />with us.</h2>
+            <p class="wedding-day">Sunday<br /><strong>1 November 2026</strong></p>
+            <div class="wedding-times">
+              <p><time datetime="2026-11-01T14:00:00+07:00">14:00</time><span>Akad</span></p>
+              <p><time datetime="2026-11-01T18:00:00+07:00">18:00</time><span>Reception</span></p>
+            </div>
+          </div>
+
+          <figure class="venue-photo photo-slot reveal" data-photo-slot="venue">
+            <div class="photo-slot-copy"><span>Venue photograph</span><p>Pandiga, Cimahi</p><small>Landscape · 4:3</small></div>
+            <figcaption>See you there.</figcaption>
+          </figure>
+
+          <div class="venue-address reveal">
+            <p>Location</p>
+            <h3>Pandiga<br />Cimahi</h3>
+            <p>Alamat lengkap, panduan masuk, dan informasi parkir dapat ditambahkan di sini.</p>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Pandiga+Cimahi" target="_blank" rel="noreferrer">Open Google Maps</a>
+          </div>
+          <img class="wedding-freesia" src="assets/02-freesia-refracta.webp" alt="" aria-hidden="true" />
+        </section>
+
+        <section class="rsvp-editorial" id="rsvp" aria-labelledby="rsvp-title">
+          <img class="rsvp-editorial-flower" src="assets/03-hypericum-perforatum.webp" alt="" aria-hidden="true" />
+          <div class="rsvp-editorial-copy reveal">
             <p>Please join us</p>
-            <h2 id="rsvp-title">Will you be there?</h2>
-            <p>Kami akan senang mengetahui rencanamu. Form ini masih berupa preview dan belum menyimpan jawaban.</p>
+            <h2 id="rsvp-title">Will you<br />be there?</h2>
+            <p>Sampai bertemu di hari kami.</p>
+            <p class="rsvp-signature">Bagas &amp; Iga</p>
           </div>
           <form class="rsvp-form reveal" id="rsvp-form">
             <label>Nama tamu<input name="name" autocomplete="name" required /></label>
@@ -223,7 +236,7 @@
         </section>
       </main>
 
-      <footer>
+      <footer class="editorial-footer">
         <img src="assets/bagas-iga-mark.jpg" alt="" />
         <p>Bagas Marsya Pratama Nugraha<br /><span>×</span><br />Iga Noviyanti Rohman</p>
         <p>1 · 11 · 2026<br />Pandiga, Cimahi</p>
