@@ -80,26 +80,6 @@ function showInvitation() {
   window.scrollTo({ top: 0, behavior: "instant" });
   enter.focus({ preventScroll: true });
 }
-function emitPetals() {
-  const host = gate.querySelector(".flight-particles");
-  const count = innerWidth < 760 ? 8 : 12;
-  for (let i = 0; i < count; i++) {
-    const petal = document.createElement("img");
-    petal.src = i % 3 === 0 ? "assets/10-dried-leaf.webp" : "assets/09-falling-petal.webp";
-    petal.alt = "";
-    petal.style.setProperty("--size", (14 + (i * 11 % 22)) + "px");
-    host.append(petal);
-    const angle = i / count * Math.PI * 2 + .2;
-    const x = Math.cos(angle) * innerWidth * (.55 + i % 3 * .08);
-    const y = Math.sin(angle) * innerHeight * .65;
-    const turn = (i % 2 ? -1 : 1) * (100 + i * 19);
-    animate(petal, [
-      { opacity:0, transform:"translate(-50%, -50%) scale(.2) rotate(0deg)", offset:0 },
-      { opacity:.4, transform:`translate(${x * .22}px,${y * .18}px) scale(.65) rotate(${turn * .35}deg)`, offset:.28 },
-      { opacity:0, transform:`translate(${x}px,${y}px) scale(1.5) rotate(${turn}deg)`, offset:1 }
-    ], 1100 + i % 4 * 55, 4100 + i % 5 * 45, "cubic-bezier(.12,.52,.28,1)");
-  }
-}
 function openGarden() {
   if (running || isOpen) return;
   if (reducedMotion.matches || typeof Element.prototype.animate !== "function") {
@@ -109,104 +89,66 @@ function openGarden() {
   running = true;
   gate.dataset.state = "opening";
   enter.disabled = true;
+  replay.hidden = false;
   skip.focus({ preventScroll:true });
   gate.querySelector(".opening-status").textContent = "Undangan terbuka. Selamat datang di taman kami.";
   const q = selector => gate.querySelector(selector);
-  // One clock. The pocket occludes the insert until it has cleared the opening.
   try {
+    // Two endpoints per gesture: continuous acceleration, no internal velocity
+    // corners. Paper and camera overlap rather than stopping between scenes.
+    const paperEase = "cubic-bezier(.42,0,.24,1)";
     animate(q(".invitation-seal"), [
-      { transform:"rotate(8deg) translateZ(0) scale(1)", opacity:1, offset:0 },
-      { transform:"rotate(5deg) translate3d(0,-2px,0) scale(.94)", opacity:1, offset:.2 },
-      { transform:"rotate(-5deg) translate3d(5px,-9px,16px) scale(1.02)", opacity:1, offset:.62 },
-      { transform:"rotate(-18deg) translate3d(24px,32px,30px) scale(.92)", opacity:0, offset:1 }
-    ], 980, 80, "cubic-bezier(.22,.72,.18,1)");
-    animate(q(".sleeve-cover"), [
-      { transform:"rotateX(0deg) translate3d(0,0,0)", offset:0 },
-      { transform:"rotateX(-18deg) translate3d(0,-1px,2px)", offset:.22 },
-      { transform:"rotateX(-116deg) translate3d(0,-3px,4px)", offset:.7 },
-      { transform:"rotateX(-165deg) translate3d(0,-2px,0)", offset:1 }
-    ], 1480, 420, "cubic-bezier(.2,.72,.16,1)");
+      { transform:"translate3d(0,0,0) rotate(8deg) scale(1)", opacity:1 },
+      { transform:"translate3d(8px,18px,0) rotate(15deg) scale(.98)", opacity:0 }
+    ], 650, 0, paperEase);
+    gate.querySelectorAll(".sleeve-cover").forEach(cover => animate(cover, [
+      { transform:"rotateX(0deg)" },
+      { transform:"rotateX(-158deg)" }
+    ], 1500, 200, paperEase));
     animate(q(".letter"), [
-      { transform:"translate3d(0,0,0) rotate(0deg) scale(1)", offset:0 },
-      { transform:"translate3d(0,-6%,0) rotate(.25deg) scale(1.004)", offset:.22 },
-      { transform:"translate3d(0,-27%,0) rotate(.72deg) scale(1.02)", offset:.68 },
-      { transform:"translate3d(0,-40%,0) rotate(1deg) scale(1.06)", offset:1 }
-    ], 1740, 900, "cubic-bezier(.2,.72,.16,1)");
-    animate(q(".letter-address"), [
-      { transform:"translate3d(0,0,0) rotateX(0deg)", opacity:1, offset:0 },
-      { transform:"translate3d(0,-3px,0) rotateX(-3deg)", opacity:.96, offset:.45 },
-      { transform:"translate3d(0,-18px,0) rotateX(-10deg)", opacity:0, offset:1 }
-    ], 680, 2020, "cubic-bezier(.2,.72,.16,1)");
-    animate(q(".wing-left"), [
-      {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
-      {transform:"perspective(800px) rotateY(-28deg) translateX(-6px)", opacity:1, offset:.28},
-      {transform:"perspective(800px) rotateY(-72deg) translateX(-16px)", opacity:.42, offset:.68},
-      {transform:"perspective(800px) rotateY(-100deg) translateX(-26px)", opacity:0, offset:1}
-    ], 1080, 2020, "cubic-bezier(.2,.72,.16,1)");
-    animate(q(".wing-right"), [
-      {transform:"perspective(800px) rotateY(0deg) translateX(0)", opacity:1, offset:0},
-      {transform:"perspective(800px) rotateY(28deg) translateX(6px)", opacity:1, offset:.28},
-      {transform:"perspective(800px) rotateY(72deg) translateX(16px)", opacity:.42, offset:.68},
-      {transform:"perspective(800px) rotateY(100deg) translateX(26px)", opacity:0, offset:1}
-    ], 1080, 2110, "cubic-bezier(.2,.72,.16,1)");
-    // Keep the botanical composition on one compositor layer. Individual plant
-    // transforms caused frame drops while the paper was unfolding on mobile.
-    animate(q(".miniature-world"), [
-      {transform:"translate3d(0,8px,0) scale(.985)", opacity:.72},
-      {transform:"translate3d(0,0,0) scale(1)", opacity:1}
-    ], 1120, 1900, "cubic-bezier(.2,.72,.16,1)");
-    animate(q(".miniature-light"), [{opacity:.1},{opacity:1}], 720, 2250);
-    // The half-second reveal breath gives the miniature garden time to register.
+      { transform:"translate3d(0,0,0) rotate(0deg)" },
+      { transform:"translate3d(0,-24%,0) rotate(1.4deg)" }
+    ], 2450, 700, paperEase);
     animate(q(".invitation-object"), [
-      {transform:"rotate(-3deg) scale(1)", offset:0},
-      {transform:"translateY(8%) rotate(0deg) scale(1.04)", offset:.54},
-      {transform:"translateY(8%) rotate(0deg) scale(1.08)", offset:1}
-    ], 1700, 2400, "cubic-bezier(.22,.72,.18,1)");
-    // The little green world appears as a quiet panel before it opens into the viewport.
-    const thresholdScene = q(".threshold-scene");
-    const boxClip = getComputedStyle(thresholdScene).clipPath;
-    if (innerWidth > 760) {
-      const frame = q(".invitation-perspective").getBoundingClientRect();
-      const scaleX = frame.width / innerWidth;
-      const scaleY = frame.height / innerHeight;
-      thresholdScene.classList.add("threshold-transform-mode");
-      animate(thresholdScene, [
-        {transform:`translate3d(0,0,0) scale(${scaleX},${scaleY})`, opacity:0, offset:0},
-        {transform:`translate3d(0,0,0) scale(${scaleX},${scaleY})`, opacity:1, offset:.19},
-        {transform:"translate3d(0,0,0) scale(1,1)", opacity:1, offset:.79},
-        {transform:"translate3d(0,0,0) scale(1,1)", opacity:0, offset:1}
-      ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
-    } else {
-      animate(thresholdScene, [
-        {clipPath:boxClip, opacity:0, offset:0},
-        {clipPath:boxClip, opacity:1, offset:.19},
-        {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:1, offset:.79},
-        {clipPath:"inset(0% 0% 0% 0% round 0px)", opacity:0, offset:1}
-      ], 3100, 2550, "cubic-bezier(.22,.72,.18,1)");
-    }
-    animate(q(".letter-garden"), [{opacity:1},{opacity:0}], 700, 2550, "cubic-bezier(.22,.72,.18,1)");
-    // Let the paper settle behind the green panel instead of flying toward the camera.
-    [q(".sleeve-back"), q(".sleeve-pocket")].forEach(el => animate(el, [
-      {transform:"translateY(0)", opacity:1},
-      {transform:"translateY(120%)", opacity:0}
-    ], 620, 3150));
-    // The wings own their opacity. Animating it again here made them reappear
-    // for a frame because delayed WAAPI animations apply their first keyframe.
-    animate(q(".sleeve-cover"), [{opacity:1},{opacity:0}], 620, 3230);
-    animate(q(".invitation-object"), [{opacity:1},{opacity:0}], 500, 3300, "ease-in-out");
-    animate(q(".invitation-backdrop"), [{opacity:1},{opacity:0}], 1100, 3400);
-    gate.querySelectorAll(".invitation-corner").forEach(el => {
-      const restingOpacity = Number.parseFloat(getComputedStyle(el).opacity);
-      animate(el,[{opacity:restingOpacity},{opacity:0}],850,3200);
-    });
-    [q(".invitation-action"), q(".invitation-dateline")].forEach(el=>animate(el,[{opacity:1},{opacity:0}],350,100));
+      { transform:"translate3d(0,0,0) rotate(-3deg) scale(1)" },
+      { transform:"translate3d(0,5%,0) rotate(-1deg) scale(1.025)" }
+    ], 3000, 450, paperEase);
+
+    // Reveal the actual homepage, not a differently composed intermediate
+    // rectangle. One foreground fade retains the paper's spatial relationships.
+    [q(".invitation-action"), q(".invitation-dateline")].forEach(element =>
+      animate(element, [{opacity:1},{opacity:0}], 550, 0, "ease-in-out"));
+    animate(q(".invitation-perspective"), [
+      { opacity:1 }, { opacity:0 }
+    ], 1250, 1750, "cubic-bezier(.42,0,.58,1)");
+    animate(q(".invitation-backdrop"), [
+      { opacity:1 }, { opacity:0 }
+    ], 2150, 1950, "cubic-bezier(.42,0,.58,1)");
+    gate.querySelectorAll(".invitation-corner").forEach(element =>
+      animate(element, [
+        {opacity:Number.parseFloat(getComputedStyle(element).opacity)},
+        {opacity:0}
+      ], 1500, 1900, "ease-in-out"));
     animate(document.querySelector(".garden-center"), [
-      {opacity:0,transform:"translateY(16px)"},
-      {opacity:1,transform:"translateY(0)"}
-    ], 1250, 4300);
-    animate(document.querySelector(".garden-bottom"), [{opacity:0},{opacity:1}],600,4900);
-    emitPetals();
-    finishTimer = window.setTimeout(finishOpening, 5650);
+      {opacity:0, transform:"translate3d(0,10px,0)"},
+      {opacity:1, transform:"translate3d(0,0,0)"}
+    ], 1300, 3300, paperEase);
+    animate(document.querySelector(".garden-bottom"), [
+      {opacity:0}, {opacity:1}
+    ], 1000, 3600, "ease-in-out");
+    animate(header, [
+      {opacity:0, visibility:"visible"}, {opacity:1, visibility:"visible"}
+    ], 1100, 3500, "ease-in-out");
+    animate(skip, [{opacity:1},{opacity:0}], 500, 4100, "ease-in-out");
+
+    // Start every track on the same document clock. Completion follows the
+    // browser's animation clock, including slow frames, rather than a timeout.
+    const opening = animations.slice();
+    const startTime = document.timeline.currentTime;
+    opening.forEach(animation => { animation.startTime = startTime; });
+    Promise.all(opening.map(animation => animation.finished))
+      .then(() => { if (running) finishOpening(); })
+      .catch(() => { /* Skip/replay cancels the previous opening intentionally. */ });
   } catch {
     finishOpening();
   }

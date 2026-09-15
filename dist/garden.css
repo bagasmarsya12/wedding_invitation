@@ -89,6 +89,10 @@ body::before { opacity:.07; }
 .cover-face,.cover-reverse { position:absolute; inset:0; clip-path:polygon(0 0,100% 0,50% 100%); backface-visibility:hidden; }
 .cover-face { background-color:#ecdbc2; background-image:linear-gradient(180deg,#f8eddb55,#baa07b22),url("assets/15-paper-fiber-texture.webp"); }
 .cover-reverse { background-color:#d8c5a5; transform:rotateX(180deg); }
+.sleeve-cover:not(.sleeve-cover-back) .cover-reverse { visibility:hidden; }
+.sleeve-cover-back { z-index:0; }
+.sleeve-cover { will-change:transform; }
+.invitation-object { transform-style:flat; }
 .invitation-seal { position:absolute; z-index:7; width:76px; height:76px; left:calc(50% - 38px); top:calc(78% - 38px); border-radius:49% 45% 48% 46%; background:#f7ead6; border:3px double #baa180; box-shadow:2px 4px 3px #7055364d,inset 0 0 8px #fffaf1; display:grid; place-items:center; transform:rotate(8deg); will-change:transform,opacity; }
 .invitation-seal img { display:block; width:51px; height:51px; object-fit:contain; mix-blend-mode:multiply; border-radius:50%; }
 .invitation-action { position:absolute; top:calc(50% + min(240px,34vw)); text-align:center; z-index:20; }
@@ -108,6 +112,9 @@ body::before { opacity:.07; }
 .invitation-active .site-header { visibility:hidden; }
 .invitation-active .garden-center,.invitation-active .garden-bottom { opacity:0; }
 .invitation-active .garden-world { transform:scale(1); }
+/* A single sheet remains intact; no extra folding wings or green portal swap. */
+.letter-wing,.letter-garden,.threshold-scene { display:none; }
+.invitation-gate[data-state="opening"] .invitation-perspective { will-change:opacity; }
 .garden-entered .plant-wisteria { animation:canopy-sway 14s ease-in-out infinite alternate; }
 @keyframes canopy-sway { from { transform:rotate(-18deg); } to { transform:rotate(-16.5deg); } }
 @media(max-width:760px) {
