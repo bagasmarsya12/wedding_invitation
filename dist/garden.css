@@ -47,6 +47,22 @@ body::before { opacity:.07; }
 .garden-entered .garden-fireflies i { animation:firefly-drift var(--period) ease-in-out var(--delay) infinite alternate; }
 @keyframes firefly-drift { from { opacity:.05; transform:translate(0,0); } to { opacity:.65; transform:translate(8px,-18px); } }
 
+/* The hero reads as a garden with four rooted gestures, not a collage of loose
+   cut-outs. The full branch assets enter from an edge and keep their stems in
+   the composition. */
+.garden-world > .plant-wisteria-small,
+.garden-world > .plant-ivy,
+.garden-world > .plant-hypericum { display:none; }
+.garden-world > .plant-wisteria { width:31%; left:-3%; top:-20%; opacity:.76; }
+.garden-world > .plant-branch { width:28%; right:-8%; top:-9%; opacity:.48; }
+.garden-world > .plant-freesia { width:24%; left:-1%; bottom:-18%; opacity:.72; }
+.garden-world > .plant-strelitzia { width:27%; right:-3%; bottom:-10%; opacity:.88; }
+.garden-entered .garden-world > .plant-branch { animation:branch-breathe 11s ease-in-out 700ms infinite alternate; }
+.garden-entered .garden-world > .plant-freesia { animation:stem-breathe 12s ease-in-out 900ms infinite alternate; }
+.garden-entered .garden-world > .plant-strelitzia { animation:leaf-breathe 14s ease-in-out 1100ms infinite alternate; }
+@keyframes stem-breathe { from { transform:rotate(-17deg) translate3d(0,0,0); } to { transform:rotate(-16deg) translate3d(2px,-3px,0); } }
+@keyframes leaf-breathe { from { transform:rotate(-13deg) translate3d(0,0,0); } to { transform:rotate(-12deg) translate3d(-2px,-3px,0); } }
+
 .invitation-gate { position:fixed; z-index:90; inset:0; display:grid; place-items:center; overflow:hidden; color:#43372e; isolation:isolate; }
 .invitation-backdrop { position:absolute; inset:0; z-index:-3; background:radial-gradient(ellipse at 48% 42%,#fbf4e8 10%,#e7d9c9 68%,#d0bda9); }
 .invitation-backdrop::after { content:""; position:absolute; inset:0; background:url("assets/15-paper-fiber-texture.webp") center/600px; opacity:.19; mix-blend-mode:multiply; }
@@ -128,13 +144,10 @@ body::before { opacity:.07; }
   .garden-times span { margin:0 .25rem; }
   .garden-architecture { inset:13% 9% -20%; }
   .threshold-scene { --scene-width:86vw; --scene-height:calc(var(--scene-width) / 1.05); }
-  .plant-wisteria { width:57%; left:-16%; top:-12%; opacity:.65; }
-  .plant-wisteria-small { width:27%; right:-7%; top:-7%; }
-  .plant-strelitzia { width:54%; right:-22%; bottom:-4%; opacity:.85; }
-  .plant-freesia { width:55%; left:-24%; bottom:-5%; opacity:.76; }
-  .plant-ivy { width:56%; left:-30%; bottom:24%; opacity:.5; }
-  .plant-hypericum { width:40%; right:8%; bottom:-20%; opacity:.7; }
-  .plant-branch { width:54%; right:-34%; top:15%; }
+  .garden-world > .plant-wisteria { width:53%; left:-16%; top:-9%; opacity:.67; }
+  .garden-world > .plant-strelitzia { width:49%; right:-18%; bottom:-4%; opacity:.84; }
+  .garden-world > .plant-freesia { width:48%; left:-18%; bottom:-3%; opacity:.7; }
+  .garden-world > .plant-branch { width:44%; right:-25%; top:4%; opacity:.42; }
   .garden-bottom { font-size:.75rem; bottom:1rem; gap:1rem; }
   .garden-bottom button { max-width:10rem; text-align:left; }
   .invitation-dateline { top:1.5rem; left:1.4rem; right:1.4rem; font-size:1.15rem; }

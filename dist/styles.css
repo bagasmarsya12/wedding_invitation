@@ -1638,6 +1638,210 @@ select:focus {
 .motion-ready .guest-note-grid [data-reveal]:nth-child(3) { transition-delay: 180ms; }
 .motion-ready .guest-note-grid [data-reveal]:nth-child(4) { transition-delay: 270ms; }
 
+/* Inner-page art direction: restrained, rooted, and editorial. */
+:root {
+  --rose-muted: #b66b79;
+  --moss-deep: #5f694f;
+  --night-soft: #2d2a26;
+}
+
+.countdown-strip,
+.details,
+.day-flow,
+.transition-panel,
+.archive,
+.guest-notes,
+.closing-note,
+.rsvp {
+  isolation: isolate;
+}
+
+.motion-ready [data-reveal],
+.motion-ready .botanical-reveal {
+  transform: translate3d(0, 1.25rem, 0);
+  clip-path: inset(0 0 9% 0);
+  transition:
+    opacity 720ms ease,
+    transform 1050ms cubic-bezier(.16,.72,.18,1),
+    clip-path 1050ms cubic-bezier(.16,.72,.18,1);
+}
+
+.motion-ready [data-reveal].is-visible,
+.motion-ready .botanical-reveal.is-visible {
+  transform: translate3d(0, 0, 0);
+  clip-path: inset(0);
+}
+
+.transition-panel { background: var(--rose-muted); }
+.rsvp { background: var(--moss-deep); }
+
+.countdown-strip {
+  min-height: 21rem;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.1), transparent 40%),
+    #d7c8b4;
+}
+
+.countdown-strip > img {
+  top: -10rem;
+  right: 7%;
+  width: clamp(8rem, 13vw, 12rem);
+  opacity: .13;
+  transform: rotate(9deg);
+  transform-origin: 50% 0;
+}
+
+.details {
+  background-color: #f5f1e9;
+  background-image:
+    linear-gradient(rgba(250,249,246,.38), rgba(250,249,246,.38)),
+    url("assets/15-paper-fiber-texture.webp");
+}
+
+.details > .botanical-ivy-sprig,
+.details > .botanical-freesia {
+  display:none;
+}
+
+.botanical-branch-details {
+  right: -5rem;
+  bottom: -13rem;
+  width: clamp(19rem, 31vw, 31rem);
+  opacity: .16;
+  transform: rotate(-14deg) scaleX(-1);
+}
+
+.day-flow {
+  min-height: 100svh;
+  background:
+    linear-gradient(115deg, rgba(9,25,20,.18), transparent 58%),
+    #173029;
+}
+
+.day-flow-flower {
+  right: 4%;
+  bottom: -9rem;
+  width: clamp(20rem, 34vw, 34rem);
+  opacity: .13;
+  transform: rotate(-4deg);
+  transform-origin: 50% 100%;
+}
+
+.transition-panel {
+  min-height: 32rem;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(250,221,186,.18), transparent 25%),
+    var(--rose-muted);
+}
+
+.transition-plant {
+  right: 3vw;
+  bottom: -10rem;
+  width: clamp(14rem, 22vw, 21rem);
+  opacity: .22;
+  transform: rotate(4deg);
+  transform-origin: 50% 100%;
+}
+
+.archive {
+  background:
+    radial-gradient(circle at 86% 20%, rgba(156,145,104,.12), transparent 20%),
+    var(--night-soft);
+}
+
+.archive-botany .archive-wisteria,
+.archive-botany .archive-wisteria-sprig {
+  display:none;
+}
+
+.botanical-branch-archive {
+  top: -12rem;
+  right: -5rem;
+  width: clamp(20rem, 34vw, 34rem);
+  opacity: .16;
+}
+
+.archive-object-art {
+  top: 4.5rem;
+  right: -3.5rem;
+  width: clamp(9rem, 14vw, 13rem);
+  opacity: .3;
+  transform: rotate(5deg);
+  transform-origin: 80% 20%;
+}
+
+.guest-notes {
+  background-color: #e7dac7;
+  background-image:
+    linear-gradient(rgba(231,218,199,.24), rgba(231,218,199,.24)),
+    url("assets/15-paper-fiber-texture.webp");
+}
+
+.guest-notes-ivy {
+  left: -10rem;
+  bottom: -15rem;
+  width: clamp(24rem, 39vw, 38rem);
+  opacity: .12;
+  transform: rotate(13deg);
+  transform-origin: 20% 90%;
+}
+
+.closing-note {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,232,218,.13), transparent 23%),
+    var(--rose-muted);
+}
+
+.closing-note > img {
+  right: -5rem;
+  bottom: -10rem;
+  width: clamp(22rem, 38vw, 36rem);
+  opacity: .16;
+  transform: rotate(2deg);
+  transform-origin: 50% 100%;
+}
+
+.day-flow-flower {
+  animation: rooted-strelitzia 15s ease-in-out 700ms infinite alternate;
+}
+
+.transition-plant {
+  animation: rooted-hypericum 13s ease-in-out 900ms infinite alternate;
+}
+
+.guest-notes-ivy {
+  animation: rooted-ivy 17s ease-in-out 500ms infinite alternate;
+}
+
+.closing-note > img {
+  animation: rooted-freesia 16s ease-in-out 1s infinite alternate;
+}
+
+@keyframes rooted-strelitzia {
+  from { transform: rotate(-4deg) translate3d(0, 0, 0); }
+  to { transform: rotate(-3deg) translate3d(-2px, -4px, 0); }
+}
+
+@keyframes rooted-hypericum {
+  from { transform: rotate(4deg) translate3d(0, 0, 0); }
+  to { transform: rotate(4.8deg) translate3d(-2px, -3px, 0); }
+}
+
+@keyframes rooted-ivy {
+  from { transform: rotate(13deg) translate3d(0, 0, 0); }
+  to { transform: rotate(14deg) translate3d(3px, -2px, 0); }
+}
+
+@keyframes rooted-freesia {
+  from { transform: rotate(2deg) translate3d(0, 0, 0); }
+  to { transform: rotate(3deg) translate3d(-2px, -3px, 0); }
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .day-stop:hover { transform: translate3d(.35rem, 0, 0); }
+  .guest-note-card:hover { transform: translate3d(0, -.25rem, 0); }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .day-stop:hover { transform: translate3d(0.55rem, 0, 0); }
 
@@ -1923,9 +2127,9 @@ select:focus {
 
   .archive-object-art {
     top: 3.5rem;
-    right: -1rem;
-    width: 12rem;
-    opacity: 0.32;
+    right: -2rem;
+    width: 10rem;
+    opacity: 0.26;
   }
 
   .archive-heading {
@@ -1996,5 +2200,44 @@ select:focus {
 
   [data-parallax] {
     translate: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .day-flow-flower {
+    right: -4rem;
+    bottom: -6rem;
+    width: 23rem;
+    opacity: .11;
+  }
+
+  .transition-panel {
+    min-height: 29rem;
+  }
+
+  .transition-plant {
+    right: -2rem;
+    bottom: -7rem;
+    width: 16rem;
+    opacity: .18;
+  }
+
+  .botanical-branch-details {
+    right: -7rem;
+    bottom: -10rem;
+    width: 21rem;
+  }
+
+  .botanical-branch-archive {
+    top: -8rem;
+    right: -7rem;
+    width: 24rem;
+  }
+
+  .closing-note > img {
+    right: -5rem;
+    bottom: -7rem;
+    width: 24rem;
+    opacity: .13;
   }
 }
