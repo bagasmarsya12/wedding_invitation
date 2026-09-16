@@ -109,5 +109,8 @@ const formStatus = document.querySelector("#form-status");
 rsvpForm.addEventListener("submit", event => {
   event.preventDefault();
   if (!rsvpForm.reportValidity()) return;
-  formStatus.textContent = "Preview selesai—jawabanmu belum disimpan.";
+  const attending = new FormData(rsvpForm).get("attendance") === "yes";
+  formStatus.textContent = attending
+    ? "Preview selesai. Konfirmasi online belum dibuka."
+    : "Preview selesai. Tidak ada jawaban yang disimpan.";
 });
