@@ -7,6 +7,8 @@ import {
   type AnimationEvent,
   type CSSProperties,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
   useContext,
   useEffect,
@@ -156,6 +158,154 @@ function ArchiveArtifact({ item, index }: { item: (typeof archiveItems)[number];
         </span>
       </button>
     </article>
+  );
+}
+
+type MapTransform = { x: number; y: number; scale: number };
+type MapPointer = { id: number; x: number; y: number; originX: number; originY: number; moved: boolean; type: string };
+
+const INITIAL_MAP_TRANSFORM: MapTransform = { x: 0, y: 0, scale: 1 };
+
+function clampMapTransform(transform: MapTransform): MapTransform {
+  return {
+    x: Math.max(-88, Math.min(88, transform.x)),
+    y: Math.max(-64, Math.min(64, transform.y)),
+    scale: Math.max(.9, Math.min(1.35, transform.scale)),
+  };
+}
+
+function DestinationMap() {
+  const { reduced } = useContext(MotionContext);
+  const [transform, setTransform] = useState<MapTransform>(INITIAL_MAP_TRANSFORM);
+  const mapRef = useRef<SVGSVGElement>(null);
+  const pointerRef = useRef<MapPointer | null>(null);
+
+  const moveMap = (dx: number, dy: number) => {
+    setTransform(value => clampMapTransform({ ...value, x: value.x + dx, y: value.y + dy }));
+  };
+
+  const zoomMap = (delta: number) => {
+    setTransform(value => clampMapTransform({ ...value, scale: value.scale + delta }));
+  };
+
+  const mapUnitsPerPixel = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return 800 / Math.max(rect.width, 1);
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointerRef.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      originX: event.clientX,
+      originY: event.clientY,
+      moved: false,
+      type: event.pointerType,
+    };
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const pointer = pointerRef.current;
+    if (!pointer || pointer.id !== event.pointerId) return;
+    const dx = event.clientX - pointer.x;
+    const dy = event.clientY - pointer.y;
+    const totalX = event.clientX - pointer.originX;
+    const totalY = event.clientY - pointer.originY;
+    if (pointer.type === "touch" && !pointer.moved && Math.abs(totalY) > Math.abs(totalX) && Math.abs(totalY) > 5) {
+      pointerRef.current = null;
+      return;
+    }
+    if (Math.abs(totalX) > 3 || Math.abs(totalY) > 3) pointer.moved = true;
+    if (!pointer.moved) return;
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    const units = mapUnitsPerPixel(event);
+    moveMap(dx * units, dy * units);
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (pointerRef.current?.id === event.pointerId) pointerRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+
+  const handleMapKeyDown = (event: ReactKeyboardEvent<SVGSVGElement>) => {
+    const distance = event.shiftKey ? 36 : 20;
+    if (event.key === "ArrowLeft") { event.preventDefault(); moveMap(distance, 0); }
+    if (event.key === "ArrowRight") { event.preventDefault(); moveMap(-distance, 0); }
+    if (event.key === "ArrowUp") { event.preventDefault(); moveMap(0, distance); }
+    if (event.key === "ArrowDown") { event.preventDefault(); moveMap(0, -distance); }
+    if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomMap(.1); }
+    if (event.key === "-" || event.key === "_") { event.preventDefault(); zoomMap(-.1); }
+    if (event.key === "Home") { event.preventDefault(); setTransform(INITIAL_MAP_TRANSFORM); }
+  };
+
+  return (
+    <div className="v2-destination-map-shell">
+      <div className="v2-destination-map-bar">
+        <span>Orienting around Cimahi</span>
+        <span>Drag to explore</span>
+      </div>
+      <div className="v2-destination-map-frame">
+        <svg
+          ref={mapRef}
+          className="v2-destination-map"
+          viewBox="0 0 800 520"
+          role="application"
+          tabIndex={0}
+          aria-label="Interactive map around Pandiga Cimahi. Use arrow keys to pan and plus or minus to zoom."
+          aria-describedby="destination-map-help"
+          onKeyDown={handleMapKeyDown}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          <title>Pandiga Cimahi orientation map</title>
+          <desc>Warm editorial map illustration showing Pandiga on Jalan Sirnarasa, with nearby roads and Cimahi landmarks.</desc>
+          <rect className="destination-map-paper" width="800" height="520" />
+          <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`} aria-hidden="true">
+            <path className="destination-map-water" d="M-70 418C88 382 116 426 217 390S403 339 516 378s172 27 262-34v222H-70Z" />
+            <path className="destination-map-park" d="M-34 52C89 0 173 34 195 112s-22 130-114 131S-22 184-34 52Z" />
+            <g className="destination-map-roads">
+              <path className="destination-road destination-road-major" d="M-24 106C91 88 166 143 263 131S486 41 824 74" />
+              <path className="destination-road destination-road-major" d="M-22 426C86 342 168 293 264 278S467 251 826 124" />
+              <path className="destination-road" d="M108-34C112 80 166 152 151 244S72 374 86 571" />
+              <path className="destination-road" d="M326-42C308 75 252 151 278 252S391 350 404 570" />
+              <path className="destination-road" d="M548-30C524 73 560 128 633 186s87 117 108 215" />
+              <path className="destination-road" d="M2 222C104 198 172 220 253 221s177-42 294-26 190 62 281 38" />
+              <path className="destination-road destination-road-minor" d="M184 16c22 91 53 143 110 204s93 95 164 112" />
+              <path className="destination-road destination-road-minor" d="M474 80c-15 74-12 127 34 185s111 88 183 105" />
+            </g>
+            <path className="destination-route" d="M70 389C150 326 201 303 281 280S418 226 537 158" />
+            <g className="destination-map-labels">
+              <text className="destination-label-large" x="49" y="98">CIBABAT</text>
+              <text x="62" y="177">Cimahi</text>
+              <text x="586" y="102">Cimahi Utara</text>
+              <text className="destination-road-label" x="371" y="112" transform="rotate(-13 371 112)">Jalan Amir Machmud</text>
+              <text className="destination-road-label" x="92" y="350" transform="rotate(-33 92 350)">Jl. Sirnarasa</text>
+              <text className="destination-road-label" x="455" y="298" transform="rotate(-16 455 298)">Cibabat Road</text>
+            </g>
+            <g className="destination-marker" transform="translate(281 280)">
+              <circle className="destination-marker-halo" r="30" />
+              <circle className="destination-marker-disc" r="20" />
+              <path className="destination-marker-b" d="M-7-10v20M-6-10c14-4 14 6 2 9 15 2 13 13-2 11" />
+              <path className="destination-marker-i" d="M8-10c-5 6-4 14 2 20" />
+              <text x="39" y="5">Pandiga</text>
+            </g>
+          </g>
+        </svg>
+        <div className="v2-destination-map-controls" aria-label="Map controls">
+          <button type="button" onClick={() => zoomMap(.1)} aria-label="Zoom in">+</button>
+          <button type="button" onClick={() => zoomMap(-.1)} aria-label="Zoom out">−</button>
+          <button type="button" onClick={() => setTransform(INITIAL_MAP_TRANSFORM)} aria-label="Reset map">↺</button>
+        </div>
+      </div>
+      <p className="v2-destination-map-help" id="destination-map-help">Use the controls, drag, or arrow keys to explore. The directions link below opens Google Maps.</p>
+      {reduced && <span className="v2-destination-map-static-note">Map shown in a still state.</span>}
+    </div>
   );
 }
 
@@ -359,19 +509,19 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <a className="v2-scroll-cue" href="#details"><span>Continue</span><i /></a>
         </section>
 
-        <section className="v2-details v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
-          <div className="v2-details-backdrop" aria-hidden="true">
-            <div className="v2-details-olive-field" />
-            <div className="v2-details-light" />
+        <section className="v2-details v2-destination-scene v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
+          <div className="v2-destination-backdrop" aria-hidden="true">
+            <div className="v2-destination-olive-field" />
+            <div className="v2-destination-light" />
           </div>
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
-          <div className="v2-details-page">
-            <header className="v2-details-head">
+          <div className="v2-destination-page">
+            <header className="v2-destination-head">
               <p>Wedding details</p>
               <h2 id="details-title">The<br />details.</h2>
               <time dateTime="2026-11-01">Sunday, <span>01 November 2026</span></time>
             </header>
-            <div className="v2-details-events" aria-label="Wedding schedule">
+            <div className="v2-destination-events" aria-label="Wedding schedule">
               <article>
                 <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
                 <div><h3>Akad</h3><p>The official part.</p></div>
@@ -381,25 +531,13 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                 <div><h3>Reception</h3><p>The louder part.</p></div>
               </article>
             </div>
-            <div className="v2-details-venue">
-              <div className="v2-details-venue-copy">
+            <DestinationMap />
+            <div className="v2-destination-venue">
+              <div className="v2-destination-venue-copy">
                 <p>At</p>
                 <h3>Pandiga <em>Cimahi</em></h3>
                 <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-                <a href={MAPS_URL} target="_blank" rel="noreferrer">Open in Maps <span aria-hidden="true">↗</span></a>
-              </div>
-              <div className="v2-details-map" aria-label="Simplified map around Pandiga Cimahi">
-                <svg viewBox="0 0 540 420" role="img" aria-label="Map illustration showing Pandiga on Jalan Sirnarasa">
-                  <path d="M-20 92C92 80 131 135 229 119S403 27 572 58" />
-                  <path d="M21 374C104 301 143 264 217 249S337 254 565 171" />
-                  <path d="M128-15C122 97 157 156 148 247S94 358 94 444" />
-                  <path d="M365-28C350 91 287 142 310 227S409 315 408 452" />
-                  <path className="route" d="M75 335C159 270 202 259 278 236S381 186 440 137" />
-                  <circle cx="278" cy="236" r="12" />
-                  <circle cx="278" cy="236" r="26" className="map-ring" />
-                  <text x="298" y="226">Pandiga</text>
-                  <text x="48" y="327">Jl. Sirnarasa</text>
-                </svg>
+                <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">OPEN DIRECTIONS <span aria-hidden="true">→</span></a>
               </div>
             </div>
           </div>
