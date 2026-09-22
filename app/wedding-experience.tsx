@@ -7,8 +7,6 @@ import {
   type AnimationEvent,
   type CSSProperties,
   type FormEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
   type ReactNode,
   useContext,
   useEffect,
@@ -16,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { Map as MapLibreMap } from "maplibre-gl";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
 type Attendance = "" | "yes" | "no";
@@ -25,6 +24,7 @@ const MotionContext = createContext<MotionPreferences>({ reduced: false, precise
 
 const EVENT_DATE_UTC = Date.UTC(2026, 10, 1);
 const MAPS_URL = "https://maps.app.goo.gl/JFL3wrzj7qsBXbz56";
+const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
 const archiveItems = [
   {
@@ -161,149 +161,127 @@ function ArchiveArtifact({ item, index }: { item: (typeof archiveItems)[number];
   );
 }
 
-type MapTransform = { x: number; y: number; scale: number };
-type MapPointer = { id: number; x: number; y: number; originX: number; originY: number; moved: boolean; type: string };
-
-const INITIAL_MAP_TRANSFORM: MapTransform = { x: 0, y: 0, scale: 1 };
-
-function clampMapTransform(transform: MapTransform): MapTransform {
-  return {
-    x: Math.max(-88, Math.min(88, transform.x)),
-    y: Math.max(-64, Math.min(64, transform.y)),
-    scale: Math.max(.9, Math.min(1.35, transform.scale)),
-  };
-}
-
 function DestinationMap() {
   const { reduced } = useContext(MotionContext);
-  const [transform, setTransform] = useState<MapTransform>(INITIAL_MAP_TRANSFORM);
-  const mapRef = useRef<SVGSVGElement>(null);
-  const pointerRef = useRef<MapPointer | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
-  const moveMap = (dx: number, dy: number) => {
-    setTransform(value => clampMapTransform({ ...value, x: value.x + dx, y: value.y + dy }));
-  };
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+    let cancelled = false;
+    let observer: IntersectionObserver | null = null;
+    let mapLoaded = false;
+
+    const initialize = async () => {
+      try {
+        const { default: maplibregl } = await import("maplibre-gl");
+        if (cancelled) return;
+        const map = new maplibregl.Map({
+          container,
+          style: "https://tiles.openfreemap.org/styles/liberty",
+          center: VENUE_CENTER,
+          zoom: 15.1,
+          minZoom: 12,
+          maxZoom: 19,
+          attributionControl: false,
+          scrollZoom: false,
+          dragRotate: false,
+          pitchWithRotate: false,
+          touchPitch: false,
+          cooperativeGestures: true,
+        });
+        mapRef.current = map;
+        map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+        map.on("styleimagemissing", event => {
+          if (!map.hasImage(event.id)) {
+            map.addImage(event.id, { width: 1, height: 1, data: new Uint8Array([0, 0, 0, 0]) });
+          }
+        });
+        const markerElement = document.createElement("div");
+        markerElement.className = "v2-maplibre-marker";
+        markerElement.setAttribute("aria-label", "Pandiga Cimahi");
+        markerElement.innerHTML = "<span>B</span><i>×</i><span>I</span>";
+        new maplibregl.Marker({ element: markerElement, anchor: "bottom" }).setLngLat(VENUE_CENTER).addTo(map);
+        map.on("load", () => {
+          if (cancelled) return;
+          mapLoaded = true;
+          map.resize();
+          setStatus("ready");
+          if (!reduced) map.easeTo({ center: VENUE_CENTER, zoom: 15.45, duration: 1100, essential: true });
+        });
+        map.on("error", () => {
+          if (!mapLoaded) setStatus("error");
+        });
+      } catch {
+        if (!cancelled) setStatus("error");
+      }
+    };
+
+    observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        observer?.disconnect();
+        void initialize();
+      }
+    }, { rootMargin: "240px" });
+    observer.observe(container);
+
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, [reduced]);
 
   const zoomMap = (delta: number) => {
-    setTransform(value => clampMapTransform({ ...value, scale: value.scale + delta }));
+    const map = mapRef.current;
+    if (!map) return;
+    if (delta > 0) map.zoomIn({ duration: 350 });
+    else map.zoomOut({ duration: 350 });
   };
 
-  const mapUnitsPerPixel = (event: ReactPointerEvent<SVGSVGElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return 800 / Math.max(rect.width, 1);
-  };
+  const resetMap = () => mapRef.current?.easeTo({ center: VENUE_CENTER, zoom: 15.45, bearing: 0, pitch: 0, duration: 650, essential: true });
 
-  const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pointerRef.current = {
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-      originX: event.clientX,
-      originY: event.clientY,
-      moved: false,
-      type: event.pointerType,
-    };
-  };
-
-  const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
-    const pointer = pointerRef.current;
-    if (!pointer || pointer.id !== event.pointerId) return;
-    const dx = event.clientX - pointer.x;
-    const dy = event.clientY - pointer.y;
-    const totalX = event.clientX - pointer.originX;
-    const totalY = event.clientY - pointer.originY;
-    if (pointer.type === "touch" && !pointer.moved && Math.abs(totalY) > Math.abs(totalX) && Math.abs(totalY) > 5) {
-      pointerRef.current = null;
-      return;
-    }
-    if (Math.abs(totalX) > 3 || Math.abs(totalY) > 3) pointer.moved = true;
-    if (!pointer.moved) return;
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    const units = mapUnitsPerPixel(event);
-    moveMap(dx * units, dy * units);
-  };
-
-  const handlePointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
-    if (pointerRef.current?.id === event.pointerId) pointerRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-  };
-
-  const handleMapKeyDown = (event: ReactKeyboardEvent<SVGSVGElement>) => {
-    const distance = event.shiftKey ? 36 : 20;
-    if (event.key === "ArrowLeft") { event.preventDefault(); moveMap(distance, 0); }
-    if (event.key === "ArrowRight") { event.preventDefault(); moveMap(-distance, 0); }
-    if (event.key === "ArrowUp") { event.preventDefault(); moveMap(0, distance); }
-    if (event.key === "ArrowDown") { event.preventDefault(); moveMap(0, -distance); }
-    if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomMap(.1); }
-    if (event.key === "-" || event.key === "_") { event.preventDefault(); zoomMap(-.1); }
-    if (event.key === "Home") { event.preventDefault(); setTransform(INITIAL_MAP_TRANSFORM); }
+  const handleMapKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const distance = event.shiftKey ? 180 : 90;
+    if (event.key === "ArrowLeft") { event.preventDefault(); map.panBy([-distance, 0], { duration: 350 }); }
+    if (event.key === "ArrowRight") { event.preventDefault(); map.panBy([distance, 0], { duration: 350 }); }
+    if (event.key === "ArrowUp") { event.preventDefault(); map.panBy([0, -distance], { duration: 350 }); }
+    if (event.key === "ArrowDown") { event.preventDefault(); map.panBy([0, distance], { duration: 350 }); }
+    if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomMap(1); }
+    if (event.key === "-" || event.key === "_") { event.preventDefault(); zoomMap(-1); }
+    if (event.key === "Home") { event.preventDefault(); resetMap(); }
   };
 
   return (
     <div className="v2-destination-map-shell">
       <div className="v2-destination-map-bar">
-        <span>Orienting around Cimahi</span>
-        <span>Drag to explore</span>
+        <span>Pandiga / Cimahi</span>
+        <span>{status === "ready" ? "Live map" : "Finding the venue"}</span>
       </div>
       <div className="v2-destination-map-frame">
-        <svg
-          ref={mapRef}
-          className="v2-destination-map"
-          viewBox="0 0 800 520"
+        <div
+          ref={mapContainerRef}
+          className="v2-maplibre-map"
           role="application"
           tabIndex={0}
-          aria-label="Interactive map around Pandiga Cimahi. Use arrow keys to pan and plus or minus to zoom."
+          aria-label="Interactive map around Pandiga Cimahi. Use drag, the controls, or arrow keys to explore."
           aria-describedby="destination-map-help"
           onKeyDown={handleMapKeyDown}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
-          <title>Pandiga Cimahi orientation map</title>
-          <desc>Warm editorial map illustration showing Pandiga on Jalan Sirnarasa, with nearby roads and Cimahi landmarks.</desc>
-          <rect className="destination-map-paper" width="800" height="520" />
-          <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`} aria-hidden="true">
-            <path className="destination-map-water" d="M-70 418C88 382 116 426 217 390S403 339 516 378s172 27 262-34v222H-70Z" />
-            <path className="destination-map-park" d="M-34 52C89 0 173 34 195 112s-22 130-114 131S-22 184-34 52Z" />
-            <g className="destination-map-roads">
-              <path className="destination-road destination-road-major" d="M-24 106C91 88 166 143 263 131S486 41 824 74" />
-              <path className="destination-road destination-road-major" d="M-22 426C86 342 168 293 264 278S467 251 826 124" />
-              <path className="destination-road" d="M108-34C112 80 166 152 151 244S72 374 86 571" />
-              <path className="destination-road" d="M326-42C308 75 252 151 278 252S391 350 404 570" />
-              <path className="destination-road" d="M548-30C524 73 560 128 633 186s87 117 108 215" />
-              <path className="destination-road" d="M2 222C104 198 172 220 253 221s177-42 294-26 190 62 281 38" />
-              <path className="destination-road destination-road-minor" d="M184 16c22 91 53 143 110 204s93 95 164 112" />
-              <path className="destination-road destination-road-minor" d="M474 80c-15 74-12 127 34 185s111 88 183 105" />
-            </g>
-            <path className="destination-route" d="M70 389C150 326 201 303 281 280S418 226 537 158" />
-            <g className="destination-map-labels">
-              <text className="destination-label-large" x="49" y="98">CIBABAT</text>
-              <text x="62" y="177">Cimahi</text>
-              <text x="586" y="102">Cimahi Utara</text>
-              <text className="destination-road-label" x="371" y="112" transform="rotate(-13 371 112)">Jalan Amir Machmud</text>
-              <text className="destination-road-label" x="92" y="350" transform="rotate(-33 92 350)">Jl. Sirnarasa</text>
-              <text className="destination-road-label" x="455" y="298" transform="rotate(-16 455 298)">Cibabat Road</text>
-            </g>
-            <g className="destination-marker" transform="translate(281 280)">
-              <circle className="destination-marker-halo" r="30" />
-              <circle className="destination-marker-disc" r="20" />
-              <path className="destination-marker-b" d="M-7-10v20M-6-10c14-4 14 6 2 9 15 2 13 13-2 11" />
-              <path className="destination-marker-i" d="M8-10c-5 6-4 14 2 20" />
-              <text x="39" y="5">Pandiga</text>
-            </g>
-          </g>
-        </svg>
+        />
+        {status === "loading" && <div className="v2-maplibre-status" role="status">Loading the actual roads around Pandiga…</div>}
+        {status === "error" && <div className="v2-maplibre-fallback"><strong>Pandiga Cimahi</strong><span>Live map unavailable right now.</span><a href={MAPS_URL} target="_blank" rel="noreferrer">OPEN IN GOOGLE MAPS <span aria-hidden="true">→</span></a></div>}
         <div className="v2-destination-map-controls" aria-label="Map controls">
           <button type="button" onClick={() => zoomMap(.1)} aria-label="Zoom in">+</button>
           <button type="button" onClick={() => zoomMap(-.1)} aria-label="Zoom out">−</button>
-          <button type="button" onClick={() => setTransform(INITIAL_MAP_TRANSFORM)} aria-label="Reset map">↺</button>
+          <button type="button" onClick={resetMap} aria-label="Reset map">↺</button>
         </div>
       </div>
-      <p className="v2-destination-map-help" id="destination-map-help">Use the controls, drag, or arrow keys to explore. The directions link below opens Google Maps.</p>
+      <p className="v2-destination-map-help" id="destination-map-help">Use the controls, drag, or arrow keys to explore the actual roads around the venue. The directions link below opens Google Maps.</p>
       {reduced && <span className="v2-destination-map-static-note">Map shown in a still state.</span>}
     </div>
   );

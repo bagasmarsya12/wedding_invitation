@@ -132,7 +132,7 @@
 @keyframes v2-day-arrival { from{opacity:0;transform:translateY(2.5rem)} to{opacity:1;transform:none} }
 @keyframes v2-botanical-breathe { from{translate:0 0;rotate:0deg} to{translate:-3px 5px;rotate:.9deg} }
 
-/* The Details — DestinationScene: a quiet editorial map, not a generic embed */
+/* The Details — DestinationScene: real roads, framed like an editorial object */
 .v2-details { min-height: 100svh; padding: clamp(6.5rem,9vw,9rem) clamp(1.3rem,7vw,7rem) clamp(4rem,8vw,7rem); overflow: hidden; color: var(--v2-charcoal); background: var(--v2-paper); }
 .v2-details::after { position: absolute; z-index: 0; inset: 0; content: ""; opacity: .2; pointer-events: none; background: linear-gradient(117deg,transparent 0 34%,rgba(255,255,255,.72) 34.2% 51%,transparent 51.2%); mix-blend-mode: screen; }
 .v2-destination-backdrop { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
@@ -164,27 +164,20 @@
 .v2-destination-map-shell { position: relative; z-index: 4; display: flex; min-width: 0; grid-area: map; min-height: clamp(30rem,48vw,42rem); flex-direction: column; }
 .v2-destination-map-bar { display: flex; min-height: 2.2rem; align-items: center; justify-content: space-between; border-top: 1px solid rgba(41,39,33,.3); border-bottom: 1px solid rgba(41,39,33,.2); color: rgba(41,39,33,.62); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; }
 .v2-destination-map-frame { position: relative; min-height: 0; flex: 1; margin-top: .75rem; overflow: hidden; border: 1px solid rgba(41,39,33,.23); background: #ebe6d9; box-shadow: 1rem 1.2rem 3rem rgba(49,43,34,.08); }
-.v2-destination-map { display: block; width: 100%; height: 100%; min-height: 27rem; cursor: grab; outline-offset: 6px; touch-action: pan-y; }
-.v2-destination-map:active { cursor: grabbing; }
-.destination-map-paper { fill: #eee9dd; }
-.destination-map-water { fill: rgba(178,188,176,.18); stroke: none; }
-.destination-map-park { fill: rgba(190,199,176,.3); stroke: none; }
-.destination-road { fill: none; stroke: #b8b6a9; stroke-width: 4; stroke-linecap: round; }
-.destination-road-major { stroke: #9e9e91; stroke-width: 8; }
-.destination-road-minor { stroke: #cbc7b9; stroke-width: 2.2; }
-.destination-route { fill: none; stroke: var(--v2-rose); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 620; stroke-dashoffset: 620; transition: stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1); }
-.v2-destination-scene.is-in-view .destination-route { stroke-dashoffset: 0; }
-.destination-map-labels text { fill: rgba(41,39,33,.68); font-family: var(--v2-sans); font-size: 15px; letter-spacing: 1px; }
-.destination-map-labels .destination-label-large { fill: rgba(41,39,33,.5); font-size: 12px; letter-spacing: 4px; }
-.destination-map-labels .destination-road-label { fill: rgba(41,39,33,.48); font-size: 11px; letter-spacing: .7px; }
-.destination-marker { transform-box: fill-box; transform-origin: center; }
-.destination-marker-halo { fill: rgba(196,135,141,.14); stroke: var(--v2-rose); stroke-width: 1.5; }
-.destination-marker-disc { fill: var(--v2-rose); stroke: var(--v2-paper); stroke-width: 3; }
-.destination-marker-b,.destination-marker-i { fill: none; stroke: var(--v2-paper); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.destination-marker text { fill: var(--v2-charcoal); font-family: var(--v2-serif); font-size: 19px; letter-spacing: 0; }
-.v2-destination-scene:not(.is-in-view) .destination-marker { opacity: .18; }
-.v2-destination-scene.is-in-view .destination-marker { animation: destination-marker-arrival 1s .55s cubic-bezier(.22,1,.36,1) both; }
-@keyframes destination-marker-arrival { from{opacity:0;transform:translate(0 8px) scale(.72)} to{opacity:1;transform:translate(0 0) scale(1)} }
+.v2-maplibre-map { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 27rem; cursor: grab; outline-offset: 6px; background: #e8e2d6; }
+.v2-maplibre-map:active { cursor: grabbing; }
+.v2-maplibre-map .maplibregl-canvas { outline: none; }
+.v2-maplibre-marker { display: flex; width: 2.75rem; height: 2.75rem; align-items: center; justify-content: center; gap: .08rem; border: 2px solid var(--v2-paper); border-radius: 50% 50% 50% 0; color: var(--v2-paper); background: var(--v2-rose); box-shadow: 0 .45rem 1.2rem rgba(41,39,33,.25); font-family: var(--v2-serif); font-size: .78rem; transform: rotate(-45deg); }
+.v2-maplibre-marker span,.v2-maplibre-marker i { display: block; transform: rotate(45deg); }
+.v2-maplibre-marker i { font-size: .55rem; font-style: normal; opacity: .78; }
+.v2-maplibre-status,.v2-maplibre-fallback { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; padding: 2rem; color: var(--v2-charcoal); background: rgba(238,233,221,.88); font-family: var(--v2-serif); font-size: 1.15rem; font-style: italic; text-align: center; }
+.v2-maplibre-fallback { align-content: center; gap: .45rem; font-style: normal; }
+.v2-maplibre-fallback strong { font-family: var(--v2-serif); font-size: 2rem; font-weight: 400; }
+.v2-maplibre-fallback span { font-size: .8rem; opacity: .7; }
+.v2-maplibre-fallback a { margin-top: .8rem; border-bottom: 1px solid currentColor; padding-bottom: .25rem; font-size: .63rem; letter-spacing: .12em; text-decoration: none; }
+.v2-destination-map-frame .maplibregl-ctrl-attrib { margin: 0 .35rem .35rem 0; border-radius: 0; color: rgba(41,39,33,.62); background: rgba(251,248,241,.8); font-size: .55rem; }
+.v2-destination-map-frame .maplibregl-ctrl-attrib a { color: inherit; }
+.v2-destination-map-frame .maplibregl-ctrl-attrib-button { width: 1.65rem; height: 1.65rem; background-color: var(--v2-paper); }
 .v2-destination-map-controls { position: absolute; right: .8rem; bottom: .8rem; display: flex; flex-direction: column; border: 1px solid rgba(41,39,33,.28); background: rgba(251,248,241,.9); box-shadow: 0 .4rem 1rem rgba(41,39,33,.12); }
 .v2-destination-map-controls button { display: grid; width: 2.1rem; height: 2.1rem; place-items: center; border: 0; border-bottom: 1px solid rgba(41,39,33,.18); cursor: pointer; background: transparent; font-size: 1.15rem; line-height: 1; }
 .v2-destination-map-controls button:last-child { border-bottom: 0; font-size: 1rem; }
