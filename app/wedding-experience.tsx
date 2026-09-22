@@ -89,15 +89,14 @@ function useExperienceClock() {
     const forcedToday = phaseOverride === "wedding-day";
     const forcedPast = phaseOverride === "post-wedding";
     const state = forcedPast || days < 0 ? "past" : forcedToday || days === 0 ? "today" : days === 1 ? "tomorrow" : "countdown";
-    const statement = state === "past"
+    const countdown = state === "past"
       ? "AND JUST LIKE THAT, WE'RE MARRIED."
       : state === "today"
         ? "IS TODAY."
         : state === "tomorrow"
           ? "IS TOMORROW."
           : `IS ${Math.max(days, 0)} DAYS AWAY.`;
-    const aperture = state === "past" ? "MARRIED" : state === "today" ? "TODAY" : state === "tomorrow" ? "TOMORROW" : String(Math.max(days, 0));
-    return { state, statement, aperture };
+    return { state, countdown };
   }, [now, phaseOverride]);
 }
 
@@ -116,7 +115,7 @@ function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggl
     <header className={`v2-spine ${open ? "is-open" : ""}`}>
       <a className="v2-spine-mark" href="#the-day" aria-label="Kembali ke The Day">B <i>×</i> I</a>
       <span className="v2-spine-date">01 · 11 · 26</span>
-      {confirmed ? <span className="v2-spine-rsvp">You’re on the list</span> : <span aria-hidden="true" />}
+      {confirmed ? <span className="v2-spine-rsvp">You’re on the list</span> : <span className="v2-spine-rsvp" aria-hidden="true" />}
       <button type="button" onClick={onToggle} aria-expanded={open} aria-controls="invitation-info">
         {open ? "Close" : "Info"}
       </button>
@@ -177,7 +176,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   const [rsvpSaved, setRsvpSaved] = useState(false);
   const [rsvpBusy, setRsvpBusy] = useState(false);
   const edition = useMemo(() => hashEdition(token), [token]);
-  const displayName = guestName.trim() || "Tamu Spesial Kami";
+  const displayName = guestName.trim();
+  const hasGuestName = Boolean(displayName);
 
   useEffect(() => {
     document.body.classList.add("wedding-v2-body");
@@ -314,7 +314,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-orchid" />
           </div>
           <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
-            <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-describedby="opening-hint">
+            <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={hasGuestName ? `Open the invitation for ${displayName}` : "Open the invitation"}>
               <span className="v2-envelope-shadow" aria-hidden="true" />
               <span className="v2-envelope-back" aria-hidden="true">
                 <span className="v2-envelope-lining"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
@@ -325,9 +325,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                 <span className="v2-envelope-fold fold-right" aria-hidden="true" />
                 <span className="v2-recipient-copy">
                   <small>Teruntuk tamu spesial kami</small>
-                  <strong id="opening-recipient" dir="auto">{displayName}</strong>
-                  <i aria-hidden="true" />
-                  <span id="opening-hint">Tap the envelope</span>
+                  {hasGuestName && <><strong id="opening-recipient" dir="auto">{displayName}</strong><i aria-hidden="true" /></>}
                 </span>
                 <span className="v2-wax-seal" aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
               </span>
@@ -344,7 +342,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         <section className={`v2-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
-            <div className="v2-aperture" data-value={clock.aperture}>{clock.aperture}</div>
             <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="day-combretum" />
             <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
             <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-short-02.webp" className="day-fern" />
@@ -352,64 +349,62 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <div className="v2-day-copy">
             <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
             <p>The day we’ve been dreaming of</p>
-            <h1 id="day-title" ref={dayTitleRef} tabIndex={-1} suppressHydrationWarning>{clock.statement}</h1>
+            <p className="v2-day-countdown" suppressHydrationWarning>{clock.countdown}</p>
             <div className="v2-day-identity">
               <span>The special day of</span>
-              <strong>Iga <i>×</i> Bagas</strong>
-              <time dateTime="2026-11-01">1 November 2026</time>
+              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1}>IGA <i aria-hidden="true">×</i> BAGAS</h1>
+              <time dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
             </div>
           </div>
-          <a className="v2-scroll-cue" href="#hours"><span>Continue</span><i /></a>
+          <a className="v2-scroll-cue" href="#details"><span>Continue</span><i /></a>
         </section>
 
-        <section className="v2-hours v2-scene" id="hours" data-light="afternoon" aria-labelledby="hours-title">
-          <div className="v2-hours-heading">
-            <p>Two moments.</p>
-            <h2 id="hours-title">One very important day.</h2>
+        <section className="v2-details v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
+          <div className="v2-details-architecture" aria-hidden="true">
+            <div className="v2-details-window" />
+            <div className="v2-details-light" />
           </div>
-          <div className="v2-time-horizon" aria-label="Wedding schedule">
-            <div className="v2-sun" aria-hidden="true" />
-            <article>
-              <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
-              <h3>Akad</h3>
-              <p>The official part.</p>
-            </article>
-            <span className="v2-horizon-line" aria-hidden="true" />
-            <article>
-              <time dateTime="2026-11-01T18:00:00+07:00">18:00</time>
-              <h3>Reception</h3>
-              <p>The louder part.</p>
-            </article>
+          <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
+          <div className="v2-details-grid">
+            <header className="v2-details-intro">
+              <p>Wedding information</p>
+              <h2 id="details-title">The<br />details.</h2>
+              <span>One day, two moments, one place to find.</span>
+            </header>
+            <div className="v2-details-date">
+              <span>Sunday</span>
+              <time dateTime="2026-11-01">01 November 2026</time>
+            </div>
+            <div className="v2-details-schedule" aria-label="Wedding schedule">
+              <article>
+                <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
+                <div><h3>Akad</h3><p>The official part.</p></div>
+              </article>
+              <article>
+                <time dateTime="2026-11-01T18:00:00+07:00">18:00</time>
+                <div><h3>Reception</h3><p>The louder part.</p></div>
+              </article>
+            </div>
+            <div className="v2-details-place">
+              <p>At</p>
+              <h3>Pandiga <em>Cimahi</em></h3>
+              <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+              <a href={MAPS_URL} target="_blank" rel="noreferrer">Open in Maps <span aria-hidden="true">↗</span></a>
+            </div>
+            <div className="v2-details-map" aria-label="Simplified map around Pandiga Cimahi">
+              <svg viewBox="0 0 540 420" role="img" aria-label="Map illustration showing Pandiga on Jalan Sirnarasa">
+                <path d="M-20 92C92 80 131 135 229 119S403 27 572 58" />
+                <path d="M21 374C104 301 143 264 217 249S337 254 565 171" />
+                <path d="M128-15C122 97 157 156 148 247S94 358 94 444" />
+                <path d="M365-28C350 91 287 142 310 227S409 315 408 452" />
+                <path className="route" d="M75 335C159 270 202 259 278 236S381 186 440 137" />
+                <circle cx="278" cy="236" r="12" />
+                <circle cx="278" cy="236" r="26" className="map-ring" />
+                <text x="298" y="226">Pandiga</text>
+                <text x="48" y="327">Jl. Sirnarasa</text>
+              </svg>
+            </div>
           </div>
-          <div className="v2-leaf-shadow" aria-hidden="true" />
-        </section>
-
-        <section className="v2-place v2-scene" id="place" data-light="place" aria-labelledby="place-title">
-          <div className="v2-place-photo" aria-label="Venue photograph placeholder">
-            <div className="v2-architecture" aria-hidden="true"><i /><i /><i /><span /></div>
-            <p>Venue photograph<br />to follow</p>
-            <small>Pandiga / Cimahi</small>
-          </div>
-          <div className="v2-place-copy">
-            <p>One place you’ll need to find.</p>
-            <h2 id="place-title">Pandiga<br />Cimahi</h2>
-            <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-            <a href={MAPS_URL} target="_blank" rel="noreferrer">Open in Maps <span aria-hidden="true">↗</span></a>
-          </div>
-          <div className="v2-place-map" aria-label="Simplified map around Pandiga Cimahi">
-            <svg viewBox="0 0 540 420" role="img" aria-label="Map illustration showing Pandiga on Jalan Sirnarasa">
-              <path d="M-20 92C92 80 131 135 229 119S403 27 572 58" />
-              <path d="M21 374C104 301 143 264 217 249S337 254 565 171" />
-              <path d="M128-15C122 97 157 156 148 247S94 358 94 444" />
-              <path d="M365-28C350 91 287 142 310 227S409 315 408 452" />
-              <path className="route" d="M75 335C159 270 202 259 278 236S381 186 440 137" />
-              <circle cx="278" cy="236" r="12" />
-              <circle cx="278" cy="236" r="26" className="map-ring" />
-              <text x="298" y="226">Pandiga</text>
-              <text x="48" y="327">Jl. Sirnarasa</text>
-            </svg>
-          </div>
-          <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="place-syzygium" />
         </section>
 
         <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
