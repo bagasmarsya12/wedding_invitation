@@ -11,18 +11,29 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
   return (
     <>
       <nav className="filter-row" aria-label="Filter archive">
-        {types.map(type => <button key={type} className={filter === type ? "is-active" : ""} onClick={() => setFilter(type)}>{type}</button>)}
+        {types.map(type => <button key={type} aria-pressed={filter === type} className={filter === type ? "is-active" : ""} onClick={() => setFilter(type)}>{type}</button>)}
       </nav>
-      <div className="archive-index-grid">
+      <p className="cabinet-label">The collection <span>{String(visible.length).padStart(2, "0")} {visible.length === 1 ? "entry" : "entries"}</span></p>
+      <div className="archive-cabinet">
         {visible.map((entry, index) => (
-          <a className={`archive-index-card card-${index % 4}`} href={`/archive/${entry.slug}`} key={entry.slug}>
-            <div className="archive-card-visual">
-              {entry.media_url ? <img src={entry.media_url} alt="" /> : entry.slug === "the-mark" ? <img className="mark-asset" src="/assets/bagas-iga-mark.jpg" alt="Monogram Bagas dan Iga" /> : <span>Original material<br />to be added</span>}
+          <details className="archive-drawer" key={entry.slug} open={index === 0 ? true : undefined}>
+            <summary>
+              <span className="drawer-number">{String(entries.indexOf(entry) + 1).padStart(2, "0")}</span>
+              <h2>{entry.title}</h2>
+              <span className="drawer-type">{entry.type}</span>
+              <span className="drawer-toggle" aria-hidden="true">+</span>
+            </summary>
+            <div className="drawer-interior">
+              <figure className={`drawer-object ${entry.slug === "the-mark" ? "drawer-mark" : ""}`}>
+                {entry.media_url ? <img src={entry.media_url} alt={entry.title} loading="lazy" /> : <span>Original material<br />to be added</span>}
+              </figure>
+              <div className="drawer-story">
+                <p className="drawer-metadata">{[entry.entry_date, entry.location].filter(Boolean).join(" · ") || "Bagas × Iga"}</p>
+                <p>{entry.excerpt || "Entry ready for original material."}</p>
+                <a href={`/archive/${entry.slug}`}>Open this story <span aria-hidden="true">↗</span></a>
+              </div>
             </div>
-            <p>{String(index + 1).padStart(2, "0")} / {entry.type}</p>
-            <h2>{entry.title}</h2>
-            <span>{entry.excerpt || "Entry ready for original material."}</span>
-          </a>
+          </details>
         ))}
       </div>
     </>

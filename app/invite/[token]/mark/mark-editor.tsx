@@ -27,15 +27,15 @@ export function MarkEditor({ token, guestName }: { token: string; guestName: str
     const ctx = context(); if (!ctx) return; ctx.scale(ratio, ratio); ctx.lineCap = "round"; ctx.lineJoin = "round";
     if (snapshot) restore(snapshot);
   };
-  const restore = (url: string) => { const ctx = context(); const element = canvas(); if (!ctx || !element) return; ctx.clearRect(0, 0, element.width, element.height); if (!url) return; const image = new Image(); image.onload = () => ctx.drawImage(image, 0, 0, element.clientWidth, element.clientHeight); image.src = url; };
+  const restore = (url: string) => { const ctx = context(); const element = canvas(); if (!ctx || !element) return; ctx.clearRect(0, 0, element.width, element.height); if (!url) return; const image = new Image(); image.onload = () => { ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.drawImage(image, 0, 0, element.clientWidth, element.clientHeight); ctx.restore(); }; image.src = url; };
   useEffect(() => { resize(); const onResize = () => resize(); addEventListener("resize", onResize); return () => removeEventListener("resize", onResize); }, []);
   const point = (event: PointerEvent<HTMLCanvasElement>) => { const rect = event.currentTarget.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
-  const start = (event: PointerEvent<HTMLCanvasElement>) => { const ctx = context(); if (!ctx) return; event.currentTarget.setPointerCapture(event.pointerId); setHistory(items => [...items.slice(-19), event.currentTarget.toDataURL()]); setFuture([]); drawing.current = true; const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+  const start = (event: PointerEvent<HTMLCanvasElement>) => { const ctx = context(); if (!ctx) return; event.currentTarget.setPointerCapture(event.pointerId); const snapshot = event.currentTarget.toDataURL(); setHistory(items => [...items.slice(-19), snapshot]); setFuture([]); drawing.current = true; const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
   const move = (event: PointerEvent<HTMLCanvasElement>) => { if (!drawing.current) return; const ctx = context(); if (!ctx) return; const p = point(event); ctx.globalCompositeOperation = tool === "eraser" ? "destination-out" : "source-over"; ctx.strokeStyle = color; ctx.lineWidth = tool === "eraser" ? 22 : 3; ctx.lineTo(p.x, p.y); ctx.stroke(); };
   const stop = () => { drawing.current = false; context()?.closePath(); };
-  const undo = () => { const element = canvas(); if (!element || !history.length) return; setFuture(items => [element.toDataURL(), ...items]); const previous = history[history.length - 1]; setHistory(items => items.slice(0, -1)); restore(previous); };
-  const redo = () => { const element = canvas(); if (!element || !future.length) return; setHistory(items => [...items, element.toDataURL()]); restore(future[0]); setFuture(items => items.slice(1)); };
-  const clear = () => { const element = canvas(); const ctx = context(); if (!element || !ctx) return; setHistory(items => [...items.slice(-19), element.toDataURL()]); setFuture([]); ctx.clearRect(0, 0, element.width, element.height); };
+  const undo = () => { const element = canvas(); if (!element || !history.length) return; const snapshot = element.toDataURL(); setFuture(items => [snapshot, ...items]); const previous = history[history.length - 1]; setHistory(items => items.slice(0, -1)); restore(previous); };
+  const redo = () => { const element = canvas(); if (!element || !future.length) return; const snapshot = element.toDataURL(); setHistory(items => [...items, snapshot]); restore(future[0]); setFuture(items => items.slice(1)); };
+  const clear = () => { const element = canvas(); const ctx = context(); if (!element || !ctx) return; const snapshot = element.toDataURL(); setHistory(items => [...items.slice(-19), snapshot]); setFuture([]); ctx.clearRect(0, 0, element.width, element.height); };
   const submit = async () => {
     const element = canvas(); if (!element) return; setBusy(true); setStatus("Keeping your mark…");
     try {

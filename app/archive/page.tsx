@@ -23,8 +23,8 @@ export default async function ArchivePage() {
       <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/">Invitation</a><a href="/marks">Guest marks</a></nav></header>
       <section className="archive-hero">
         <div><p>Things worth keeping</p><h1>The<br /><em>Archive</em></h1></div>
-        <p>Photos, places, conversations, objects, and other material we chose to keep. No forced chronology.</p>
-        <img src="/assets/botanicals/syzygium/branch-long.webp" alt="" aria-hidden="true" />
+        <p>A few things that stayed.<br />Open one. Take your time.</p>
+        <img src="/assets/botanicals/combretum/canopy-branch.webp" alt="" aria-hidden="true" />
       </section>
       <section className="archive-catalogue" aria-label="Archive collection">
         <ArchiveCollection entries={[mark, ...custom]} />

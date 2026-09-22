@@ -18,6 +18,7 @@
         <span>Bagas × Iga</span>
         <span>01 · 11 · 2026</span>
       </div>
+      <p class="opening-event">1 November 2026 · Pandiga, Cimahi<br />Akad 14:00 WIB · Reception 18:00 WIB</p>
       <img class="opening-vine opening-vine-left" src="assets/07-ivy-sprig.webp" alt="" aria-hidden="true" />
       <img class="opening-vine opening-vine-right" src="assets/08-wisteria-sprig.webp" alt="" aria-hidden="true" />
 
@@ -40,7 +41,7 @@
       <p class="sr-only" id="opening-status" aria-live="polite"></p>
     </section>
 
-    <div class="page-shell interior-v3" id="page-shell" inert>
+    <div class="page-shell interior-v3 world-garden" id="page-shell">
       <header class="site-header">
         <a class="wordmark" href="#invitation" aria-label="Bagas dan Iga, kembali ke awal">Bagas <span>×</span> Iga</a>
         <nav aria-label="Navigasi undangan">
@@ -54,33 +55,32 @@
       <p class="lifecycle-notice" id="lifecycle-notice" hidden></p>
 
       <main id="invitation">
-        <section class="story-cover" aria-labelledby="hero-title">
+        <section class="story-cover" aria-labelledby="hero-title" data-world-scene="arrival">
+          <div class="garden-room" aria-hidden="true">
+            <div class="room-light"></div>
+            <div class="room-recess"></div>
+            <img class="room-canopy" src="assets/botanicals/combretum/canopy-branch.webp" width="1008" height="487" alt="" />
+            <img class="room-climber" src="assets/botanicals/combretum/climber-right.webp" width="271" height="811" alt="" />
+            <div class="room-glass"></div>
+            <img class="room-fern" src="assets/botanicals/nephrolepis/frond-arched-01.webp" alt="" />
+            <img class="room-bloom" src="assets/botanicals/combretum/flower-cascade.webp" alt="" />
+            <div class="room-sill"></div>
+          </div>
           <div class="cover-copy">
-            <img class="cover-mark" src="assets/bagas-iga-mark.jpg" alt="Monogram Bagas dan Iga" />
-            <p class="cover-names">Bagas Marsya <span>×</span> Iga Noviyanti</p>
-            <h1 id="hero-title" tabindex="-1">We’re getting married.</h1>
-            <p class="cover-date"><time datetime="2026-11-01">Sunday, 1 November 2026</time></p>
+            <img class="cover-mark" src="assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
+            <p class="cover-names">The wedding of</p>
+            <h1 id="hero-title" tabindex="-1"><span>Bagas</span><span class="cover-conjunction">&amp;</span><span>Iga</span></h1>
+            <p class="cover-date"><time datetime="2026-11-01">Minggu, 1 November 2026</time></p>
             <p class="cover-place">Pandiga, Cimahi</p>
+            <p class="cover-times">Akad 14:00 WIB <span>Reception 18:00 WIB</span></p>
             <div class="cover-actions">
-              <a href="#wedding">Wedding details</a>
+              <a href="#wedding">Detail acara</a>
               <a href="#rsvp">RSVP</a>
+              <a href="https://www.google.com/maps/search/?api=1&amp;query=Pandiga+Cimahi" target="_blank" rel="noreferrer">Maps</a>
             </div>
           </div>
-
-          <figure class="cover-visual photo-slot" data-photo-slot="cover">
-            <div class="photo-slot-copy">
-              <span>Cover photograph</span>
-              <p>Foto kalian atau arsitektur venue</p>
-              <small>Landscape · 4:3</small>
-            </div>
-            <figcaption>A place for the photograph that opens our story.</figcaption>
-          </figure>
-
-          <picture class="hero-melastoma" aria-hidden="true">
-            <source media="(max-width: 600px)" srcset="assets/botanicals/melastoma/branch-short.webp" />
-            <img src="assets/botanicals/melastoma/full-stem.webp" alt="" />
-          </picture>
-          <img class="hero-botanical-shadow" src="assets/botanicals/nephrolepis/frond-arched-01.webp" alt="" aria-hidden="true" />
+          <p class="room-caption">A garden, an invitation.<br />And a little of us.</p>
+          <label class="light-control" hidden><span>Cahaya</span><input type="range" min="0" max="100" value="65" aria-label="Atur cahaya taman" /><span aria-hidden="true">☼</span></label>
           <a class="cover-scroll" href="#wedding" aria-label="Lanjut ke informasi pernikahan"><span></span></a>
         </section>
 
@@ -95,9 +95,10 @@
             </div>
           </div>
 
-          <figure class="venue-photo photo-slot reveal" data-photo-slot="venue">
-            <div class="photo-slot-copy"><span>Venue photograph</span><p>Pandiga, Cimahi</p><small>Landscape · 4:3</small></div>
-            <figcaption>See you there.</figcaption>
+          <figure class="venue-photo date-folio reveal">
+            <span class="date-folio-month">November</span><strong>01</strong><span class="date-folio-year">2026</span>
+            <img src="assets/botanicals/dendrobium/branch-short.webp" alt="" aria-hidden="true" loading="lazy" />
+            <figcaption>Pandiga, Cimahi</figcaption>
           </figure>
 
           <div class="venue-address reveal">
@@ -180,12 +181,18 @@
           </form>
         </section>
 
-        <section class="story-transition" aria-label="Personal archive introduction">
-          <picture class="archive-fern" aria-hidden="true">
-            <source media="(max-width: 600px)" srcset="assets/botanicals/nephrolepis/frond-short-02.webp" />
-            <img src="assets/botanicals/nephrolepis/frond-arched-01.webp" alt="" />
-          </picture>
-          <p class="reveal">There are a few other things we kept.</p>
+        <section class="garden-passage" aria-labelledby="passage-title" data-world-scene="passage">
+          <div class="passage-stage">
+            <div class="passage-window" aria-hidden="true"></div>
+            <div class="passage-plants" aria-hidden="true">
+              <img class="passage-left" src="assets/botanicals/combretum/climber-left.webp" alt="" loading="lazy" />
+              <img class="passage-top" src="assets/botanicals/combretum/canopy-branch.webp" alt="" loading="lazy" />
+              <img class="passage-right" src="assets/botanicals/combretum/climber-right.webp" alt="" loading="lazy" />
+              <img class="passage-floor" src="assets/botanicals/nephrolepis/frond-arched-01.webp" alt="" loading="lazy" />
+            </div>
+            <div class="passage-copy"><p>Beyond the invitation</p><h2 id="passage-title">A little<br />closer.</h2><p>There are a few other things we kept.</p><a href="#profiles">Meet the two of us</a></div>
+            <span class="passage-caption" aria-hidden="true">Combretum indicum</span>
+          </div>
         </section>
 
         <section class="couple-spread" id="profiles" aria-labelledby="profiles-title">
@@ -204,9 +211,7 @@
               <h3>Bagas</h3>
               <p class="person-fullname">Bagas Marsya Pratama Nugraha</p>
               <dl class="person-observations">
-                <div><dt>Known for</dt><dd>[A small, real observation]</dd></div>
-                <div><dt>Usually found</dt><dd>[A place or habit]</dd></div>
-                <div><dt>According to Iga</dt><dd>[One honest sentence]</dd></div>
+                <div><dt>According to Iga</dt><dd>Cerita singkat akan ditambahkan.</dd></div>
               </dl>
             </div>
           </article>
@@ -221,9 +226,7 @@
               <h3>Iga</h3>
               <p class="person-fullname">Iga Noviyanti Rohman</p>
               <dl class="person-observations">
-                <div><dt>Known for</dt><dd>[A small, real observation]</dd></div>
-                <div><dt>Recurring habit</dt><dd>[Something unmistakably Iga]</dd></div>
-                <div><dt>According to Bagas</dt><dd>[One honest sentence]</dd></div>
+                <div><dt>According to Bagas</dt><dd>Cerita singkat akan ditambahkan.</dd></div>
               </dl>
             </div>
             <figure class="person-photo photo-slot reveal" data-photo-slot="iga">
@@ -274,9 +277,9 @@
                 </figure>
                 <span class="memory-index">MARK / 03</span>
                 <h3>The Mark</h3>
-                <p>The story behind the symbol belongs in the full archive.</p>
+                <p>A B embracing a bending I.</p>
               </summary>
-              <div class="memory-detail">Archive entry coming soon.</div>
+              <div class="memory-detail">Dari percakapan tentang nama Iga, menjadi tanda kami berdua. <a href="/archive/the-mark">Read the story</a></div>
             </details>
           </div>
           <div class="archive-status reveal"><p>More archive entries will be added here.</p><a href="/archive">Open the Archive</a></div>
@@ -300,13 +303,13 @@
           <div class="mark-copy reveal">
             <p>Guest contribution</p>
             <h2 id="mark-title">Leave a Mark</h2>
-            <p>Write it, draw it, or combine both. Every submission stays pending until it is reviewed.</p>
-            <a class="product-entry-link" data-invite-path="mark" href="/marks">Open the editor</a>
+            <p>A few words. A small drawing. Something from you, for us.</p>
+            <a class="product-entry-link" data-invite-path="mark" href="/marks">See guest marks</a>
           </div>
           <div class="postcard-placeholder reveal" aria-label="Leave a Mark preview">
             <span>Text</span><span>Drawing</span>
             <p>Something from you<br />will live here.</p>
-            <small>The editor is not open yet</small>
+            <small>Buka tautan undangan pribadi untuk meninggalkan pesan.</small>
           </div>
         </section>
 

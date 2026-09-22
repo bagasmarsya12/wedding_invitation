@@ -3,6 +3,7 @@ const openButton = document.querySelector("#open-invitation");
 const skipButton = document.querySelector("#skip-opening");
 const replayButton = document.querySelector("#replay-opening");
 const pageShell = document.querySelector("#page-shell");
+pageShell.inert = true;
 const openingName = document.querySelector("#opening-name");
 const openingStatus = document.querySelector("#opening-status");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
