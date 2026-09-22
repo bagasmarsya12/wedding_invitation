@@ -360,22 +360,18 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </section>
 
         <section className="v2-details v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
-          <div className="v2-details-architecture" aria-hidden="true">
-            <div className="v2-details-window" />
+          <div className="v2-details-backdrop" aria-hidden="true">
+            <div className="v2-details-olive-field" />
             <div className="v2-details-light" />
           </div>
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
-          <div className="v2-details-grid">
-            <header className="v2-details-intro">
-              <p>Wedding information</p>
+          <div className="v2-details-page">
+            <header className="v2-details-head">
+              <p>Wedding details</p>
               <h2 id="details-title">The<br />details.</h2>
-              <span>One day, two moments, one place to find.</span>
+              <time dateTime="2026-11-01">Sunday, <span>01 November 2026</span></time>
             </header>
-            <div className="v2-details-date">
-              <span>Sunday</span>
-              <time dateTime="2026-11-01">01 November 2026</time>
-            </div>
-            <div className="v2-details-schedule" aria-label="Wedding schedule">
+            <div className="v2-details-events" aria-label="Wedding schedule">
               <article>
                 <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
                 <div><h3>Akad</h3><p>The official part.</p></div>
@@ -385,24 +381,26 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                 <div><h3>Reception</h3><p>The louder part.</p></div>
               </article>
             </div>
-            <div className="v2-details-place">
-              <p>At</p>
-              <h3>Pandiga <em>Cimahi</em></h3>
-              <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-              <a href={MAPS_URL} target="_blank" rel="noreferrer">Open in Maps <span aria-hidden="true">↗</span></a>
-            </div>
-            <div className="v2-details-map" aria-label="Simplified map around Pandiga Cimahi">
-              <svg viewBox="0 0 540 420" role="img" aria-label="Map illustration showing Pandiga on Jalan Sirnarasa">
-                <path d="M-20 92C92 80 131 135 229 119S403 27 572 58" />
-                <path d="M21 374C104 301 143 264 217 249S337 254 565 171" />
-                <path d="M128-15C122 97 157 156 148 247S94 358 94 444" />
-                <path d="M365-28C350 91 287 142 310 227S409 315 408 452" />
-                <path className="route" d="M75 335C159 270 202 259 278 236S381 186 440 137" />
-                <circle cx="278" cy="236" r="12" />
-                <circle cx="278" cy="236" r="26" className="map-ring" />
-                <text x="298" y="226">Pandiga</text>
-                <text x="48" y="327">Jl. Sirnarasa</text>
-              </svg>
+            <div className="v2-details-venue">
+              <div className="v2-details-venue-copy">
+                <p>At</p>
+                <h3>Pandiga <em>Cimahi</em></h3>
+                <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+                <a href={MAPS_URL} target="_blank" rel="noreferrer">Open in Maps <span aria-hidden="true">↗</span></a>
+              </div>
+              <div className="v2-details-map" aria-label="Simplified map around Pandiga Cimahi">
+                <svg viewBox="0 0 540 420" role="img" aria-label="Map illustration showing Pandiga on Jalan Sirnarasa">
+                  <path d="M-20 92C92 80 131 135 229 119S403 27 572 58" />
+                  <path d="M21 374C104 301 143 264 217 249S337 254 565 171" />
+                  <path d="M128-15C122 97 157 156 148 247S94 358 94 444" />
+                  <path d="M365-28C350 91 287 142 310 227S409 315 408 452" />
+                  <path className="route" d="M75 335C159 270 202 259 278 236S381 186 440 137" />
+                  <circle cx="278" cy="236" r="12" />
+                  <circle cx="278" cy="236" r="26" className="map-ring" />
+                  <text x="298" y="226">Pandiga</text>
+                  <text x="48" y="327">Jl. Sirnarasa</text>
+                </svg>
+              </div>
             </div>
           </div>
         </section>

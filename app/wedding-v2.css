@@ -132,44 +132,43 @@
 @keyframes v2-day-arrival { from{opacity:0;transform:translateY(2.5rem)} to{opacity:1;transform:none} }
 @keyframes v2-botanical-breathe { from{translate:0 0;rotate:0deg} to{translate:-3px 5px;rotate:.9deg} }
 
-/* The Details — one architectural folio for time and place */
-.v2-details { min-height: 92svh; padding: clamp(6.5rem,10vw,10rem) clamp(1.3rem,7vw,7rem); overflow: hidden; color: var(--v2-paper); background: linear-gradient(135deg,#59614e 0%,#3f503f 50%,#253a2e 100%); }
-.v2-details::after { position: absolute; z-index: 0; inset: 0; content: ""; opacity: .18; pointer-events: none; background: linear-gradient(120deg,transparent 32%,rgba(255,244,214,.26) 32.2%,transparent 63%); mix-blend-mode: screen; }
-.v2-details-architecture { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
-.v2-details-window { position: absolute; top: 7%; right: -8%; width: 54%; height: 112%; border: 1px solid rgba(251,248,241,.4); transform: skewX(-11deg) rotate(4deg); }
-.v2-details-window::before,.v2-details-window::after { position: absolute; content: ""; background: rgba(251,248,241,.24); }
-.v2-details-window::before { top: 0; bottom: 0; left: 37%; width: 1px; }
-.v2-details-window::after { top: 36%; right: 0; left: 0; height: 1px; }
-.v2-details-light { position: absolute; inset: -20%; background: radial-gradient(circle at 73% 25%,rgba(255,238,189,.3),transparent 35%); transform: translate(calc(var(--pointer-x) * 12px),calc(var(--pointer-y) * 8px)); transition: transform .8s ease-out; }
-.details-syzygium { position: absolute; z-index: 3; bottom: -24%; left: 28%; width: min(40vw,38rem); pointer-events: none; filter: drop-shadow(0 24px 20px rgba(20,37,27,.3)); transform: rotate(24deg); transform-origin: bottom center; }
-.v2-details-grid { position: relative; z-index: 4; display: grid; max-width: 88rem; grid-template-columns: minmax(0,.62fr) minmax(0,1fr) minmax(0,.82fr); grid-template-areas: "intro date schedule" "intro place map"; gap: 1rem clamp(2rem,5vw,5rem); margin: 0 auto; }
-.v2-details-intro { grid-area: intro; align-self: start; padding-right: 1rem; }
-.v2-details-intro > p,.v2-details-place > p { margin-bottom: 1rem; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
-.v2-details-intro h2 { margin: 0 0 2rem; font-family: var(--v2-serif); font-size: clamp(3.8rem,6.5vw,7rem); font-weight: 400; letter-spacing: -.075em; line-height: .8; }
-.v2-details-intro > span { display: block; max-width: 14rem; font-family: var(--v2-serif); font-size: 1rem; font-style: italic; line-height: 1.55; opacity: .82; }
-.v2-details-date { grid-area: date; display: flex; flex-direction: column; gap: .35rem; padding: .9rem 0 1.3rem; border-top: 1px solid rgba(251,248,241,.42); }
-.v2-details-date span { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; }
-.v2-details-date time { font-family: var(--v2-serif); font-size: clamp(1.7rem,3vw,3.2rem); line-height: 1; }
-.v2-details-schedule { grid-area: schedule; display: grid; min-width: 0; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(251,248,241,.42); }
-.v2-details-schedule article { display: grid; min-width: 0; grid-template-columns: 1fr; gap: .65rem; align-content: start; padding: .9rem 0 1.3rem; }
-.v2-details-schedule article + article { border-left: 1px solid rgba(251,248,241,.32); padding-left: clamp(1rem,2vw,2rem); }
-.v2-details-schedule time { font-family: var(--v2-serif); font-size: clamp(2.8rem,5vw,5.1rem); line-height: .84; letter-spacing: -.06em; }
-.v2-details-schedule article > div { min-width: 0; }
-.v2-details-schedule h3 { margin: .15rem 0 .25rem; font-family: var(--v2-serif); font-size: clamp(1.2rem,2vw,1.8rem); font-weight: 400; }
-.v2-details-schedule p { margin: 0; font-family: var(--v2-serif); font-size: .85rem; font-style: italic; opacity: .75; }
-.v2-details-place { grid-area: place; align-self: start; padding: 2.5rem 0 0; border-top: 1px solid rgba(251,248,241,.42); }
-.v2-details-place h3 { margin: 0 0 1.6rem; font-family: var(--v2-serif); font-size: clamp(2.1rem,4vw,4.2rem); font-weight: 400; letter-spacing: -.055em; line-height: .9; }
-.v2-details-place h3 em { color: var(--v2-rose); font-style: normal; }
-.v2-details-place address { margin-bottom: 1.8rem; font-family: var(--v2-serif); font-size: .98rem; font-style: normal; line-height: 1.55; }
-.v2-details-place a,.v2-mark-copy a { display: inline-block; padding-bottom: .3rem; border-bottom: 1px solid currentColor; font-size: .7rem; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
-.v2-details-map { grid-area: map; align-self: end; min-height: 14rem; border-top: 1px solid rgba(251,248,241,.42); }
-.v2-details-map svg { width: 100%; color: rgba(251,248,241,.62); }
+/* The Details — one folded garden page */
+.v2-details { min-height: 100svh; padding: clamp(6.5rem,9vw,9rem) clamp(1.3rem,7vw,7rem) clamp(4rem,8vw,7rem); overflow: hidden; color: var(--v2-charcoal); background: var(--v2-paper); }
+.v2-details::after { position: absolute; z-index: 0; inset: 0; content: ""; opacity: .22; pointer-events: none; background: linear-gradient(117deg,transparent 0 34%,rgba(255,255,255,.72) 34.2% 51%,transparent 51.2%); mix-blend-mode: screen; }
+.v2-details-backdrop { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.v2-details-olive-field { position: absolute; right: -8%; bottom: -30%; width: min(63vw,62rem); height: 91%; border-left: 1px solid rgba(41,39,33,.16); background: linear-gradient(145deg,#737e67 0%,#53614e 48%,#304435 100%); clip-path: polygon(16% 0,100% 5%,100% 100%,0 100%,8% 53%); box-shadow: inset 2rem 2rem 6rem rgba(255,255,255,.1); }
+.v2-details-olive-field::after { position: absolute; inset: 0; content: ""; opacity: .38; background: linear-gradient(120deg,transparent 32%,rgba(255,247,218,.22) 32.2% 33%,transparent 33.2% 68%,rgba(255,247,218,.13) 68.2% 68.8%,transparent 69%); }
+.v2-details-light { position: absolute; top: -18%; right: 15%; width: 52%; height: 142%; background: linear-gradient(118deg,transparent 35%,rgba(255,238,189,.26) 35.2%,transparent 63%); transform: translate(calc(var(--pointer-x) * 14px),calc(var(--pointer-y) * 8px)); transition: transform .9s ease-out; }
+.details-syzygium { position: absolute; z-index: 3; right: -10%; bottom: -28%; width: min(44vw,40rem); pointer-events: none; filter: drop-shadow(0 24px 20px rgba(20,37,27,.24)); transform: rotate(23deg); transform-origin: bottom center; }
+.v2-details-page { position: relative; z-index: 4; display: grid; max-width: 84rem; grid-template-columns: minmax(15rem,.78fr) minmax(23rem,1.22fr); grid-template-areas: "head events" "venue venue"; gap: clamp(4rem,8vw,7rem) clamp(3rem,8vw,9rem); margin: 0 auto; }
+.v2-details-head { grid-area: head; align-self: start; }
+.v2-details-head > p,.v2-details-venue-copy > p { margin-bottom: 1.2rem; font-size: .74rem; letter-spacing: .1em; }
+.v2-details-head h2 { margin: 0; font-family: var(--v2-serif); font-size: clamp(4.2rem,7.2vw,8rem); font-weight: 400; letter-spacing: -.08em; line-height: .78; }
+.v2-details-head time { display: block; margin-top: 2.4rem; padding-top: 1rem; border-top: 1px solid rgba(41,39,33,.3); font-family: var(--v2-serif); font-size: clamp(1.25rem,2.1vw,2rem); line-height: 1.15; }
+.v2-details-head time span { white-space: nowrap; }
+.v2-details-events { position: relative; grid-area: events; align-self: start; min-width: 0; border-top: 1px solid rgba(41,39,33,.3); }
+.v2-details-events::before { position: absolute; top: 3.35rem; bottom: 3.35rem; left: 9.05rem; width: 1px; content: ""; background: rgba(41,39,33,.25); }
+.v2-details-events article { position: relative; display: grid; grid-template-columns: 9.2rem minmax(0,1fr); gap: clamp(1.3rem,3vw,3rem); min-width: 0; padding: 1.35rem 0 1.7rem; }
+.v2-details-events article + article { border-top: 1px solid rgba(41,39,33,.2); }
+.v2-details-events article::before { position: absolute; top: 2.25rem; left: 8.73rem; width: .65rem; height: .65rem; content: ""; border: 1px solid var(--v2-rose); border-radius: 50%; background: var(--v2-paper); }
+.v2-details-events time { font-family: var(--v2-serif); font-size: clamp(3rem,5.4vw,5.5rem); line-height: .8; letter-spacing: -.07em; }
+.v2-details-events article > div { min-width: 0; padding-top: .22rem; }
+.v2-details-events h3 { margin: 0 0 .3rem; font-family: var(--v2-serif); font-size: clamp(1.45rem,2.4vw,2.1rem); font-weight: 400; }
+.v2-details-events p { margin: 0; font-family: var(--v2-serif); font-size: .9rem; font-style: italic; opacity: .7; }
+.v2-details-venue { display: grid; grid-area: venue; grid-template-columns: minmax(17rem,.82fr) minmax(22rem,1.18fr); gap: clamp(3rem,8vw,9rem); padding-top: 2.4rem; border-top: 1px solid rgba(41,39,33,.3); }
+.v2-details-venue-copy { position: relative; z-index: 2; }
+.v2-details-venue-copy h3 { margin: 0 0 1.4rem; font-family: var(--v2-serif); font-size: clamp(2.7rem,5vw,5.1rem); font-weight: 400; letter-spacing: -.065em; line-height: .86; }
+.v2-details-venue-copy h3 em { color: var(--v2-rose); font-style: normal; }
+.v2-details-venue-copy address { max-width: 22rem; margin-bottom: 1.7rem; font-family: var(--v2-serif); font-size: .98rem; font-style: normal; line-height: 1.55; }
+.v2-details-venue-copy a,.v2-mark-copy a { display: inline-block; padding-bottom: .3rem; border-bottom: 1px solid currentColor; font-size: .7rem; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
+.v2-details-map { align-self: stretch; min-height: 17rem; border-left: 1px solid rgba(41,39,33,.24); }
+.v2-details-map svg { width: 100%; height: 100%; color: rgba(41,39,33,.54); }
 .v2-details-map path { fill: none; stroke: currentColor; stroke-width: 1.4; }
-.v2-details-map .route { stroke: #e3b2b6; stroke-width: 4; stroke-dasharray: 780; stroke-dashoffset: 780; transition: stroke-dashoffset 1.9s cubic-bezier(.22,1,.36,1); }
+.v2-details-map .route { stroke: var(--v2-rose); stroke-width: 4; stroke-dasharray: 780; stroke-dashoffset: 780; transition: stroke-dashoffset 1.9s cubic-bezier(.22,1,.36,1); }
 .v2-details.is-in-view .route { stroke-dashoffset: 0; }
-.v2-details-map circle { fill: #e3b2b6; stroke: none; }
-.v2-details-map .map-ring { fill: none; stroke: #e3b2b6; stroke-width: 1; }
-.v2-details-map text { fill: rgba(251,248,241,.82); font-family: var(--v2-sans); font-size: 14px; letter-spacing: 1px; }
+.v2-details-map circle { fill: var(--v2-rose); stroke: none; }
+.v2-details-map .map-ring { fill: none; stroke: var(--v2-rose); stroke-width: 1; }
+.v2-details-map text { fill: rgba(41,39,33,.68); font-family: var(--v2-sans); font-size: 14px; letter-spacing: 1px; }
 
 /* Profiles */
 .v2-profiles { padding: clamp(7rem,12vw,13rem) clamp(1.3rem,7vw,7rem); background: #f7f2e9; }
@@ -340,8 +339,8 @@
   .v2-day { grid-template-columns: 1fr; }
   .v2-day-garden::before { right: -14%; width: 72vw; height: 61%; }
   .v2-day-copy { align-self: start; margin-top: 4vh; }
-  .v2-details-grid { grid-template-columns: .8fr 1.2fr; grid-template-areas: "intro date" "intro schedule" "place map"; gap: 1rem clamp(1.5rem,4vw,4rem); }
-  .details-syzygium { left: 31%; width: 49vw; }
+  .v2-details-page { grid-template-columns: minmax(13rem,.72fr) minmax(18rem,1.28fr); gap: 4rem clamp(1.5rem,4vw,4rem); }
+  .details-syzygium { right: -17%; width: 49vw; }
   .v2-rsvp { grid-template-columns: 1fr; }.v2-rsvp-copy { max-width: 46rem; }.v2-rsvp-form { justify-self: stretch; width: 100%; }
   .v2-mark { grid-template-columns: 1fr; }.v2-mark-copy { max-width: 43rem; }.v2-postcard-installation { width: min(100%,48rem); justify-self: center; }
 }
@@ -371,24 +370,22 @@
   .v2-day-identity { margin: 0 auto; align-items: center; text-align: center; }
   .v2-day-identity h1 { max-width: 10ch; margin: 0 auto; font-size: clamp(3.25rem,14.5vw,4.6rem); line-height: .82; text-align: center; }
   .v2-scroll-cue { display: none; }
-  .v2-details { min-height: 0; padding: 6.5rem 1.25rem 4rem; }
-  .v2-details-grid { grid-template-columns: 1fr 1fr; grid-template-areas: "intro intro" "date date" "schedule schedule" "place map"; gap: 1rem 1.5rem; }
-  .v2-details-intro { padding-right: 0; }
-  .v2-details-intro h2 { margin-bottom: 1rem; font-size: clamp(3.25rem,14vw,4.6rem); }
-  .v2-details-intro > span { max-width: 18rem; font-size: .96rem; }
-  .v2-details-date { margin-top: 2rem; padding-top: .75rem; }
-  .v2-details-date time { font-size: clamp(1.7rem,7vw,2.4rem); }
-  .v2-details-schedule { margin-top: .5rem; }
-  .v2-details-schedule article { grid-template-columns: 1fr; gap: .65rem; padding: 1rem 0 1.2rem; }
-  .v2-details-schedule article + article { padding-left: 1rem; }
-  .v2-details-schedule time { font-size: clamp(2.8rem,12vw,4.2rem); }
-  .v2-details-schedule h3 { font-size: 1.3rem; }
-  .v2-details-schedule p { font-size: .8rem; }
-  .v2-details-place { padding-top: 1.6rem; }
-  .v2-details-place h3 { margin-bottom: 1.2rem; font-size: clamp(2.1rem,8vw,3rem); }
-  .v2-details-place address { font-size: .9rem; }
-  .v2-details-map { min-height: 12rem; }
-  .details-syzygium { right: -26%; bottom: -15%; left: auto; width: 80vw; }
+  .v2-details { min-height: 0; padding: 6.5rem 1.25rem 4.5rem; }
+  .v2-details-olive-field { right: -27%; bottom: -18%; width: 92vw; height: 62%; }
+  .v2-details-page { grid-template-columns: 1fr; grid-template-areas: "head" "events" "venue"; gap: 4rem; }
+  .v2-details-head h2 { font-size: clamp(3.5rem,14vw,5.2rem); }
+  .v2-details-head time { margin-top: 1.5rem; font-size: 1.35rem; }
+  .v2-details-events::before { top: 3rem; bottom: 3rem; left: 6rem; }
+  .v2-details-events article { grid-template-columns: 6.2rem minmax(0,1fr); gap: 1.1rem; padding: 1.1rem 0 1.45rem; }
+  .v2-details-events article::before { top: 2rem; left: 5.68rem; }
+  .v2-details-events time { font-size: clamp(3.1rem,12vw,4.5rem); }
+  .v2-details-events h3 { font-size: 1.45rem; }
+  .v2-details-events p { font-size: .82rem; }
+  .v2-details-venue { grid-template-columns: 1fr; gap: 2.2rem; padding-top: 1.7rem; }
+  .v2-details-venue-copy h3 { margin-bottom: 1.15rem; font-size: clamp(2.5rem,10vw,3.5rem); }
+  .v2-details-venue-copy address { font-size: .9rem; }
+  .v2-details-map { min-height: 12rem; border-top: 1px solid rgba(41,39,33,.24); border-left: 0; padding-top: 1rem; }
+  .details-syzygium { right: -29%; bottom: -11%; width: 82vw; }
   .v2-profiles { padding: 7rem 1.25rem; }
   .v2-profiles > header { grid-template-columns:1fr;gap:1rem;margin-bottom:6rem }.v2-profiles > header h2{font-size:clamp(3.1rem,12vw,4.6rem)}
   .v2-person,.v2-person-iga { grid-template-columns:1fr;gap:3rem;direction:ltr }.v2-person h3{font-size:clamp(3.7rem,18vw,5.6rem)}
@@ -414,9 +411,13 @@
   .v2-spine { padding:0 .9rem }.v2-spine-mark{font-size:.92rem}.v2-spine-date{font-size:.57rem}
   .v2-day-identity h1 { font-size: clamp(3.2rem,14vw,4.2rem); }
   .v2-day-garden::before{height:52%;right:-42%}.day-combretum{right:-48%;bottom:17%}
-  .v2-details-grid { grid-template-columns: 1fr; grid-template-areas: "intro" "date" "schedule" "place" "map"; }
+  .v2-details-head h2 { font-size: 3.8rem; }
+  .v2-details-head time { font-size: 1.18rem; }
+  .v2-details-events article { grid-template-columns: 5.8rem minmax(0,1fr); gap: 1.5rem; }
+  .v2-details-events::before { left: 6.4rem; }
+  .v2-details-events article::before { left: 6.08rem; }
+  .v2-details-events time { font-size: 12.5vw; }
   .v2-details-map { min-height: 10rem; }
-  .v2-details-schedule time { font-size: 14vw; }
   .v2-person dl div{display:block}.v2-person dt{margin-bottom:.4rem}
   .v2-artifact{min-height:25rem}.v2-artifact > button{min-height:25rem}
   .v2-rsvp-form fieldset label{padding:0 .8rem}.v2-rsvp-form fieldset span{font-size:1.08rem}
