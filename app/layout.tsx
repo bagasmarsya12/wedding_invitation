@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./world-surfaces.css";
+import "./wedding-v2.css";
 
 export const metadata: Metadata = {
   title: "Bagas × Iga — 1 November 2026",
