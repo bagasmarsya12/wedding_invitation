@@ -494,30 +494,32 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           </div>
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
           <div className="v2-destination-page">
-            <header className="v2-destination-head">
-              <p>Wedding details</p>
-              <h2 id="details-title">The<br />details.</h2>
-              <time dateTime="2026-11-01">Sunday, <span>01 November 2026</span></time>
-            </header>
-            <div className="v2-destination-events" aria-label="Wedding schedule">
-              <article>
-                <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
-                <div><h3>Akad</h3><p>The official part.</p></div>
-              </article>
-              <article>
-                <time dateTime="2026-11-01T18:00:00+07:00">18:00</time>
-                <div><h3>Reception</h3><p>The louder part.</p></div>
-              </article>
-            </div>
-            <DestinationMap />
-            <div className="v2-destination-venue">
-              <div className="v2-destination-venue-copy">
-                <p>At</p>
-                <h3>Pandiga <em>Cimahi</em></h3>
-                <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-                <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">OPEN DIRECTIONS <span aria-hidden="true">→</span></a>
+            <div className="v2-destination-rail">
+              <header className="v2-destination-head">
+                <p>Wedding details</p>
+                <h2 id="details-title">The<br />details.</h2>
+                <time dateTime="2026-11-01">Sunday, <span>01 November 2026</span></time>
+              </header>
+              <div className="v2-destination-events" aria-label="Wedding schedule">
+                <article>
+                  <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
+                  <div><h3>Akad</h3><p>The official part.</p></div>
+                </article>
+                <article>
+                  <time dateTime="2026-11-01T18:00:00+07:00">18:00</time>
+                  <div><h3>Reception</h3><p>The louder part.</p></div>
+                </article>
+              </div>
+              <div className="v2-destination-venue">
+                <div className="v2-destination-venue-copy">
+                  <p>At</p>
+                  <h3>Pandiga <em>Cimahi</em></h3>
+                  <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+                  <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">OPEN DIRECTIONS <span aria-hidden="true">→</span></a>
+                </div>
               </div>
             </div>
+            <DestinationMap />
           </div>
         </section>
 
