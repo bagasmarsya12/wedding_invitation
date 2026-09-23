@@ -3,6 +3,7 @@ import * as THREE from "three";
 // Botanical forms are curved meshes, not enlarged raster cutouts. Units are CSS pixels.
 // A single canvas serves the chapters; only the visible chapter groups are drawn.
 type Kind = "leaf" | "petal" | "stem" | "heart" | "bud";
+type Species = "combretum" | "orchid" | "cosmos" | "wisteria" | "fern";
 type Instance = { matrix: THREE.Matrix4; color: THREE.Color; anchor: number[] };
 type Bounds = { left: number; top: number; width: number; height: number };
 type Chapter = { element: HTMLElement; group: THREE.Group; top: number; height: number; safe: Bounds[] };
@@ -148,6 +149,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
     const rect = element.getBoundingClientRect();
     const w = rect.width, h = rect.height, mobile = w < 721;
     const rng = random(720 + index * 183);
+    // Beyond retains its original seed, geometry, palette and arrangement.
+    const habitat: Species = ({ profiles: "orchid", archive: "fern", rsvp: "cosmos", "useful-bits": "orchid", gifts: "cosmos", "leave-a-mark": "wisteria" } as Record<string, Species>)[element.id] || "combretum";
     const group = new THREE.Group();
     const pool: Record<Kind, Instance[]> = { stem: [], leaf: [], bud: [], petal: [], heart: [] };
     const scale = mobile ? .65 : Math.min(1.1, w / 1200);
@@ -165,8 +168,29 @@ export function mountGarden(host: HTMLDivElement): () => void {
       size.set(radius, delta.length(), radius);
       add("stem", position, rotation, size, color);
     }
-    function flower(center: THREE.Vector3, radius: number, color: string) {
+    function flower(center: THREE.Vector3, radius: number, color: string, species: Species = "combretum") {
       const tilt = new THREE.Quaternion().setFromEuler(new THREE.Euler((rng() - .5) * .8, (rng() - .5) * .7, rng() * TAU));
+      if (species === "orchid") {
+        for (let p = 0; p < 5; p++) {
+          const angle = [0, 1.12, 2.42, 3.86, 5.16][p];
+          const q = tilt.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle));
+          const broad = p === 1 || p === 4;
+          add("petal", center, q, new THREE.Vector3(radius * (broad ? 1.85 : .9), radius * (broad ? .88 : 1.12), radius), "#fff9e7");
+        }
+        const lip = center.clone().add(new THREE.Vector3(0, -radius * .08, radius * .18));
+        add("petal", lip, new THREE.Quaternion().setFromEuler(new THREE.Euler(.25, 0, Math.PI)), new THREE.Vector3(radius * 1.2, radius * .55, radius * 1.3), "#dec58c");
+        add("heart", center.clone().add(new THREE.Vector3(0, 0, radius * .22)), new THREE.Quaternion(), new THREE.Vector3(radius * .12, radius * .09, radius * .09), "#893d50");
+        return;
+      }
+      if (species === "cosmos" || species === "wisteria") {
+        const count = species === "cosmos" ? 8 : 3;
+        for (let p = 0; p < count; p++) {
+          const q = tilt.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), p * TAU / count));
+          add("petal", center, q, new THREE.Vector3(radius * (species === "cosmos" ? 1.4 : 1.7), radius, radius * 1.5), color);
+        }
+        add("heart", center.clone().add(new THREE.Vector3(0, 0, 3 * scale)), tilt, new THREE.Vector3(radius * .2, radius * .2, radius * .12), species === "cosmos" ? "#cba44c" : "#f1ddb0");
+        return;
+      }
       for (let p = 0; p < 5; p++) {
         const q = tilt.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), p * TAU / 5 + (rng() - .5) * .12));
         add("petal", center, q, new THREE.Vector3(radius * (.86 + rng() * .18), radius, radius), color);
@@ -177,11 +201,11 @@ export function mountGarden(host: HTMLDivElement): () => void {
         add("heart", tip, new THREE.Quaternion(), new THREE.Vector3(.48, .48, .45).multiplyScalar(scale), "#eee5b0");
       }
     }
-    function shrub(edge: number, y: number, direction: number, amplitude = 1) {
+    function shrub(edge: number, y: number, direction: number, amplitude = 1, species: Species = habitat) {
       const root = new THREE.Vector3(edge, -y, -35 + rng() * 15);
       anchor = [root.x, root.y, rng() * TAU, 0];
       const extent = scale * amplitude;
-      for (let b = 0; b < 4; b++) {
+      for (let b = 0; b < (species === "fern" ? 3 : 4); b++) {
         const reach = (100 + b * 34 + rng() * 45) * extent;
         const rise = (b % 2 ? -1 : 1) * (55 + rng() * 130) * extent;
         const end = root.clone().add(new THREE.Vector3(direction * reach, rise, 15 + rng() * 35));
@@ -189,22 +213,51 @@ export function mountGarden(host: HTMLDivElement): () => void {
           root.clone().add(new THREE.Vector3(direction * reach * .28, rise * .05, 0)),
           end.clone().add(new THREE.Vector3(-direction * reach * .25, -30 * extent, -8)), end);
         for (let n = 0; n < 9; n++) stem(curve.getPoint(n / 9), curve.getPoint((n + 1) / 9), (1.35 - n * .09) * extent);
-        for (let n = 1; n < 9; n++) {
-          const t = n / 10, origin = curve.getPoint(t), tangent = curve.getTangent(t);
+        for (let n = 1; n < (species === "fern" ? 6 : 9); n++) {
+          const t = n / (species === "fern" ? 7 : 10), origin = curve.getPoint(t), tangent = curve.getTangent(t);
           for (const side of [-1, 1]) {
             const angle = Math.atan2(tangent.y, tangent.x) - Math.PI / 2 + side * (.75 + rng() * .45);
             const q = new THREE.Quaternion().setFromEuler(new THREE.Euler((rng() - .5) * .85, (rng() - .5) * .65, angle));
             const length = (32 + rng() * 24) * extent * (1 - t * .2);
             const leafOrigin = origin.clone().add(new THREE.Vector3(0, 0, 6 + rng() * 6));
-            add("leaf", leafOrigin, q, new THREE.Vector3(length * (.8 + rng() * .2), length, length), colors.leaf[Math.floor(rng() * colors.leaf.length)]);
+            if (species === "fern") {
+              const axis = Y.clone().applyQuaternion(q);
+              const tip = leafOrigin.clone().addScaledVector(axis, length * 1.65);
+              stem(leafOrigin, tip, .45 * extent);
+              for (let pinna = 1; pinna < 9; pinna++) {
+                const joint = leafOrigin.clone().lerp(tip, pinna / 10);
+                for (const wing of [-1, 1]) {
+                  const pinnaQ = q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), wing * 1.05));
+                  const l = length * .40 * Math.sin(pinna / 10 * Math.PI);
+                  add("leaf", joint, pinnaQ, new THREE.Vector3(l * .52, l, l), colors.leaf[(pinna + b) % colors.leaf.length]);
+                }
+              }
+            } else {
+              const slender = species === "orchid" ? .40 : species === "cosmos" ? .33 : .8;
+              add("leaf", leafOrigin, q, new THREE.Vector3(length * (slender + rng() * .2), length * (species === "orchid" ? 1.38 : 1), length), colors.leaf[Math.floor(rng() * colors.leaf.length)]);
+            }
           }
         }
-        const blossoms = mobile ? 10 : 14;
+        const blossoms = species === "fern" ? 0 : species === "orchid" ? 7 : species === "cosmos" ? 8 : species === "wisteria" ? 22 : mobile ? 10 : 14;
         for (let f = 0; f < blossoms; f++) {
           const phi = f * 2.39996 + b, spread = Math.sqrt((f + .5) / blossoms) * 40 * extent;
           const p = end.clone().add(new THREE.Vector3(Math.cos(phi) * spread, Math.sin(phi) * spread * .85 - f * extent * 1.35, 12 + rng() * 16));
-          stem(end, p, .42 * extent, "#968f5b");
-          flower(p, (10 + rng() * 6.5) * extent, colors.flower[Math.floor(rng() * colors.flower.length)]);
+          if (species === "wisteria") {
+            p.x = end.x + Math.cos(phi) * (27 - f * .8) * extent;
+            p.y = end.y - f * 6 * extent;
+            const joint = new THREE.Vector3(end.x, p.y, end.z);
+            stem(f ? new THREE.Vector3(end.x, p.y + 6 * extent, end.z) : end, joint, .5 * extent);
+            stem(joint, p, .35 * extent);
+          } else stem(end, p, .42 * extent, "#968f5b");
+          if (species === "combretum") {
+            flower(p, (10 + rng() * 6.5) * extent, colors.flower[Math.floor(rng() * colors.flower.length)]);
+            continue;
+          }
+          const base = species === "orchid" ? 18 : species === "cosmos" ? 17 : 10;
+          const tint = species === "wisteria" ? ["#b8a1c7", "#ddd0df", "#9875ad"][f % 3]
+            : species === "cosmos" ? (element.id === "gifts" ? ["#eed596", "#f9e7bf", "#dbaa55"] : ["#e2a2b8", "#ad426d", "#f5d5db"])[f % 3]
+            : colors.flower[Math.floor(rng() * colors.flower.length)];
+          flower(p, (base + rng() * 6.5) * extent * (species === "wisteria" ? 1 - f * .022 : 1), tint, species);
         }
         for (let f = 0; f < 4; f++) {
           const p = end.clone().add(new THREE.Vector3((rng() - .5) * 105 * extent, (rng() - .5) * 100 * extent, 4));
@@ -217,13 +270,19 @@ export function mountGarden(host: HTMLDivElement): () => void {
     // Local arrangements emerge from chapter edges, never a continuous vertical vine.
     const left = -w / 2 - 38 * scale, right = w / 2 + 38 * scale;
     if (element.id === "the-day") {
-      shrub(right, h * .53, -1, 1.35); shrub(right, h * .98, -1, 1.25); shrub(left, h * .99, 1, .72);
+      shrub(left, h * .18, 1, mobile ? 1.12 : 1.6, "orchid");
+      shrub(right, h * .15, -1, mobile ? 1 : 1.65, "wisteria");
+      shrub(left, h * .72, 1, 1.32, "fern");
+      shrub(right, h * .69, -1, 1.35, "orchid");
+      shrub(left, h * .98, 1, 1.65, "combretum");
+      shrub(right, h * .98, -1, 1.65, "cosmos");
+      if (!mobile) { shrub(-w * .26, 0, 1, .9, "wisteria"); shrub(w * .27, 0, -1, .85, "orchid"); }
     } else if (element.id === "details") {
       shrub(right, h * .18, -1, 1.2); shrub(left, h * .85, 1, 1.1);
     } else {
       shrub(index % 2 ? left : right, Math.min(190, h * .17), index % 2 ? 1 : -1, 1.08);
       shrub(index % 2 ? right : left, Math.min(85, h * .07), index % 2 ? -1 : 1, mobile ? .68 : .86);
-      shrub(index % 2 ? right : left, h * .88, index % 2 ? -1 : 1, 1.18);
+      shrub(index % 2 ? right : left, h * .88, index % 2 ? -1 : 1, 1.18, habitat === "fern" ? "orchid" : habitat);
       shrub(index % 2 ? left : right, h * .64, index % 2 ? 1 : -1, .84);
       if (!mobile) shrub(index % 2 ? left : right, h - 20, index % 2 ? 1 : -1, .78);
       if (h > 1300) shrub(index % 2 ? right : left, h * .39, index % 2 ? -1 : 1, .9);
@@ -300,6 +359,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
   canvas.addEventListener("webglcontextlost", contextLost);
   canvas.addEventListener("webglcontextrestored", contextRestored);
   addEventListener("scroll", scroll, { passive: true }); addEventListener("resize", resize, { passive: true });
+  addEventListener("wedding-language-change", resize);
   document.addEventListener("visibilitychange", visibility); media.addEventListener("change", motion);
   const observer = new ResizeObserver(resize);
   parent.querySelectorAll(":scope > .v2-scene").forEach(element => observer.observe(element));
@@ -307,6 +367,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
   return () => {
     disposed = true; cancelAnimationFrame(frame); cancelAnimationFrame(resizeFrame); observer.disconnect();
     removeEventListener("scroll", scroll); removeEventListener("resize", resize); document.removeEventListener("visibilitychange", visibility); media.removeEventListener("change", motion);
+    removeEventListener("wedding-language-change", resize);
     canvas.removeEventListener("webglcontextlost", contextLost); canvas.removeEventListener("webglcontextrestored", contextRestored);
     clearChapters(); KINDS.forEach(kind => { geometries[kind].dispose(); materials[kind].dispose(); });
     renderer.dispose(); canvas.remove(); parent.classList.remove("has-garden-renderer");

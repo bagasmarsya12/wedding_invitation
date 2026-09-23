@@ -17,6 +17,7 @@ import {
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
+import { T, LanguageSwitch, useLanguage } from "./language";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
 type Attendance = "" | "yes" | "no";
@@ -39,12 +40,12 @@ const archiveItems = [
   {
     type: "Photograph",
     title: "Reserved for something real.",
-    note: "An original photograph from Bagas and Iga will live here. No substitute memory has been invented.",
+    note: "We’re choosing a photograph for this spot. Some things deserve a little time.",
   },
   {
     type: "Object",
     title: "Something that survived.",
-    note: "This place is held for a real object, receipt, note, or other ordinary evidence worth keeping.",
+    note: "A small place for an ordinary thing that means something to us. The story is coming.",
   },
 ];
 
@@ -68,6 +69,7 @@ function MotionProvider({ children }: { children: ReactNode }) {
 }
 
 function useExperienceClock() {
+  const { language } = useLanguage();
   const [phaseOverride, setPhaseOverride] = useState("");
   const [now, setNow] = useState(() => new Date());
 
@@ -100,8 +102,11 @@ function useExperienceClock() {
         : state === "tomorrow"
           ? "IS TOMORROW."
           : `IS ${Math.max(days, 0)} DAYS AWAY.`;
-    return { state, countdown };
-  }, [now, phaseOverride]);
+    const caption = language === "id"
+      ? state === "past" ? "DAN SEKARANG, KAMI SUDAH MENIKAH." : state === "today" ? "HARINYA TIBA." : state === "tomorrow" ? "BESOK HARINYA." : `${Math.max(days, 0)} HARI LAGI.`
+      : countdown;
+    return { state, countdown: caption };
+  }, [now, phaseOverride, language]);
 }
 
 function hashEdition(token: string) {
@@ -128,24 +133,26 @@ function BotanicalImage({ src, className, eager = false }: { src: string; classN
 }
 
 function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggle: () => void; confirmed: boolean }) {
+  const { t } = useLanguage();
   return (
     <header className={`v2-spine ${open ? "is-open" : ""}`}>
-      <a className="v2-spine-mark" href="#the-day" aria-label="Kembali ke The Day">B <i>×</i> I</a>
+      <a className="v2-spine-mark" href="#the-day" aria-label={t("Return to invitation")}>B <i>×</i> I</a>
       <span className="v2-spine-date">01 · 11 · 26</span>
-      {confirmed ? <span className="v2-spine-rsvp">You’re on the list</span> : <span className="v2-spine-rsvp" aria-hidden="true" />}
+      {confirmed ? <span className="v2-spine-rsvp"><T>You’re on the list</T></span> : <span className="v2-spine-rsvp" aria-hidden="true" />}
+      <LanguageSwitch />
       <button type="button" onClick={onToggle} aria-expanded={open} aria-controls="invitation-info">
-        {open ? "Close" : "Info"}
+        {t(open ? "Close" : "Info")}
       </button>
       <div className="v2-info-drawer" id="invitation-info" aria-hidden={!open}>
         <div>
           <p><time>14:00</time><span>Akad</span></p>
-          <p><time>18:00</time><span>Reception</span></p>
+          <p><time>18:00</time><span><T>Reception</T></span></p>
         </div>
         <p className="v2-info-place"><strong>Pandiga Cimahi</strong><span>Jl. Sirnarasa No.11, Cibabat</span></p>
-        <nav aria-label="Practical wedding links">
-          <a href={MAPS_URL} target="_blank" rel="noreferrer" onClick={onToggle}>Maps</a>
+        <nav aria-label={t("Practical wedding links")}>
+          <a href={MAPS_URL} target="_blank" rel="noreferrer" onClick={onToggle}><T>Maps</T></a>
           <a href="#rsvp" onClick={onToggle}>RSVP</a>
-          <a href="#useful-bits" onClick={onToggle}>Useful bits</a>
+          <a href="#useful-bits" onClick={onToggle}><T>Useful bits</T></a>
         </nav>
       </div>
     </header>
@@ -162,14 +169,14 @@ function ArchiveArtifact({ item, index }: { item: (typeof archiveItems)[number];
           {item.image
             ? <img src={item.image} alt={item.alt || ""} />
             : <span className="v2-artifact-placeholder" aria-hidden="true"><i /><i /><i /></span>}
-          <span className="v2-artifact-type">{item.type}</span>
-          <strong>{item.title}</strong>
-          <small>Turn it over</small>
+          <span className="v2-artifact-type"><T>{item.type}</T></span>
+          <strong><T>{item.title}</T></strong>
+          <small><T>Turn it over</T></small>
         </span>
         <span className="v2-artifact-side v2-artifact-back">
-          <span>{item.type} / Bagas × Iga</span>
-          <strong>{item.note}</strong>
-          <small>Return to the front</small>
+          <span><T>{item.type}</T> / Bagas × Iga</span>
+          <strong><T>{item.note}</T></strong>
+          <small><T>Return to the front</T></small>
         </span>
       </button>
     </article>
@@ -177,6 +184,7 @@ function ArchiveArtifact({ item, index }: { item: (typeof archiveItems)[number];
 }
 
 function DestinationMap() {
+  const { t } = useLanguage();
   const { reduced } = useContext(MotionContext);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -310,25 +318,26 @@ function DestinationMap() {
           className="v2-maplibre-map"
           role="application"
           tabIndex={0}
-          aria-label="Interactive map around Pandiga Cimahi. Use drag, the controls, or arrow keys to explore."
+          aria-label={t("Interactive map around Pandiga Cimahi. Use drag, the controls, or arrow keys to explore.")}
           aria-describedby="destination-map-help"
           onKeyDown={handleMapKeyDown}
         />
-        {status === "loading" && <div className="v2-maplibre-status" role="status">Loading the actual roads around Pandiga…</div>}
-        {status === "error" && <div className="v2-maplibre-fallback"><strong>Pandiga Cimahi</strong><span>Live map unavailable right now.</span><a href={MAPS_URL} target="_blank" rel="noreferrer">OPEN IN GOOGLE MAPS <span aria-hidden="true">→</span></a></div>}
-        <div className="v2-destination-map-controls" role="group" aria-label="Map controls">
-          <button type="button" onClick={() => zoomMap(.1)} aria-label="Zoom in">+</button>
-          <button type="button" onClick={() => zoomMap(-.1)} aria-label="Zoom out">−</button>
-          <button type="button" onClick={resetMap} aria-label="Reset map">↺</button>
+        {status === "loading" && <div className="v2-maplibre-status" role="status"><T>Loading the actual roads around Pandiga…</T></div>}
+        {status === "error" && <div className="v2-maplibre-fallback"><strong>Pandiga Cimahi</strong><span><T>Live map unavailable right now.</T></span><a href={MAPS_URL} target="_blank" rel="noreferrer"><T>OPEN IN GOOGLE MAPS </T><span aria-hidden="true">→</span></a></div>}
+        <div className="v2-destination-map-controls" role="group" aria-label={t("Map controls")}>
+          <button type="button" onClick={() => zoomMap(.1)} aria-label={t("Zoom in")}>+</button>
+          <button type="button" onClick={() => zoomMap(-.1)} aria-label={t("Zoom out")}>−</button>
+          <button type="button" onClick={resetMap} aria-label={t("Reset map")}>↺</button>
         </div>
       </div>
-      <p className="v2-destination-map-help" id="destination-map-help">Use the controls, drag, or arrow keys to explore the actual roads around the venue. The directions link below opens Google Maps.</p>
-      {reduced && <span className="v2-destination-map-static-note">Map shown in a still state.</span>}
+      <p className="v2-destination-map-help" id="destination-map-help"><T>Use the controls, drag, or arrow keys to explore the actual roads around the venue. The directions link below opens Google Maps.</T></p>
+      {reduced && <span className="v2-destination-map-static-note"><T>Map shown in a still state.</T></span>}
     </div>
   );
 }
 
 function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
+  const { t } = useLanguage();
   const { reduced, precise } = useContext(MotionContext);
   const clock = useExperienceClock();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -472,13 +481,13 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
   return (
     <div className={`v2-world edition-${edition} ${entered ? "has-entered" : "is-locked"} ${opening ? "is-opening" : ""}`} data-light="day" ref={rootRef} style={editionStyle}>
-      <a className="v2-skip-link" href="#the-day" onClick={() => setEntered(true)}>Skip to the invitation</a>
+      <a className="v2-skip-link" href="#the-day" onClick={() => setEntered(true)}><T>Skip to the invitation</T></a>
 
       {!entered && (
         <section className={`v2-opening ${opening ? "is-opening" : ""}`} role="dialog" aria-modal="true" aria-labelledby="opening-recipient">
           <div className="v2-opening-light" aria-hidden="true" />
           <div className="v2-drapery" aria-hidden="true" />
-          <div className="v2-opening-folio" aria-hidden="true"><span>Bagas × Iga</span><span>01 · 11 · 2026</span></div>
+          <header className="v2-opening-folio"><span>Bagas × Iga</span><span>01 · 11 · 2026</span><LanguageSwitch /></header>
           <div className="v2-opening-botanicals" aria-hidden="true">
             <BotanicalImage eager src="/assets/botanicals/syzygium/branch-long.webp" className="opening-syzygium" />
             <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="opening-fern" />
@@ -487,7 +496,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-orchid" />
           </div>
           <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
-            <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={hasGuestName ? `Open the invitation for ${displayName}` : "Open the invitation"}>
+            <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={`${t("Open the invitation")}${hasGuestName ? ` — ${displayName}` : ""}`}>
               <span className="v2-envelope-shadow" aria-hidden="true" />
               <span className="v2-envelope-back" aria-hidden="true">
                 <span className="v2-envelope-lining"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
@@ -497,15 +506,15 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                 <span className="v2-envelope-fold fold-left" aria-hidden="true" />
                 <span className="v2-envelope-fold fold-right" aria-hidden="true" />
                 <span className="v2-recipient-copy">
-                  <small>Teruntuk tamu spesial kami</small>
+                  <small id={!hasGuestName ? "opening-recipient" : undefined}><T>For our very special guest</T></small>
                   {hasGuestName && <><strong id="opening-recipient" dir="auto">{displayName}</strong><i aria-hidden="true" /></>}
                 </span>
                 <span className="v2-wax-seal" aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
               </span>
             </button>
           </div>
-          <button className="v2-opening-skip" type="button" onClick={() => setEntered(true)}>Skip opening</button>
-          <p className="v2-opening-date">1 November 2026 · Pandiga, Cimahi<br />Akad 14:00 · Reception 18:00</p>
+          <button className="v2-opening-skip" type="button" onClick={() => setEntered(true)}><T>Skip opening</T></button>
+          <p className="v2-opening-date">1 November 2026 · Pandiga, Cimahi<br />Akad 14:00 · <T>Reception</T> 18:00</p>
         </section>
       )}
 
@@ -514,24 +523,27 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
       <main className="v2-main" aria-hidden={!entered}>
         <div className="v2-botanical-continuum">
         <GardenBackground active={entered} />
-        <section className={`v2-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
+        <section className={`v2-day v2-grand-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
             <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="day-combretum" />
             <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
             <BotanicalImage eager src="/assets/botanicals/melastoma/full-stem.webp" className="day-melastoma" />
           </div>
+          <div className="v2-grand-portal" aria-hidden="true" />
           <div className="v2-day-copy">
             <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
-            <p>The day we’ve been dreaming of</p>
-            <p className="v2-day-countdown" suppressHydrationWarning>{clock.countdown}</p>
+            <p className="v2-grand-prelude"><T>We’re getting married.</T></p>
             <div className="v2-day-identity">
-              <span>The special day of</span>
-              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1}>IGA <i aria-hidden="true">×</i> BAGAS</h1>
-              <time dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
+              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1}><span>Iga</span><i aria-hidden="true">&amp;</i><span>Bagas</span></h1>
+              <p className="v2-grand-note"><T>Our favourite people. One very good reason to gather.</T></p>
+              <time dateTime="2026-11-01"><span><T>Sunday</T></span>01 November 2026</time>
+              <p className="v2-grand-venue">Pandiga, Cimahi <span>Akad 14:00 · <T>Reception</T> 18:00 WIB</span></p>
+              <div className="v2-grand-actions"><a href="#details"><T>Wedding details</T></a><a href="#rsvp">RSVP <ArrowRight size={15} aria-hidden="true" /></a></div>
             </div>
+            <p className="v2-day-countdown" suppressHydrationWarning><T>The day we’ve been dreaming of</T><span>{clock.countdown}</span></p>
           </div>
-          <a className="v2-scroll-cue" href="#details"><span>Continue</span><i /></a>
+          <a className="v2-scroll-cue" href="#details"><span><T>Continue</T></span><i /></a>
         </section>
 
         <section className="v2-details v2-destination-scene v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
@@ -543,20 +555,20 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <DestinationMap />
             <div className="v2-destination-paper-edge" aria-hidden="true" />
             <header className="v2-destination-head">
-              <p>The details</p>
-              <h2 id="details-title"><span>Same place,</span><span>a very special day.</span></h2>
-              <p className="v2-destination-intro">Here’s when and where to find us. We can’t wait to see you there.</p>
+              <p><T>The details</T></p>
+              <h2 id="details-title"><span><T>Same place,</T></span><span><T>a very special day.</T></span></h2>
+              <p className="v2-destination-intro"><T>Here’s when and where to find us. We can’t wait to see you there.</T></p>
             </header>
             <div className="v2-destination-card">
-              <time className="v2-destination-date" dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
-              <div className="v2-destination-events" aria-label="Wedding schedule">
+              <time className="v2-destination-date" dateTime="2026-11-01"><span><T>Sunday</T></span>01 November 2026</time>
+              <div className="v2-destination-events" aria-label={t("Wedding schedule")}>
                 <article>
                   <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p>The official part.</p></div>
+                  <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p><T>The official part.</T></p></div>
                 </article>
                 <article>
                   <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3>Reception</h3><p>The louder part.</p></div>
+                  <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3><T>Reception</T></h3><p><T>The louder part.</T></p></div>
                 </article>
               </div>
               <div className="v2-destination-venue">
@@ -565,7 +577,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                   <em>Cimahi</em>
                 </div>
                 <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-                <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">Open directions <ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
+                <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label={t("Open directions to Pandiga Cimahi in Google Maps")}><T>Open directions </T><ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
               </div>
             </div>
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
@@ -578,29 +590,29 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-profiles-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-profiles" />
           <header>
-            <p>For those who know one of us better.</p>
-            <h2 id="profiles-title">The two of us,<br />as observed by the other.</h2>
+            <p><T>For those who know one of us better.</T></p>
+            <h2 id="profiles-title"><T>The two of us,</T><br /><T>as observed by the other.</T></h2>
           </header>
           <article className="v2-person v2-person-bagas">
-            <figure><div><span>Portrait of Bagas<br />to be added</span></div><figcaption>Bagas, as himself.</figcaption></figure>
+            <figure><div><span><T>Portrait of Bagas</T><br /><T>to be added</T></span></div><figcaption><T>Bagas, as himself.</T></figcaption></figure>
             <div>
               <p>Bagas</p><h3>Bagas</h3><small>Bagas Marsya Pratama Nugraha</small>
               <dl>
-                <div><dt>Known for</dt><dd>Observation from Iga will be added.</dd></div>
-                <div><dt>Usually found</dt><dd>Observation from Iga will be added.</dd></div>
-                <div><dt>According to Iga</dt><dd>“A real sentence will live here.”</dd></div>
+                <div><dt><T>Known for</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
+                <div><dt><T>According to Iga</T></dt><dd><T>“A real sentence will live here.”</T></dd></div>
               </dl>
             </div>
           </article>
           <div className="v2-profile-join"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
           <article className="v2-person v2-person-iga">
-            <figure><div><span>Portrait of Iga<br />to be added</span></div><figcaption>Iga, as herself.</figcaption></figure>
+            <figure><div><span><T>Portrait of Iga</T><br /><T>to be added</T></span></div><figcaption><T>Iga, as herself.</T></figcaption></figure>
             <div>
               <p>Iga</p><h3>Iga</h3><small>Iga Noviyanti Rohman</small>
               <dl>
-                <div><dt>Known for</dt><dd>Observation from Bagas will be added.</dd></div>
-                <div><dt>Usually found</dt><dd>Observation from Bagas will be added.</dd></div>
-                <div><dt>According to Bagas</dt><dd>“A real sentence will live here.”</dd></div>
+                <div><dt><T>Known for</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
+                <div><dt><T>According to Bagas</T></dt><dd><T>“A real sentence will live here.”</T></dd></div>
               </dl>
             </div>
           </article>
@@ -610,66 +622,65 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-archive" />
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-near-field v2-near-archive-bloom" />
           <div className="v2-archive-heading">
-            <p>From the archive</p>
-            <h2 id="archive-title">Some things were<br />worth keeping.</h2>
-            <span>Photographs, objects, and other evidence. Only the real material makes it into the collection.</span>
+            <p><T>From the archive</T></p>
+            <h2 id="archive-title"><T>Some things were</T><br /><T>worth keeping.</T></h2>
+            <span><T>Photographs, objects, and little things that became our things.</T></span>
           </div>
           <div className="v2-evidence-field">
             {archiveItems.map((item, index) => <ArchiveArtifact item={item} index={index} key={item.type} />)}
             <BotanicalImage src="/assets/botanicals/combretum/tendril.webp" className="archive-tendril" />
           </div>
-          <Link className="v2-text-link" href="/archive">Open the archive <span aria-hidden="true">↗</span></Link>
+          <Link className="v2-text-link" href="/archive"><T>Open the archive </T><span aria-hidden="true">↗</span></Link>
         </section>
 
         <section className="v2-rsvp v2-scene" id="rsvp" data-light="rsvp" aria-labelledby="rsvp-title">
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-rsvp" />
           <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-rsvp-secondary" />
           <div className="v2-rsvp-copy">
-            <p>Will you be there?</p>
-            <h2 id="rsvp-title">We’re doing<br />a headcount.</h2>
-            <span>Apparently venues care about these things.</span>
+            <p><T>Will you be there?</T></p>
+            <h2 id="rsvp-title"><T>We’re doing</T><br /><T>a headcount.</T></h2>
+            <span><T>Apparently venues care about these things.</T></span>
           </div>
           <form className={`v2-rsvp-form ${rsvpSaved ? "is-confirmed" : ""}`} onSubmit={submitRsvp}>
-            <p className="v2-form-person">Invitation for <strong>{displayName}</strong></p>
+            <p className="v2-form-person"><T>Invitation for </T><strong>{displayName || t("our favourite people")}</strong></p>
             <fieldset>
-              <legend>Your answer</legend>
+              <legend><T>Your answer</T></legend>
               <label className={attendance === "yes" ? "is-selected" : ""}>
                 <input type="radio" name="attendance" value="yes" checked={attendance === "yes"} onChange={() => setAttendance("yes")} />
-                <span>I’ll be there.</span>
+                <span><T>I’ll be there.</T></span>
               </label>
               <label className={attendance === "no" ? "is-selected" : ""}>
                 <input type="radio" name="attendance" value="no" checked={attendance === "no"} onChange={() => setAttendance("no")} />
-                <span>I’ll miss this one.</span>
+                <span><T>I’ll miss this one.</T></span>
               </label>
             </fieldset>
             {attendance === "yes" && (
               <div className="v2-rsvp-details">
-                <label>Number of guests
-                  <select value={partySize} onChange={event => setPartySize(Number(event.target.value))}>
+                <label><T>Number of guests</T><select value={partySize} onChange={event => setPartySize(Number(event.target.value))}>
                     {Array.from({ length: Math.max(1, partyLimit) }, (_, index) => <option value={index + 1} key={index + 1}>{index + 1}</option>)}
                   </select>
                 </label>
-                <label>Guest names <span>optional</span><input value={guestNames} onChange={event => setGuestNames(event.target.value)} maxLength={300} /></label>
-                <label>Dietary notes <span>optional</span><input value={dietary} onChange={event => setDietary(event.target.value)} maxLength={300} /></label>
-                <label>A note for us <span>optional</span><textarea value={message} onChange={event => setMessage(event.target.value)} maxLength={800} rows={3} /></label>
+                <label><T>Guest names </T><span><T>optional</T></span><input value={guestNames} onChange={event => setGuestNames(event.target.value)} maxLength={300} /></label>
+                <label><T>Dietary notes </T><span><T>optional</T></span><input value={dietary} onChange={event => setDietary(event.target.value)} maxLength={300} /></label>
+                <label><T>A note for us </T><span><T>optional</T></span><textarea value={message} onChange={event => setMessage(event.target.value)} maxLength={800} rows={3} /></label>
               </div>
             )}
-            <button className="v2-rsvp-submit" type="submit" disabled={!attendance || rsvpBusy}>{rsvpBusy ? "Saving…" : token ? "Save my answer" : "Preview my answer"}</button>
-            <p className="v2-rsvp-status" role="status">{rsvpStatus}</p>
-            {rsvpSaved && <div className={`v2-acceptance-mark edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /><span>Accepted / 01.11.26</span></div>}
+            <button className="v2-rsvp-submit" type="submit" disabled={!attendance || rsvpBusy}>{t(rsvpBusy ? "Saving…" : token ? "Save my answer" : "Preview my answer")}</button>
+            <p className="v2-rsvp-status" role="status">{t(rsvpStatus)}</p>
+            {rsvpSaved && <div className={`v2-acceptance-mark edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /><span><T>Accepted / 01.11.26</T></span></div>}
           </form>
         </section>
 
         <section className="v2-useful v2-scene" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
           <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-background-bloom v2-background-bloom-useful" />
           <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-useful-secondary" />
-          <header><p>The useful bits</p><h2 id="useful-title">The questions someone was going to ask anyway.</h2></header>
+          <header><p><T>The useful bits</T></p><h2 id="useful-title"><T>The questions someone was going to ask anyway.</T></h2></header>
           <div className="v2-useful-list">
-            <details><summary><span>Dress code</span><small>Details to follow</small></summary><p>The dress code will be added after it is confirmed.</p></details>
-            <details><summary><span>Address and entrance</span><small>Pandiga Cimahi</small></summary><p>Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513.</p></details>
-            <details><summary><span>Parking and accessibility</span><small>Details to follow</small></summary><p>Parking, entrance, and accessibility guidance will be added after venue confirmation.</p></details>
-            <details><summary><span>Children and plus-ones</span><small>Details to follow</small></summary><p>Guest-specific guidance will remain attached to each private invitation.</p></details>
-            <details><summary><span>Contact person</span><small>Details to follow</small></summary><p>A contact person will be added closer to the date.</p></details>
+            <details><summary><span><T>Dress code</T></span><small><T>Details to follow</T></small></summary><p><T>The dress code will be added after it is confirmed.</T></p></details>
+            <details><summary><span><T>Address and entrance</T></span><small>Pandiga Cimahi</small></summary><p>Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513.</p></details>
+            <details><summary><span><T>Parking and accessibility</T></span><small><T>Details to follow</T></small></summary><p><T>Parking, entrance, and accessibility guidance will be added after venue confirmation.</T></p></details>
+            <details><summary><span><T>Children and plus-ones</T></span><small><T>Details to follow</T></small></summary><p><T>Guest-specific guidance will remain attached to each private invitation.</T></p></details>
+            <details><summary><span><T>Contact person</T></span><small><T>Details to follow</T></small></summary><p><T>A contact person will be added closer to the date.</T></p></details>
           </div>
         </section>
 
@@ -677,23 +688,23 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-gifts" />
           <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-gifts-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
-          <div className="v2-gifts-heading"><p>A few things</p><h2 id="gifts-title">We’re saving room for.</h2><span>The catalogue opens from a private invitation so reservations stay private.</span></div>
-          <div className="v2-gift-shelf" aria-label="Gift collections">
+          <div className="v2-gifts-heading"><p><T>A few things</T></p><h2 id="gifts-title"><T>We’re saving room for.</T></h2><span><T>The catalogue opens from a private invitation so reservations stay private.</T></span></div>
+          <div className="v2-gift-shelf" aria-label={t("Gift collections")}>
             {["For Bagas", "For Iga", "For Our Home"].map((label, index) => (
               <article key={label}>
                 <div className={`v2-object object-${index + 1}`} aria-hidden="true"><i /><i /></div>
-                <span>{String(index + 1).padStart(2, "0")}</span><h3>{label}</h3><p>Curated objects will be added here.</p>
+                <span>{String(index + 1).padStart(2, "0")}</span><h3>{t(label)}</h3><p><T>Curated objects will be added here.</T></p>
               </article>
             ))}
           </div>
-          <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}>Open the gift catalogue <span aria-hidden="true">↗</span></Link>
+          <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></Link>
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
         </section>
 
         <section className="v2-mark v2-scene" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="v2-mark-copy"><p>Leave a mark</p><h2 id="mark-title">Make a mess.<br />We’ll keep it.</h2><span>Write something, draw something, or do both.</span><Link href={token ? `/invite/${encodeURIComponent(token)}/mark` : "/marks"}>{token ? "Open your postcard" : "See guest marks"} <span aria-hidden="true">↗</span></Link></div>
-          <div className="v2-postcard-installation" aria-label="Guest postcard installation preview">
-            <div className="v2-postcard card-a"><small>Text / drawing</small><strong>Something from you<br />will live here.</strong><span>Kept for Bagas × Iga</span></div>
+          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span><Link href={token ? `/invite/${encodeURIComponent(token)}/mark` : "/marks"}>{t(token ? "Open your postcard" : "See guest marks")} <span aria-hidden="true">↗</span></Link></div>
+          <div className="v2-postcard-installation" aria-label={t("Guest postcard installation preview")}>
+            <div className="v2-postcard card-a"><small><T>Text / drawing</T></small><strong><T>Something from you</T><br /><T>will live here.</T></strong><span><T>Kept for Bagas × Iga</T></span></div>
             <div className="v2-postcard card-b" aria-hidden="true"><i /><i /><i /></div>
             <div className={`v2-postcard card-c edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
           </div>
@@ -711,12 +722,12 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-orchid" />
           </div>
           <div className="v2-beyond-copy">
-            <p>Beyond the invitation</p>
-            <h2 id="beyond-title">The invitation ends here.<br />The rest stays open.</h2>
-            <nav aria-label="Beyond the invitation">
-              <Link href="/archive"><strong>The Archive</strong><span>Things we kept.</span></Link>
-              <Link href="/marks"><strong>The Marks</strong><span>Things you left.</span></Link>
-              <span className="is-coming"><strong>The Gallery</strong><span>Then and now. Coming later.</span></span>
+            <p><T>Beyond the invitation</T></p>
+            <h2 id="beyond-title"><T>The invitation ends here.</T><br /><T>The rest stays open.</T></h2>
+            <nav aria-label={t("Beyond the invitation")}>
+              <Link href="/archive"><strong><T>The Archive</T></strong><span><T>Things we kept.</T></span></Link>
+              <Link href="/marks"><strong><T>The Marks</T></strong><span><T>Things you left.</T></span></Link>
+              <span className="is-coming"><strong><T>The Gallery</T></strong><span><T>Then and now. Coming later.</T></span></span>
             </nav>
           </div>
         </section>
@@ -724,10 +735,10 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
       </main>
 
       <footer className="v2-footer" aria-hidden={!entered}>
-        <div className={`v2-footer-edition edition-${edition}`}><img src="/assets/bagas-iga-mark.webp" alt="" /><span>Guest edition {String(edition + 1).padStart(2, "0")}</span></div>
+        <div className={`v2-footer-edition edition-${edition}`}><img src="/assets/bagas-iga-mark.webp" alt="" /><span><T>Guest edition </T>{String(edition + 1).padStart(2, "0")}</span></div>
         <p>Bagas × Iga<br /><span>2026</span></p>
-        <small>Made with unreasonable attention to detail<br />and approximately 1 billion tokens.</small>
-        <button type="button" onClick={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }}>View the envelope again</button>
+        <small><T>Made with unreasonable attention to detail</T><br /><T>and approximately 1 billion tokens.</T></small>
+        <button type="button" onClick={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }}><T>View the envelope again</T></button>
       </footer>
     </div>
   );

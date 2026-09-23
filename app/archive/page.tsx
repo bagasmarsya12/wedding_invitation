@@ -1,3 +1,5 @@
+
+import { T, LanguageSwitch } from "../language";
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { ArchiveCollection, type ArchiveCard } from "./archive-client";
 import { db } from "@/lib/server";
@@ -20,16 +22,16 @@ export default async function ArchivePage() {
   } catch { /* The built-in story remains available during an empty database state. */ }
   return (
     <main className="product-page archive-page">
-      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/">Invitation</a><a href="/marks">Guest marks</a></nav></header>
+      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/"><T>Invitation</T></a><a href="/marks"><T>Guest marks</T></a></nav><LanguageSwitch /></header>
       <section className="archive-hero">
-        <div><p>Things worth keeping</p><h1>The<br /><em>Archive</em></h1></div>
-        <p>A few things that stayed.<br />Open one. Take your time.</p>
+        <div><p><T>Things worth keeping</T></p><h1><T>The</T><br /><em><T>Archive</T></em></h1></div>
+        <p><T>A few things that stayed.</T><br /><T>Open one. Take your time.</T></p>
         <img src="/assets/botanicals/combretum/canopy-branch.webp" alt="" aria-hidden="true" />
       </section>
       <section className="archive-catalogue" aria-label="Archive collection">
         <ArchiveCollection entries={[mark, ...custom]} />
       </section>
-      <footer className="product-footer"><img src="/assets/bagas-iga-mark.jpg" alt="" /><p>Bagas × Iga<br />1 November 2026</p><a href="/">Return to invitation</a></footer>
+      <footer className="product-footer"><img src="/assets/bagas-iga-mark.jpg" alt="" /><p>Bagas × Iga<br />1 November 2026</p><a href="/"><T>Return to invitation</T></a></footer>
     </main>
   );
 }

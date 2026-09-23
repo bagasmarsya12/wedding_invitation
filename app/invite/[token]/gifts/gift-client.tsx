@@ -1,10 +1,13 @@
 "use client";
+import { T, useLanguage } from "../../../language";
+
 
 import { useEffect, useMemo, useState } from "react";
 
 type Gift = { id: string; title: string; description: string | null; category: string; imageUrl: string | null; priceLabel: string | null; status: string; reservedByYou: boolean; purchaseUrl: string | null; shippingRequired: boolean };
 
 export function GiftCatalogue({ token, guestName }: { token: string; guestName: string }) {
+  const { t } = useLanguage();
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [category, setCategory] = useState("bagas");
   const [message, setMessage] = useState("");
@@ -43,23 +46,23 @@ export function GiftCatalogue({ token, guestName }: { token: string; guestName: 
   return (
     <>
       <div className="catalogue-tabs" role="tablist" aria-label="Gift recipient">
-        {[["bagas", "For Bagas"], ["iga", "For Iga"], ["home", "For Our Home"]].map(([key, label]) => <button role="tab" aria-selected={category === key} className={category === key ? "is-active" : ""} onClick={() => setCategory(key)} key={key}>{label}</button>)}
+        {[["bagas", "For Bagas"], ["iga", "For Iga"], ["home", "For Our Home"]].map(([key, label]) => <button role="tab" aria-selected={category === key} className={category === key ? "is-active" : ""} onClick={() => setCategory(key)} key={key}>{t(label)}</button>)}
       </div>
-      <p className="product-status" role="status">{message}</p>
-      {shipping && <aside className="private-note"><strong>Private delivery information</strong><p>{shipping}</p><small>Visible because {guestName} holds this reservation.</small></aside>}
+      <p className="product-status" role="status">{t(message)}</p>
+      {shipping && <aside className="private-note"><strong><T>Private delivery information</T></strong><p>{shipping}</p><small><T>Visible because </T>{guestName}<T>holds this reservation.</T></small></aside>}
       <div className="gift-grid">
-        {visible.length === 0 && <div className="empty-catalogue"><span>{category}</span><p>No items have been added to this category yet.</p></div>}
+        {visible.length === 0 && <div className="empty-catalogue"><span>{t(category)}</span><p><T>No items have been added to this category yet.</T></p></div>}
         {visible.map(gift => <article className="gift-card" key={gift.id}>
-          <div className="gift-image">{gift.imageUrl ? <img src={gift.imageUrl} alt="" /> : <span>Object photograph<br />to be added</span>}</div>
-          <p>{gift.category} / {gift.status}</p><h2>{gift.title}</h2><p>{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
+          <div className="gift-image">{gift.imageUrl ? <img src={gift.imageUrl} alt="" /> : <span><T>Object photograph</T><br /><T>to be added</T></span>}</div>
+          <p>{gift.category} / {t(gift.status)}</p><h2>{gift.title}</h2><p>{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
           <div className="gift-actions">
-            {gift.status === "available" && <button disabled={busy === gift.id} onClick={() => act(gift.id, "reserve")}>Reserve quietly</button>}
-            {gift.reservedByYou && gift.status === "reserved" && <><button disabled={busy === gift.id} onClick={() => act(gift.id, "release")}>Release</button><button disabled={busy === gift.id} onClick={() => act(gift.id, "purchased")}>I’ve bought it</button>{gift.purchaseUrl && <a href={gift.purchaseUrl} target="_blank" rel="noreferrer">Open purchase link</a>}</>}
-            {!gift.reservedByYou && gift.status !== "available" && <span>{gift.status === "purchased" ? "Purchased" : "Reserved"}</span>}
+            {gift.status === "available" && <button disabled={busy === gift.id} onClick={() => act(gift.id, "reserve")}><T>Reserve quietly</T></button>}
+            {gift.reservedByYou && gift.status === "reserved" && <><button disabled={busy === gift.id} onClick={() => act(gift.id, "release")}><T>Release</T></button><button disabled={busy === gift.id} onClick={() => act(gift.id, "purchased")}><T>I’ve bought it</T></button>{gift.purchaseUrl && <a href={gift.purchaseUrl} target="_blank" rel="noreferrer"><T>Open purchase link</T></a>}</>}
+            {!gift.reservedByYou && gift.status !== "available" && <span>{t(gift.status === "purchased" ? "Purchased" : "Reserved")}</span>}
           </div>
         </article>)}
       </div>
-      {cashGift && <aside className="cash-gift"><p>Prefer something simpler?</p><h2>Cash gift</h2><pre>{cashGift}</pre><button onClick={async () => { await navigator.clipboard.writeText(cashGift); setMessage("Copied."); }}>Copy details</button></aside>}
+      {cashGift && <aside className="cash-gift"><p><T>Prefer something simpler?</T></p><h2><T>Cash gift</T></h2><pre>{cashGift}</pre><button onClick={async () => { await navigator.clipboard.writeText(cashGift); setMessage("Copied."); }}><T>Copy details</T></button></aside>}
     </>
   );
 }
