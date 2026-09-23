@@ -556,6 +556,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
         <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
           <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-background-bloom v2-background-bloom-profiles" />
+          <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-profiles-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-profiles" />
           <header>
             <p>For those who know one of us better.</p>
@@ -603,6 +604,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
         <section className="v2-rsvp v2-scene" id="rsvp" data-light="rsvp" aria-labelledby="rsvp-title">
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-rsvp" />
+          <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-rsvp-secondary" />
           <div className="v2-rsvp-copy">
             <p>Will you be there?</p>
             <h2 id="rsvp-title">We’re doing<br />a headcount.</h2>
@@ -641,6 +643,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
         <section className="v2-useful v2-scene" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
           <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-background-bloom v2-background-bloom-useful" />
+          <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-useful-secondary" />
           <header><p>The useful bits</p><h2 id="useful-title">The questions someone was going to ask anyway.</h2></header>
           <div className="v2-useful-list">
             <details><summary><span>Dress code</span><small>Details to follow</small></summary><p>The dress code will be added after it is confirmed.</p></details>
@@ -653,6 +656,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
         <section className="v2-gifts v2-scene" id="gifts" data-light="late" aria-labelledby="gifts-title">
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-gifts" />
+          <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-gifts-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
           <div className="v2-gifts-heading"><p>A few things</p><h2 id="gifts-title">We’re saving room for.</h2><span>The catalogue opens from a private invitation so reservations stay private.</span></div>
           <div className="v2-gift-shelf" aria-label="Gift collections">

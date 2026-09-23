@@ -539,6 +539,10 @@
 .v2-background-bloom-rsvp { top: 4%; right: -2%; width: min(20vw,16rem); opacity: .24; transform: rotate(-12deg); }
 .v2-background-bloom-useful { left: -3%; bottom: 2%; width: min(19vw,15rem); opacity: .27; transform: rotate(-18deg); }
 .v2-background-bloom-gifts { top: 34%; right: -1%; width: min(17vw,13rem); opacity: .28; transform: rotate(17deg); }
+.v2-background-bloom-profiles-secondary { left: -2%; bottom: 5%; width: min(19vw,14rem); opacity: .34; transform: rotate(24deg); mask-image: linear-gradient(105deg,#000 34%,transparent 100%); }
+.v2-background-bloom-rsvp-secondary { left: -3%; bottom: 1%; width: min(20vw,15rem); opacity: .33; transform: rotate(-12deg); mask-image: linear-gradient(95deg,#000 35%,transparent 100%); }
+.v2-background-bloom-useful-secondary { top: 4%; right: -2%; width: min(18vw,13rem); opacity: .34; transform: rotate(-14deg); mask-image: linear-gradient(260deg,#000 35%,transparent 100%); }
+.v2-background-bloom-gifts-secondary { left: -2%; bottom: 1%; width: min(18vw,13rem); opacity: .33; transform: rotate(8deg); mask-image: linear-gradient(100deg,#000 35%,transparent 100%); }
 .v2-world-emergence { position: absolute; z-index: 3; top: 29%; right: -1.4%; width: clamp(5rem,8vw,7rem); pointer-events: none; filter: drop-shadow(-.3rem .8rem .7rem rgba(38,48,32,.14)); mask-image: radial-gradient(ellipse 48% 48% at 57% 48%,#000 30%,rgba(0,0,0,.85) 62%,transparent 100%); transform: scaleX(-1) rotate(18deg); transform-origin: 70% 20%; }
 @media (max-width: 720px) {
   .v2-botanical-continuum .v2-useful > header { position: relative; top: auto; }
@@ -556,6 +560,10 @@
   .v2-background-bloom-rsvp { top: 1%; right: -14%; width: 43vw; opacity: .19; }
   .v2-background-bloom-useful { left: -18%; bottom: 1%; width: 44vw; opacity: .2; }
   .v2-background-bloom-gifts { top: 38%; right: -13%; width: 39vw; opacity: .2; }
+  .v2-background-bloom-profiles-secondary { left: -10%; bottom: 2%; width: 43vw; opacity: .24; }
+  .v2-background-bloom-rsvp-secondary { left: -12%; bottom: 0; width: 45vw; opacity: .23; }
+  .v2-background-bloom-useful-secondary { top: 2%; right: -10%; width: 42vw; opacity: .24; }
+  .v2-background-bloom-gifts-secondary { left: -10%; bottom: 0; width: 42vw; opacity: .23; }
   .v2-world-emergence { top: 43%; right: -.8rem; width: 6rem; opacity: .74; mask-image: radial-gradient(ellipse 52% 48% at 43% 48%,#000 30%,rgba(0,0,0,.85) 64%,transparent 100%); }
 }
 @media (prefers-reduced-motion: reduce) {
