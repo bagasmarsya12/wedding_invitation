@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { ArrowRight, Sun, Sunset } from "lucide-react";
 import {
   createContext,
   type AnimationEvent,
@@ -207,6 +208,9 @@ function DestinationMap() {
         map.on("load", () => {
           if (cancelled) return;
           mapLoaded = true;
+          map.getStyle().layers?.forEach(layer => {
+            if (layer.id.startsWith("poi_")) map.setLayoutProperty(layer.id, "visibility", "none");
+          });
           map.resize();
           setStatus("ready");
           if (!reduced) map.easeTo({ center: VENUE_CENTER, zoom: 15.45, duration: 1100, essential: true });
@@ -259,10 +263,6 @@ function DestinationMap() {
 
   return (
     <div className="v2-destination-map-shell">
-      <div className="v2-destination-map-bar">
-        <span>Pandiga / Cimahi</span>
-        <span>{status === "ready" ? "Live map" : "Finding the venue"}</span>
-      </div>
       <div className="v2-destination-map-frame">
         <div
           ref={mapContainerRef}
@@ -275,7 +275,7 @@ function DestinationMap() {
         />
         {status === "loading" && <div className="v2-maplibre-status" role="status">Loading the actual roads around Pandiga…</div>}
         {status === "error" && <div className="v2-maplibre-fallback"><strong>Pandiga Cimahi</strong><span>Live map unavailable right now.</span><a href={MAPS_URL} target="_blank" rel="noreferrer">OPEN IN GOOGLE MAPS <span aria-hidden="true">→</span></a></div>}
-        <div className="v2-destination-map-controls" aria-label="Map controls">
+        <div className="v2-destination-map-controls" role="group" aria-label="Map controls">
           <button type="button" onClick={() => zoomMap(.1)} aria-label="Zoom in">+</button>
           <button type="button" onClick={() => zoomMap(-.1)} aria-label="Zoom out">−</button>
           <button type="button" onClick={resetMap} aria-label="Reset map">↺</button>
@@ -489,37 +489,36 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
         <section className="v2-details v2-destination-scene v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
           <div className="v2-destination-backdrop" aria-hidden="true">
-            <div className="v2-destination-olive-field" />
             <div className="v2-destination-light" />
           </div>
-          <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
           <div className="v2-destination-page">
-            <div className="v2-destination-rail">
-              <header className="v2-destination-head">
-                <p>Wedding details</p>
-                <h2 id="details-title">The<br />details.</h2>
-                <time dateTime="2026-11-01">Sunday, <span>01 November 2026</span></time>
-              </header>
-              <div className="v2-destination-events" aria-label="Wedding schedule">
-                <article>
-                  <time dateTime="2026-11-01T14:00:00+07:00">14:00</time>
-                  <div><h3>Akad</h3><p>The official part.</p></div>
-                </article>
-                <article>
-                  <time dateTime="2026-11-01T18:00:00+07:00">18:00</time>
-                  <div><h3>Reception</h3><p>The louder part.</p></div>
-                </article>
-              </div>
-              <div className="v2-destination-venue">
-                <div className="v2-destination-venue-copy">
-                  <p>At</p>
-                  <h3>Pandiga <em>Cimahi</em></h3>
-                  <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-                  <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">OPEN DIRECTIONS <span aria-hidden="true">→</span></a>
-                </div>
-              </div>
+            <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
+            <header className="v2-destination-head">
+              <p>The details</p>
+              <h2 id="details-title"><span>Same place,</span><span>a very special day.</span></h2>
+              <p className="v2-destination-intro">Here’s when and where to find us. We can’t wait to see you there.</p>
+              <time className="v2-destination-date" dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
+            </header>
+            <div className="v2-destination-events" aria-label="Wedding schedule">
+              <article>
+                <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
+                <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p>The official part.</p></div>
+              </article>
+              <article>
+                <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
+                <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3>Reception</h3><p>The louder part.</p></div>
+              </article>
             </div>
             <DestinationMap />
+            <div className="v2-destination-venue">
+              <div className="v2-destination-venue-title">
+                <p>Join us at</p>
+                <h3>Pandiga</h3>
+                <em>Cimahi</em>
+              </div>
+              <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+              <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">Open directions <ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
+            </div>
           </div>
         </section>
 
