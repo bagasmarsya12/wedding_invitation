@@ -502,9 +502,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <div className="v2-day-light" />
             <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="day-combretum" />
             <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
-            <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-short-02.webp" className="day-fern" />
+            <BotanicalImage eager src="/assets/botanicals/melastoma/full-stem.webp" className="day-melastoma" />
           </div>
-          <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-near-field v2-near-hero" />
           <div className="v2-day-copy">
             <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
             <p>The day we’ve been dreaming of</p>
@@ -652,7 +651,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </section>
 
         <section className="v2-gifts v2-scene" id="gifts" data-light="late" aria-labelledby="gifts-title">
-          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-short-02.webp" className="v2-near-field v2-near-gifts" />
+          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
           <div className="v2-gifts-heading"><p>A few things</p><h2 id="gifts-title">We’re saving room for.</h2><span>The catalogue opens from a private invitation so reservations stay private.</span></div>
           <div className="v2-gift-shelf" aria-label="Gift collections">
             {["For Bagas", "For Iga", "For Our Home"].map((label, index) => (
@@ -663,7 +662,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             ))}
           </div>
           <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}>Open the gift catalogue <span aria-hidden="true">↗</span></Link>
-          <BotanicalImage src="/assets/botanicals/syzygium/branch-short.webp" className="gifts-syzygium" />
+          <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
         </section>
 
         <section className="v2-mark v2-scene" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">

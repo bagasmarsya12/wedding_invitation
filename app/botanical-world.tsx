@@ -43,7 +43,7 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
         return; // Existing botanical images remain as the no-WebGL composition.
       }
       renderer.setClearColor(0x000000, 0);
-      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1 : 1.45));
+      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, saveData ? 1 : mobile ? 1.5 : 1.6));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.domElement.setAttribute("aria-hidden", "true");
       shell.appendChild(renderer.domElement);
@@ -222,87 +222,37 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
         const b = top(beyond);
         const small = width <= 720;
         const x = (value: number) => width * value;
-        const r = small ? 1.2 : 1.45;
-        // The original vine is never restarted. It recedes outside the frame
-        // through the quiet chapters, then grows back into the final canopy.
+        const r = small ? 1.35 : 1.65;
+        // One stem crosses every chapter. It bends toward the page instead of
+        // disappearing beyond the right edge between the main compositions.
         const stem = makeCurve([
-          [x(small ? .83 : .76), h * (small ? .69 : .43), -32],
-          [x(small ? .91 : .88), h * (small ? .8 : .67), -14],
-          [x(small ? .94 : .958), h * .94, 18],
-          [x(small ? .965 : .982), h + d * .06, 4],
-          [x(small ? .945 : .967), h + d * .28, -15],
-          [x(small ? .97 : .986), h + d * .49, -24],
-          [x(small ? .935 : .97), h + d * .72, -10],
-          [x(small ? .96 : .983), h + d * .94, 11],
-          [x(small ? .91 : .93), h + d + p * .04, -4],
-          [x(small ? .85 : .88), h + d + p * .13, -30],
-          [x(1.025), h + d + p * .29, -65],
-          [x(1.035), h + d + p * .86, -75],
-          [x(.98), a + archive.offsetHeight * .15, -48],
-          [x(.955), a + archive.offsetHeight * .52, -20],
-          [x(1.025), a + archive.offsetHeight * .92, -60],
-          [x(1.04), q + rsvp.offsetHeight * .5, -80],
-          [x(1.04), u + useful.offsetHeight * .5, -80],
-          [x(1.025), u + useful.offsetHeight * .94, -72],
-          [x(.965), g + gifts.offsetHeight * .18, -35],
-          [x(.955), g + gifts.offsetHeight * .63, -14],
-          [x(.99), m + mark.offsetHeight * .12, -38],
-          [x(.985), m + mark.offsetHeight * .84, -18],
-          [x(.88), b + beyond.offsetHeight * .18, -33],
-          [x(.74), b + beyond.offsetHeight * .37, -45],
+          [x(small ? .82 : .76), h * (small ? .69 : .43), -32],
+          [x(small ? .85 : .8), h * (small ? .8 : .67), -14],
+          [x(small ? .89 : .85), h * .94, 18],
+          [x(small ? .9 : .86), h + d * .06, 4],
+          [x(small ? .88 : .84), h + d * .28, -15],
+          [x(small ? .9 : .86), h + d * .49, -24],
+          [x(small ? .87 : .82), h + d * .72, -10],
+          [x(small ? .9 : .85), h + d * .94, 11],
+          [x(small ? .9 : .85), h + d + p * .04, -4],
+          [x(small ? .87 : .81), h + d + p * .13, -30],
+          [x(small ? .85 : .79), h + d + p * .29, -65],
+          [x(small ? .85 : .85), h + d + p * .86, -75],
+          [x(small ? .92 : .94), h + d + p * .96, -58],
+          [x(small ? .95 : .98), a + archive.offsetHeight * .15, -48],
+          [x(small ? .83 : .79), a + archive.offsetHeight * .52, -20],
+          [x(small ? .87 : .83), a + archive.offsetHeight * .92, -60],
+          [x(small ? .9 : .86), q + rsvp.offsetHeight * .5, -80],
+          [x(small ? .82 : .88), u + useful.offsetHeight * .5, -80],
+          [x(small ? .82 : .98), u + useful.offsetHeight * .94, -72],
+          [x(small ? 1.06 : 1.04), g + gifts.offsetHeight * .18, -35],
+          [x(small ? 1.04 : 1.02), g + gifts.offsetHeight * .34, -32],
+          [x(small ? .82 : .77), g + gifts.offsetHeight * .63, -14],
+          [x(small ? .88 : .84), m + mark.offsetHeight * .12, -38],
+          [x(small ? .85 : .81), m + mark.offsetHeight * .84, -18],
+          [x(small ? .8 : .75), b + beyond.offsetHeight * .18, -33],
+          [x(small ? .7 : .65), b + beyond.offsetHeight * .37, -45],
         ], r, 0x625e45);
-
-        const branchSpecs: { at: number; points: [number, number, number][]; leaves: [number, number, number, number, number][]; flower?: [number, number, number, number, number] }[] = [
-          {
-            at: .19,
-            points: [[x(small ? .94 : .91), h * .77, -10], [x(small ? .77 : .82), h * .82, -1], [x(small ? .68 : .77), h * .86, 10]],
-            leaves: [[small ? .77 : .82, h * .82, 14, small ? 52 : 72, -.35], [small ? .68 : .77, h * .86, 18, small ? 42 : 62, .35]],
-          },
-          {
-            at: .38,
-            points: [[x(.96), h + d * .21, -14], [x(small ? .77 : .83), h + d * .28, -10], [x(small ? .68 : .75), h + d * .35, 6]],
-            leaves: [[small ? .8 : .85, h + d * .27, -7, small ? 38 : 64, -.45]],
-            flower: [small ? .7 : .77, h + d * .34, 9, small ? 49 : 75, .25],
-          },
-          {
-            at: .68,
-            points: [[x(.96), h + d * .78, -17], [x(small ? .78 : .84), h + d * .84, -6], [x(small ? .69 : .77), h + d * .9, 8]],
-            leaves: [[small ? .8 : .84, h + d * .84, 3, small ? 36 : 62, -.2]],
-          },
-          {
-            at: .84,
-            points: [[x(small ? .93 : .95), h + d - 34, -22], [x(small ? .86 : .89), h + d + 20, -9], [x(small ? .78 : .82), h + d + 85, 5]],
-            leaves: [[small ? .85 : .89, h + d + 20, -2, small ? 37 : 62, -.45], [small ? .78 : .82, h + d + 85, 9, small ? 30 : 51, .28]],
-          },
-          {
-            at: 1,
-            points: [[x(.96), a + archive.offsetHeight * .43, -22], [x(small ? .83 : .86), a + archive.offsetHeight * .51, -12], [x(small ? .76 : .78), a + archive.offsetHeight * .56, 2]],
-            leaves: [[small ? .83 : .86, a + archive.offsetHeight * .51, -3, small ? 39 : 70, -.4], [small ? .76 : .78, a + archive.offsetHeight * .56, 9, small ? 32 : 55, .27]],
-          },
-          {
-            at: 1,
-            points: [[x(.965), g + gifts.offsetHeight * .22, -31], [x(small ? .86 : .83), g + gifts.offsetHeight * .31, -18], [x(small ? .77 : .74), g + gifts.offsetHeight * .39, 5]],
-            leaves: [[small ? .86 : .83, g + gifts.offsetHeight * .31, -9, small ? 40 : 67, -.33], [small ? .77 : .74, g + gifts.offsetHeight * .39, 11, small ? 35 : 59, .38]],
-          },
-          {
-            at: 1,
-            points: [[x(.89), b + beyond.offsetHeight * .14, -35], [x(small ? .73 : .76), b + beyond.offsetHeight * .23, -15], [x(small ? .66 : .64), b + beyond.offsetHeight * .3, 2]],
-            leaves: [[small ? .73 : .76, b + beyond.offsetHeight * .23, -8, small ? 49 : 75, -.3]],
-            flower: [small ? .66 : .64, b + beyond.offsetHeight * .3, 8, small ? 55 : 79, .17],
-          },
-        ];
-
-        for (const [index, spec] of branchSpecs.entries()) {
-          if (small && (index === 1 || index === 5)) continue; // Map and gift shelf keep breathing room.
-          makeCurve(spec.points, r * .49, 0x5f5a3e);
-          for (const [leafX, leafY, leafZ, size, rotation] of spec.leaves) {
-            addPlane(leafTexture, x(leafX), leafY, leafZ, size, rotation, .7, index * 1.8);
-          }
-          if (spec.flower && (!small || index === 6)) {
-            const [flowerX, flowerY, flowerZ, size, rotation] = spec.flower;
-            addPlane(blossomTexture, x(flowerX), flowerY, flowerZ, size, rotation, .8, 2.4);
-          }
-        }
 
         const pointAtY = (targetY: number) => {
           let lo = 0;
@@ -314,20 +264,87 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
           }
           return stem.getPoint((lo + hi) / 2);
         };
-        const leafPositions = small
-          ? [h * .84, h + d * .09, h + d * .73, h + d + 25, a + archive.offsetHeight * .28, a + archive.offsetHeight * .65, g + gifts.offsetHeight * .48, b + beyond.offsetHeight * .15]
-          : [h * .65, h * .85, h + d * .1, h + d * .58, h + d * .9, h + d + 35, a + archive.offsetHeight * .22, a + archive.offsetHeight * .43, a + archive.offsetHeight * .68, g + gifts.offsetHeight * .12, g + gifts.offsetHeight * .51, m + mark.offsetHeight * .87, b + beyond.offsetHeight * .12, b + beyond.offsetHeight * .27];
-        // Foliage is anchored to the same spatial curve, never scattered.
+        const sprouts = [
+          { y: h * .83, reach: .14, drop: 55 },
+          { y: h + d * .16, reach: .12, drop: 65, desktopOnly: true },
+          { y: h + d * .68, reach: .15, drop: -58, flower: true, desktopOnly: true },
+          { y: h + d + p * .2, reach: .13, drop: 70 },
+          { y: h + d + p * .44, reach: .18, drop: -70, flower: true },
+          { y: h + d + p * .68, reach: .16, drop: 85 },
+          { y: h + d + p * .87, reach: .17, drop: -55 },
+          { y: a + archive.offsetHeight * .31, reach: .16, drop: 65, flower: true },
+          { y: a + archive.offsetHeight * .62, reach: .19, drop: -70 },
+          { y: a + archive.offsetHeight * .84, reach: .15, drop: 55, flower: true },
+          { y: q + rsvp.offsetHeight * .3, reach: .12, drop: 55, desktopOnly: true },
+          { y: q + rsvp.offsetHeight * .72, reach: .15, drop: -40 },
+          { y: u + useful.offsetHeight * .42, reach: .12, drop: 60, desktopOnly: true },
+          { y: u + useful.offsetHeight * .64, reach: .11, drop: 48 },
+          { y: u + useful.offsetHeight * .82, reach: .14, drop: -45 },
+          { y: g + gifts.offsetHeight * .42, reach: .16, drop: 55, flower: true },
+          { y: g + gifts.offsetHeight * .56, reach: .13, drop: 55 },
+          { y: g + gifts.offsetHeight * .65, reach: .18, drop: -55, desktopOnly: true },
+          { y: g + gifts.offsetHeight * .73, reach: .14, drop: -48, flower: true },
+          { y: g + gifts.offsetHeight * .83, reach: .16, drop: 65, flower: true },
+          { y: m + mark.offsetHeight * (small ? .53 : .27), reach: .15, drop: -65, flower: true },
+          { y: m + mark.offsetHeight * .67, reach: .16, drop: 55 },
+          { y: b + beyond.offsetHeight * .17, reach: .2, drop: 80, flower: true },
+          { y: b + beyond.offsetHeight * .42, reach: .22, drop: -60, flower: true },
+        ];
+        for (const [index, sprout] of sprouts.entries()) {
+          if (small && sprout.desktopOnly) continue;
+          const anchor = pointAtY(sprout.y);
+          const anchorX = anchor.x + width / 2;
+          const spread = width * sprout.reach * (small ? 1.12 : 1);
+          const branch = makeCurve([
+            [anchorX, sprout.y, anchor.z + 1],
+            [anchorX - spread * .47, sprout.y + sprout.drop * .28, anchor.z + 7],
+            [anchorX - spread, sprout.y + sprout.drop, anchor.z + 16],
+          ], r * .47, 0x5f5a3e);
+          for (let leaf = 0; leaf < 3; leaf++) {
+            const point = branch.getPoint(.3 + leaf * .26);
+            addPlane(
+              leafTexture,
+              point.x + width / 2 + (leaf % 2 ? -8 : 9),
+              -point.y,
+              point.z + 8,
+              (small ? 30 : 39) + (index + leaf) % 3 * (small ? 4 : 6),
+              leaf % 2 ? -.55 : .42,
+              .73,
+              index * .81 + leaf,
+            );
+          }
+          if (sprout.flower) {
+            const tip = branch.getPoint(.96);
+            addPlane(blossomTexture, tip.x + width / 2, -tip.y, tip.z + 10, small ? 43 : 55, index % 2 ? -.2 : .22, .83, index * .73);
+          }
+        }
+
+        const leafBands: [number, number, number, number][] = [
+          [h * .71, h * .96, 3, 2],
+          [h + d * .11, h + d * .94, 5, 3],
+          [h + d + p * .08, h + d + p * .91, 9, 6],
+          [a + archive.offsetHeight * .38, a + archive.offsetHeight * .9, 6, 4],
+          [q + rsvp.offsetHeight * .17, q + rsvp.offsetHeight * .88, 3, 2],
+          [u + useful.offsetHeight * .17, u + useful.offsetHeight * .86, 4, 3],
+          [g + gifts.offsetHeight * .4, g + gifts.offsetHeight * .9, 7, 5],
+          [m + mark.offsetHeight * (small ? .53 : .15), m + mark.offsetHeight * .88, 5, 4],
+          [b + beyond.offsetHeight * .1, b + beyond.offsetHeight * .39, 4, 3],
+        ];
+        const leafPositions = leafBands.flatMap(([start, end, desktopCount, mobileCount]) => {
+          const count = small ? mobileCount : desktopCount;
+          return Array.from({ length: count }, (_, index) => start + (end - start) * (index + .5) / count);
+        });
+        // Every leaf is sampled from the same stem, including at section seams.
         for (const [index, targetY] of leafPositions.entries()) {
           const point = pointAtY(targetY);
           addPlane(
             leafTexture,
-            point.x + width / 2 + (index % 2 ? -16 : 10),
+            point.x + width / 2 + (index % 2 ? -10 : 12),
             -point.y,
             point.z + 16,
-            small ? 42 : 62 + index % 3 * 8,
+            (small ? 32 : 43) + index % 3 * (small ? 5 : 7),
             index % 2 ? -.55 : .5,
-            .58,
+            .7,
             index * .83,
           );
         }
