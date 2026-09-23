@@ -16,6 +16,7 @@ import {
   useState,
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { GardenBackground } from "./garden-background";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
 type Attendance = "" | "yes" | "no";
@@ -110,7 +111,20 @@ function hashEdition(token: string) {
 }
 
 function BotanicalImage({ src, className, eager = false }: { src: string; className: string; eager?: boolean }) {
-  return <img className={className} src={src} alt="" aria-hidden="true" loading={eager ? "eager" : "lazy"} />;
+  const pixels: Record<string, number> = {
+    "syzygium/branch-long": 496, "syzygium/branch-short": 270,
+    "nephrolepis/frond-arched-01": 657, "nephrolepis/frond-short-02": 123,
+    "combretum/canopy-branch": 1005, "combretum/climber-left": 372,
+    "combretum/climber-right": 252, "combretum/flower-cascade": 278,
+    "combretum/flower-tip": 173, "combretum/tendril": 444,
+    "combretum/flower-cluster": 323, "combretum/flower-spray": 307,
+    "combretum/flower-tip-pink": 221, "combretum/leaf-sprig": 153,
+    "melastoma/full-stem": 503, "melastoma/branch-short": 286,
+    "dendrobium/branch-short": 251,
+  };
+  const key = src.replace("/assets/botanicals/", "").replace(".webp", "");
+  const style = pixels[key] ? { "--botanical-pixels": pixels[key] } as CSSProperties : undefined;
+  return <img className={className} style={style} src={src} alt="" aria-hidden="true" decoding="async" loading={eager ? "eager" : "lazy"} />;
 }
 
 function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggle: () => void; confirmed: boolean }) {
@@ -336,10 +350,14 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
   useEffect(() => {
     document.body.classList.add("wedding-v2-body");
+    const setAssetDensity = () => rootRef.current?.style.setProperty("--botanical-dpr", String(Math.max(1, window.devicePixelRatio || 1)));
+    setAssetDensity();
+    window.addEventListener("resize", setAssetDensity, { passive: true });
     document.body.style.overflow = entered ? "" : "hidden";
     return () => {
       document.body.classList.remove("wedding-v2-body");
       document.body.style.overflow = "";
+      window.removeEventListener("resize", setAssetDensity);
     };
   }, [entered]);
 
@@ -495,6 +513,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
       <main className="v2-main" aria-hidden={!entered}>
         <div className="v2-botanical-continuum">
+        <GardenBackground active={entered} />
         <section className={`v2-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
@@ -685,6 +704,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <div className="v2-night-light" aria-hidden="true" />
           <div className="v2-night-garden" aria-hidden="true">
             <BotanicalImage src="/assets/botanicals/combretum/canopy-branch.webp" className="night-canopy" />
+            <BotanicalImage src="/assets/botanicals/combretum/climber-left.webp" className="night-left" />
+            <BotanicalImage src="/assets/botanicals/combretum/climber-right.webp" className="night-right" />
             <BotanicalImage src="/assets/botanicals/combretum/flower-cascade.webp" className="night-bloom" />
             <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="night-fern" />
             <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-orchid" />

@@ -567,3 +567,28 @@
 @media (prefers-reduced-motion: reduce) {
   .v2-world-emergence { transform: none; }
 }
+
+/* The video reference: lush gardens surrounding the reading surface. */
+.v2-garden-background { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.v2-garden-background canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.has-garden-renderer > .v2-scene:not(.v2-beyond)::after,
+.has-garden-renderer .v2-background-bloom,
+.has-garden-renderer .v2-near-field,
+.has-garden-renderer .v2-world-emergence,
+.has-garden-renderer .day-tendril,
+.has-garden-renderer .day-melastoma,
+.has-garden-renderer .archive-tendril { display: none; }
+.v2-world img[style*="--botanical-pixels"] { max-width: min(100%, calc(var(--botanical-pixels) * 1px / var(--botanical-dpr, 2))); height: auto; }
+.opening-syzygium { top: -5%; left: -4%; }
+.opening-combretum-top { top: -4%; right: 2%; }
+.night-left { z-index: 6; left: -1%; bottom: 0; width: 28%; transform: rotate(9deg); transform-origin: bottom left; }
+.night-right { z-index: 6; right: 0; bottom: 0; width: 19%; transform: rotate(-10deg); transform-origin: bottom right; }
+.night-canopy { left: -2%; }
+.night-orchid { left: 9%; }
+@media (max-width: 720px) {
+  .opening-syzygium { top: -4%; left: -8%; }
+  .opening-combretum-top { top: 8%; right: -6%; }
+  .night-left { left: -3%; width: 42%; }
+  .night-right { right: -3%; width: 34%; }
+  .night-canopy { left: -5%; }
+}
