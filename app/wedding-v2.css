@@ -67,7 +67,7 @@
 .v2-opening-botanicals img { position: absolute; z-index: 6; pointer-events: none; filter: drop-shadow(0 18px 17px rgba(24,42,31,.18)); }
 .opening-syzygium { top: -12%; left: -9%; width: min(42vw,37rem); transform: rotate(15deg); transform-origin: top left; }
 .opening-fern { right: -8%; bottom: -22%; width: min(51vw,45rem); transform: rotate(-18deg); transform-origin: bottom right; opacity: .82; }
-.opening-combretum-left { left: -5%; bottom: -18%; width: min(25vw,22rem); transform: rotate(7deg); transform-origin: bottom left; }
+.opening-melastoma-left { left: -3%; bottom: -5%; width: min(14vw,11rem); transform: rotate(7deg); transform-origin: bottom left; }
 .opening-combretum-top { top: -8%; right: 8%; width: min(42vw,41rem); transform: rotate(-8deg); transform-origin: top right; }
 .opening-orchid { right: 2%; top: 26%; width: min(18vw,15rem); transform: rotate(-15deg); transform-origin: right center; }
 .v2-opening-date { position: absolute; z-index: 10; bottom: clamp(1rem,3vh,2rem); left: clamp(1rem,3vw,2.6rem); margin: 0; font-family: var(--v2-serif); font-size: .84rem; line-height: 1.55; }
@@ -390,7 +390,7 @@
   .v2-drapery { right: -12%; width: 49vw; opacity: .46; }
   .opening-syzygium { top: -6%; left: -31%; width: 86vw; }
   .opening-combretum-top { top: 5%; right: -40%; width: 91vw; }
-  .opening-combretum-left { left: -22%; bottom: -15%; width: 51vw; }
+  .opening-melastoma-left { left: -12%; bottom: -9%; width: 38vw; }
   .opening-fern { right: -28%; bottom: -12%; width: 93vw; opacity: .55; }
   .opening-orchid { right: -7%; top: 27%; width: 36vw; }
   .v2-opening-date { display: none; }

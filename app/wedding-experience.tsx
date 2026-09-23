@@ -464,7 +464,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <div className="v2-opening-botanicals" aria-hidden="true">
             <BotanicalImage eager src="/assets/botanicals/syzygium/branch-long.webp" className="opening-syzygium" />
             <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="opening-fern" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/climber-left.webp" className="opening-combretum-left" />
+            <BotanicalImage eager src="/assets/botanicals/melastoma/branch-short.webp" className="opening-melastoma-left" />
             <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="opening-combretum-top" />
             <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-orchid" />
           </div>
