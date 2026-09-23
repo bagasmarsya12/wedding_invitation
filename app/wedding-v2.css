@@ -325,8 +325,6 @@
 .v2-night-light { position: absolute; z-index: 1; inset: -20%; opacity: .34; background: linear-gradient(120deg,transparent 35%,rgba(239,230,199,.22) 35.3%,transparent 59%); transform: translateX(calc(var(--pointer-x) * 18px)); }
 .v2-night-garden img { position: absolute; pointer-events: none; filter: drop-shadow(0 24px 25px rgba(0,0,0,.3)); }
 .night-canopy { z-index: 4; top: -5%; left: -7%; width: 68%; transform: rotate(5deg); transform-origin: top left; }
-.night-left { z-index: 6; left: -9%; bottom: -9%; width: 28%; transform: rotate(9deg); transform-origin: bottom left; }
-.night-right { z-index: 6; right: -2%; bottom: -7%; width: min(19%,15rem); transform: rotate(-10deg); transform-origin: bottom right; }
 .night-bloom { z-index: 7; top: 7%; right: 4%; width: min(20%,15rem); transform: rotate(14deg); transform-origin: top right; }
 .night-fern { z-index: 5; right: 13%; bottom: -21%; width: 52%; transform: rotate(-12deg); transform-origin: bottom right; opacity: .74; }
 .night-orchid { z-index: 7; left: 11%; bottom: 6%; width: 18%; transform: rotate(17deg); transform-origin: bottom left; }
@@ -448,7 +446,7 @@
   .v2-gift-shelf{grid-template-columns:1fr}.v2-gift-shelf article{min-height:0;padding:2rem 0 3rem}.v2-gift-shelf article + article{border-left:0;border-top:1px solid rgba(41,39,33,.28)}.v2-object{height:16rem}.v2-world .gifts-syzygium{display:none}
   .v2-mark { padding:7rem 1.25rem }.v2-mark-copy h2{font-size:clamp(3.8rem,16vw,5.6rem)}.v2-postcard-installation{min-height:32rem}.v2-postcard.card-a{top:16%;left:0;width:92%}.mark-melastoma{right:-24%;width:68vw}
   .v2-beyond { min-height:105svh }.v2-beyond-copy{width:calc(100% - 2rem);padding:3.5rem 1.2rem}.v2-beyond-copy h2{font-size:clamp(3.5rem,14vw,5.3rem)}.v2-beyond-copy nav{grid-template-columns:1fr}.v2-beyond-copy nav > *{min-height:5.5rem}.v2-beyond-copy nav > * + *{border-left:0;border-top:1px solid rgba(255,255,255,.2)}
-  .night-canopy{left:-35%;width:134%}.night-left{left:-25%;width:62%}.night-right{right:-13%;width:min(45%,11rem)}.night-bloom{right:-11%;width:51%}.night-fern{right:-25%;width:100%}.night-orchid{left:-7%;width:39%}
+  .night-canopy{left:-35%;width:134%}.night-bloom{right:-11%;width:51%}.night-fern{right:-25%;width:100%}.night-orchid{left:-7%;width:39%}
   .v2-footer{grid-template-columns:1fr;min-height:34rem;align-content:end;text-align:center}.v2-footer-edition{justify-self:center}.v2-footer > small{justify-self:center;text-align:center}.v2-footer > button{grid-column:1}
 }
 

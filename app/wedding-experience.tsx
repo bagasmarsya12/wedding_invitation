@@ -685,8 +685,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <div className="v2-night-light" aria-hidden="true" />
           <div className="v2-night-garden" aria-hidden="true">
             <BotanicalImage src="/assets/botanicals/combretum/canopy-branch.webp" className="night-canopy" />
-            <BotanicalImage src="/assets/botanicals/combretum/climber-left.webp" className="night-left" />
-            <BotanicalImage src="/assets/botanicals/combretum/climber-right.webp" className="night-right" />
             <BotanicalImage src="/assets/botanicals/combretum/flower-cascade.webp" className="night-bloom" />
             <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="night-fern" />
             <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-orchid" />
