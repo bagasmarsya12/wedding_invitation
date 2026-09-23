@@ -24,7 +24,7 @@ export default async function ArchivePage() {
       <section className="archive-hero">
         <div><p>Things worth keeping</p><h1>The<br /><em>Archive</em></h1></div>
         <p>A few things that stayed.<br />Open one. Take your time.</p>
-        <img src="/assets/botanicals/combretum/canopy-branch.webp" alt="" aria-hidden="true" />
+        <img src="/assets/botanicals/syzygium/branch-long.webp" alt="" aria-hidden="true" />
       </section>
       <section className="archive-catalogue" aria-label="Archive collection">
         <ArchiveCollection entries={[mark, ...custom]} />

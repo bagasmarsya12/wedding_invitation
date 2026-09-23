@@ -16,7 +16,6 @@ import {
   useState,
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { BotanicalWorld } from "./botanical-world";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
 type Attendance = "" | "yes" | "no";
@@ -465,8 +464,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <div className="v2-opening-botanicals" aria-hidden="true">
             <BotanicalImage eager src="/assets/botanicals/syzygium/branch-long.webp" className="opening-syzygium" />
             <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="opening-fern" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/climber-left.webp" className="opening-combretum-left" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="opening-combretum-top" />
+            <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-dendrobium" />
+            <BotanicalImage eager src="/assets/botanicals/melastoma/branch-short.webp" className="opening-melastoma-top" />
             <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-orchid" />
           </div>
           <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
@@ -496,12 +495,10 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
       <main className="v2-main" aria-hidden={!entered}>
         <div className="v2-botanical-continuum">
-          <BotanicalWorld active={entered} reducedMotion={reduced} />
         <section className={`v2-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="day-combretum" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
+            <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="day-dendrobium" />
             <BotanicalImage eager src="/assets/botanicals/melastoma/full-stem.webp" className="day-melastoma" />
           </div>
           <div className="v2-day-copy">
@@ -553,7 +550,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             </div>
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
           </div>
-          <BotanicalImage src="/assets/botanicals/combretum/flower-tip.webp" className="v2-world-emergence" />
+          <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-world-emergence" />
         </section>
 
         <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
@@ -597,7 +594,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           </div>
           <div className="v2-evidence-field">
             {archiveItems.map((item, index) => <ArchiveArtifact item={item} index={index} key={item.type} />)}
-            <BotanicalImage src="/assets/botanicals/combretum/tendril.webp" className="archive-tendril" />
           </div>
           <Link className="v2-text-link" href="/archive">Open the archive <span aria-hidden="true">↗</span></Link>
         </section>
@@ -678,10 +674,9 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         <section className="v2-beyond v2-scene" id="beyond" data-light="night" aria-labelledby="beyond-title">
           <div className="v2-night-light" aria-hidden="true" />
           <div className="v2-night-garden" aria-hidden="true">
-            <BotanicalImage src="/assets/botanicals/combretum/canopy-branch.webp" className="night-canopy" />
-            <BotanicalImage src="/assets/botanicals/combretum/climber-left.webp" className="night-left" />
-            <BotanicalImage src="/assets/botanicals/combretum/climber-right.webp" className="night-right" />
-            <BotanicalImage src="/assets/botanicals/combretum/flower-cascade.webp" className="night-bloom" />
+            <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-dendrobium" />
+            <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="night-syzygium" />
+            <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="night-melastoma" />
             <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="night-fern" />
             <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-orchid" />
           </div>
