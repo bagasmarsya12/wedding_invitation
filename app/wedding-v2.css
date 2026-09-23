@@ -490,3 +490,30 @@
   .v2-opening-stage,.v2-opening-botanicals img,.v2-day-garden img,.v2-night-garden img,.gifts-syzygium,.mark-melastoma { transform: none!important; translate: none!important; rotate: none!important; }
   .v2-artifact.is-turned > button { transform: rotateY(180deg)!important; }
 }
+
+/* One spatial plant is shared by The Day, Destination and Profiles. Section
+   colour fields sit behind the sticky, viewport-sized WebGL camera; actual
+   paper, content and map stay in the DOM above it. */
+.v2-botanical-continuum { position: relative; isolation: isolate; }
+.v2-botanical-viewport { position: sticky; z-index: 1; top: 0; height: 100svh; margin-bottom: -100svh; overflow: hidden; pointer-events: none; }
+.v2-botanical-viewport canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .7s ease; }
+.v2-botanical-continuum.has-botanical-world .v2-botanical-viewport canvas { opacity: 1; }
+.v2-botanical-continuum > .v2-scene { isolation: auto; overflow: visible; background: transparent; }
+.v2-botanical-continuum > .v2-scene::before { position: absolute; z-index: 0; inset: 0; content: ""; pointer-events: none; }
+.v2-botanical-continuum > .v2-day::before { background: var(--v2-ivory); }
+.v2-botanical-continuum > .v2-details::before { background: radial-gradient(ellipse at 48% 30%,#d8d8c6 0%,#a6ab94 58%,#666d58 100%); }
+.v2-botanical-continuum > .v2-profiles::before { background: #f7f2e9; }
+.v2-botanical-continuum .v2-day-garden { z-index: 0; }
+.v2-botanical-continuum .v2-day-copy,
+.v2-botanical-continuum .v2-profiles > header,
+.v2-botanical-continuum .v2-profiles > article,
+.v2-botanical-continuum .v2-profile-join { position: relative; z-index: 2; }
+.v2-botanical-continuum.has-botanical-world .day-tendril { opacity: 0; }
+.v2-world-emergence { position: absolute; z-index: 3; top: 29%; right: -1.4%; width: clamp(7rem,13vw,12rem); pointer-events: none; filter: drop-shadow(-.3rem .8rem .7rem rgba(38,48,32,.14)); mask-image: radial-gradient(ellipse 48% 48% at 57% 48%,#000 30%,rgba(0,0,0,.85) 62%,transparent 100%); transform: scaleX(-1) rotate(18deg); transform-origin: 70% 20%; }
+@media (max-width: 720px) {
+  .v2-world-emergence { top: 43%; right: -.8rem; width: 9rem; opacity: .74; mask-image: radial-gradient(ellipse 52% 48% at 43% 48%,#000 30%,rgba(0,0,0,.85) 64%,transparent 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-botanical-viewport canvas { transition: none; }
+  .v2-world-emergence { transform: none; }
+}

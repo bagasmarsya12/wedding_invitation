@@ -16,6 +16,7 @@ import {
   useState,
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { BotanicalWorld } from "./botanical-world";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
 type Attendance = "" | "yes" | "no";
@@ -494,6 +495,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
       {entered && <InvitationSpine open={infoOpen} onToggle={() => setInfoOpen(value => !value)} confirmed={rsvpSaved} />}
 
       <main className="v2-main" aria-hidden={!entered}>
+        <div className="v2-botanical-continuum">
+          <BotanicalWorld active={entered} reducedMotion={reduced} />
         <section className={`v2-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
@@ -550,6 +553,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             </div>
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
           </div>
+          <BotanicalImage src="/assets/botanicals/combretum/flower-tip.webp" className="v2-world-emergence" />
         </section>
 
         <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
@@ -581,6 +585,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             </div>
           </article>
         </section>
+        </div>
 
         <section className="v2-archive v2-scene" id="archive" data-light="archive" aria-labelledby="archive-title">
           <div className="v2-archive-heading">
