@@ -504,6 +504,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
             <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-short-02.webp" className="day-fern" />
           </div>
+          <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-near-field v2-near-hero" />
           <div className="v2-day-copy">
             <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
             <p>The day we’ve been dreaming of</p>
@@ -557,6 +558,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </section>
 
         <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
+          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-profiles" />
           <header>
             <p>For those who know one of us better.</p>
             <h2 id="profiles-title">The two of us,<br />as observed by the other.</h2>
@@ -585,9 +587,10 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             </div>
           </article>
         </section>
-        </div>
 
         <section className="v2-archive v2-scene" id="archive" data-light="archive" aria-labelledby="archive-title">
+          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-archive" />
+          <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-near-field v2-near-archive-bloom" />
           <div className="v2-archive-heading">
             <p>From the archive</p>
             <h2 id="archive-title">Some things were<br />worth keeping.</h2>
@@ -649,6 +652,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </section>
 
         <section className="v2-gifts v2-scene" id="gifts" data-light="late" aria-labelledby="gifts-title">
+          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-short-02.webp" className="v2-near-field v2-near-gifts" />
           <div className="v2-gifts-heading"><p>A few things</p><h2 id="gifts-title">We’re saving room for.</h2><span>The catalogue opens from a private invitation so reservations stay private.</span></div>
           <div className="v2-gift-shelf" aria-label="Gift collections">
             {["For Bagas", "For Iga", "For Our Home"].map((label, index) => (
@@ -692,6 +696,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             </nav>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className="v2-footer" aria-hidden={!entered}>

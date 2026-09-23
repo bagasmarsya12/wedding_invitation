@@ -6,7 +6,7 @@ type BotanicalWorldProps = { active: boolean; reducedMotion: boolean };
 
 /**
  * One document-space plant, viewed through a viewport-sized camera. The canvas
- * sticks while its parent spans the three chapters; no section owns the vine.
+ * sticks while its parent spans the invitation; no section owns the vine.
  */
 export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
   const shellRef = useRef<HTMLDivElement>(null);
@@ -188,7 +188,13 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
         const hero = root!.querySelector<HTMLElement>("#the-day");
         const details = root!.querySelector<HTMLElement>("#details");
         const profiles = root!.querySelector<HTMLElement>("#profiles");
-        if (!hero || !details || !profiles || !renderer) return;
+        const archive = root!.querySelector<HTMLElement>("#archive");
+        const rsvp = root!.querySelector<HTMLElement>("#rsvp");
+        const useful = root!.querySelector<HTMLElement>("#useful-bits");
+        const gifts = root!.querySelector<HTMLElement>("#gifts");
+        const mark = root!.querySelector<HTMLElement>("#leave-a-mark");
+        const beyond = root!.querySelector<HTMLElement>("#beyond");
+        if (!hero || !details || !profiles || !archive || !rsvp || !useful || !gifts || !mark || !beyond || !renderer) return;
 
         const nextWidth = root!.clientWidth;
         const nextHeight = innerHeight;
@@ -206,10 +212,19 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
         const h = hero.offsetHeight;
         const d = details.offsetHeight;
         const p = profiles.offsetHeight;
+        const origin = root!.getBoundingClientRect().top;
+        const top = (element: HTMLElement) => element.getBoundingClientRect().top - origin;
+        const a = top(archive);
+        const q = top(rsvp);
+        const u = top(useful);
+        const g = top(gifts);
+        const m = top(mark);
+        const b = top(beyond);
         const small = width <= 720;
         const x = (value: number) => width * value;
         const r = small ? 1.2 : 1.45;
-        // One uninterrupted stem physically crosses BOTH chapter seams.
+        // The original vine is never restarted. It recedes outside the frame
+        // through the quiet chapters, then grows back into the final canopy.
         const stem = makeCurve([
           [x(small ? .83 : .76), h * (small ? .69 : .43), -32],
           [x(small ? .91 : .88), h * (small ? .8 : .67), -14],
@@ -221,6 +236,20 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
           [x(small ? .96 : .983), h + d * .94, 11],
           [x(small ? .91 : .93), h + d + p * .04, -4],
           [x(small ? .85 : .88), h + d + p * .13, -30],
+          [x(1.025), h + d + p * .29, -65],
+          [x(1.035), h + d + p * .86, -75],
+          [x(.98), a + archive.offsetHeight * .15, -48],
+          [x(.955), a + archive.offsetHeight * .52, -20],
+          [x(1.025), a + archive.offsetHeight * .92, -60],
+          [x(1.04), q + rsvp.offsetHeight * .5, -80],
+          [x(1.04), u + useful.offsetHeight * .5, -80],
+          [x(1.025), u + useful.offsetHeight * .94, -72],
+          [x(.965), g + gifts.offsetHeight * .18, -35],
+          [x(.955), g + gifts.offsetHeight * .63, -14],
+          [x(.99), m + mark.offsetHeight * .12, -38],
+          [x(.985), m + mark.offsetHeight * .84, -18],
+          [x(.88), b + beyond.offsetHeight * .18, -33],
+          [x(.74), b + beyond.offsetHeight * .37, -45],
         ], r, 0x625e45);
 
         const branchSpecs: { at: number; points: [number, number, number][]; leaves: [number, number, number, number, number][]; flower?: [number, number, number, number, number] }[] = [
@@ -245,29 +274,58 @@ export function BotanicalWorld({ active, reducedMotion }: BotanicalWorldProps) {
             points: [[x(small ? .93 : .95), h + d - 34, -22], [x(small ? .86 : .89), h + d + 20, -9], [x(small ? .78 : .82), h + d + 85, 5]],
             leaves: [[small ? .85 : .89, h + d + 20, -2, small ? 37 : 62, -.45], [small ? .78 : .82, h + d + 85, 9, small ? 30 : 51, .28]],
           },
+          {
+            at: 1,
+            points: [[x(.96), a + archive.offsetHeight * .43, -22], [x(small ? .83 : .86), a + archive.offsetHeight * .51, -12], [x(small ? .76 : .78), a + archive.offsetHeight * .56, 2]],
+            leaves: [[small ? .83 : .86, a + archive.offsetHeight * .51, -3, small ? 39 : 70, -.4], [small ? .76 : .78, a + archive.offsetHeight * .56, 9, small ? 32 : 55, .27]],
+          },
+          {
+            at: 1,
+            points: [[x(.965), g + gifts.offsetHeight * .22, -31], [x(small ? .86 : .83), g + gifts.offsetHeight * .31, -18], [x(small ? .77 : .74), g + gifts.offsetHeight * .39, 5]],
+            leaves: [[small ? .86 : .83, g + gifts.offsetHeight * .31, -9, small ? 40 : 67, -.33], [small ? .77 : .74, g + gifts.offsetHeight * .39, 11, small ? 35 : 59, .38]],
+          },
+          {
+            at: 1,
+            points: [[x(.89), b + beyond.offsetHeight * .14, -35], [x(small ? .73 : .76), b + beyond.offsetHeight * .23, -15], [x(small ? .66 : .64), b + beyond.offsetHeight * .3, 2]],
+            leaves: [[small ? .73 : .76, b + beyond.offsetHeight * .23, -8, small ? 49 : 75, -.3]],
+            flower: [small ? .66 : .64, b + beyond.offsetHeight * .3, 8, small ? 55 : 79, .17],
+          },
         ];
 
         for (const [index, spec] of branchSpecs.entries()) {
-          if (small && index === 1) continue; // Paper/map gets breathing room on mobile.
+          if (small && (index === 1 || index === 5)) continue; // Map and gift shelf keep breathing room.
           makeCurve(spec.points, r * .49, 0x5f5a3e);
           for (const [leafX, leafY, leafZ, size, rotation] of spec.leaves) {
             addPlane(leafTexture, x(leafX), leafY, leafZ, size, rotation, .7, index * 1.8);
           }
-          if (spec.flower && !small) {
+          if (spec.flower && (!small || index === 6)) {
             const [flowerX, flowerY, flowerZ, size, rotation] = spec.flower;
             addPlane(blossomTexture, x(flowerX), flowerY, flowerZ, size, rotation, .8, 2.4);
           }
         }
 
-        // Sparse growth directly on the stem gives the long line a living rhythm.
-        for (const [index, at] of (small ? [.13, .27, .4, .72, .89] : [.11, .19, .28, .34, .44, .59, .73, .85, .93]).entries()) {
-          const point = stem.getPointAt(at);
+        const pointAtY = (targetY: number) => {
+          let lo = 0;
+          let hi = 1;
+          for (let i = 0; i < 22; i++) {
+            const mid = (lo + hi) / 2;
+            if (-stem.getPoint(mid).y < targetY) lo = mid;
+            else hi = mid;
+          }
+          return stem.getPoint((lo + hi) / 2);
+        };
+        const leafPositions = small
+          ? [h * .84, h + d * .09, h + d * .73, h + d + 25, a + archive.offsetHeight * .28, a + archive.offsetHeight * .65, g + gifts.offsetHeight * .48, b + beyond.offsetHeight * .15]
+          : [h * .65, h * .85, h + d * .1, h + d * .58, h + d * .9, h + d + 35, a + archive.offsetHeight * .22, a + archive.offsetHeight * .43, a + archive.offsetHeight * .68, g + gifts.offsetHeight * .12, g + gifts.offsetHeight * .51, m + mark.offsetHeight * .87, b + beyond.offsetHeight * .12, b + beyond.offsetHeight * .27];
+        // Foliage is anchored to the same spatial curve, never scattered.
+        for (const [index, targetY] of leafPositions.entries()) {
+          const point = pointAtY(targetY);
           addPlane(
             leafTexture,
             point.x + width / 2 + (index % 2 ? -16 : 10),
             -point.y,
             point.z + 16,
-            small ? 42 : 64 + index % 3 * 8,
+            small ? 42 : 62 + index % 3 * 8,
             index % 2 ? -.55 : .5,
             .58,
             index * .83,
