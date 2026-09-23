@@ -183,7 +183,7 @@ function DestinationMap() {
           container,
           style: "https://tiles.openfreemap.org/styles/liberty",
           center: VENUE_CENTER,
-          zoom: 15.1,
+          zoom: 12.9,
           minZoom: 12,
           maxZoom: 19,
           attributionControl: false,
@@ -203,17 +203,44 @@ function DestinationMap() {
         const markerElement = document.createElement("div");
         markerElement.className = "v2-maplibre-marker";
         markerElement.setAttribute("aria-label", "Pandiga Cimahi");
-        markerElement.innerHTML = "<span>B</span><i>×</i><span>I</span>";
+        markerElement.innerHTML = '<span class="v2-maplibre-marker-pin"><span>B × I</span></span><span class="v2-maplibre-marker-label">Pandiga</span>';
         new maplibregl.Marker({ element: markerElement, anchor: "bottom" }).setLngLat(VENUE_CENTER).addTo(map);
         map.on("load", () => {
           if (cancelled) return;
           mapLoaded = true;
           map.getStyle().layers?.forEach(layer => {
-            if (layer.id.startsWith("poi_")) map.setLayoutProperty(layer.id, "visibility", "none");
+            const id = layer.id;
+            if (/^poi_|^highway-shield|^road_shield|^road_one_way|^airport$|^label_other$|^highway-name-minor$|^building-3d$/.test(id)) {
+              map.setLayoutProperty(id, "visibility", "none");
+              return;
+            }
+            if (layer.type === "background") map.setPaintProperty(id, "background-color", "#e5e1d6");
+            if (layer.type === "fill") {
+              if (id === "park" || /^landcover_(wood|grass)$/.test(id)) {
+                map.setPaintProperty(id, "fill-color", "#b9cbaa");
+                map.setPaintProperty(id, "fill-opacity", 0.7);
+              } else if (id === "water") map.setPaintProperty(id, "fill-color", "#afc9c3");
+              else if (id === "building") {
+                map.setPaintProperty(id, "fill-color", "#ccc5b8");
+                map.setPaintProperty(id, "fill-outline-color", "#d5cec1");
+                map.setPaintProperty(id, "fill-opacity", 0.44);
+              } else if (/^landuse_(school|cemetery|pitch|track)$/.test(id)) map.setPaintProperty(id, "fill-color", "#cdd6bd");
+              else if (/^landuse_/.test(id)) map.setPaintProperty(id, "fill-color", "#dedace");
+            }
+            if (layer.type === "line") {
+              if (/^(road|bridge|tunnel)_(motorway|trunk_primary|secondary_tertiary|link)/.test(id)) map.setPaintProperty(id, "line-color", id.endsWith("_casing") ? "#ad9f89" : "#fbf7ec");
+              else if (/^(road|bridge|tunnel)_(minor|service_track|street|path_pedestrian)/.test(id)) map.setPaintProperty(id, "line-color", id.endsWith("_casing") ? "#beb7a9" : "#faf7ef");
+              else if (/^waterway_/.test(id)) map.setPaintProperty(id, "line-color", "#9fbfb7");
+            }
+            if (layer.type === "symbol") {
+              if (/^highway-name|^label_/.test(id)) {
+                map.setPaintProperty(id, "text-color", /^label_(city|town|village)/.test(id) ? "#4a443b" : "#70695d");
+                map.setPaintProperty(id, "text-halo-color", "#f2efe7");
+              }
+            }
           });
           map.resize();
           setStatus("ready");
-          if (!reduced) map.easeTo({ center: VENUE_CENTER, zoom: 15.45, duration: 1100, essential: true });
         });
         map.on("error", () => {
           if (!mapLoaded) setStatus("error");
@@ -246,7 +273,7 @@ function DestinationMap() {
     else map.zoomOut({ duration: 350 });
   };
 
-  const resetMap = () => mapRef.current?.easeTo({ center: VENUE_CENTER, zoom: 15.45, bearing: 0, pitch: 0, duration: 650, essential: true });
+  const resetMap = () => mapRef.current?.easeTo({ center: VENUE_CENTER, zoom: 12.9, bearing: 0, pitch: 0, duration: 650, essential: true });
 
   const handleMapKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const map = mapRef.current;
@@ -492,33 +519,36 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <div className="v2-destination-light" />
           </div>
           <div className="v2-destination-page">
-            <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium" />
+            <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-back" />
+            <DestinationMap />
+            <div className="v2-destination-paper-edge" aria-hidden="true" />
             <header className="v2-destination-head">
               <p>The details</p>
               <h2 id="details-title"><span>Same place,</span><span>a very special day.</span></h2>
               <p className="v2-destination-intro">Here’s when and where to find us. We can’t wait to see you there.</p>
-              <time className="v2-destination-date" dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
             </header>
-            <div className="v2-destination-events" aria-label="Wedding schedule">
-              <article>
-                <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p>The official part.</p></div>
-              </article>
-              <article>
-                <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3>Reception</h3><p>The louder part.</p></div>
-              </article>
-            </div>
-            <DestinationMap />
-            <div className="v2-destination-venue">
-              <div className="v2-destination-venue-title">
-                <p>Join us at</p>
-                <h3>Pandiga</h3>
-                <em>Cimahi</em>
+            <div className="v2-destination-card">
+              <time className="v2-destination-date" dateTime="2026-11-01"><span>Sunday</span>01 November 2026</time>
+              <div className="v2-destination-events" aria-label="Wedding schedule">
+                <article>
+                  <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
+                  <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p>The official part.</p></div>
+                </article>
+                <article>
+                  <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
+                  <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3>Reception</h3><p>The louder part.</p></div>
+                </article>
               </div>
-              <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
-              <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">Open directions <ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
+              <div className="v2-destination-venue">
+                <div className="v2-destination-venue-title">
+                  <h3>Pandiga</h3>
+                  <em>Cimahi</em>
+                </div>
+                <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+                <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label="Open directions to Pandiga Cimahi in Google Maps">Open directions <ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
+              </div>
             </div>
+            <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
           </div>
         </section>
 
