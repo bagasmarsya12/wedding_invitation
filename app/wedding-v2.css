@@ -67,8 +67,8 @@
 .v2-opening-botanicals img { position: absolute; z-index: 6; pointer-events: none; filter: drop-shadow(0 18px 17px rgba(24,42,31,.18)); }
 .opening-syzygium { top: -12%; left: -9%; width: min(42vw,37rem); transform: rotate(15deg); transform-origin: top left; }
 .opening-fern { right: -8%; bottom: -22%; width: min(51vw,45rem); transform: rotate(-18deg); transform-origin: bottom right; opacity: .82; }
-.opening-dendrobium { left: -4%; bottom: -11%; width: min(13rem,17vw); transform: rotate(8deg); transform-origin: bottom left; }
-.opening-melastoma-top { top: -7%; right: 8%; width: min(15rem,21vw); transform: rotate(-8deg); transform-origin: top right; }
+.opening-combretum-left { left: -5%; bottom: -18%; width: min(25vw,22rem); transform: rotate(7deg); transform-origin: bottom left; }
+.opening-combretum-top { top: -8%; right: 8%; width: min(42vw,41rem); transform: rotate(-8deg); transform-origin: top right; }
 .opening-orchid { right: 2%; top: 26%; width: min(18vw,15rem); transform: rotate(-15deg); transform-origin: right center; }
 .v2-opening-date { position: absolute; z-index: 10; bottom: clamp(1rem,3vh,2rem); left: clamp(1rem,3vw,2.6rem); margin: 0; font-family: var(--v2-serif); font-size: .84rem; line-height: 1.55; }
 .v2-opening-skip { position: absolute; z-index: 20; right: clamp(1rem,3vw,2.6rem); bottom: clamp(1rem,3vh,2rem); border: 0; border-bottom: 1px solid currentColor; padding: .15rem 0; cursor: pointer; background: transparent; font-size: .69rem; letter-spacing: .08em; }
@@ -110,10 +110,11 @@
 .v2-day-garden { position: absolute; z-index: -1; inset: 0; overflow: hidden; }
 .v2-day-garden::before { position: absolute; right: -4%; bottom: -15%; width: min(56vw,52rem); height: 84%; content: ""; border: 1px solid rgba(41,39,33,.16); border-radius: 52% 52% 0 0; background: linear-gradient(145deg,#77836b,#41523f 68%,#263b31); box-shadow: inset 20px 18px 70px rgba(255,255,255,.15),-15px 22px 30px rgba(46,41,33,.12); }
 .v2-day-light { position: absolute; z-index: 2; inset: -20%; background: linear-gradient(118deg,transparent 31%,rgba(255,255,240,.62) 31.2%,rgba(255,255,240,.08) 60%,transparent 60.2%); transform: translateX(calc(var(--pointer-x) * 14px)); transition: transform .4s ease-out; }
-.day-dendrobium,.day-melastoma { position: absolute; z-index: 3; pointer-events: none; filter: drop-shadow(0 20px 22px rgba(16,36,25,.23)); }
-.day-dendrobium { top: 7%; right: 1%; width: min(13rem,19vw); transform: rotate(-8deg); transform-origin: top right; }
+.day-combretum,.day-tendril,.day-melastoma { position: absolute; z-index: 3; pointer-events: none; filter: drop-shadow(0 20px 22px rgba(16,36,25,.23)); }
+.day-combretum { top: 6%; right: -11%; width: min(48vw,34rem); transform: rotate(-9deg); transform-origin: top right; }
+.day-tendril { right: 16%; bottom: 0; width: min(18vw,16rem); transform: rotate(5deg); transform-origin: bottom center; }
 .day-melastoma { right: 5%; bottom: -8%; width: min(16vw,11rem); transform: rotate(-10deg); transform-origin: bottom center; opacity: .85; }
-.v2-day.is-in-view .day-dendrobium { animation: v2-botanical-breathe 13s ease-in-out infinite alternate; }
+.v2-day.is-in-view .day-combretum,.v2-day.is-in-view .day-tendril { animation: v2-botanical-breathe 13s ease-in-out infinite alternate; }
 .v2-day-copy { position: relative; z-index: 10; max-width: 52rem; }
 .v2-day-mark { width: clamp(2.7rem,4vw,4rem); margin-bottom: clamp(2rem,4vh,3.5rem); }
 .v2-day-copy > p:not(.v2-day-countdown) { max-width: 26rem; margin-bottom: .8rem; font-size: clamp(.76rem,1vw,.92rem); letter-spacing: .17em; text-transform: uppercase; }
@@ -235,6 +236,7 @@
 .v2-artifact-side strong { display: block; margin-top: .35rem; font-family: var(--v2-serif); font-size: 1.25rem; font-weight: 400; line-height: 1.25; }
 .v2-artifact-side small { margin-top: auto; padding-top: 1rem; font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; }
 .v2-artifact-back strong { margin: auto 0; font-size: 1.45rem; line-height: 1.45; }
+.archive-tendril { position: absolute; z-index: 1; top: 1rem; left: 40%; width: 26%; pointer-events: none; filter: drop-shadow(0 15px 15px rgba(31,53,37,.18)); transform: rotate(79deg); transform-origin: left center; }
 .v2-text-link { display: block; width: fit-content; margin: 0 auto; padding-bottom: .3rem; border-bottom: 1px solid currentColor; font-size: .7rem; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
 
 /* RSVP */
@@ -322,14 +324,15 @@
 .v2-beyond { display: grid; min-height: 112svh; place-items: center; overflow: hidden; color: var(--v2-paper); background: radial-gradient(circle at 50% 38%,#314b3b,#1d3429 48%,#12231c 100%); }
 .v2-night-light { position: absolute; z-index: 1; inset: -20%; opacity: .34; background: linear-gradient(120deg,transparent 35%,rgba(239,230,199,.22) 35.3%,transparent 59%); transform: translateX(calc(var(--pointer-x) * 18px)); }
 .v2-night-garden img { position: absolute; pointer-events: none; filter: drop-shadow(0 24px 25px rgba(0,0,0,.3)); }
-.night-dendrobium { z-index: 4; top: -9%; left: -7%; width: min(17rem,23vw); transform: rotate(-7deg); transform-origin: top left; }
-.night-syzygium { z-index: 6; left: -5%; bottom: -5%; width: min(28rem,38vw); transform: rotate(12deg); transform-origin: bottom left; }
-.night-melastoma { z-index: 7; top: 7%; right: 4%; width: min(12rem,17vw); transform: rotate(14deg); transform-origin: top right; }
+.night-canopy { z-index: 4; top: -5%; left: -7%; width: 68%; transform: rotate(5deg); transform-origin: top left; }
+.night-left { z-index: 6; left: -9%; bottom: -9%; width: 28%; transform: rotate(9deg); transform-origin: bottom left; }
+.night-right { z-index: 6; right: -2%; bottom: -7%; width: min(19%,15rem); transform: rotate(-10deg); transform-origin: bottom right; }
+.night-bloom { z-index: 7; top: 7%; right: 4%; width: min(20%,15rem); transform: rotate(14deg); transform-origin: top right; }
 .night-fern { z-index: 5; right: 13%; bottom: -21%; width: 52%; transform: rotate(-12deg); transform-origin: bottom right; opacity: .74; }
 .night-orchid { z-index: 7; left: 11%; bottom: 6%; width: 18%; transform: rotate(17deg); transform-origin: bottom left; }
-.v2-beyond.is-in-view .night-dendrobium,.v2-beyond.is-in-view .night-melastoma,.v2-beyond.is-in-view .night-orchid,.v2-beyond.is-in-view .night-syzygium { animation: v2-night-breathe 16s ease-in-out infinite alternate; }
+.v2-beyond.is-in-view .night-canopy,.v2-beyond.is-in-view .night-bloom,.v2-beyond.is-in-view .night-orchid { animation: v2-night-breathe 16s ease-in-out infinite alternate; }
 @keyframes v2-night-breathe { from{translate:0 0;rotate:0deg} to{translate:4px 7px;rotate:1deg} }
-.v2-beyond-copy { position: relative; z-index: 10; width: min(90% - 2rem,61rem); padding: clamp(3rem,7vw,6rem); border: 1px solid rgba(255,255,255,.19); background: rgba(16,35,27,.5); backdrop-filter: blur(2px); text-align: center; }
+.v2-beyond-copy { position: relative; z-index: 10; width: min(90% - 2rem,61rem); padding: clamp(3rem,7vw,6rem); border: 1px solid rgba(255,255,255,.19); background: rgba(16,35,27,.42); backdrop-filter: blur(5px); text-align: center; }
 .v2-beyond-copy > p { margin-bottom: 1.4rem; font-size: .71rem; letter-spacing: .14em; text-transform: uppercase; }
 .v2-beyond-copy h2 { max-width: 14ch; margin: 0 auto clamp(3rem,6vw,5rem); font-family: var(--v2-serif); font-size: clamp(4rem,7vw,7.7rem); font-weight: 400; letter-spacing: -.07em; line-height: .84; }
 .v2-beyond-copy nav { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid rgba(255,255,255,.2); }
@@ -386,8 +389,8 @@
   .v2-opening-stage { width: min(90vw,38rem); }
   .v2-drapery { right: -12%; width: 49vw; opacity: .46; }
   .opening-syzygium { top: -6%; left: -31%; width: 86vw; }
-  .opening-melastoma-top { top: 7%; right: -16%; width: 55vw; }
-  .opening-dendrobium { left: -15%; bottom: -12%; width: 28vw; }
+  .opening-combretum-top { top: 5%; right: -40%; width: 91vw; }
+  .opening-combretum-left { left: -22%; bottom: -15%; width: 51vw; }
   .opening-fern { right: -28%; bottom: -12%; width: 93vw; opacity: .55; }
   .opening-orchid { right: -7%; top: 27%; width: 36vw; }
   .v2-opening-date { display: none; }
@@ -398,7 +401,7 @@
   .v2-spine-rsvp { display: none; }.v2-spine-date { justify-self: end; }.v2-info-drawer { width: 100vw; }
   .v2-day { min-height: 100svh; padding: 6.8rem 1.25rem 3.8rem; align-items: start; }
   .v2-day-garden::before { right: -31%; bottom: -8%; width: 103vw; height: 54%; }
-  .day-dendrobium { top: auto; right: -4%; bottom: 19%; width: 31vw; }.day-melastoma { right: -1%; bottom: -4%; width: 30vw; }
+  .day-combretum { top: auto; right: -39%; bottom: 19%; width: 108vw; }.day-tendril { right: 30%; width: 37vw; }.day-melastoma { right: -1%; bottom: -4%; width: 36vw; }
   .v2-day-copy { width: 100%; margin-top: 0; }
   .v2-day-mark { width: 2.5rem; margin: 0 auto 1.7rem; }
   .v2-day-copy > p:not(.v2-day-countdown) { margin: 0 auto .65rem; font-size: .67rem; text-align: center; }
@@ -438,14 +441,14 @@
   .v2-person > div > small { margin-bottom:2.5rem }.v2-person dl div{grid-template-columns:6.5rem 1fr;gap:1rem}
   .v2-person-iga figure { order:-1 }.v2-profile-join{margin:5rem auto}
   .v2-archive { padding:7rem 1.25rem }.v2-archive-heading{grid-template-columns:1fr;gap:1rem;margin-bottom:4rem}.v2-archive-heading h2{font-size:clamp(3.2rem,13vw,4.8rem)}
-  .v2-evidence-field{display:flex;min-height:0;flex-direction:column;gap:2rem}.v2-artifact,.v2-artifact.artifact-1,.v2-artifact.artifact-2,.v2-artifact.artifact-3{width:min(100%,25rem);margin:0;transform:none}.v2-artifact:nth-child(even){align-self:flex-end}
+  .v2-evidence-field{display:flex;min-height:0;flex-direction:column;gap:2rem}.v2-artifact,.v2-artifact.artifact-1,.v2-artifact.artifact-2,.v2-artifact.artifact-3{width:min(100%,25rem);margin:0;transform:none}.v2-artifact:nth-child(even){align-self:flex-end}.archive-tendril{top:17%;left:45%;width:65%}
   .v2-rsvp { padding:7rem 1.25rem;gap:4rem}.v2-rsvp-copy h2{font-size:clamp(3.7rem,15vw,5.4rem)}.v2-rsvp-form{padding:1.5rem;transform:none}.v2-rsvp-details{grid-template-columns:1fr}.v2-rsvp-details label{grid-column:1!important}.v2-form-person strong{float:none;display:block;max-width:none;margin-top:.5rem;text-align:left}
   .v2-useful { display:block;min-height:0;padding:7rem 1.25rem }.v2-useful header{position:static;margin-bottom:4rem}.v2-useful header h2{font-size:clamp(3.25rem,13vw,4.8rem)}.v2-useful-list summary{grid-template-columns:1fr auto}.v2-useful-list summary small{display:none}
   .v2-gifts { padding:7rem 1.25rem }.v2-gifts-heading{grid-template-columns:1fr;gap:1rem;margin-bottom:5rem}.v2-gifts-heading h2{font-size:clamp(3.7rem,15vw,5.4rem)}
   .v2-gift-shelf{grid-template-columns:1fr}.v2-gift-shelf article{min-height:0;padding:2rem 0 3rem}.v2-gift-shelf article + article{border-left:0;border-top:1px solid rgba(41,39,33,.28)}.v2-object{height:16rem}.v2-world .gifts-syzygium{display:none}
   .v2-mark { padding:7rem 1.25rem }.v2-mark-copy h2{font-size:clamp(3.8rem,16vw,5.6rem)}.v2-postcard-installation{min-height:32rem}.v2-postcard.card-a{top:16%;left:0;width:92%}.mark-melastoma{right:-24%;width:68vw}
   .v2-beyond { min-height:105svh }.v2-beyond-copy{width:calc(100% - 2rem);padding:3.5rem 1.2rem}.v2-beyond-copy h2{font-size:clamp(3.5rem,14vw,5.3rem)}.v2-beyond-copy nav{grid-template-columns:1fr}.v2-beyond-copy nav > *{min-height:5.5rem}.v2-beyond-copy nav > * + *{border-left:0;border-top:1px solid rgba(255,255,255,.2)}
-  .night-dendrobium{top:-3%;left:-17%;width:49vw}.night-syzygium{left:-22%;bottom:-3%;width:72vw}.night-melastoma{right:-8%;width:36vw}.night-fern{right:-25%;width:100%}.night-orchid{left:-7%;width:39%}
+  .night-canopy{left:-35%;width:134%}.night-left{left:-25%;width:62%}.night-right{right:-13%;width:min(45%,11rem)}.night-bloom{right:-11%;width:51%}.night-fern{right:-25%;width:100%}.night-orchid{left:-7%;width:39%}
   .v2-footer{grid-template-columns:1fr;min-height:34rem;align-content:end;text-align:center}.v2-footer-edition{justify-self:center}.v2-footer > small{justify-self:center;text-align:center}.v2-footer > button{grid-column:1}
 }
 
@@ -456,7 +459,7 @@
   .v2-opening-folio span:first-child { font-size: .82rem; }.v2-opening-folio span:last-child{font-size:.56rem}
   .v2-spine { padding:0 .9rem }.v2-spine-mark{font-size:.92rem}.v2-spine-date{font-size:.57rem}
   .v2-day-identity h1 { font-size: clamp(3.2rem,14vw,4.2rem); }
-  .v2-day-garden::before{height:52%;right:-42%}.day-dendrobium{right:-4%;bottom:17%;width:31vw}
+  .v2-day-garden::before{height:52%;right:-42%}.day-combretum{right:-48%;bottom:17%}
   .v2-destination-head h2 { font-size: clamp(2.35rem,9vw,2.8rem); }
   .v2-destination-events article { gap: .42rem; }
   .v2-destination-events article + article { padding-left: .48rem; }
@@ -488,9 +491,10 @@
   .v2-artifact.is-turned > button { transform: rotateY(180deg)!important; }
 }
 
-/* Botanical plates sit behind each chapter as quiet, layered scenery. */
+/* V27's chapter plates remain the base; selected blooms sit behind the content. */
 .v2-botanical-continuum { position: relative; isolation: isolate; }
-.v2-botanical-continuum > .v2-scene { isolation: isolate; background: transparent; }
+.v2-botanical-continuum > .v2-scene { isolation: auto; overflow: visible; background: transparent; }
+.v2-botanical-continuum > .v2-gifts { overflow: hidden; }
 .v2-botanical-continuum > .v2-scene::before { position: absolute; z-index: 0; inset: 0; content: ""; pointer-events: none; }
 .v2-botanical-continuum > .v2-day::before { background: var(--v2-ivory); }
 .v2-botanical-continuum > .v2-details::before { background: radial-gradient(ellipse at 48% 30%,#d8d8c6 0%,#a6ab94 58%,#666d58 100%); }
@@ -501,16 +505,15 @@
 .v2-botanical-continuum > .v2-gifts::before { background: linear-gradient(140deg,#e8dfd1,#d2c2ad); }
 .v2-botanical-continuum > .v2-mark::before { background: linear-gradient(145deg,#8f8275,#5b6259 65%,#37493d); }
 .v2-botanical-continuum > .v2-beyond::before { background: radial-gradient(circle at 50% 38%,#314b3b,#1d3429 48%,#12231c 100%); }
-.v2-botanical-continuum > .v2-scene:not(.v2-beyond)::after { position: absolute; z-index: 1; inset: 0; content: ""; pointer-events: none; background-repeat: no-repeat; filter: saturate(.96); opacity: .27; }
-.v2-botanical-continuum > .v2-day::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/dendrobium/branch-short.webp"); background-size: min(29rem,35vw) auto,min(9rem,12vw) auto; background-position: -18% 108%,96% 11%; }
-.v2-botanical-continuum > .v2-details::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"),url("/assets/botanicals/melastoma/branch-short.webp"); background-size: min(27rem,42vw) auto,min(10rem,14vw) auto; background-position: -8% 92%,106% 9%; opacity: .15; }
-.v2-botanical-continuum > .v2-profiles::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/dendrobium/branch-short.webp"),url("/assets/botanicals/nephrolepis/frond-arched-01.webp"); background-size: min(26rem,34vw) auto,min(9rem,12vw) auto,min(23rem,29vw) auto; background-position: 106% 12%,-7% 96%,105% 92%; }
-.v2-botanical-continuum > .v2-archive::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/melastoma/full-stem.webp"),url("/assets/botanicals/dendrobium/branch-short.webp"); background-size: min(25rem,33vw) auto,min(8rem,11vw) auto,min(9rem,12vw) auto; background-position: -8% 8%,106% 72%,102% 97%; }
-.v2-botanical-continuum > .v2-rsvp::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"),url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/dendrobium/branch-short.webp"); background-size: min(27rem,40vw) auto,min(25rem,32vw) auto,min(10rem,13vw) auto; background-position: -8% 99%,108% 8%,98% 98%; opacity: .23; }
-.v2-botanical-continuum > .v2-useful::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"),url("/assets/botanicals/syzygium/branch-short.webp"); background-size: min(23rem,33vw) auto,min(14rem,18vw) auto; background-position: 106% 98%,-8% 5%; opacity: .25; }
-.v2-botanical-continuum > .v2-gifts::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/melastoma/branch-short.webp"),url("/assets/botanicals/nephrolepis/frond-arched-01.webp"); background-size: min(27rem,35vw) auto,min(12rem,16vw) auto,min(20rem,26vw) auto; background-position: 106% 94%,-7% 9%,96% 6%; opacity: .56; }
-.v2-botanical-continuum > .v2-mark::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"),url("/assets/botanicals/melastoma/branch-short.webp"),url("/assets/botanicals/dendrobium/branch-short.webp"); background-size: min(26rem,34vw) auto,min(12rem,16vw) auto,min(11rem,15vw) auto; background-position: 108% 8%,-7% 98%,104% 96%; opacity: .22; }
-.v2-botanical-continuum > .v2-beyond::after { position: absolute; z-index: 1; inset: 0; content: ""; pointer-events: none; background-image: url("/assets/botanicals/dendrobium/branch-short.webp"),url("/assets/botanicals/melastoma/branch-short.webp"); background-repeat: no-repeat; background-size: min(11rem,14vw) auto,min(12rem,16vw) auto; background-position: 103% 7%,-5% 96%; opacity: .22; }
+.v2-botanical-continuum > .v2-scene:not(.v2-beyond)::after { position: absolute; z-index: 1; inset: 0; content: ""; pointer-events: none; background-repeat: no-repeat; filter: grayscale(.45) blur(9px); opacity: .13; }
+.v2-botanical-continuum > .v2-day::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"); background-size: min(34vw,31rem) auto; background-position: -9% 57%; opacity: .11; }
+.v2-botanical-continuum > .v2-details::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"); background-size: min(44vw,38rem) auto; background-position: -8% 85%; opacity: .17; }
+.v2-botanical-continuum > .v2-profiles::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"); background-size: min(39vw,39rem) auto; background-position: 111% 24%; opacity: .11; }
+.v2-botanical-continuum > .v2-archive::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"); background-size: min(42vw,38rem) auto; background-position: -7% 69%; opacity: .18; }
+.v2-botanical-continuum > .v2-rsvp::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"); background-size: min(35vw,30rem) auto; background-position: -7% 77%; filter: brightness(0) blur(12px); opacity: .11; }
+.v2-botanical-continuum > .v2-useful::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"); background-size: min(36vw,30rem) auto; background-position: 111% 87%; opacity: .08; }
+.v2-botanical-continuum > .v2-gifts::after { background-image: url("/assets/botanicals/syzygium/branch-long.webp"); background-size: min(48vw,44rem) auto; background-position: 108% 42%; opacity: .17; }
+.v2-botanical-continuum > .v2-mark::after { background-image: url("/assets/botanicals/nephrolepis/frond-arched-01.webp"); background-size: min(48vw,44rem) auto; background-position: -12% 21%; filter: brightness(0) blur(11px); opacity: .13; }
 .v2-botanical-continuum .v2-day-garden { z-index: 0; }
 .v2-botanical-continuum .v2-day-copy,
 .v2-botanical-continuum .v2-profiles > header,
@@ -526,27 +529,33 @@
 .v2-botanical-continuum .v2-useful > header { position: sticky; z-index: 2; }
 .v2-botanical-continuum .v2-archive > .v2-text-link,
 .v2-botanical-continuum .v2-gifts > .v2-text-link { position: relative; z-index: 3; }
-.v2-near-field { position: absolute; z-index: 1; pointer-events: none; transform-origin: center; }
-.v2-near-profiles { top: 43%; left: -16%; width: min(24vw,20rem); opacity: .28; transform: rotate(-27deg); mask-image: linear-gradient(95deg,#000 39%,transparent 100%); }
-.v2-near-archive { right: -18%; bottom: -8%; width: min(30vw,24rem); opacity: .36; filter: drop-shadow(-.5rem 1rem 1rem rgba(38,52,35,.14)); transform: rotate(19deg); mask-image: linear-gradient(270deg,#000 44%,transparent 100%); }
-.v2-near-archive-bloom { right: -9%; top: 30%; width: min(22vw,16rem); opacity: .38; filter: drop-shadow(-.5rem .6rem .6rem rgba(38,52,35,.12)); transform: rotate(-29deg); mask-image: linear-gradient(260deg,#000 35%,transparent 88%); }
-.v2-near-gifts { top: -8%; left: -14%; width: min(24vw,20rem); opacity: .48; filter: drop-shadow(.4rem 1rem 1rem rgba(38,52,35,.13)); transform: rotate(28deg); mask-image: linear-gradient(95deg,#000 40%,transparent 100%); }
+.v2-near-field { position: absolute; z-index: 3; pointer-events: none; transform-origin: center; }
+.v2-near-profiles { top: 43%; left: -16%; width: min(24vw,20rem); opacity: .44; transform: rotate(-27deg); mask-image: linear-gradient(95deg,#000 39%,transparent 100%); }
+.v2-near-archive { right: -18%; bottom: -8%; width: min(30vw,24rem); opacity: .64; filter: drop-shadow(-.5rem 1rem 1rem rgba(38,52,35,.2)); transform: rotate(19deg); mask-image: linear-gradient(270deg,#000 44%,transparent 100%); }
+.v2-near-archive-bloom { right: -9%; top: 30%; width: min(22vw,16rem); opacity: .67; filter: drop-shadow(-.5rem .6rem .6rem rgba(38,52,35,.15)); transform: rotate(-29deg); mask-image: linear-gradient(260deg,#000 35%,transparent 88%); }
+.v2-near-gifts { top: -8%; left: -14%; width: min(24vw,20rem); opacity: .64; filter: drop-shadow(.4rem 1rem 1rem rgba(38,52,35,.17)); transform: rotate(28deg); mask-image: linear-gradient(95deg,#000 40%,transparent 100%); }
+.v2-background-bloom { position: absolute; z-index: 2; pointer-events: none; filter: drop-shadow(0 .8rem .8rem rgba(37,45,33,.14)); }
+.v2-background-bloom-profiles { top: 5%; right: 4%; width: min(17vw,13rem); opacity: .32; transform: rotate(13deg); }
+.v2-background-bloom-rsvp { top: 4%; right: -2%; width: min(20vw,16rem); opacity: .24; transform: rotate(-12deg); }
+.v2-background-bloom-useful { left: -3%; bottom: 2%; width: min(19vw,15rem); opacity: .27; transform: rotate(-18deg); }
+.v2-background-bloom-gifts { top: 34%; right: -1%; width: min(17vw,13rem); opacity: .28; transform: rotate(17deg); }
 .v2-world-emergence { position: absolute; z-index: 3; top: 29%; right: -1.4%; width: clamp(5rem,8vw,7rem); pointer-events: none; filter: drop-shadow(-.3rem .8rem .7rem rgba(38,48,32,.14)); mask-image: radial-gradient(ellipse 48% 48% at 57% 48%,#000 30%,rgba(0,0,0,.85) 62%,transparent 100%); transform: scaleX(-1) rotate(18deg); transform-origin: 70% 20%; }
 @media (max-width: 720px) {
   .v2-botanical-continuum .v2-useful > header { position: relative; top: auto; }
-  .v2-botanical-continuum > .v2-day::after { background-size: 78vw auto,26vw auto; background-position: -24% 94%,103% 8%; }
-  .v2-botanical-continuum > .v2-details::after { background-size: 80vw auto,35vw auto; background-position: -24% 91%,110% 8%; }
-  .v2-botanical-continuum > .v2-profiles::after { background-size: 73vw auto,27vw auto,68vw auto; background-position: 112% 8%,-15% 96%,112% 98%; }
-  .v2-botanical-continuum > .v2-archive::after { background-size: 74vw auto,27vw auto,28vw auto; background-position: -19% 7%,112% 74%,105% 99%; }
-  .v2-botanical-continuum > .v2-rsvp::after { background-size: 74vw auto,70vw auto,30vw auto; background-position: -22% 98%,112% 7%,105% 98%; }
-  .v2-botanical-continuum > .v2-useful::after { background-size: 72vw auto,42vw auto; background-position: 111% 100%,-19% 5%; }
-  .v2-botanical-continuum > .v2-gifts::after { background-size: 76vw auto,40vw auto,62vw auto; background-position: 111% 96%,-18% 8%,98% 5%; opacity: .58; }
-  .v2-botanical-continuum > .v2-mark::after { background-size: 75vw auto,40vw auto,35vw auto; background-position: 112% 7%,-20% 99%,110% 98%; }
-  .v2-botanical-continuum > .v2-beyond::after { background-size: 32vw auto,35vw auto; background-position: 106% 6%,-8% 96%; }
-  .v2-near-profiles { top: 42%; left: -28%; width: 56vw; opacity: .2; }
-  .v2-near-archive { right: -29%; bottom: -5%; width: 64vw; opacity: .27; }
-  .v2-near-archive-bloom { right: -32%; top: 38%; width: 57vw; opacity: .29; }
-  .v2-near-gifts { left: -18%; top: -3%; width: 56vw; opacity: .48; }
+  .v2-botanical-continuum > .v2-scene:not(.v2-beyond)::after { filter: grayscale(.5) blur(7px); }
+  .v2-botanical-continuum > .v2-day::after { background-size: 70vw auto; background-position: -42% 69%; }
+  .v2-botanical-continuum > .v2-profiles::after { background-size: 72vw auto; background-position: 145% 17%; }
+  .v2-botanical-continuum > .v2-archive::after { background-size: 75vw auto; background-position: -47% 64%; }
+  .v2-botanical-continuum > .v2-rsvp::after { background-size: 62vw auto; background-position: -62% 37%; }
+  .v2-botanical-continuum > .v2-useful::after { background-size: 80vw auto; background-position: 150% 89%; }
+  .v2-near-profiles { top: 42%; left: -28%; width: 56vw; opacity: .32; }
+  .v2-near-archive { right: -29%; bottom: -5%; width: 64vw; opacity: .45; }
+  .v2-near-archive-bloom { right: -32%; top: 38%; width: 57vw; opacity: .48; }
+  .v2-near-gifts { left: -28%; top: -3%; width: 56vw; opacity: .46; }
+  .v2-background-bloom-profiles { top: 4%; right: -12%; width: 39vw; opacity: .22; }
+  .v2-background-bloom-rsvp { top: 1%; right: -14%; width: 43vw; opacity: .19; }
+  .v2-background-bloom-useful { left: -18%; bottom: 1%; width: 44vw; opacity: .2; }
+  .v2-background-bloom-gifts { top: 38%; right: -13%; width: 39vw; opacity: .2; }
   .v2-world-emergence { top: 43%; right: -.8rem; width: 6rem; opacity: .74; mask-image: radial-gradient(ellipse 52% 48% at 43% 48%,#000 30%,rgba(0,0,0,.85) 64%,transparent 100%); }
 }
 @media (prefers-reduced-motion: reduce) {
