@@ -3,8 +3,10 @@ import { T, LanguageSwitch } from "../../../language";
 import { notFound } from "next/navigation";
 import { guestFromToken } from "@/lib/server";
 import { MarkEditor } from "./mark-editor";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { robots: { index: false, follow: false, nocache: true } };
 
 export default async function MarkPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params; const guest = await guestFromToken(token); if (!guest) notFound();

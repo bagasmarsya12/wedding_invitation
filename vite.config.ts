@@ -16,6 +16,7 @@ const managedLinux = readExecutionProfile() === "managed-linux";
 const localBindingConfig = {
   main: "vinext/server/fetch-handler",
   compatibility_flags: ["nodejs_compat"],
+  ...(process.env.ADMIN_USER_IDS ? { vars: { ADMIN_USER_IDS: process.env.ADMIN_USER_IDS } } : {}),
   d1_databases: d1
     ? [
         {
@@ -61,6 +62,7 @@ export default defineConfig(async () => {
       cloudflare({
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         inspectorPort: false,
+        persistState: process.env.SITE_TEST_PERSIST_PATH ? { path: process.env.SITE_TEST_PERSIST_PATH } : true,
         config: localBindingConfig,
       }),
     ],

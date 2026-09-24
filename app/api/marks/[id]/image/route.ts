@@ -9,5 +9,5 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (!canView && !(await requireAdmin())) return apiError("Drawing not found.", 404);
   const object = await bucket().get(mark.drawing_key);
   if (!object) return apiError("Drawing not found.", 404);
-  return new Response(object.body, { headers: { "content-type": object.httpMetadata?.contentType ?? "image/png", "cache-control": canView ? "public, max-age=3600" : "private, no-store" } });
+  return new Response(object.body, { headers: { "content-type": "image/png", "cache-control": "private, no-store, max-age=0", "x-content-type-options": "nosniff", "x-robots-tag": "noindex" } });
 }

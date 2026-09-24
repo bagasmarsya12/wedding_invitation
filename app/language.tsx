@@ -10,7 +10,10 @@ const KEY = "bagas-iga:language:v1";
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
   useEffect(() => {
-    try { if (localStorage.getItem(KEY) === "id") setLanguage("id"); } catch { /* Storage is optional. */ }
+    // Read after hydration so the server and first client render agree.
+    queueMicrotask(() => {
+      try { if (localStorage.getItem(KEY) === "id") setLanguage("id"); } catch { /* Storage is optional. */ }
+    });
   }, []);
   useEffect(() => {
     document.documentElement.lang = language;

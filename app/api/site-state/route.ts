@@ -1,10 +1,14 @@
-import { db } from "@/lib/server";
+import { phaseForDate } from "@/lib/production";
+import { featureEnabled, logFailure, privateJson, sitePhase } from "@/lib/server";
 
 export async function GET() {
-  let phase = "pre-wedding";
   try {
-    const setting = await db().prepare("SELECT value FROM settings WHERE key = 'site_phase' LIMIT 1").first<{ value: string }>();
-    if (setting && ["pre-wedding", "wedding-day", "post-wedding"].includes(setting.value)) phase = setting.value;
-  } catch { /* Keep the safe pre-wedding default. */ }
-  return Response.json({ phase });
+    const [phase, rsvpEnabled, giftsEnabled, marksEnabled] = await Promise.all([
+      sitePhase(), featureEnabled("rsvp"), featureEnabled("gifts"), featureEnabled("marks"),
+    ]);
+    return privateJson({ phase, rsvpEnabled, giftsEnabled, marksEnabled });
+  } catch (error) {
+    logFailure("site_state", error);
+    return privateJson({ phase: phaseForDate(new Date()), rsvpEnabled: false, giftsEnabled: false, marksEnabled: false });
+  }
 }

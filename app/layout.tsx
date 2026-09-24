@@ -10,7 +10,12 @@ export const metadata: Metadata = {
   title: "Bagas × Iga — 1 November 2026",
   description: "Undangan pernikahan Bagas Marsya Pratama Nugraha dan Iga Noviyanti Rohman di Pandiga, Cimahi.",
   icons: { icon: "/assets/bagas-iga-mark.jpg" },
-  referrer: "same-origin",
+  referrer: "no-referrer",
+  openGraph: {
+    type: "website",
+    title: "Bagas × Iga — 1 November 2026",
+    description: "Bagas & Iga are getting married at Pandiga, Cimahi, on 1 November 2026.",
+  },
 };
 
 export default function RootLayout({

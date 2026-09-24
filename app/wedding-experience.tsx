@@ -29,7 +29,8 @@ const EVENT_DATE_UTC = Date.UTC(2026, 10, 1);
 const MAPS_URL = "https://maps.app.goo.gl/JFL3wrzj7qsBXbz56";
 const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
-const archiveItems = [
+type ArchiveItem = { type: string; title: string; note: string; image?: string; alt?: string };
+const archiveItems: ArchiveItem[] = [
   {
     type: "The mark",
     title: "A B embracing a bending I.",
@@ -75,7 +76,7 @@ function useExperienceClock() {
 
   useEffect(() => {
     fetch("/api/site-state")
-      .then(response => response.ok ? response.json() : null)
+      .then(response => response.ok ? response.json() as Promise<{ phase?: string }> : null)
       .then(state => setPhaseOverride(state?.phase || ""))
       .catch(() => {});
     const interval = window.setInterval(() => setNow(new Date()), 60_000);
@@ -353,6 +354,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   const [rsvpStatus, setRsvpStatus] = useState("");
   const [rsvpSaved, setRsvpSaved] = useState(false);
   const [rsvpBusy, setRsvpBusy] = useState(false);
+  const [rsvpEnabled, setRsvpEnabled] = useState(true);
+  const [featuredArchive, setFeaturedArchive] = useState<ArchiveItem[]>([]);
   const edition = useMemo(() => hashEdition(token), [token]);
   const displayName = guestName.trim();
   const hasGuestName = Boolean(displayName);
@@ -378,10 +381,12 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`)
-      .then(response => response.ok ? response.json() : null)
+    fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, { cache: "no-store" })
+      .then(async response => { const result = await response.json() as { error?: string; enabled: boolean; rsvp: { attendance: string; party_size: number; guest_names?: string; dietary?: string; message?: string } | null }; if (!response.ok) throw new Error(result.error || "RSVP is unavailable."); return result; })
       .then(result => {
-        if (cancelled || !result?.rsvp) return;
+        if (cancelled) return;
+        setRsvpEnabled(result.enabled !== false);
+        if (!result.rsvp) return;
         const saved = result.rsvp;
         const nextAttendance: Attendance = saved.attendance === "yes" ? "yes" : saved.attendance === "no" ? "no" : "";
         setAttendance(nextAttendance);
@@ -391,9 +396,25 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         setMessage(saved.message || "");
         setRsvpSaved(nextAttendance === "yes");
       })
-      .catch(() => {});
+      .catch(error => { if (!cancelled) setRsvpStatus(error instanceof Error ? error.message : "RSVP is unavailable."); });
     return () => { cancelled = true; };
   }, [token]);
+
+  useEffect(() => {
+    if (!entered) return;
+    let cancelled = false;
+    fetch("/api/archive?featured=1")
+      .then(async response => response.ok ? await response.json() as { entries: { slug: string; type: string; title: string; excerpt: string | null; media_url: string | null }[] } : null)
+      .then(result => {
+        if (cancelled || !result) return;
+        setFeaturedArchive(result.entries.filter(entry => entry.slug !== "the-mark").slice(0, 2).map(entry => ({
+          type: entry.type, title: entry.title, note: entry.excerpt || entry.title,
+          image: entry.media_url || undefined, alt: entry.title,
+        })));
+      })
+      .catch(() => { /* The editorial placeholders remain until real entries are available. */ });
+    return () => { cancelled = true; };
+  }, [entered]);
 
   useEffect(() => {
     if (!entered || !rootRef.current) return;
@@ -452,6 +473,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
 
   async function submitRsvp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!rsvpEnabled) { setRsvpStatus("RSVP is closed. Thank you for being part of our day."); return; }
     if (!attendance) return;
     if (!token) {
       setRsvpStatus(attendance === "yes" ? "Preview only — open your personal invitation to save this." : "Preview only — nothing was saved.");
@@ -465,7 +487,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ attendance, partySize, guestNames, dietary, message }),
       });
-      const result = await response.json();
+      const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || "Your answer could not be saved.");
       const attending = attendance === "yes";
       setRsvpSaved(attending);
@@ -627,7 +649,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <span><T>Photographs, objects, and little things that became our things.</T></span>
           </div>
           <div className="v2-evidence-field">
-            {archiveItems.map((item, index) => <ArchiveArtifact item={item} index={index} key={item.type} />)}
+            {[archiveItems[0], ...featuredArchive, ...archiveItems.slice(1)].slice(0, 3).map((item, index) => <ArchiveArtifact item={item} index={index} key={`${item.type}-${index}`} />)}
             <BotanicalImage src="/assets/botanicals/combretum/tendril.webp" className="archive-tendril" />
           </div>
           <Link className="v2-text-link" href="/archive"><T>Open the archive </T><span aria-hidden="true">↗</span></Link>
@@ -665,7 +687,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
                 <label><T>A note for us </T><span><T>optional</T></span><textarea value={message} onChange={event => setMessage(event.target.value)} maxLength={800} rows={3} /></label>
               </div>
             )}
-            <button className="v2-rsvp-submit" type="submit" disabled={!attendance || rsvpBusy}>{t(rsvpBusy ? "Saving…" : token ? "Save my answer" : "Preview my answer")}</button>
+            <button className="v2-rsvp-submit" type="submit" disabled={!attendance || rsvpBusy || !rsvpEnabled}>{t(rsvpBusy ? "Saving…" : token ? "Save my answer" : "Preview my answer")}</button>
+            {!rsvpEnabled && <p className="v2-rsvp-status" role="status">{t("RSVP is closed. Thank you for being part of our day.")}</p>}
             <p className="v2-rsvp-status" role="status">{t(rsvpStatus)}</p>
             {rsvpSaved && <div className={`v2-acceptance-mark edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /><span><T>Accepted / 01.11.26</T></span></div>}
           </form>

@@ -246,6 +246,7 @@
 .v2-rsvp-copy h2 { margin-bottom: 2rem; font-family: var(--v2-serif); font-size: clamp(3.8rem,6.3vw,6.8rem); font-weight: 400; letter-spacing: -.075em; line-height: .84; }
 .v2-rsvp-copy > span { font-family: var(--v2-serif); font-size: 1.15rem; font-style: italic; }
 .v2-rsvp-form { position: relative; width: min(100%,42rem); justify-self: end; padding: clamp(2rem,4vw,4rem); color: var(--v2-charcoal); border: 1px solid rgba(255,255,255,.45); background: var(--v2-paper) url("/assets/15-paper-fiber-texture.webp") center / 520px; box-shadow: 20px 24px 45px rgba(73,36,41,.23); transform: rotate(.5deg); }
+.v2-rsvp-form.is-confirmed { padding-bottom: clamp(5rem,7vw,7rem); }
 .v2-form-person { margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(41,39,33,.25); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
 .v2-form-person strong { float: right; max-width: 57%; overflow-wrap: anywhere; font-family: var(--v2-serif); font-size: 1rem; font-weight: 400; letter-spacing: 0; text-align: right; text-transform: none; }
 .v2-rsvp-form fieldset { display: grid; gap: .65rem; margin: 0 0 1.5rem; border: 0; padding: 0; }
@@ -263,7 +264,7 @@
 .v2-rsvp-submit { width: 100%; min-height: 3.8rem; border: 1px solid var(--v2-charcoal); cursor: pointer; background: transparent; font-size: .69rem; letter-spacing: .12em; text-transform: uppercase; transition: color .2s ease,background .2s ease; }
 .v2-rsvp-submit:hover:not(:disabled) { color: var(--v2-paper); background: var(--v2-charcoal); }
 .v2-rsvp-submit:disabled { cursor: not-allowed; opacity: .45; }
-.v2-rsvp-status { min-height: 1.4rem; margin: 1rem 0 0; font-family: var(--v2-serif); font-size: .95rem; font-style: italic; }
+.v2-rsvp-status { min-height: 1.4rem; margin: 1.8rem 0 0; font-family: var(--v2-serif); font-size: .95rem; font-style: italic; }
 .v2-acceptance-mark { position: absolute; right: 2.2rem; bottom: 2rem; display: flex; align-items: center; gap: .65rem; opacity: .28; transform: rotate(-8deg); }
 .v2-acceptance-mark img { width: 1.8rem; }.v2-acceptance-mark span { font-size: .53rem; letter-spacing: .11em; text-transform: uppercase; }
 

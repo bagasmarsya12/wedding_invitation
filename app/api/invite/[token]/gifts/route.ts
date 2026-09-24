@@ -1,65 +1,86 @@
-import { apiError, db, guestFromToken, randomId } from "@/lib/server";
+import { allowMutation, apiError, db, featureEnabled, guestFromToken, logFailure, privateJson, randomId, readJsonBody, sameOriginMutation } from "@/lib/server";
 
 type GiftRow = { id: string; title: string; description: string | null; recipient_category: string; image_url: string | null; price_label: string | null; purchase_url: string | null; status: string; reserved_by_guest_id: string | null; shipping_required: number };
 
 async function listGifts(guestId: string) {
   const rows = await db().prepare("SELECT id, title, description, recipient_category, image_url, price_label, purchase_url, status, reserved_by_guest_id, shipping_required FROM gifts ORDER BY recipient_category, created_at").all<GiftRow>();
   return rows.results.map(gift => ({
-    id: gift.id,
-    title: gift.title,
-    description: gift.description,
-    category: gift.recipient_category,
-    imageUrl: gift.image_url,
-    priceLabel: gift.price_label,
-    status: gift.status,
+    id: gift.id, title: gift.title, description: gift.description, category: gift.recipient_category,
+    imageUrl: gift.image_url, priceLabel: gift.price_label, status: gift.status,
     reservedByYou: gift.reserved_by_guest_id === guestId,
     purchaseUrl: gift.reserved_by_guest_id === guestId ? gift.purchase_url : null,
     shippingRequired: Boolean(gift.shipping_required),
   }));
 }
 
+async function shippingFor(guestId: string) {
+  const reservation = await db().prepare("SELECT id FROM gifts WHERE reserved_by_guest_id = ? AND status IN ('reserved', 'purchased') AND shipping_required = 1 LIMIT 1").bind(guestId).first();
+  if (!reservation) return null;
+  const setting = await db().prepare("SELECT value FROM settings WHERE key = 'shipping_instructions' LIMIT 1").first<{ value: string }>();
+  return setting?.value ?? null;
+}
+
 export async function GET(_: Request, { params }: { params: Promise<{ token: string }> }) {
-  const guest = await guestFromToken((await params).token);
-  if (!guest) return apiError("Invitation not found.", 404);
-  const cash = await db().prepare("SELECT value FROM settings WHERE key = 'cash_gift_details' LIMIT 1").first<{ value: string }>();
-  const hasShippingReservation = await db().prepare("SELECT id FROM gifts WHERE reserved_by_guest_id = ? AND status = 'reserved' AND shipping_required = 1 LIMIT 1").bind(guest.id).first();
-  const shipping = hasShippingReservation ? await db().prepare("SELECT value FROM settings WHERE key = 'shipping_instructions' LIMIT 1").first<{ value: string }>() : null;
-  return Response.json({ gifts: await listGifts(guest.id), cashGiftDetails: cash?.value ?? null, shippingInstructions: shipping?.value ?? null });
+  try {
+    const guest = await guestFromToken((await params).token);
+    if (!guest) return apiError("Invitation not found.", 404);
+    const [cash, gifts, shipping, enabled] = await Promise.all([
+      db().prepare("SELECT value FROM settings WHERE key = 'cash_gift_details' LIMIT 1").first<{ value: string }>(),
+      listGifts(guest.id), shippingFor(guest.id), featureEnabled("gifts"),
+    ]);
+    return privateJson({ gifts, cashGiftDetails: cash?.value ?? null, shippingInstructions: shipping, enabled });
+  } catch (error) { logFailure("gifts_read", error); return apiError("Gifts are temporarily unavailable. Please try again.", 503); }
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
-  const guest = await guestFromToken((await params).token);
-  if (!guest) return apiError("Invitation not found.", 404);
-  const payload = await request.json() as { action?: string; giftId?: string; surprise?: boolean };
-  const giftId = String(payload.giftId ?? "");
-  const now = new Date().toISOString();
-  if (!giftId) return apiError("Gift is required.");
-
-  if (payload.action === "reserve") {
-    const result = await db().prepare(
-      "UPDATE gifts SET status = 'reserved', reserved_by_guest_id = ?, reserved_at = ?, updated_at = ? WHERE id = ? AND status = 'available'",
-    ).bind(guest.id, now, now, giftId).run();
-    if (!result.meta.changes) return apiError("This gift was just reserved by someone else.", 409);
-    await db().prepare("INSERT INTO gift_reservations (id, gift_id, guest_id, surprise, status, reserved_at) VALUES (?, ?, ?, ?, 'reserved', ?)")
-      .bind(randomId("reservation"), giftId, guest.id, payload.surprise === false ? 0 : 1, now).run();
-  } else if (payload.action === "release") {
-    const result = await db().prepare(
-      "UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, reserved_at = NULL, updated_at = ? WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ?",
-    ).bind(now, giftId, guest.id).run();
-    if (!result.meta.changes) return apiError("This reservation can no longer be released.", 409);
-    await db().prepare("UPDATE gift_reservations SET status = 'released', released_at = ? WHERE gift_id = ? AND guest_id = ? AND status = 'reserved'")
-      .bind(now, giftId, guest.id).run();
-  } else if (payload.action === "purchased") {
-    const result = await db().prepare(
-      "UPDATE gifts SET status = 'purchased', purchased_at = ?, updated_at = ? WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ?",
-    ).bind(now, now, giftId, guest.id).run();
-    if (!result.meta.changes) return apiError("Only your active reservation can be marked purchased.", 409);
-    await db().prepare("UPDATE gift_reservations SET status = 'purchased', purchased_at = ? WHERE gift_id = ? AND guest_id = ? AND status = 'reserved'")
-      .bind(now, giftId, guest.id).run();
-  } else {
-    return apiError("Unsupported gift action.");
-  }
-
-  const shipping = await db().prepare("SELECT value FROM settings WHERE key = 'shipping_instructions' LIMIT 1").first<{ value: string }>();
-  return Response.json({ gifts: await listGifts(guest.id), shippingInstructions: payload.action === "reserve" ? shipping?.value ?? null : null });
+  if (!sameOriginMutation(request)) return apiError("This request could not be verified.", 403);
+  try {
+    const guest = await guestFromToken((await params).token);
+    if (!guest) return apiError("Invitation not found.", 404);
+    if (!(await featureEnabled("gifts"))) return apiError("Gift reservations are currently closed.", 403);
+    const payload = await readJsonBody(request);
+    if (!payload || typeof payload.giftId !== "string" || payload.giftId.length > 120) return apiError("Please choose a gift.");
+    const giftId = payload.giftId;
+    if (!giftId || !["reserve", "release", "purchased"].includes(String(payload.action))) return apiError("Unsupported gift action.");
+    if (!(await allowMutation("gift", guest.id, 15, 60_000))) return apiError("Too many gift updates. Please try again shortly.", 429);
+    const now = new Date().toISOString();
+    const database = db();
+    let results: D1Result[];
+    if (payload.action === "reserve") {
+      results = await database.batch([
+        database.prepare("UPDATE gifts SET status = 'reserved', reserved_by_guest_id = ?, reserved_at = ?, updated_at = ? WHERE id = ? AND status = 'available'").bind(guest.id, now, now, giftId),
+        database.prepare(`INSERT INTO gift_reservations (id, gift_id, guest_id, surprise, status, reserved_at)
+          SELECT ?, id, ?, ?, 'reserved', ? FROM gifts WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ? AND reserved_at = ?`)
+          .bind(randomId("reservation"), guest.id, payload.surprise === false ? 0 : 1, now, giftId, guest.id, now),
+      ]);
+    } else if (payload.action === "release") {
+      results = await database.batch([
+        database.prepare(`UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, reserved_at = NULL, updated_at = ?
+          WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ?
+          AND EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND guest_id = ? AND status = 'reserved')`)
+          .bind(now, giftId, guest.id, guest.id),
+        database.prepare(`UPDATE gift_reservations SET status = 'released', released_at = ?
+          WHERE gift_id = ? AND guest_id = ? AND status = 'reserved'
+          AND EXISTS (SELECT 1 FROM gifts WHERE id = gift_id AND status = 'available' AND updated_at = ?)`)
+          .bind(now, giftId, guest.id, now),
+      ]);
+    } else {
+      results = await database.batch([
+        database.prepare(`UPDATE gifts SET status = 'purchased', purchased_at = ?, updated_at = ?
+          WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ?
+          AND EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND guest_id = ? AND status = 'reserved')`)
+          .bind(now, now, giftId, guest.id, guest.id),
+        database.prepare(`UPDATE gift_reservations SET status = 'purchased', purchased_at = ?
+          WHERE gift_id = ? AND guest_id = ? AND status = 'reserved'
+          AND EXISTS (SELECT 1 FROM gifts WHERE id = gift_id AND status = 'purchased' AND updated_at = ?)`)
+          .bind(now, giftId, guest.id, now),
+      ]);
+    }
+    if (!results[0].meta.changes) return apiError("This gift changed while you were viewing it. Please refresh and try again.", 409);
+    if (!results[1].meta.changes) {
+      logFailure("gift_history_inconsistent", new Error("Missing reservation history transition"));
+      return apiError("We could not confirm this gift update. Please contact us before retrying.", 503);
+    }
+    return privateJson({ gifts: await listGifts(guest.id), shippingInstructions: await shippingFor(guest.id) });
+  } catch (error) { logFailure("gift_write", error); return apiError("Gift could not be updated. Please try again.", 503); }
 }

@@ -9,12 +9,13 @@ const timestamps = {
 export const guests = sqliteTable("guests", {
   id: text("id").primaryKey(),
   tokenHash: text("token_hash").notNull(),
+  importKey: text("import_key"),
   displayName: text("display_name").notNull(),
   email: text("email"),
   partyLimit: integer("party_limit").notNull().default(1),
   status: text("status").notNull().default("active"),
   ...timestamps,
-}, table => [uniqueIndex("guests_token_hash_unique").on(table.tokenHash)]);
+}, table => [uniqueIndex("guests_token_hash_unique").on(table.tokenHash), uniqueIndex("guests_import_key_unique").on(table.importKey)]);
 
 export const rsvps = sqliteTable("rsvps", {
   id: text("id").primaryKey(),
@@ -88,4 +89,10 @@ export const settings = sqliteTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const mutationLimits = sqliteTable("mutation_limits", {
+  key: text("key").primaryKey(),
+  windowStart: integer("window_start").notNull(),
+  count: integer("count").notNull().default(0),
 });

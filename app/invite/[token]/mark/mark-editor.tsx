@@ -24,7 +24,7 @@ export function MarkEditor({ token, guestName }: { token: string; guestName: str
   const resize = () => {
     const element = canvas(); if (!element) return;
     const rect = element.getBoundingClientRect();
-    const ratio = Math.min(devicePixelRatio || 1, 2);
+    const ratio = Math.min(devicePixelRatio || 1, 2, 2048 / Math.max(1, rect.width), 2048 / Math.max(1, rect.height));
     const snapshot = element.width ? element.toDataURL() : "";
     element.width = Math.round(rect.width * ratio); element.height = Math.round(rect.height * ratio);
     const ctx = context(); if (!ctx) return; ctx.scale(ratio, ratio); ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -43,7 +43,7 @@ export function MarkEditor({ token, guestName }: { token: string; guestName: str
     const element = canvas(); if (!element) return; setBusy(true); setStatus("Keeping your mark…");
     try {
       const response = await fetch(`/api/invite/${encodeURIComponent(token)}/marks`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message, visibility, drawing: history.length ? element.toDataURL("image/png") : "" }) });
-      const result = await response.json(); if (!response.ok) throw new Error(result.error || "Your mark could not be saved.");
+      const result = await response.json() as { error?: string }; if (!response.ok) throw new Error(result.error || "Your mark could not be saved.");
       setStatus("Kept."); setMessage(""); clear(); setHistory([]); setFuture([]);
     } catch (error) { setStatus(error instanceof Error ? error.message : "Your mark could not be saved."); }
     finally { setBusy(false); }
