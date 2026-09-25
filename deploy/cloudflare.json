@@ -1,0 +1,9 @@
+{
+  "account_id": "a88d690a3be966c2789ebb109616b336",
+  "worker_name": "bagas-iga-wedding",
+  "worker_url": "https://bagas-iga-wedding.bagasmarsya.workers.dev",
+  "database_name": "wedding-invitation",
+  "database_id": "4c2cdd67-2dca-4f25-b350-ffd1ba662dba",
+  "bucket_name": "wedding-invitation-media",
+  "note": "Cloudflare ids are not secrets. No API tokens live in this repo; wrangler keeps its own OAuth session."
+}

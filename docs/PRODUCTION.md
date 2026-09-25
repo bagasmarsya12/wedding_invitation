@@ -2,6 +2,13 @@
 
 The existing Sites deployment runs Vinext/React on a Cloudflare Worker, D1 for structured data, and R2 for guest drawings. The site is public; individual invitations use opaque `/invite/<token>` links. Admin authentication is either dispatch-owned ChatGPT sign-in plus a server-side `ADMIN_USER_IDS`/`ADMIN_EMAILS` allowlist, or email + password sign-in backed by a PBKDF2-hashed credential in the `settings` table (`admin.credential.<email>`, key `admin.session_secret` for the signed session cookie). Seed or rotate a password from the admin desk (Kartu Pos tab) or with `node --experimental-strip-types scripts/seed-admin.mjs --email you@example.com --password-file <file>` (add `--remote` once a standalone Worker deploy exists). The client never receives the allowlist, credential hashes, or token hashes.
 
+## Standalone Cloudflare deployment (added 26 Sep 2026)
+
+- Worker **`bagas-iga-wedding`** → https://bagas-iga-wedding.bagasmarsya.workers.dev (workers.dev subdomain `bagasmarsya`, account `a88d690a…`). D1 **`wedding-invitation`** (`4c2cdd67-…`, APAC), R2 **`wedding-invitation-media`**; ids recorded in `deploy/cloudflare.json` (ids are not secrets; no API tokens live in this repo — wrangler keeps its own OAuth session).
+- Redeploy after `npm run build`: `node scripts/deploy-cloudflare.mjs` (add `--migrate` only when a new `drizzle/*.sql` file must be applied — the additive files run once per database).
+- Off-platform hosts have no `oai-authenticated-*` headers, so admin sign-in there is **email + password** (seed or rotate: `node --experimental-strip-types scripts/seed-admin.mjs --email you@example.com --remote`). `ADMIN_SESSION_SECRET` is optional; when unset the session secret is generated into the settings table.
+- A brand-new `*.workers.dev` subdomain can refuse TLS handshakes (`ERR_SSL_VERSION_OR_CIPHER_MISMATCH`) for a few minutes while its certificate is provisioned; retry.
+
 ## Before sending invitations
 
 1. Confirm the production Site still has the `DB` D1 and `BUCKET` R2 bindings in `.openai/hosting.json`, and configure `ADMIN_EMAILS` or `ADMIN_USER_IDS` in the Site environment. See `.env.example`; never commit values.
