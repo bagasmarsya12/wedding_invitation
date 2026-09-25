@@ -37,7 +37,7 @@ const run = args => execFileSync("npx", ["wrangler", ...args], { cwd: REPO, stdi
 const wranglerConfig = ["--config", "dist/server/wrangler.deploy.json"];
 
 if (process.argv.includes("--migrate")) {
-  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql"]) {
+  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql"]) {
     console.log(`applying drizzle/${file} …`);
     run(["d1", "execute", "DB", "--remote", "--yes", ...wranglerConfig, "--file", `drizzle/${file}`]);
   }

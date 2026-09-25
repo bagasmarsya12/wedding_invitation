@@ -38,7 +38,7 @@ async function api(base, path, cookie, data) {
 }
 
 try {
-  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql"]) migrate(file);
+  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql"]) migrate(file);
   const listenPort = await port();
   const base = `http://127.0.0.1:${listenPort}`;
   // Direct Vite avoids vinext's single-server lock while a designer preview runs.

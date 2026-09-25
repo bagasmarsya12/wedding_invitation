@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
 import { T } from "./language";
-import { MARK_DECOR, markStyleOr } from "@/lib/mark-styles";
+import { MARK_DECOR, markFontOr, markStyleOr } from "@/lib/mark-styles";
 
 const STAMPS = [
   "/assets/botanicals/combretum/flower-cluster.webp",
@@ -17,6 +17,7 @@ export type PostcardMark = {
   created_at?: string | null;
   index?: number;
   style?: string | null;
+  font?: string | null;
 };
 
 function postmark(stamp?: string | null) {
@@ -29,9 +30,10 @@ export function Postcard({ mark, className = "", note }: { mark: PostcardMark; c
   const drawing = mark.drawingUrl || null;
   const stamp = postmark(mark.created_at);
   const style = markStyleOr(mark.style);
+  const font = markFontOr(mark.font);
   const decor = MARK_DECOR[style];
   return (
-    <article className={`postcard pc--${style} ${className}`.trim()}>
+    <article className={`postcard pc--${style} pc-font-${font} ${className}`.trim()}>
       {decor && <img className="pc-decor" src={decor} alt="" aria-hidden="true" />}
       <span className="postcard-stamp" aria-hidden="true"><img src={STAMPS[index % STAMPS.length]} alt="" /></span>
       {stamp && <span className="postcard-postmark" aria-hidden="true">{stamp}</span>}

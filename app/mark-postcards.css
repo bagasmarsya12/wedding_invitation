@@ -25,7 +25,6 @@
 .pc--midnight .postcard-stamp{border-color:rgba(244,239,226,.42)}
 .pc--midnight .postcard-stamp img{filter:brightness(0) invert(.94)}
 .pc--midnight .postcard-postmark{border-color:rgba(244,239,226,.5);color:#f4efe2}
-.pc--airmail .postcard-writing{font-family:var(--bx-sans);font-style:normal}
 .pc--midnight .postcard-writing.is-drawn{color:rgba(244,239,226,.52)}
 .pc-decor{display:none;position:absolute;z-index:0;pointer-events:none}
 .pc--classic .pc-decor{display:block;left:-4%;bottom:-6%;width:24%;opacity:.32;transform:rotate(5deg)}
@@ -64,3 +63,29 @@
 .style-swatches button:hover{transform:scale(1.1)}
 .style-swatches button.is-on{border-color:var(--bx-paper);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 2px rgba(249,245,237,.35)}
 .style-swatches .caption{font-size:.74rem;color:rgba(249,245,237,.64)}
+/* --- two separate panels --- */
+.mark-studio > .mark-composer,.mark-studio > .mark-wall{padding:1.5rem 1.4rem;border:1px solid rgba(249,245,237,.16);border-radius:16px;background:rgba(249,245,237,.035)}
+.mark-composer .postcard-canvas{max-width:32rem}
+@media (max-width:60rem){.mark-studio > .mark-composer,.mark-studio > .mark-wall{padding:1.05rem .95rem}}
+/* --- wall: two rows + scroll --- */
+.wall-scroll{max-height:22rem;overflow-y:auto;overscroll-behavior:contain;padding:.15rem .4rem .15rem 0;scrollbar-width:thin;scrollbar-color:rgba(249,245,237,.3) transparent}
+.wall-scroll::-webkit-scrollbar{width:6px}
+.wall-scroll::-webkit-scrollbar-thumb{background:rgba(249,245,237,.25);border-radius:99px}
+/* --- card fonts --- */
+.pc-font-hand{--pc-font:var(--bx-serif);--pc-font-style:italic}
+.pc-font-clean{--pc-font:var(--bx-sans);--pc-font-style:normal}
+.pc-font-type{--pc-font:"Courier New",Courier,monospace;--pc-font-style:normal}
+.postcard-writing{font-family:var(--pc-font,var(--bx-serif));font-style:var(--pc-font-style,italic)}
+.postcard-canvas .postcard-writing textarea{font-family:var(--pc-font,var(--bx-serif));font-style:var(--pc-font-style,italic);font-size:1.5rem;line-height:1.62}
+.postcard-canvas .postcard-writing textarea::placeholder{font-style:var(--pc-font-style,italic)}
+.pc-mini .postcard-writing{font-size:.9rem;line-height:1.45}
+.font-picker{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.font-option{display:grid;place-items:center;min-width:2.7rem;height:2.3rem;padding:0 .55rem;color:rgba(249,245,237,.92);background:rgba(249,245,237,.05);border:1px solid rgba(249,245,237,.28);border-radius:8px;cursor:pointer}
+.font-option:hover{background:rgba(249,245,237,.12)}
+.font-option.is-on{border-color:var(--bx-paper);background:rgba(249,245,237,.16)}
+.font-preview{font-family:var(--pc-font,var(--bx-serif));font-style:var(--pc-font-style,italic);font-size:1.08rem;line-height:1}
+.font-picker .caption{font-size:.74rem;color:rgba(249,245,237,.64)}
+/* --- save row + counter --- */
+.submit-row{display:flex;align-items:center;gap:.8rem}
+.submit-row .paper-button{color:var(--bx-charcoal);background:var(--bx-paper)}
+.char-count{font-size:.72rem;letter-spacing:.08em;color:rgba(249,245,237,.62);font-variant-numeric:tabular-nums}

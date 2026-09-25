@@ -28,3 +28,14 @@ export const MARK_DECOR: Record<MarkStyle, string | null> = {
   airmail: null,
   midnight: "/assets/botanicals/combretum/flower-cascade.webp",
 };
+
+/** Card lettering choices (system stacks only — the project ships no webfonts). */
+export const MARK_FONTS = ["hand", "clean", "type"] as const;
+export type MarkFont = (typeof MARK_FONTS)[number];
+export const DEFAULT_MARK_FONT: MarkFont = "hand";
+export function isMarkFont(value: unknown): value is MarkFont {
+  return typeof value === "string" && (MARK_FONTS as readonly string[]).includes(value);
+}
+export function markFontOr(value: unknown, fallback: MarkFont = DEFAULT_MARK_FONT): MarkFont {
+  return isMarkFont(value) ? value : fallback;
+}

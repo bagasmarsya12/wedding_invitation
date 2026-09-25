@@ -221,4 +221,6 @@ export const indonesian: Record<string, string> = {
   "Loading the wall…": "Memuat mading…",
   "Approved postcards from every guest.": "Kartu semua tamu yang sudah disetujui.",
   "Nothing here yet — approved postcards will fill the wall.": "Belum ada kartu di mading — kartu yang disetujui akan tampil di sini.",
+  "Handwriting": "Tulisan", "Clean": "Rapi", "Typewriter": "Ketik",
+  "Card font": "Font kartu", "Card font — click to try": "Font kartu — klik untuk coba",
 };

@@ -176,7 +176,7 @@ button, a { color: inherit; }
 .postcard-postmark { position: absolute; z-index: 1; top: 1.4rem; right: 6.2rem; display: grid; width: 3.2rem; aspect-ratio: 1; place-items: center; color: rgba(43,41,37,.5); border: 1px solid rgba(43,41,37,.3); border-radius: 50%; font-size: .56rem; letter-spacing: .04em; }
 .postcard-ink { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .postcard-body { position: relative; z-index: 3; display: flex; flex: 1; min-height: 0; margin-right: 6rem; padding-right: .75rem; }
-.postcard-writing { margin: 0; overflow: auto; font-family: var(--bx-serif); font-size: clamp(1rem, 1.4vw, 1.3rem); font-style: italic; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.postcard-writing { margin: 0; overflow: auto; font-family: var(--bx-serif); font-size: clamp(1.05rem, 1.5vw, 1.42rem); font-style: italic; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .postcard-writing.is-drawn { color: rgba(43,41,37,.5); font-size: .9rem; }
 .public-mark { position: relative; display: flex; aspect-ratio: 3 / 2; flex-direction: column; overflow: hidden; }
 .mark-modes { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .4rem; }

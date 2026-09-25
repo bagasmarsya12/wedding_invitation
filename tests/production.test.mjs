@@ -7,7 +7,7 @@ import { csvCell, parseCsv, phaseForDate, pngDimensions, randomInviteToken, safe
 function database() {
   const db = new DatabaseSync(":memory:");
   db.exec("PRAGMA foreign_keys = ON");
-  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql"]) {
+  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql"]) {
     for (const statement of readFileSync(new URL(`../drizzle/${file}`, import.meta.url), "utf8").split("--> statement-breakpoint")) {
       if (statement.trim()) db.exec(statement);
     }
