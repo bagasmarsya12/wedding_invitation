@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { toCsv } from "@/lib/production";
 import { CONTENT_SECTIONS } from "@/lib/content-defaults";
+import { PasswordPanel } from "./password-panel";
 
 type Row = Record<string, unknown>;
 type State = { guests: Row[]; rsvps: Row[]; gifts: Row[]; reservations: Row[]; marks: Row[]; archive: Row[]; settings: Row[] };
@@ -202,6 +203,7 @@ export function AdminClient() {
     </div></section>
 
     <section className="admin-panel admin-settings"><header><p>Private configuration</p><h2>Lifecycle &amp; details</h2></header><form onSubmit={event => submit(event, "set_setting")}><label>Setting<select name="key"><option value="site_phase">Site phase (auto, pre-wedding, wedding-day, post-wedding)</option><option value="rsvp_enabled">RSVP (auto, on, off)</option><option value="gifts_enabled">Gifts (auto, on, off)</option><option value="marks_enabled">Leave a Mark (auto, on, off)</option><option value="shipping_instructions">Private shipping instructions</option><option value="cash_gift_details">Cash gift details</option></select></label><label>Value<textarea name="value" rows={5} placeholder="Use auto unless overriding a feature" required /></label><button>Save setting</button></form><div className="admin-table">{state.settings.map(row => <article key={string(row.key)}><strong>{string(row.key)}</strong><span>{string(row.value)}</span></article>)}</div></section>
+    <PasswordPanel />
     </div>
 
     <div hidden={tab !== "konten"} className="admin-pane">

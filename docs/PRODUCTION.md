@@ -1,6 +1,6 @@
 # Bagas × Iga — production operations
 
-The existing Sites deployment runs Vinext/React on a Cloudflare Worker, D1 for structured data, and R2 for guest drawings. The site is public; individual invitations use opaque `/invite/<token>` links. Admin authentication is dispatch-owned ChatGPT sign-in plus a server-side `ADMIN_USER_IDS`/`ADMIN_EMAILS` allowlist. The client never receives the allowlist or token hashes.
+The existing Sites deployment runs Vinext/React on a Cloudflare Worker, D1 for structured data, and R2 for guest drawings. The site is public; individual invitations use opaque `/invite/<token>` links. Admin authentication is either dispatch-owned ChatGPT sign-in plus a server-side `ADMIN_USER_IDS`/`ADMIN_EMAILS` allowlist, or email + password sign-in backed by a PBKDF2-hashed credential in the `settings` table (`admin.credential.<email>`, key `admin.session_secret` for the signed session cookie). Seed or rotate a password from the admin desk (Kartu Pos tab) or with `node --experimental-strip-types scripts/seed-admin.mjs --email you@example.com --password-file <file>` (add `--remote` once a standalone Worker deploy exists). The client never receives the allowlist, credential hashes, or token hashes.
 
 ## Before sending invitations
 

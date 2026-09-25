@@ -1,6 +1,11 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "@/app/chatgpt-auth";
+import { headers } from "next/headers";
+import { getChatGPTUser, type ChatGPTUser } from "@/app/chatgpt-auth";
 import { phaseForDate, sha256, type SitePhase } from "@/lib/production";
+import {
+  credentialKey, newSecret, parseCredential, readSessionToken, secretFromText, secretToText,
+  type StoredCredential,
+} from "@/lib/admin-auth";
 export { randomInviteToken, sha256 } from "@/lib/production";
 
 export type GuestRecord = {
@@ -29,13 +34,69 @@ export async function guestFromToken(token: string): Promise<GuestRecord | null>
   ).bind(hash).first<GuestRecord>();
 }
 
-export async function requireAdmin() {
+export type PasswordAdmin = { userId: string; email: string; displayName: string; fullName: string | null };
+
+export function adminMethod(admin: { userId: string }): "password" | "chatgpt" {
+  return admin.userId.startsWith("pw:") ? "password" : "chatgpt";
+}
+
+export const ADMIN_SESSION_COOKIE = "wedding_admin";
+const ADMIN_SESSION_SECRET_KEY = "admin.session_secret";
+
+export function cookieValue(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  for (const part of cookieHeader.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator === -1) continue;
+    if (part.slice(0, separator).trim() === name) return part.slice(separator + 1).trim();
+  }
+  return null;
+}
+
+export async function getAdminCredential(email: string): Promise<StoredCredential | null> {
+  const row = await db().prepare("SELECT value FROM settings WHERE key = ? LIMIT 1").bind(credentialKey(email)).first<{ value: string }>();
+  return parseCredential(row?.value);
+}
+
+// Session signing key: ADMIN_SESSION_SECRET when configured, otherwise a
+// generated secret that lives in the settings table so login works on any host.
+export async function adminSessionSecret(): Promise<Uint8Array> {
+  const configured = env.ADMIN_SESSION_SECRET?.trim();
+  if (configured && configured.length >= 32) return new TextEncoder().encode(configured);
+  const read = async () => (await db().prepare("SELECT value FROM settings WHERE key = ? LIMIT 1").bind(ADMIN_SESSION_SECRET_KEY).first<{ value: string }>())?.value;
+  const existing = await read();
+  const parsed = existing ? secretFromText(existing) : null;
+  if (parsed) return parsed;
+  await db().prepare("INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO NOTHING")
+    .bind(ADMIN_SESSION_SECRET_KEY, secretToText(newSecret())).run();
+  const stored = await read();
+  const secret = stored ? secretFromText(stored) : null;
+  if (!secret) throw new Error("Admin session secret is unavailable.");
+  return secret;
+}
+
+async function passwordAdminSession(): Promise<PasswordAdmin | null> {
+  try {
+    const token = cookieValue((await headers()).get("cookie"), ADMIN_SESSION_COOKIE);
+    if (!token) return null;
+    const email = await readSessionToken(token, await adminSessionSecret());
+    if (!email) return null;
+    // Removing the credential revokes every outstanding session for that email.
+    if (!(await getAdminCredential(email))) return null;
+    return { userId: `pw:${email}`, email, displayName: email, fullName: null };
+  } catch {
+    return null;
+  }
+}
+
+export async function requireAdmin(): Promise<ChatGPTUser | PasswordAdmin | null> {
   const user = await getChatGPTUser();
-  if (!user) return null;
-  const ids = (env.ADMIN_USER_IDS ?? "").split(",").map(value => value.trim()).filter(Boolean);
-  const emails = (env.ADMIN_EMAILS ?? "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean);
-  if (!ids.includes(user.userId) && !emails.includes(user.email.toLowerCase())) return null;
-  return user;
+  if (user) {
+    const ids = (env.ADMIN_USER_IDS ?? "").split(",").map(value => value.trim()).filter(Boolean);
+    const emails = (env.ADMIN_EMAILS ?? "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean);
+    if (ids.includes(user.userId) || emails.includes(user.email.toLowerCase())) return user;
+  }
+  return passwordAdminSession();
 }
 
 export function cleanText(value: unknown, max = 500): string {

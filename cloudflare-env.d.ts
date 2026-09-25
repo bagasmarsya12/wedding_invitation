@@ -4,5 +4,6 @@ declare namespace Cloudflare {
     BUCKET?: R2Bucket;
     ADMIN_USER_IDS?: string;
     ADMIN_EMAILS?: string;
+    ADMIN_SESSION_SECRET?: string;
   }
 }
