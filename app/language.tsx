@@ -4,11 +4,31 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { indonesian } from "../lib/invitation-copy";
 
 type Language = "en" | "id";
-const LanguageContext = createContext({ language: "en" as Language, setLanguage: (_: Language) => {}, t: (text: string) => text });
+
+/**
+ * CMS overrides arrive from the server (settings table → flat key/value map,
+ * keys like "hero.env greet"). A key with a stored value replaces the literal;
+ * everything else keeps the authored fallback. Indonesian translation still
+ * applies on top for interface copy that has an entry in the dictionary.
+ */
+type LanguageContextValue = {
+  language: Language;
+  setLanguage: (_: Language) => void;
+  t: (text: string) => string;
+  content: Record<string, string>;
+};
+const EMPTY: Record<string, string> = {};
+const LanguageContext = createContext<LanguageContextValue>({
+  language: "en" as Language,
+  setLanguage: () => {},
+  t: (text: string) => text,
+  content: EMPTY,
+});
 const KEY = "bagas-iga:language:v1";
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export function LanguageProvider({ children, content }: { children: ReactNode; content?: Record<string, string> }) {
   const [language, setLanguage] = useState<Language>("en");
+  const overrides = content && Object.keys(content).length > 0 ? content : EMPTY;
   useEffect(() => {
     // Read after hydration so the server and first client render agree.
     queueMicrotask(() => {
@@ -26,11 +46,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(KEY, value); } catch { /* Private browsing still works. */ }
   }, []);
   const t = useCallback((text: string) => {
-    if (language === "en") return text;
-    const translated = indonesian[text.trim()];
-    return translated === undefined ? text : text.replace(text.trim(), translated);
-  }, [language]);
-  const value = useMemo(() => ({ language, setLanguage: choose, t }), [language, choose, t]);
+    let value = text;
+    // Longest matching override wins (overrides may equal the default literal).
+    const stored = overrides[text.trim()];
+    if (stored !== undefined) value = stored;
+    if (language === "id") {
+      const translated = indonesian[value.trim()] ?? indonesian[text.trim()];
+      if (translated !== undefined) return value.replace(value.trim(), translated);
+    }
+    return value;
+  }, [language, overrides]);
+  const value = useMemo(() => ({ language, setLanguage: choose, t, content: overrides }), [language, choose, t, overrides]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 

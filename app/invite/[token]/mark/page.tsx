@@ -2,7 +2,7 @@
 import { T, LanguageSwitch } from "../../../language";
 import { notFound } from "next/navigation";
 import { guestFromToken } from "@/lib/server";
-import { MarkEditor } from "./mark-editor";
+import { MarkEditor } from "@/app/mark-editor";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";

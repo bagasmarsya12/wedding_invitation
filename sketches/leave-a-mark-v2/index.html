@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Leave a Mark v2 — mockup gaya kartu &amp; layout</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#2b2925; --paper:#f9f5ed; --paper-warm:#eee6da; --green:#46533e; --green-deep:#303c2d;
+    --rose:#c48f94; --sand:#d1c5b5;
+    --serif:Baskerville,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:"Avenir Next",Avenir,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{font-family:var(--sans);background:#ece7de;color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:44px 26px 90px}
+  .kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#8a8177}
+  h1{font-family:var(--serif);font-size:2.05rem;font-weight:500;margin:6px 0 8px}
+  .lede{color:#5f584e;max-width:68ch;font-size:.98rem}
+  section{margin-top:54px}
+  h2{font-family:var(--serif);font-size:1.5rem;font-weight:500}
+  .sub{color:#6b6459;font-size:.9rem;margin:4px 0 22px;max-width:72ch}
+  .note{font-size:.82rem;color:#8a8177}
+
+  /* ============ KOMPONEN KARTU POS (dipakai semua mock) ============ */
+  .pc{position:relative;container-type:inline-size;aspect-ratio:3/2;overflow:hidden;border-radius:5px;
+      background-color:var(--pc-bg,#f9f5ed);
+      background-image:url("../../public/assets/15-paper-fiber-texture.webp");
+      background-size:cover;background-blend-mode:multiply;
+      color:var(--pc-ink,#2b2925);
+      box-shadow:0 12px 28px -16px rgba(43,41,37,.5)}
+  .pc-stamp{position:absolute;top:5.5cqw;right:4.5cqw;width:13.5cqw;aspect-ratio:4/5;display:grid;place-items:center;
+      background:rgba(242,231,210,.9);border:1px dashed rgba(43,41,37,.35)}
+  .pc-stamp img{display:none;width:72%;mix-blend-mode:multiply}
+  .pc--classic .pc-stamp .s1,.pc--rose .pc-stamp .s2,.pc--sage .pc-stamp .s3,.pc--airmail .pc-stamp .s4,.pc--midnight .pc-stamp .s5{display:block}
+  .pc-postmark{position:absolute;top:6.8cqw;right:20.6cqw;width:9cqw;aspect-ratio:1;border:1px solid rgba(43,41,37,.32);
+      border-radius:50%;display:grid;place-items:center;font-size:2.3cqw;letter-spacing:.04em;color:rgba(43,41,37,.55)}
+  .pc-msg{position:absolute;left:6.5cqw;top:11cqw;right:31cqw;font-family:var(--serif);font-style:italic;font-size:4.1cqw;line-height:1.6}
+  .pc-from{position:absolute;left:6.5cqw;bottom:5cqw;font-size:2.8cqw;letter-spacing:.14em;text-transform:uppercase;color:rgba(43,41,37,.62)}
+  .pc-decor{display:none;pointer-events:none}
+  .pc--classic .d1,.pc--rose .d2,.pc--sage .d3,.pc--midnight .d5{display:block}
+  .pc--classic .d1{position:absolute;left:-3cqw;bottom:-4cqw;width:22cqw;opacity:.32;transform:rotate(5deg)}
+  .pc--rose .d2{position:absolute;right:-5cqw;bottom:-7cqw;width:31cqw;opacity:.5;transform:rotate(-8deg)}
+  .pc--sage .d3{position:absolute;left:-5cqw;bottom:-6cqw;width:26cqw;opacity:.5;transform:rotate(6deg)}
+  .pc--midnight .d5{position:absolute;left:-6cqw;bottom:-8cqw;width:31cqw;opacity:.26;filter:brightness(0) invert(.94)}
+  /* ---------- 5 GAYA KARTU ---------- */
+  .pc--classic{--pc-bg:#f9f5ed}
+  .pc--classic::after{content:"";position:absolute;inset:5%;border:1px solid rgba(43,41,37,.16);pointer-events:none}
+
+  .pc--rose{--pc-bg:#f7e7e4;--pc-ink:#4a3a37}
+  .pc--rose .pc-stamp{background:rgba(253,247,244,.92);border-color:rgba(158,106,110,.42)}
+  .pc--rose .pc-postmark{border-color:rgba(158,106,110,.4);color:rgba(140,90,95,.75)}
+  .pc--rose .pc-msg{color:#5b4340}
+  .pc--rose::after{content:"";position:absolute;inset:5%;border:1px solid rgba(196,143,148,.55);pointer-events:none}
+
+  .pc--sage{--pc-bg:#e9eddf;--pc-ink:#3c4634}
+  .pc--sage .pc-stamp{background:rgba(244,247,238,.92);border-color:rgba(90,105,78,.4)}
+  .pc--sage .pc-postmark{border-color:rgba(90,105,78,.38);color:rgba(74,88,62,.75)}
+  .pc--sage .pc-msg{color:#37412e}
+  .pc--sage::after{content:"";position:absolute;inset:5%;border:1px solid rgba(70,83,62,.35);pointer-events:none}
+
+  .pc--airmail{--pc-bg:#f6f1e5}
+  .pc--airmail::before,.pc--airmail::after{content:"";position:absolute;left:0;right:0;height:6.8%;
+      background:repeating-linear-gradient(45deg,#c14b43 0 10px,#f7f3ec 10px 20px,#3f5d8f 20px 30px,#f7f3ec 30px 40px)}
+  .pc--airmail::before{top:0}.pc--airmail::after{bottom:0}
+  .pc--airmail .pc-msg{font-family:var(--sans);font-style:normal;font-size:3.4cqw;top:12.5cqw}
+  .pc--airmail .pc-stamp{border-style:solid;border-color:rgba(63,93,143,.5);background:rgba(247,243,236,.95)}
+  .pc--airmail .pc-postmark{border-color:rgba(63,93,143,.42);color:rgba(63,93,143,.7)}
+  .pc--airmail .pc-from{color:rgba(63,93,143,.65)}
+
+  .pc--midnight{--pc-bg:#303c2d;--pc-ink:#f2ecdd}
+  .pc--midnight .pc-stamp{background:rgba(48,60,45,.55);border-color:rgba(242,236,221,.5)}
+  .pc--midnight .pc-stamp img{filter:brightness(0) invert(.94) sepia(.08)}
+  .pc--midnight .pc-postmark{border-color:rgba(242,236,221,.4);color:rgba(242,236,221,.66)}
+  .pc--midnight .pc-from{color:rgba(242,236,221,.6)}
+  .pc--midnight .pc-msg{color:#f4efe2}
+  .pc-seal{position:absolute;right:5.5cqw;bottom:5.2cqw;width:14cqw;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+      background:radial-gradient(circle at 34% 30%,#fbf8f3,#e7dcc9 72%);
+      box-shadow:0 6px 14px -6px rgba(0,0,0,.55),inset 0 0 0 1px rgba(43,41,37,.08)}
+  .pc-seal img{width:64%;height:64%;object-fit:contain;mix-blend-mode:multiply}
+  /* ---------- CSS untuk MOCK LAYOUT & GALERI ---------- */
+  .flow{position:relative;background:linear-gradient(145deg,#8f8275,#5b6259 65%,#37493d);border-radius:20px;
+      padding:clamp(20px,2.8vw,34px);color:#f4efe4;
+      display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);gap:clamp(18px,2.4vw,30px)}
+  .flow-label{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,239,228,.78)}
+  .flow-label b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(244,239,228,.2);font-size:.62rem;font-weight:600;letter-spacing:0;color:#f4efe4}
+  .editor-panel,.mad{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{padding:7px 15px;border-radius:999px;border:1px solid rgba(244,239,228,.35);background:transparent;color:rgba(244,239,228,.85);font:inherit;font-size:.8rem;cursor:pointer;transition:.2s}
+  .tab:hover{border-color:rgba(244,239,228,.7)}
+  .tab.is-on{background:#f4efe4;color:#37493d;border-color:#f4efe4}
+  .pane{padding:11px 14px;border:1px dashed rgba(244,239,228,.38);border-radius:12px;font-size:.84rem;color:rgba(244,239,228,.9);min-height:74px;background:rgba(244,239,228,.06)}
+  .stick{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:11px;margin:0;padding:3px;
+      background:rgba(244,239,228,.14);border:1px dashed rgba(244,239,228,.45);cursor:pointer;transition:.15s}
+  .stick:hover{transform:translateY(-2px) scale(1.05);background:rgba(244,239,228,.24)}
+  .stick:focus-visible{outline:2px solid #f4efe4;outline-offset:2px}
+  .stick img{width:100%;height:100%;display:block}
+  .stick-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .swatches{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);transition:.15s}
+  .sw:hover{transform:scale(1.08)}
+  .sw.is-on{border-color:#f4efe4;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 0 0 2px rgba(244,239,228,.35)}
+  .save-btn{align-self:flex-start;padding:9px 20px;border-radius:999px;border:0;background:#f4efe4;color:#37493d;font:inherit;font-weight:600;font-size:.85rem;cursor:pointer;transition:.2s}
+  .save-btn:hover{background:#fff}
+  .placed{position:absolute;width:17cqw;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(43,41,37,.18))}
+  .mystrip{margin-top:6px;display:flex;flex-direction:column;gap:9px}
+  .mystrip-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .strip-card{width:136px;display:flex;flex-direction:column;gap:6px}
+  .strip-card .pc{cursor:pointer}
+  .strip-add{width:136px;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+      border:1px dashed rgba(244,239,228,.45);border-radius:12px;background:rgba(244,239,228,.06);color:rgba(244,239,228,.8);font-size:.78rem;cursor:pointer}
+  .strip-add:hover{background:rgba(244,239,228,.12)}
+  .caption{font-size:.76rem;color:rgba(244,239,228,.64)}
+  .mad-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 16px;padding-top:6px}
+  .mini-wrap{position:relative;padding-top:11px}
+  .mini-wrap .pc{transition:transform .25s}
+  .mini-wrap:nth-child(odd) .pc{transform:rotate(-1.8deg)}
+  .mini-wrap:nth-child(even) .pc{transform:rotate(1.5deg)}
+  .mini-wrap:hover .pc{transform:rotate(0)}
+  .pin{position:absolute;top:0;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:#e8e0d2;box-shadow:0 2px 5px rgba(0,0,0,.45);z-index:2}
+  .chip{display:inline-block;margin-top:7px;padding:3px 10px;border-radius:999px;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;background:rgba(244,239,228,.15);color:rgba(244,239,228,.85)}
+  .mini-wrap.is-mine .pc::before{content:"";position:absolute;inset:4px;border:1px dashed rgba(244,239,228,.75);pointer-events:none;z-index:4}
+
+  .styles-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 22px}
+  .style-card{display:flex;flex-direction:column;gap:10px}
+  .style-card .pc{transition:transform .25s}
+  .style-card .pc:hover{transform:translateY(-3px)}
+  .style-card h3{font-family:var(--serif);font-size:1.05rem;font-weight:500;margin-top:4px}
+  .style-card p{font-size:.82rem;color:#6b6459}
+  .legend{border:1px dashed #b9b0a2;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .legend h3{font-family:var(--serif);font-size:1.05rem;font-weight:500}
+  .legend p{font-size:.83rem;color:#5f584e}
+  footer.page-foot{margin-top:70px;border-top:1px solid #d5ccbd;padding-top:18px}
+  @media (max-width:900px){.styles-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:660px){.flow{grid-template-columns:1fr}.styles-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">Mockup konsep v2 — bukan implementasi</p>
+    <h1>“Leave a Mark”: editor kiri, mading kanan</h1>
+    <p class="lede">Kiri = editor tamu (tulis / gambar / sticker). Kanan = mading berisi kartu tamu yang sudah di-approve admin. Di bawah: 5 kandidat gaya kartu pos. Kartu di mock ini memakai aset asli situs.</p>
+  </header>
+  <section>
+    <h2>1 · Layout yang diusulkan</h2>
+    <p class="sub">Mading hanya menampilkan kartu berstatus <em>approved</em> + publik — hasil moderasi admin. Kartumu sendiri ada di panel kiri (strip di bawah editor).</p>
+    <div class="flow">
+      <div class="editor-panel">
+        <span class="flow-label"><b>1</b> Editor tamu</span>
+        <div class="tabs">
+          <button type="button" class="tab is-on" data-tab="write">Tulis</button>
+          <button type="button" class="tab" data-tab="draw">Gambar</button>
+          <button type="button" class="tab" data-tab="sticker">Sticker</button>
+        </div>
+        <div class="pane" data-pane="write">“Selamat menempuh hidup baru, Bagas &amp; Iga. Semoga rumahmu selalu ramai…”<br /><span class="caption">Ketik langsung di kertas.</span></div>
+        <div class="pane" data-pane="draw" hidden>Kanvas coret: pena · penghapus · undo — seperti yang sudah ada.</div>
+        <div class="pane" data-pane="sticker" hidden>
+          <div class="stick-row">
+            <button type="button" class="stick" title="Senang"><img src="stickers/cat-01-senang.svg" alt="Kucing senang" /></button>
+            <button type="button" class="stick" title="Ketawa"><img src="stickers/cat-02-ketawa.svg" alt="Kucing ketawa" /></button>
+            <button type="button" class="stick" title="Love"><img src="stickers/cat-03-love.svg" alt="Kucing love" /></button>
+            <button type="button" class="stick" title="Malu"><img src="stickers/cat-04-malu.svg" alt="Kucing malu" /></button>
+            <button type="button" class="stick" title="Kaget"><img src="stickers/cat-05-kaget.svg" alt="Kucing kaget" /></button>
+            <button type="button" class="stick" title="Ngantuk"><img src="stickers/cat-06-ngantuk.svg" alt="Kucing ngantuk" /></button>
+          </div>
+          <p class="caption" style="margin-top:8px">Set kucing — 6 ekspresi. Klik untuk menempel di kertas.</p>
+        </div>
+        <div class="pc pc--classic" id="preview-card">
+          <span class="pc-stamp">
+            <img class="s1" src="../../public/assets/botanicals/combretum/flower-cluster.webp" alt="" />
+            <img class="s2" src="../../public/assets/botanicals/combretum/flower-tip-pink.webp" alt="" />
+            <img class="s3" src="../../public/assets/botanicals/syzygium/branch-short.webp" alt="" />
+            <img class="s4" src="../../public/assets/botanicals/dendrobium/branch-short.webp" alt="" />
+            <img class="s5" src="../../public/assets/botanicals/melastoma/full-stem.webp" alt="" />
+          </span>
+          <span class="pc-postmark">25·09·26</span>
+          <p class="pc-msg">Selamat menempuh hidup baru, Bagas &amp; Iga. Semoga rumahmu selalu ramai dan hangat.</p>
+          <span class="pc-from">Raka &amp; Nadia</span>
+          <img class="pc-decor d1" src="../../public/assets/botanicals/combretum/leaf-sprig.webp" alt="" />
+          <img class="pc-decor d2" src="../../public/assets/botanicals/combretum/flower-spray.webp" alt="" />
+          <img class="pc-decor d3" src="../../public/assets/botanicals/nephrolepis/frond-short-02.webp" alt="" />
+          <img class="pc-decor d5" src="../../public/assets/botanicals/combretum/flower-cascade.webp" alt="" />
+        </div>
+        <div class="swatches">
+          <button type="button" class="sw is-on" data-style="pc--classic" style="background:#f9f5ed" title="Klasik"></button>
+          <button type="button" class="sw" data-style="pc--rose" style="background:#f7e7e4" title="Rosé"></button>
+          <button type="button" class="sw" data-style="pc--sage" style="background:#e9eddf" title="Sage"></button>
+          <button type="button" class="sw" data-style="pc--airmail" style="background:repeating-linear-gradient(45deg,#c14b43 0 3px,#f7f3ec 3px 6px,#3f5d8f 6px 9px,#f7f3ec 9px 12px)" title="Airmail"></button>
+          <button type="button" class="sw" data-style="pc--midnight" style="background:#303c2d" title="Midnight"></button>
+          <span class="caption">Gaya kartu — klik untuk coba</span>
+        </div>
+        <button type="button" class="save-btn">Simpan jejak</button>
+        <div class="mystrip">
+          <span class="caption">Kartumu — klik untuk edit:</span>
+          <div class="mystrip-row">
+            <div class="strip-card">
+              <div class="pc pc--sage">
+                <span class="pc-stamp"><img class="s3" src="../../public/assets/botanicals/syzygium/branch-short.webp" alt="" /></span>
+                <p class="pc-msg">Nikmatin tiap momennya ya.</p>
+                <span class="pc-from">Kamu</span>
+                <img class="pc-decor d3" src="../../public/assets/botanicals/nephrolepis/frond-short-02.webp" alt="" />
+              </div>
+              <span class="chip">Tayang di mading</span>
+            </div>
+            <div class="strip-card">
+              <div class="pc pc--classic">
+                <span class="pc-stamp"><img class="s1" src="../../public/assets/botanicals/combretum/flower-cluster.webp" alt="" /></span>
+                <p class="pc-msg">Kami titip doa di kartu ini.</p>
+                <span class="pc-from">Kamu</span>
+                <img class="pc-decor d1" src="../../public/assets/botanicals/combretum/leaf-sprig.webp" alt="" />
+              </div>
+              <span class="chip">Sedang ditinjau</span>
+            </div>
+            <div class="strip-add"><span style="font-size:1.2rem">+</span><span>Kartu baru</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mad">
+        <span class="flow-label"><b>2</b> Mading — kartu tamu (approved)</span>
+        <div class="mad-grid">
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--rose">
+              <span class="pc-stamp"><img class="s2" src="../../public/assets/botanicals/combretum/flower-tip-pink.webp" alt="" /></span>
+              <span class="pc-postmark">24·09·26</span>
+              <p class="pc-msg">Selamat menempuh hidup baru! Main ke Bandung ya.</p>
+              <span class="pc-from">Nadia</span>
+              <img class="pc-decor d2" src="../../public/assets/botanicals/combretum/flower-spray.webp" alt="" />
+            </div>
+          </div>
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--classic">
+              <span class="pc-stamp"><img class="s1" src="../../public/assets/botanicals/combretum/flower-cluster.webp" alt="" /></span>
+              <span class="pc-postmark">23·09·26</span>
+              <p class="pc-msg">Semoga jadi keluarga yang selalu ketawa.</p>
+              <span class="pc-from">Raka</span>
+              <img class="pc-decor d1" src="../../public/assets/botanicals/combretum/leaf-sprig.webp" alt="" />
+            </div>
+          </div>
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--sage">
+              <span class="pc-stamp"><img class="s3" src="../../public/assets/botanicals/syzygium/branch-short.webp" alt="" /></span>
+              <span class="pc-postmark">23·09·26</span>
+              <p class="pc-msg">Nikmatin tiap momennya ya.</p>
+              <span class="pc-from">Dimas &amp; Sari</span>
+              <img class="pc-decor d3" src="../../public/assets/botanicals/nephrolepis/frond-short-02.webp" alt="" />
+            </div>
+          </div>
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--airmail">
+              <span class="pc-stamp"><img class="s4" src="../../public/assets/botanicals/dendrobium/branch-short.webp" alt="" /></span>
+              <span class="pc-postmark">22·09·26</span>
+              <p class="pc-msg">Sampai jumpa 1 November!</p>
+              <span class="pc-from">Kel. Wijaya</span>
+            </div>
+          </div>
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--midnight">
+              <span class="pc-stamp"><img class="s5" src="../../public/assets/botanicals/melastoma/full-stem.webp" alt="" /></span>
+              <span class="pc-postmark">22·09·26</span>
+              <p class="pc-msg">Doa terbaik untuk kalian.</p>
+              <span class="pc-from">Om Hendra</span>
+              <img class="pc-decor d5" src="../../public/assets/botanicals/combretum/flower-cascade.webp" alt="" />
+              <span class="pc-seal">B · I</span>
+            </div>
+          </div>
+          <div class="mini-wrap"><span class="pin"></span>
+            <div class="pc pc--classic">
+              <span class="pc-stamp"><img class="s1" src="../../public/assets/botanicals/combretum/flower-cluster.webp" alt="" /></span>
+              <span class="pc-postmark">25·09·26</span>
+              <p class="pc-msg">Kenangan manis buat kalian!</p>
+              <span class="pc-from">Tante Rina</span>
+              <img class="pc-decor d1" src="../../public/assets/botanicals/combretum/leaf-sprig.webp" alt="" />
+            </div>
+          </div>
+        </div>
+        <p class="caption">Hanya kartu tamu yang sudah di-approve tampil di mading. Approve/reject dari panel admin (/admin → Moderation queue).</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>2 · 5 kandidat gaya kartu pos</h2>
+    <p class="sub">Gaya mengubah kertas, perangko, ornamen sudut, dan bingkai — isi kartu tetap bebas: tulisan, gambar, sticker. Keputusan: hybrid — default otomatis unik per tamu, bisa ganti manual.</p>
+    <div class="styles-grid">
+      <div class="style-card">
+        <div class="pc pc--classic">
+          <span class="pc-stamp"><img class="s1" src="../../public/assets/botanicals/combretum/flower-cluster.webp" alt="" /></span>
+          <span class="pc-postmark">21·09·26</span>
+          <p class="pc-msg">Semoga selalu bahagia, Bagas &amp; Iga.</p>
+          <span class="pc-from">Raka</span>
+          <img class="pc-decor d1" src="../../public/assets/botanicals/combretum/leaf-sprig.webp" alt="" />
+        </div>
+        <h3>Klasik</h3>
+        <p>Krem lembut + aksen botanikal. Gaya yang dipakai sekarang.</p>
+      </div>
+      <div class="style-card">
+        <div class="pc pc--rose">
+          <span class="pc-stamp"><img class="s2" src="../../public/assets/botanicals/combretum/flower-tip-pink.webp" alt="" /></span>
+          <span class="pc-postmark">21·09·26</span>
+          <p class="pc-msg">Selamat menempuh hidup baru! Jangan lupa main ke Bandung ya.</p>
+          <span class="pc-from">Nadia</span>
+          <img class="pc-decor d2" src="../../public/assets/botanicals/combretum/flower-spray.webp" alt="" />
+        </div>
+        <h3>Rosé</h3>
+        <p>Blush manis, bunga pink, bingkai ganda tipis.</p>
+      </div>
+      <div class="style-card">
+        <div class="pc pc--sage">
+          <span class="pc-stamp"><img class="s3" src="../../public/assets/botanicals/syzygium/branch-short.webp" alt="" /></span>
+          <span class="pc-postmark">21·09·26</span>
+          <p class="pc-msg">Nikmatin tiap momennya. Kami menyusul pelukannya.</p>
+          <span class="pc-from">Dimas &amp; Sari</span>
+          <img class="pc-decor d3" src="../../public/assets/botanicals/nephrolepis/frond-short-02.webp" alt="" />
+        </div>
+        <h3>Sage</h3>
+        <p>Hijau sage tenang, daun &amp; pakis. Natural.</p>
+      </div>
+      <div class="style-card">
+        <div class="pc pc--airmail">
+          <span class="pc-stamp"><img class="s4" src="../../public/assets/botanicals/dendrobium/branch-short.webp" alt="" /></span>
+          <span class="pc-postmark">21·09·26</span>
+          <p class="pc-msg">Sampai jumpa 1 November! Kami terbang dari Surabaya.</p>
+          <span class="pc-from">Kel. Wijaya</span>
+        </div>
+        <h3>Airmail</h3>
+        <p>Garis merah-biru khas surat udara. Vintage, playful.</p>
+      </div>
+      <div class="style-card">
+        <div class="pc pc--midnight">
+          <span class="pc-stamp"><img class="s5" src="../../public/assets/botanicals/melastoma/full-stem.webp" alt="" /></span>
+          <span class="pc-postmark">21·09·26</span>
+          <p class="pc-msg">Doa terbaik untuk kalian berdua.</p>
+          <span class="pc-from">Om Hendra</span>
+          <img class="pc-decor d5" src="../../public/assets/botanicals/combretum/flower-cascade.webp" alt="" />
+          <span class="pc-seal"><img src="../../public/assets/bagas-iga-mark.webp" alt="" /></span>
+        </div>
+        <h3>Midnight</h3>
+        <p>Hijau gelap + segel. Elegan, seperti malam.</p>
+      </div>
+      <div class="legend">
+        <h3>Keputusan v2 · 25 Sep</h3>
+        <p><b>Gaya kartu — hybrid.</b> Tiap tamu otomatis dapat gayanya dari edisi undangan; bisa ganti manual dari 5 gaya.</p>
+        <p><b>Kartu sendiri — strip di bawah editor.</b> Klik untuk edit; mading di kanan khusus kartu tamu.</p>
+        <p><b>Sticker — set kucing.</b> 6 ekspresi: senang, ketawa, love, malu, kaget, ngantuk.</p>
+        <p><b>Moderasi — tetap.</b> Kartu tampil di mading hanya setelah di-approve.</p>
+      </div>
+    </div>
+  </section>
+  <footer class="page-foot note">Mockup throwaway — untuk memilih arah sebelum implementasi · 25 Sep 2026</footer>
+  <script>
+    const tabs = [...document.querySelectorAll('.tab')];
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.classList.toggle('is-on', x === t); });
+        document.querySelectorAll('.pane').forEach(function (p) { p.hidden = p.dataset.pane !== t.dataset.tab; });
+      });
+    });
+    const sws = [...document.querySelectorAll('.sw')];
+    const preview = document.getElementById('preview-card');
+    sws.forEach(function (s) {
+      s.addEventListener('click', function () {
+        sws.forEach(function (x) { x.classList.toggle('is-on', x === s); });
+        preview.className = 'pc ' + s.dataset.style;
+      });
+    });
+    const spots = [
+      { left: '58%', bottom: '12%', r: -7 },
+      { left: '38%', bottom: '26%', r: 5 },
+      { left: '68%', bottom: '36%', r: -4 },
+      { left: '30%', bottom: '10%', r: 8 },
+      { left: '52%', bottom: '46%', r: 3 },
+      { left: '72%', bottom: '16%', r: -10 }
+    ];
+    let placedCount = 0;
+    document.querySelectorAll('.stick').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const spot = spots[placedCount % spots.length];
+        placedCount += 1;
+        const img = document.createElement('img');
+        img.src = b.querySelector('img').src;
+        img.className = 'placed';
+        img.style.left = spot.left;
+        img.style.bottom = spot.bottom;
+        img.style.transform = 'rotate(' + spot.r + 'deg)';
+        document.getElementById('preview-card').appendChild(img);
+      });
+    });
+  </script>
+</div>
+</body>
+</html>

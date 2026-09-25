@@ -208,5 +208,12 @@ export const indonesian: Record<string, string> = {
   "Drawing tools": "Alat menggambar", "Ink colour": "Warna tinta", "Postcard drawing area": "Area menggambar kartu pos",
   "Wedding schedule": "Jadwal acara", "Gift collections": "Koleksi hadiah",
   "Practical wedding links": "Tautan informasi acara", "Open directions to Pandiga Cimahi in Google Maps": "Buka petunjuk arah ke Pandiga Cimahi di Google Maps",
-  "Guest postcard installation preview": "Pratinjau kumpulan kartu pos tamu"
+  "Guest postcard installation preview": "Pratinjau kumpulan kartu pos tamu",
+  "Write": "Tulis", "Draw": "Gambar", "Your message": "Pesanmu",
+  "Drawn, not written.": "Digambar, tanpa tulisan.",
+  "Postcards from our guests": "Kartu pos dari tamu kami", "See every postcard": "Lihat semua kartu pos", "Click the paper and write — or switch to Draw and sketch over it.": "Klik kertasnya lalu tulis — atau pilih Gambar untuk mencoret di atasnya.",
+  "Your postcards": "Kartu posmu", "New card": "Kartu baru", "Update this card": "Perbarui kartu ini", "Edit": "Ubah",
+  "In review": "Sedang ditinjau", "Approved": "Disetujui", "Loading your postcards…": "Memuat kartu posmu…",
+  "Nothing here yet — your card will appear beside this note once you keep it.": "Belum ada apa pun di sini — kartumu akan tampil di sebelah catatan ini setelah kamu menyimpannya.",
+  "You are editing a card you kept before. Saving sends it back for review.": "Kamu sedang menyunting kartu yang sudah disimpan. Simpan ulang akan meninjaunya kembali.",
 };

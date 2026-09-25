@@ -6,6 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 
 type Gift = { id: string; title: string; description: string | null; category: string; imageUrl: string | null; priceLabel: string | null; status: string; reservedByYou: boolean; purchaseUrl: string | null; shippingRequired: boolean };
 
+// Category keys are storage identifiers; the interface shows translated labels.
+const CATEGORY_LABELS: Record<string, string> = { bagas: "For Bagas", iga: "For Iga", home: "For Our Home" };
+const categoryLabel = (category: string) => CATEGORY_LABELS[category] ?? category;
+
 export function GiftCatalogue({ token, guestName }: { token: string; guestName: string }) {
   const { t } = useLanguage();
   const [gifts, setGifts] = useState<Gift[]>([]);
@@ -54,10 +58,10 @@ export function GiftCatalogue({ token, guestName }: { token: string; guestName: 
       <p className="product-status" role="status">{t(message || (!enabled ? "Gift reservations are currently closed." : ""))}</p>
       {shipping && <aside className="private-note"><strong><T>Private delivery information</T></strong><p>{shipping}</p><small><T>Visible because </T>{guestName}<T>holds this reservation.</T></small></aside>}
       <div className="gift-grid">
-        {visible.length === 0 && <div className="empty-catalogue"><span>{t(category)}</span><p><T>No items have been added to this category yet.</T></p></div>}
+        {visible.length === 0 && <div className="empty-catalogue"><span>{t(categoryLabel(category))}</span><p><T>No items have been added to this category yet.</T></p></div>}
         {visible.map(gift => <article className="gift-card" key={gift.id}>
           <div className="gift-image">{gift.imageUrl ? <img src={gift.imageUrl} alt="" loading="lazy" decoding="async" /> : <span><T>Object photograph</T><br /><T>to be added</T></span>}</div>
-          <p>{gift.category} / {t(gift.status)}</p><h2>{gift.title}</h2><p>{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
+          <p>{t(categoryLabel(gift.category))} / {t(gift.status)}</p><h2>{gift.title}</h2><p>{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
           <div className="gift-actions">
             {gift.status === "available" && <button disabled={!enabled || busy === gift.id} onClick={() => act(gift.id, "reserve")}><T>Reserve quietly</T></button>}
             {gift.reservedByYou && gift.status === "reserved" && <><button disabled={!enabled || busy === gift.id} onClick={() => act(gift.id, "release")}><T>Release</T></button><button disabled={!enabled || busy === gift.id} onClick={() => act(gift.id, "purchased")}><T>I’ve bought it</T></button>{gift.purchaseUrl && <a href={gift.purchaseUrl} target="_blank" rel="noreferrer"><T>Open purchase link</T></a>}</>}

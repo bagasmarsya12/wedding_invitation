@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin CMS v2 — Bagas × Iga</title>
+<style>
+:root{
+  --paper:#f9f5ed; --ink:#2b2925; --muted:#8a857c; --line:#e4ddcf;
+  --sage:#e9eddf; --sage-deep:#303c2d; --blush:#f7e7e4; --rose:#c47a6d;
+  --ok:#3e6b4f; --warn:#b0873a; --bad:#a94438;
+  --radius:14px; --shadow:0 1px 2px rgba(43,41,37,.06),0 8px 24px rgba(43,41,37,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;margin:0}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;
+  color:var(--ink);border-radius:9px;padding:7px 14px;transition:.15s}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--sage-deep);color:#fff;border-color:var(--sage-deep)}
+button.primary:hover{opacity:.9}
+button.danger{color:var(--bad);border-color:#e5c4be}
+button.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+button.ghost:hover{color:var(--ink)}
+input,select,textarea{font:inherit;color:var(--ink);background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:8px 11px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-deep);outline-offset:1px}
+label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px}
+/* top bar */
+.topbar{display:flex;align-items:center;gap:18px;padding:20px 0 14px;
+  border-bottom:1px solid var(--line);margin-bottom:22px}
+.topbar .seal{width:40px;height:40px;border-radius:50%;background:var(--sage-deep);
+  color:#f3ead8;display:grid;place-items:center;font-family:Georgia,serif;font-size:15px}
+.topbar h1{font-size:20px}
+.topbar .who{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.phase{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--muted)}
+/* tabs */
+.tabs{display:flex;gap:6px;margin-bottom:26px}
+.tabs button{border:none;background:transparent;color:var(--muted);
+  padding:8px 16px;border-radius:9px;font-size:14.5px}
+.tabs button.on{background:var(--sage-deep);color:#fff}
+.tabs button:not(.on):hover{background:#efe9dc;color:var(--ink)}
+.panel{display:none}
+.panel.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:24px;font-family:Georgia,serif}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.warn b{color:var(--warn)}
+<!--NEXT-->
+/* toolbar */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.toolbar .search{flex:1;max-width:320px}
+.toolbar .count{margin-left:auto;font-size:12.5px;color:var(--muted)}
+/* table */
+.tblwrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);
+  background:#fbf8f1;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--ink)}
+td{padding:11px 14px;border-bottom:1px solid #f0ebdf;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:background .12s}
+tbody tr:hover{background:#faf7ef}
+.badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:99px;
+  border:1px solid var(--line);white-space:nowrap}
+.badge.ok{background:#e6efe4;color:var(--ok);border-color:#cfe0cc}
+.badge.warn{background:#f6ecd9;color:var(--warn);border-color:#eadfc4}
+.badge.mute{background:#f1eee7;color:var(--muted)}
+.badge.bad{background:#f7e4e1;color:var(--bad);border-color:#ecd2cd}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(43,41,37,.35);opacity:0;
+  pointer-events:none;transition:.2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:-460px;width:440px;max-width:94vw;height:100%;
+  background:#fff;z-index:50;box-shadow:-12px 0 40px rgba(43,41,37,.18);
+  transition:right .22s ease;display:flex;flex-direction:column}
+.drawer.on{right:0}
+.drawer header{padding:18px 22px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+.drawer header h3{font-size:17px;flex:1}
+.drawer .body{padding:6px 22px 30px;overflow-y:auto;flex:1}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dactions{display:flex;gap:8px;margin-top:20px}
+.linkbox{margin-top:18px;background:var(--sage);border:1px dashed #b9c4a6;
+  border-radius:10px;padding:12px 14px;display:none}
+.linkbox.on{display:block}
+.linkbox code{font-size:12px;word-break:break-all;display:block;margin-top:6px;color:var(--sage-deep)}
+/* photo slots */
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.slot{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow)}
+.slot .ph{aspect-ratio:4/5;background:#f1ede2;display:grid;place-items:center;
+  color:var(--muted);font-size:13px;text-align:center;position:relative;
+  background-image:radial-gradient(#e4ddcf 1px,transparent 1px);
+  background-size:14px 14px}
+.slot .ph.filled{background-image:none}
+.slot .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.slot .meta{padding:13px 16px}
+.slot .meta h3{font-size:15.5px}
+.slot .meta p{margin:5px 0 0;font-size:12.5px;color:var(--muted)}
+.slot .drop{border:2px dashed var(--line);border-radius:10px;margin:12px 16px 16px;
+  padding:18px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;
+  transition:.15s}
+.slot .drop:hover,.slot .drop.over{border-color:var(--sage-deep);color:var(--sage-deep);
+  background:#f7f9f2}
+/* quotes */
+.quotes{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow)}
+.quotes h3{font-size:15.5px;margin-bottom:8px}
+.quotes label{margin-top:8px}
+/* moderation */
+.modgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.mcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow)}
+.mcard .art{aspect-ratio:4/3;display:grid;place-items:center;font-size:34px;
+  background:repeating-linear-gradient(45deg,#faf7ef,#faf7ef 10px,#f5f0e4 10px,#f5f0e4 20px)}
+.mcard .art img{width:100%;height:100%;object-fit:cover}
+.mcard .minfo{padding:12px 14px}
+.mcard .minfo b{font-size:14px}
+.mcard .minfo p{margin:4px 0 8px;font-size:12.5px;color:var(--muted)}
+.mbtns{display:flex;gap:8px}
+.mbtns button{flex:1;padding:6px 0;font-size:13px}
+.note{font-size:12.5px;color:var(--muted);margin:14px 2px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);
+  background:var(--sage-deep);color:#fff;padding:9px 20px;border-radius:99px;
+  font-size:13.5px;opacity:0;transition:.25s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:760px){.stats,.slots{grid-template-columns:1fr 1fr}}
+
+/* konten panel */
+#konten-list{display:flex;flex-direction:column;gap:10px}
+.ksec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.ksec summary{cursor:pointer;padding:14px 16px;font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.ksec summary::-webkit-details-marker{display:none}
+.ksec summary::after{content:'+';font-size:18px;color:var(--muted)}
+.ksec[open] summary::after{content:'\2013'}
+.ksec[open] summary{border-bottom:1px solid var(--border);background:#faf7f0}
+.kbadge{font-size:11px;color:var(--muted);font-weight:500;margin-left:auto;margin-right:12px}
+.kbody{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.kfield{display:flex;flex-direction:column;gap:4px}
+.kfield span{font-size:12px;color:var(--muted)}
+.kfield input{border:1px solid var(--border);border-radius:9px;padding:8px 10px;font:inherit;font-size:13.5px;background:#fffdf9}
+.kfotos{display:flex;gap:10px}
+.kfotoslot{flex:1;aspect-ratio:4/5;max-height:130px;border:1.5px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:#faf7f0;text-align:center;padding:6px}
+.kfotoslot small{font-size:11px;color:var(--muted)}
+.kfotoslot em{font-size:11px;color:var(--accent);font-style:normal}
+.kfotoslot.filled{border-style:solid;border-color:var(--sage);background:#eef2e6}
+.kfotoslot.filled strong{font-size:12px;color:var(--sage)}
+.ksave{align-self:flex-start}
+
+/* tab hadiah (dummy) */
+.giftbar{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px}
+.giftgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+.giftcard{background:#fff;border:1px solid #e7e1d4;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.giftcard.taken{opacity:.55}
+.gthumb{height:110px;position:relative}
+.gcat{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.92);border-radius:999px;padding:2px 10px;font-size:11px;color:#4a5a3f}
+.gbadge{position:absolute;bottom:8px;right:8px;background:#4a5a3f;color:#f6f4ec;border-radius:999px;padding:2px 10px;font-size:11px}
+.gbody{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.gbody h4{margin:0;font-size:14px;color:#3f4a33}
+.gbody p{margin:0;font-size:12px;color:#7a7364;flex:1}
+.gfoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.gprice{font-weight:600;font-size:13px;color:#3f4a33}
+.gun{padding:6px 14px;border-radius:999px;border:none;cursor:pointer;font-size:12px}
+</style>
+</head>
+<body>
+<!--NEXT-->
+<div class="wrap">
+  <div class="topbar">
+    <div class="seal">B·I</div>
+    <h1>Admin CMS</h1>
+    <span class="phase">Phase: preview</span>
+    <span class="who">bagas@… · ChatGPT sign-in</span>
+  </div>
+
+  <div class="tabs">
+    <button class="on" data-tab="tamu">Tamu</button>
+    <button data-tab="konten">Konten</button>
+    <button data-tab="hadiah">Hadiah (dummy)</button>
+    <button data-tab="foto">Foto Landing</button>
+    <button data-tab="kartu">Kartu Pos <span id="modCount"></span></button>
+  </div>
+
+  <!-- ============ TAB TAMU ============ -->
+  <section class="panel on" id="panel-tamu">
+    <div class="stats">
+      <div class="stat"><b id="stTotal">0</b><span>Total tamu</span></div>
+      <div class="stat"><b id="stRsvp">0</b><span>Sudah RSVP</span></div>
+      <div class="stat"><b id="stHadir">0</b><span>Konfirmasi hadir</span></div>
+      <div class="stat warn"><b id="stBelum">0</b><span>Belum dibuka</span></div>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="q" placeholder="Cari nama / email…" />
+      <select id="filter" style="width:auto">
+        <option value="">Semua status</option>
+        <option>RSVP hadir</option>
+        <option>RSVP tidak</option>
+        <option>Belum RSVP</option>
+      </select>
+      <button id="btnAdd">+ Tambah tamu</button>
+      <button id="btnCsv">Import CSV</button>
+      <span class="count" id="rowCount"></span>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th data-k="name">Nama ⇅</th><th>Pihak</th><th>Email</th>
+          <th>RSVP</th><th>Kartu pos</th><th>Status undangan</th><th></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="note">Klik baris untuk edit · tombol 🔗 = generate ulang link (link lama langsung mati).</p>
+  </section>
+
+  <!-- ============ TAB FOTO ============ -->
+  <section class="panel" id="panel-foto">
+    <p class="note">Slot foto yang masih kosong di landing. Upload langsung dari sini — tersimpan ke R2, landing otomatis ter-update.</p>
+    <div class="slots">
+      <div class="slot" data-slot="bagas">
+        <div class="ph" id="ph-bagas"><span>Portrait of Bagas<br />to be added</span></div>
+        <div class="drop" data-for="bagas">Tarik foto ke sini, atau klik untuk pilih file</div>
+        <div class="meta"><h3>Portrait Bagas</h3><p>Seksi “Tentang kami” · 4:5 · min 1200×1500px</p></div>
+      </div>
+      <div class="slot" data-slot="iga">
+        <div class="ph" id="ph-iga"><span>Portrait of Iga<br />to be added</span></div>
+        <div class="drop" data-for="iga">Tarik foto ke sini, atau klik untuk pilih file</div>
+        <div class="meta"><h3>Portrait Iga</h3><p>Seksi “Tentang kami” · 4:5 · min 1200×1500px</p></div>
+      </div>
+    </div>
+    <div class="quotes">
+      <h3>Kutipan singkat</h3>
+      <label>Menurut Iga tentang Bagas</label>
+      <textarea rows="2" id="quote-iga">“A real sentence will live here.”</textarea>
+      <label>Menurut Bagas tentang Iga</label>
+      <textarea rows="2" id="quote-bagas">“A real sentence will live here.”</textarea>
+      <div style="margin-top:14px"><button class="primary" onclick="toast('Kutipan disimpan (mockup)')">Simpan kutipan</button></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-konten">
+  <p class="hint"><b>100% literal</b> — semua teks &amp; gambar landing ada di sini (12 seksi). Kosong = pakai teks bawaan. Simpan = langsung live, tanpa deploy ulang.</p>
+  <div id="konten-list"></div>
+</section>
+
+<!-- ============ TAB HADIAH (DUMMY) ============ -->
+  <section class="panel" id="panel-hadiah">
+    <p class="note">Preview katalog hadiah sebagaimana tampil di <b>landing</b> — dengan data dummy. Ini hanya mockup: tidak ada yang di-seed ke database. Di landing asli, katalog hanya terbuka lewat link privat per tamu.</p>
+    <div class="giftbar"><b>Katalog (dummy)</b><span id="giftCount"></span></div>
+    <div class="giftgrid" id="giftgrid"></div>
+  </section>
+
+<!-- ============ TAB KARTU POS ============ -->
+  <section class="panel" id="panel-kartu">
+    <p class="note">Kartu menunggu persetujuan. Kartu yang disetujui langsung tayang di mading; yang ditolak tidak pernah tampil.</p>
+    <div class="modgrid" id="modgrid"></div>
+  </section>
+</div>
+
+<!-- drawer edit tamu -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <header><h3 id="dTitle">Edit tamu</h3><button class="ghost" onclick="closeDrawer()">✕</button></header>
+  <div class="body">
+    <label>Nama tampilan</label><input id="fName" />
+    <div class="row2">
+      <div><label>Email</label><input id="fEmail" /></div>
+      <div><label>Pihak</label><select id="fSide"><option>Keduanya</option><option>Bagas</option><option>Iga</option></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Kuota rombongan</label><input id="fLimit" type="number" value="2" /></div>
+      <div><label>Status</label><select id="fStatus"><option>Aktif</option><option>Nonaktif</option></select></div>
+    </div>
+    <div class="dactions">
+      <button class="primary" onclick="toast('Perubahan disimpan (mockup)')">Simpan</button>
+      <button class="danger" onclick="toast('Tamu dihapus (mockup)')">Hapus</button>
+    </div>
+    <div class="linkbox" id="linkbox">
+      <b style="font-size:13px">🔗 Link baru dibuat — tampil sekali ini saja</b>
+      <code id="linkval"></code>
+      <button style="margin-top:8px" onclick="toast('Tersalin (mockup)')">Copy link</button>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="filepick" accept="image/*" style="display:none" />
+
+
+<script>
+const KONTEN = [
+ {id:'hero', nama:'Opening & Envelope', fields:[
+   ['env greet','Sapaan amplop','For our very special guest'],
+   ['env skip','Tombol skip opening','Skip opening'],
+   ['env date','Baris tanggal amplop','1 November 2026 \u00b7 Pandiga, Cimahi'],
+   ['env time','Baris jam amplop','Akad 14:00 \u00b7 Reception 18:00 WIB'],
+   ['env flip','Tombol buka amplop','Turn it over'],
+   ['env back','Tombol kembali ke depan','Return to the front'],
+   ['hero head','Heading besar','We\u2019re getting married.'],
+   ['hero sub','Sub-heading','Our favourite people. One very good reason to gather.'],
+   ['hero day','Label hari','Sunday'],
+   ['hero date','Tanggal besar','01 November 2026'],
+   ['hero venue','Venue','Pandiga, Cimahi'],
+   ['hero time','Jam WIB','18:00 WIB'],
+   ['hero cta','Tombol lanjut','Wedding details'],
+ ]},
+ {id:'details', nama:'Detail hari-H', fields:[
+   ['kicker','Kicker','The details'],
+   ['head','Heading','Same place, a very special day.'],
+   ['sub','Sub-heading','Here\u2019s when and where to find us. We can\u2019t wait to see you there.'],
+   ['akad','Label Akad','The official part.'],
+   ['resepsi','Label Resepsi','The louder part.'],
+   ['jam1','Jam Akad','14:00'],
+   ['jam2','Jam Resepsi','18:00'],
+   ['venue nama','Nama venue','Pandiga'],
+   ['venue kota','Kota','Cimahi'],
+   ['venue alamat','Alamat','Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513'],
+   ['arah','Label tombol arah','Open directions'],
+ ]},
+ {id:'profil', nama:'Profil (foto + kata-kata)', foto:true, fields:[
+   ['kicker','Kicker','For those who know one of us better.'],
+   ['head','Heading','The two of us, as observed by the other.'],
+   ['nama1','Nama Bagas','Bagas Marsya Pratama Nugraha'],
+   ['b_known','Bagas \u2014 Known for','Observation from Iga will be added.'],
+   ['b_found','Bagas \u2014 Usually found','Observation from Iga will be added.'],
+   ['b_cap','Bagas \u2014 caption foto','Bagas, as himself.'],
+   ['i_nama','Nama Iga','Iga Noviyanti Rohman'],
+   ['i_known','Iga \u2014 Known for','Observation from Bagas will be added.'],
+   ['i_found','Iga \u2014 Usually found','Observation from Bagas will be added.'],
+   ['i_cap','Iga \u2014 caption foto','Iga, as herself.'],
+   ['quote label','Label kutipan Iga','According to Iga'],
+   ['quote1','Kutipan Iga tentang Bagas','\u201cA real sentence will live here.\u201d'],
+   ['quote label2','Label kutipan Bagas','According to Bagas'],
+   ['quote2','Kutipan Bagas tentang Iga','\u201cA real sentence will live here.\u201d'],
+ ]},
+ {id:'archive', nama:'Archive', fields:[
+   ['head','Heading','From the archive'],
+   ['sub','Sub','Some things were worth keeping.'],
+   ['desc','Deskripsi','Photographs, objects, and little things that became our things.'],
+   ['cta','Tombol','Open the archive \u2197'],
+   ['kosong','Teks saat kosong','Curated memories will be added here.'],
+ ]},
+ {id:'rsvp', nama:'RSVP', fields:[
+   ['head','Heading','Will you be there?'],
+   ['sub','Sub','We\u2019re doing a headcount.'],
+   ['desc','Deskripsi','Apparently venues care about these things.'],
+   ['hadir','Tombol hadir','I\u2019ll be there.'],
+   ['maaf','Tombol tidak hadir','I\u2019ll miss this one.'],
+   ['jml','Label jumlah tamu','Number of guests'],
+   ['nama','Label nama tamu','Guest names (optional)'],
+   ['diet','Label dietary','Dietary notes'],
+   ['pesan','Label pesan','A note for us'],
+ ]},
+ {id:'useful', nama:'Useful bits', fields:[
+   ['head','Heading','The useful bits'],
+   ['sub','Sub','The questions someone was going to ask anyway.'],
+   ['dress t','Dress code \u2014 judul','Dress code'],
+   ['dress d','Dress code \u2014 isi','Details to follow'],
+   ['alamat t','Alamat \u2014 judul','Address and entrance'],
+   ['alamat d','Alamat \u2014 isi','Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513.'],
+   ['parkir t','Parkir \u2014 judul','Parking and accessibility'],
+   ['parkir d','Parkir \u2014 isi','Parking, entrance, and accessibility guidance will be added after venue confirmation.'],
+   ['anak t','Anak \u2014 judul','Children and plus-ones'],
+   ['anak d','Anak \u2014 isi','Guest-specific guidance will remain attached to each private invitation.'],
+   ['kontak t','Kontak \u2014 judul','Contact person'],
+   ['kontak d','Kontak \u2014 isi','A contact person will be added closer to the date.'],
+ ]},
+ {id:'gift', nama:'Gifts (heading & deskripsi)', fields:[
+   ['head','Heading','A few things'],
+   ['sub','Sub','We\u2019re saving room for.'],
+   ['desc','Deskripsi','The catalogue opens from a private invitation so reservations stay private.'],
+   ['kosong','Teks saat katalog kosong','Curated objects will be added here.'],
+   ['cta','Tombol','Open the gift catalogue'],
+ ]},
+ {id:'mark', nama:'Leave a mark', fields:[
+   ['head','Heading','Leave a mark'],
+   ['sub','Sub','Make a mess. We\u2019ll keep it.'],
+   ['desc','Deskripsi','Write something, draw something, or do both.'],
+   ['kosong','Teks saat belum ada kartu','Something from you will live here.'],
+   ['lihat','Tombol lihat semua','See every postcard'],
+ ]},
+ {id:'beyond', nama:'Beyond the invitation', fields:[
+   ['head','Heading','Beyond the invitation'],
+   ['sub','Sub','The invitation ends here. The rest stays open.'],
+   ['arch t','The Archive \u2014 judul','The Archive'],
+   ['arch d','The Archive \u2014 isi','Things we kept.'],
+   ['mark t','The Marks \u2014 judul','The Marks'],
+   ['mark d','The Marks \u2014 isi','Things you left.'],
+   ['gal t','The Gallery \u2014 judul','The Gallery'],
+   ['gal d','The Gallery \u2014 isi','Then and now. Coming later.'],
+ ]},
+ {id:'footer', nama:'Footer', fields:[
+   ['edisi','Label edisi','Guest edition'],
+   ['tahun','Tahun','2026'],
+   ['made','Baris made-with','Made with unreasonable attention to detail and approximately 1 billion tokens.'],
+   ['amplop','Tombol amplop','View the envelope again'],
+ ]},
+ {id:'peta', nama:'Peta & alat', fields:[
+   ['load','Teks loading','Loading the actual roads around Pandiga\u2026'],
+   ['err','Teks error','Live map unavailable right now.'],
+   ['gmaps','Tombol Google Maps','OPEN IN GOOGLE MAPS'],
+   ['hint','Hint kontrol','Use the controls, drag, or arrow keys to explore the actual roads around the venue.'],
+   ['still','Label mode diam','Map shown in a still state.'],
+ ]},
+ {id:'misc', nama:'Stempel & tanggal kecil', fields:[
+   ['monogram','Alt monogram','Monogram Bagas dan Iga'],
+   ['seal','Stempel amplop','B \u00d7 I'],
+   ['tanggal seal','Tanggal stempel','01 \u00b7 11 \u00b7 26'],
+   ['besar','Tanggal besar amplop','01 \u00b7 11 \u00b7 2026'],
+   ['di','Label di atas nama','Bagas \u00d7 Iga'],
+ ]},
+]
+const kl = document.getElementById('konten-list');
+kl.innerHTML = KONTEN.map(s => `
+ <details class="ksec" ${s.id==='profil'?'open':''}>
+  <summary>${s.nama}<span class="kbadge">${s.fields.length} field${s.foto?' \u00b7 2 foto':''}</span></summary>
+  <div class="kbody">
+   ${s.foto?`<div class="kfotos"><div class="kfotoslot" id="kf-bagas"><small>Portrait Bagas</small><em>Klik untuk upload</em></div><div class="kfotoslot" id="kf-iga"><small>Portrait Iga</small><em>Klik untuk upload</em></div></div>`:''}
+   ${s.fields.map(f=>`<label class="kfield"><span>${f[1]}</span><input data-konten="${s.id}.${f[0]}" value="${f[2]}"/></label>`).join('')}
+   <button class="primary ksave" data-sek="${s.id}">Simpan seksi \u201c${s.nama}\u201d</button>
+  </div>
+ </details>`).join('');
+kl.addEventListener('click', e => {
+  const b = e.target.closest('.ksave');
+  if(b){ toast('Seksi \u201c'+KONTEN.find(x=>x.id===b.dataset.sek).nama+'\u201d tersimpan \u2014 landing live (mockup)'); }
+  const slot = e.target.closest('.kfotoslot');
+  if(slot){ slot.classList.add('filled'); slot.innerHTML='<small>Portrait '+(slot.id==='kf-bagas'?'Bagas':'Iga')+'</small><strong>\u2713 foto terpasang</strong>'; toast('Foto terupload ke R2 (mockup)'); }
+});
+</script>
+<script>
+/* ---------- mock data (tanpa nama asli) ---------- */
+const guests = [
+  {id:1,name:"Keluarga Hartono",side:"Iga",email:"hartono@…",rsvp:"hadir",mark:"approved",opened:true},
+  {id:2,name:"Sari & Pasangan",side:"Bagas",email:"sari@…",rsvp:"tidak",mark:"—",opened:true},
+  {id:3,name:"Tim Kantor Yogyakarta",side:"Bagas",email:"—",rsvp:"belum",mark:"pending",opened:false},
+  {id:4,name:"Om Ben & Tante Rina",side:"Iga",email:"—",rsvp:"belum",mark:"—",opened:false},
+  {id:5,name:"Alumni SMA 3",side:"Keduanya",email:"—",rsvp:"hadir",mark:"approved",opened:true},
+  {id:6,name:"Nadia (Sahabat Iga)",side:"Iga",email:"nadia@…",rsvp:"hadir",mark:"pending",opened:true},
+];
+const marks = [
+  {id:1,who:"Nadia (Sahabat Iga)",msg:"Selamat ya! Kalian lucu banget 😻",art:"🐱"},
+  {id:2,who:"Alumni SMA 3",msg:"Akhirnya! Dari masa EMC sampai di sini.",art:"🎓"},
+  {id:3,who:"Keluarga Hartono",msg:"Barakallah, semoga sakinah mawaddah warahmah.",art:"🕌"},
+];
+const badgeMap = {
+  hadir:'<span class="badge ok">RSVP hadir</span>',
+  tidak:'<span class="badge bad">Tidak hadir</span>',
+  belum:'<span class="badge mute">Belum RSVP</span>',
+  approved:'<span class="badge ok">kartu tayang</span>',
+  pending:'<span class="badge warn">kartu ditinjau</span>',
+  "—":'<span class="badge mute">—</span>',
+};
+
+/* ---------- stats ---------- */
+function stats(){
+  stTotal.textContent = guests.length;
+  stRsvp.textContent = guests.filter(g=>g.rsvp!=="belum").length;
+  stHadir.textContent = guests.filter(g=>g.rsvp==="hadir").length;
+  stBelum.textContent = guests.filter(g=>!g.opened).length;
+  modCount.textContent = marks.length ? `· ${marks.length} menunggu` : "";
+}
+/* ---------- table ---------- */
+function render(filterTxt="",status=""){
+  const q = filterTxt.toLowerCase();
+  const rows = guests.filter(g =>
+    (!q || g.name.toLowerCase().includes(q) || (g.email||"").toLowerCase().includes(q)) &&
+    (!status || (status==="Belum RSVP" ? g.rsvp==="belum" : g.rsvp===status.replace("RSVP ","").toLowerCase()))
+  );
+  tbody.innerHTML = rows.map(g=>`
+    <tr onclick="openDrawer(${g.id})">
+      <td><b>${g.name}</b></td>
+      <td>${g.side}</td>
+      <td>${g.email}</td>
+      <td>${badgeMap[g.rsvp]}</td>
+      <td>${badgeMap[g.mark]}</td>
+      <td>${g.opened?'<span class="badge ok">dibuka</span>':badgeMap["—"]}</td>
+      <td><button class="ghost" title="Generate ulang link" onclick="event.stopPropagation();regen(${g.id})">🔗</button></td>
+    </tr>`).join("");
+  rowCount.textContent = `${rows.length} / ${guests.length} tamu`;
+  stats();
+}
+q.oninput = ()=>render(q.value,filter.value);
+filter.onchange = ()=>render(q.value,filter.value);
+render();
+
+/* ---------- drawer ---------- */
+let editing = null;
+function openDrawer(id){
+  editing = guests.find(g=>g.id===id);
+  dTitle.textContent = "Edit — " + editing.name;
+  fName.value = editing.name; fEmail.value = editing.email==="—"?"":editing.email;
+  fSide.value = editing.side; fLimit.value = 2; fStatus.value = "Aktif";
+  linkbox.classList.remove("on");
+  scrim.classList.add("on"); drawer.classList.add("on");
+}
+function closeDrawer(){ scrim.classList.remove("on"); drawer.classList.remove("on"); }
+scrim.onclick = closeDrawer;
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeDrawer(); });
+
+function regen(id){
+  const g = guests.find(x=>x.id===id);
+  const fake = "https://medisa.love/invite/" + Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,14);
+  openDrawer(id); linkbox.classList.add("on"); linkval.textContent = fake;
+  toast("Link baru dibuat — link lama mati");
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".panel").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById("panel-"+b.dataset.tab).classList.add("on");
+  };
+});
+
+/* ---------- photo upload (mock) ---------- */
+let targetSlot = null;
+document.querySelectorAll(".drop").forEach(d=>{
+  d.onclick = ()=>{ targetSlot = d.dataset.for; filepick.click(); };
+  d.ondragover = e=>{ e.preventDefault(); d.classList.add("over"); };
+  d.ondragleave = ()=>d.classList.remove("over");
+  d.ondrop = e=>{
+    e.preventDefault(); d.classList.remove("over");
+    const f = e.dataTransfer.files[0];
+    if(f) showPhoto(d.dataset.for, f);
+  };
+});
+filepick.onchange = ()=>{ if(filepick.files[0] && targetSlot) showPhoto(targetSlot, filepick.files[0]); };
+function showPhoto(slot, file){
+  const img = document.createElement("img");
+  img.src = URL.createObjectURL(file);
+  const ph = document.getElementById("ph-"+slot);
+  ph.classList.add("filled"); ph.innerHTML = ""; ph.appendChild(img);
+  toast("Foto " + (slot==="bagas"?"Bagas":"Iga") + " terunggah → R2 (mockup)");
+}
+
+/* ---------- moderation ---------- */
+function renderMod(){
+  modgrid.innerHTML = marks.map(m=>`
+    <div class="mcard">
+      <div class="art">${m.art}</div>
+      <div class="minfo">
+        <b>${m.who}</b>
+        <p>“${m.msg}”</p>
+        <div class="mbtns">
+          <button class="primary" onclick="mod(${m.id},1)">Setujui</button>
+          <button class="danger" onclick="mod(${m.id},0)">Tolak</button>
+        </div>
+      </div>
+    </div>`).join("") || '<p class="note">Tidak ada kartu menunggu 🎉</p>';
+  stats();
+}
+function mod(id,ok){
+  const i = marks.findIndex(m=>m.id===id);
+  marks.splice(i,1); renderMod();
+  toast(ok ? "Kartu disetujui → tayang di mading" : "Kartu ditolak");
+}
+renderMod();
+
+
+/* ---------- hadiah (dummy — TIDAK di-seed ke DB) ---------- */
+const GIFTS = [
+ {id:1,t:"Saringan kopi V60 + grinder",d:"Biar ngopi pagi kami makin serius.",c:"Rumah",p:"Rp 450rb",st:"avail"},
+ {id:2,t:"Set panci cast iron",d:"Untuk masak-masak akhir pekan.",c:"Rumah",p:"Rp 780rb",st:"avail"},
+ {id:3,t:"Lampu tidur keramik",d:"Sudah lama kami incar untuk kamar.",c:"Rumah",p:"Rp 320rb",st:"avail"},
+ {id:4,t:"Voucher restoran favorit",d:"Satu makan malam kencan lagi.",c:"Kencan",p:"Rp 500rb",st:"taken"},
+ {id:5,t:"Tiket kelas memasak berdua",d:"Biar Iga mengajari Bagas (akhirnya).",c:"Kencan",p:"Rp 900rb",st:"avail"},
+ {id:6,t:"Donasi bulan madu",d:"Kami bantu dana perjalanan ke Lombok.",c:"Bulan madu",p:"Bebas",st:"avail"},
+ {id:7,t:"Koper kabin warna sage",d:"Untuk trip pertama suami-istri.",c:"Bulan madu",p:"Rp 1,2jt",st:"avail"},
+ {id:8,t:"Speaker kecil untuk dapur",d:"Pengiring masak dan cuci piring.",c:"Rumah",p:"Rp 400rb",st:"taken"},
+ {id:9,t:"Buku rekomendasi resto Bandung",d:"Checklist makan versi kami berdua.",c:"Kencan",p:"Rp 150rb",st:"avail"},
+];
+const GSTYLE = {
+ avail:  {cls:"",       btn:"Reservasi",        act:"reserve"},
+ mine:   {cls:"",       btn:"Milikmu ✓",        act:"release"},
+ taken:  {cls:"taken",  btn:"Sudah diambil",    act:null},
+};
+let giftMode = {}; // id -> override tampilan (demo flow)
+function giftState(g){
+  const m = giftMode[g.id] || g.st;
+  return {g, s: GSTYLE[m] || GSTYLE.avail, m};
+}
+function renderGifts(){
+  giftgrid.innerHTML = GIFTS.map(g=>{
+    const {s} = giftState(g);
+    return `<div class="giftcard ${s.cls}">
+      <div class="gthumb" style="background:linear-gradient(135deg,#e9e4d5,#d8dec9)"><span class="gcat">${g.c}</span>${s.cls?'<span class="gbadge">diambil tamu lain</span>':''}</div>
+      <div class="gbody"><h4>${g.t}</h4><p>${g.d}</p>
+        <div class="gfoot"><span class="gprice">${g.p}</span>
+        ${s.act?`<button class="primary gun" data-g="${g.id}" data-act="${s.act}">${s.btn}</button>`:`<span style="font-size:12px;color:#7a7364">${s.btn}</span>`}
+        </div></div></div>`;
+  }).join("");
+  giftCount.textContent = GIFTS.length + " item \u00b7 dummy";
+}
+giftgrid.addEventListener("click", e=>{
+  const b = e.target.closest(".gun"); if(!b) return;
+  const id = +b.dataset.g, act = b.dataset.act;
+  if(act==="reserve"){ giftMode[id]="mine"; renderGifts(); toast("Hadiah direservasi \u2014 statusnya langsung terkunci untuk tamu lain"); }
+  else { giftMode[id]=GIFTS.find(x=>x.id===id).st; renderGifts(); toast("Reservasi dilepas \u2014 hadiah terbuka lagi untuk tamu lain"); }
+});
+renderGifts();
+
+/* ---------- toast ---------- */
+let tt;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(tt); tt = setTimeout(()=>el.classList.remove("on"), 2400);
+}
+
+</script>
+</body>
+</html>

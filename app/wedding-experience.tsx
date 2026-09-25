@@ -17,6 +17,8 @@ import {
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
+import { Postcard } from "./postcard";
+import { MarkEditor } from "./mark-editor";
 import { T, LanguageSwitch, useLanguage } from "./language";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
@@ -30,6 +32,7 @@ const MAPS_URL = "https://maps.app.goo.gl/JFL3wrzj7qsBXbz56";
 const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
 type ArchiveItem = { type: string; title: string; note: string; image?: string; alt?: string };
+type LiveMark = { id: string; author_name: string; message: string | null; drawingUrl: string | null; created_at: string | null };
 const archiveItems: ArchiveItem[] = [
   {
     type: "The mark",
@@ -356,6 +359,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   const [rsvpBusy, setRsvpBusy] = useState(false);
   const [rsvpEnabled, setRsvpEnabled] = useState(true);
   const [featuredArchive, setFeaturedArchive] = useState<ArchiveItem[]>([]);
+  const [liveMarks, setLiveMarks] = useState<LiveMark[]>([]);
   const edition = useMemo(() => hashEdition(token), [token]);
   const displayName = guestName.trim();
   const hasGuestName = Boolean(displayName);
@@ -415,6 +419,16 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
       .catch(() => { /* The editorial placeholders remain until real entries are available. */ });
     return () => { cancelled = true; };
   }, [entered]);
+
+  useEffect(() => {
+    if (!entered || token) return;
+    let cancelled = false;
+    fetch("/api/marks?limit=3")
+      .then(async response => response.ok ? await response.json() as { marks: LiveMark[] } : null)
+      .then(result => { if (!cancelled && result) setLiveMarks(result.marks); })
+      .catch(() => { /* The decorative installation stands in until postcards are approved. */ });
+    return () => { cancelled = true; };
+  }, [entered, token]);
 
   useEffect(() => {
     if (!entered || !rootRef.current) return;
@@ -724,13 +738,16 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
         </section>
 
-        <section className="v2-mark v2-scene" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span><Link href={token ? `/invite/${encodeURIComponent(token)}/mark` : "/marks"}>{t(token ? "Open your postcard" : "See guest marks")} <span aria-hidden="true">↗</span></Link></div>
-          <div className="v2-postcard-installation" aria-label={t("Guest postcard installation preview")}>
-            <div className="v2-postcard card-a"><small><T>Text / drawing</T></small><strong><T>Something from you</T><br /><T>will live here.</T></strong><span><T>Kept for Bagas × Iga</T></span></div>
-            <div className="v2-postcard card-b" aria-hidden="true"><i /><i /><i /></div>
-            <div className={`v2-postcard card-c edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
-          </div>
+        <section className={`v2-mark v2-scene${token ? " has-studio" : ""}`} id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
+          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span><Link href="/marks">{t(token ? "See every postcard" : "See guest marks")} <span aria-hidden="true">↗</span></Link></div>
+          {token ? <div className="v2-mark-studio"><MarkEditor token={token} guestName={displayName} /></div> : <div className="v2-postcard-installation" aria-label={t(liveMarks.length ? "Postcards from our guests" : "Guest postcard installation preview")}>
+            {liveMarks.length ? liveMarks.slice(0, 3).map((mark, index) => <Postcard key={mark.id} className={`v2-postcard-live slot-${index}`} mark={{ ...mark, index }} />) : <>
+              <div className="v2-postcard card-a"><small><T>Text / drawing</T></small><strong><T>Something from you</T><br /><T>will live here.</T></strong><span><T>Kept for Bagas × Iga</T></span></div>
+              <div className="v2-postcard card-b" aria-hidden="true"><i /><i /><i /></div>
+              <div className={`v2-postcard card-c edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
+            </>}
+            {liveMarks.length > 0 && <Link className="v2-postcard-link" href="/marks"><T>See every postcard</T> <span aria-hidden="true">↗</span></Link>}
+          </div>}
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="mark-melastoma" />
         </section>
 
