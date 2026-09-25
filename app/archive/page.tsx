@@ -22,7 +22,7 @@ export default async function ArchivePage() {
   } catch { /* The built-in story remains available during an empty database state. */ }
   return (
     <main className="product-page archive-page">
-      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/"><T>Invitation</T></a><a href="/marks"><T>Guest marks</T></a></nav><LanguageSwitch /></header>
+      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
       <section className="archive-hero">
         <div><p><T>Things worth keeping</T></p><h1><T>The</T><br /><em><T>Archive</T></em></h1></div>
         <p><T>A few things that stayed.</T><br /><T>Open one. Take your time.</T></p>

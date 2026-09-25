@@ -42,7 +42,7 @@ async function waitFor(base) {
 }
 
 try {
-  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql"]) migrate(file);
+  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql"]) migrate(file);
   const [a, b] = [randomInviteToken(), randomInviteToken()];
   sql(`INSERT INTO guests (id, token_hash, display_name, party_limit) VALUES
     ('fixture-a','${await sha256(a)}','Fixture A',2),('fixture-b','${await sha256(b)}','Fixture B',1);

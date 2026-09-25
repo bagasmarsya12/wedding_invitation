@@ -80,6 +80,7 @@ export const guestMarks = sqliteTable("guest_marks", {
   authorName: text("author_name").notNull(),
   message: text("message"),
   drawingKey: text("drawing_key"),
+  style: text("style").notNull().default("classic"),
   visibility: text("visibility").notNull().default("private"),
   moderationStatus: text("moderation_status").notNull().default("pending"),
   ...timestamps,

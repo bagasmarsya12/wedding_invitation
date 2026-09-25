@@ -19,6 +19,7 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
 import { Postcard } from "./postcard";
 import { MarkEditor } from "./mark-editor";
+import { defaultStyleForEdition } from "@/lib/mark-styles";
 import { T, LanguageSwitch, useLanguage } from "./language";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
@@ -739,8 +740,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </section>
 
         <section className={`v2-mark v2-scene${token ? " has-studio" : ""}`} id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span><Link href="/marks">{t(token ? "See every postcard" : "See guest marks")} <span aria-hidden="true">↗</span></Link></div>
-          {token ? <div className="v2-mark-studio"><MarkEditor token={token} guestName={displayName} /></div> : <div className="v2-postcard-installation" aria-label={t(liveMarks.length ? "Postcards from our guests" : "Guest postcard installation preview")}>
+          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span></div>
+          {token ? <div className="v2-mark-studio"><MarkEditor token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} /></div> : <div className="v2-postcard-installation" aria-label={t(liveMarks.length ? "Postcards from our guests" : "Guest postcard installation preview")}>
             {liveMarks.length ? liveMarks.slice(0, 3).map((mark, index) => <Postcard key={mark.id} className={`v2-postcard-live slot-${index}`} mark={{ ...mark, index }} />) : <>
               <div className="v2-postcard card-a"><small><T>Text / drawing</T></small><strong><T>Something from you</T><br /><T>will live here.</T></strong><span><T>Kept for Bagas × Iga</T></span></div>
               <div className="v2-postcard card-b" aria-hidden="true"><i /><i /><i /></div>
@@ -766,7 +767,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <h2 id="beyond-title"><T>The invitation ends here.</T><br /><T>The rest stays open.</T></h2>
             <nav aria-label={t("Beyond the invitation")}>
               <Link href="/archive"><strong><T>The Archive</T></strong><span><T>Things we kept.</T></span></Link>
-              <Link href="/marks"><strong><T>The Marks</T></strong><span><T>Things you left.</T></span></Link>
               <span className="is-coming"><strong><T>The Gallery</T></strong><span><T>Then and now. Coming later.</T></span></span>
             </nav>
           </div>

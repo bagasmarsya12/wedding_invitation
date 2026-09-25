@@ -216,4 +216,9 @@ export const indonesian: Record<string, string> = {
   "In review": "Sedang ditinjau", "Approved": "Disetujui", "Loading your postcards…": "Memuat kartu posmu…",
   "Nothing here yet — your card will appear beside this note once you keep it.": "Belum ada apa pun di sini — kartumu akan tampil di sebelah catatan ini setelah kamu menyimpannya.",
   "You are editing a card you kept before. Saving sends it back for review.": "Kamu sedang menyunting kartu yang sudah disimpan. Simpan ulang akan meninjaunya kembali.",
+  "Card style": "Gaya kartu", "Card style — click to try": "Gaya kartu — klik untuk coba",
+  "Classic": "Klasik", "The wall": "Mading", "On the wall": "Tayang di mading",
+  "Loading the wall…": "Memuat mading…",
+  "Approved postcards from every guest.": "Kartu semua tamu yang sudah disetujui.",
+  "Nothing here yet — approved postcards will fill the wall.": "Belum ada kartu di mading — kartu yang disetujui akan tampil di sini.",
 };

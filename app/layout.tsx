@@ -4,6 +4,7 @@ import "./globals.css";
 import "./world-surfaces.css";
 import "./wedding-v2.css";
 import "./grand-garden.css";
+import "./mark-postcards.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { LanguageProvider } from "./language";
 import { loadLandingContent } from "@/lib/landing-content";

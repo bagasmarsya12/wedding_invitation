@@ -87,7 +87,7 @@ button, a { color: inherit; }
 .mark-page { background: var(--bx-green-deep); }
 .mark-page .product-header, .mark-page .product-footer { color: var(--bx-paper); background: transparent; border-color: rgba(249,245,237,.25); }
 .mark-hero { color: var(--bx-paper); }
-.mark-studio { display: grid; grid-template-columns: 1.35fr .65fr; gap: 1.5rem 3rem; color: var(--bx-paper); }
+.mark-studio { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr); gap: 1.5rem 3rem; color: var(--bx-paper); }
 .mark-toolbar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .4rem; }
 .mark-toolbar button { color: var(--bx-paper); border-color: rgba(249,245,237,.3); }
 .mark-toolbar button.is-active { color: var(--bx-charcoal); background: var(--bx-paper); }
@@ -100,9 +100,6 @@ button, a { color: inherit; }
 .postcard-canvas canvas { position: absolute; z-index: 3; inset: 0; width: 100%; height: 100%; touch-action: none; }
 .mark-message { display: flex; flex-direction: column; gap: .75rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
 .mark-message textarea { min-height: 12rem; padding: 1rem; color: var(--bx-charcoal); background: var(--bx-paper); border: 0; font-family: var(--bx-serif); font-size: 1.15rem; line-height: 1.5; text-transform: none; }
-.visibility-choice { grid-column: 2; padding: 1rem 0; border: 0; border-top: 1px solid rgba(249,245,237,.25); }
-.visibility-choice legend { margin-bottom: .75rem; font-family: var(--bx-serif); }
-.visibility-choice label { display: block; margin: .5rem 0; }
 .mark-composer > .paper-button { align-self: flex-start; color: var(--bx-charcoal); background: var(--bx-paper); }
 .mark-composer > .product-status { align-self: flex-start; }
 
@@ -162,7 +159,7 @@ button, a { color: inherit; }
   .mark-story, .standard-story { grid-template-columns: 1fr; gap: 3rem; padding: 6rem 0; }
   .story-copy, .process-slot { grid-column: 1; }
   .mark-studio { grid-template-columns: 1fr; gap: 1.5rem; }
-  .postcard-canvas, .mark-message, .visibility-choice, .mark-studio > .paper-button, .mark-studio > .product-status { grid-column: 1; }
+  .postcard-canvas, .mark-message, .mark-studio > .paper-button, .mark-studio > .product-status { grid-column: 1; }
   .public-mark.mark-1, .public-mark.mark-2 { margin-top: 0; transform: none; }
   .admin-panel form, .admin-table article { grid-template-columns: 1fr; }
   .admin-table article div { grid-column: 1; }
@@ -186,21 +183,10 @@ button, a { color: inherit; }
 .mark-hint { grid-column: 1 / -1; margin: 0; color: rgba(249,245,237,.72); font-size: .82rem; line-height: 1.6; }
 .mark-composer { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
 .mark-composer .mark-modes, .mark-composer .mark-hint { grid-column: auto; }
-.mark-collection { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
-.mark-collection h2 { margin: 0; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(249,245,237,.66); }
-.mark-cards { display: grid; gap: .9rem; }
-.mark-card { display: flex; flex-direction: column; gap: .55rem; margin: 0; padding: .9rem; text-align: left; color: var(--bx-charcoal); background: var(--bx-paper); border: 1px solid rgba(43,41,37,.2); cursor: pointer; }
-.mark-card.is-editing { outline: 2px solid var(--bx-ink, #6f7d60); outline-offset: 2px; }
-.mark-card-paper { position: relative; display: flex; flex-direction: column; gap: .3rem; min-height: 3.4rem; max-height: 9rem; overflow: hidden; }
-.mark-card-paper img { width: 100%; object-fit: contain; }
-.mark-card-status { align-self: flex-start; padding: .18rem .5rem; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; border: 1px solid rgba(43,41,37,.3); }
-.mark-card-status.is-approved { color: #44583b; border-color: #44583b; }
-.mark-card-status.is-pending { color: #8a6d3b; border-color: #8a6d3b; }
-.mark-card-meta { font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(43,41,37,.6); }
 .mark-empty { margin: 0; color: rgba(249,245,237,.66); font-size: .85rem; line-height: 1.6; }
 .mark-editing-note { margin: 0; color: #c89094; font-size: .8rem; line-height: 1.6; }
 .mark-new { border-color: rgba(200,144,148,.6); }
-@media (max-width: 60rem) { .mark-studio { grid-template-columns: 1fr; } .mark-collection { order: 2; } }
+@media (max-width: 60rem) { .mark-studio { grid-template-columns: 1fr; } }
 .mark-modes button { padding: .65rem .9rem; color: var(--bx-paper); background: transparent; border: 1px solid rgba(249,245,237,.3); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 .mark-modes button.is-active { color: var(--bx-charcoal); background: var(--bx-paper); }
 .postcard-canvas .postcard-stamp { position: absolute; z-index: 2; top: 1.4rem; right: 1.4rem; display: grid; width: 4.8rem; height: 5.6rem; place-items: center; background: rgba(242,231,210,.92); border: 1px dashed rgba(43,41,37,.34); }

@@ -1,0 +1,66 @@
+/* Postcard styles (5 looks from leave-a-mark-v2) + the inline mading; loaded last on purpose. */
+.postcard:not(.v2-postcard-live),.postcard-canvas,.pc-mini{background-color:var(--pc-bg,var(--bx-paper));background-image:url("/assets/15-paper-fiber-texture.webp");background-size:560px;background-position:center;background-blend-mode:multiply}
+.postcard:not(.v2-postcard-live){color:var(--pc-ink,var(--bx-charcoal))}
+.pc--classic{--pc-bg:#f9f5ed}
+.pc--rose{--pc-bg:#f7e7e4;--pc-ink:#4a3a37}
+.pc--sage{--pc-bg:#e9eddf;--pc-ink:#3f4a37}
+.pc--airmail{--pc-bg:#f6f1e5;--pc-ink:#333a4d}
+.pc--midnight{--pc-bg:#303c2d;--pc-ink:#f4efe2}
+.postcard-canvas.pc--rose .postcard-writing textarea,.postcard-canvas.pc--rose>.postcard-from{color:#4a3a37}
+.postcard-canvas.pc--sage .postcard-writing textarea,.postcard-canvas.pc--sage>.postcard-from{color:#3f4a37}
+.postcard-canvas.pc--airmail .postcard-writing textarea,.postcard-canvas.pc--airmail>.postcard-from{color:#333a4d}
+.postcard-canvas.pc--midnight .postcard-writing textarea,.postcard-canvas.pc--midnight>.postcard-from{color:#f4efe2}
+.postcard-canvas.pc--midnight .postcard-writing textarea::placeholder{color:rgba(244,239,226,.45)}
+.postcard:not(.v2-postcard-live)::after,.pc-mini::after{position:absolute;inset:6%;z-index:1;content:"";pointer-events:none;border:1px solid rgba(43,41,37,.16)}
+.pc--rose::after{border-color:rgba(196,143,148,.62)}
+.pc--sage::after{border-color:rgba(111,125,96,.45)}
+.pc--midnight::after{border-color:rgba(244,239,226,.3)}
+.pc--airmail::before,.pc--airmail::after{position:absolute;left:0;right:0;z-index:1;height:7.5%;content:"";pointer-events:none;border:0;background:repeating-linear-gradient(45deg,#c14b43 0 10px,#f7f3ec 10px 20px,#3f5d8f 20px 30px,#f7f3ec 30px 40px)}
+.pc--airmail::before{top:0}
+.pc--airmail::after{inset:auto 0 0 0}
+.pc--rose .postcard-stamp,.pc--rose .postcard-postmark{border-color:#c48f94;color:#a86f75}
+.pc--sage .postcard-stamp,.pc--sage .postcard-postmark{border-color:#97a889;color:#6f7d60}
+.pc--airmail .postcard-stamp{border-color:#3f5d8f}
+.pc--airmail .postcard-postmark{border-color:#c14b43;color:#c14b43}
+.pc--midnight .postcard-stamp{border-color:rgba(244,239,226,.42)}
+.pc--midnight .postcard-stamp img{filter:brightness(0) invert(.94)}
+.pc--midnight .postcard-postmark{border-color:rgba(244,239,226,.5);color:#f4efe2}
+.pc--airmail .postcard-writing{font-family:var(--bx-sans);font-style:normal}
+.pc--midnight .postcard-writing.is-drawn{color:rgba(244,239,226,.52)}
+.pc-decor{display:none;position:absolute;z-index:0;pointer-events:none}
+.pc--classic .pc-decor{display:block;left:-4%;bottom:-6%;width:24%;opacity:.32;transform:rotate(5deg)}
+.pc--rose .pc-decor{display:block;right:-6%;bottom:-8%;width:31%;opacity:.5;transform:rotate(-8deg)}
+.pc--sage .pc-decor{display:block;left:-5%;bottom:-7%;width:26%;opacity:.5;transform:rotate(6deg)}
+.pc--midnight .pc-decor{display:block;left:-6%;bottom:-9%;width:31%;opacity:.26;transform:rotate(4deg);filter:brightness(0) invert(.94)}
+.pc-mini{position:relative;display:flex;flex-direction:column;aspect-ratio:3/2;overflow:hidden;padding:.7rem .55rem;color:var(--pc-ink,var(--bx-charcoal));box-shadow:0 .5rem 1.2rem rgba(20,24,18,.26)}
+.pc-mini .postcard-stamp{position:absolute;z-index:1;top:.5rem;right:.5rem;width:2rem;height:2.35rem}
+.pc-mini .postcard-ink{position:absolute;z-index:2;inset:0;width:100%;height:100%;object-fit:contain}
+.pc-mini .postcard-writing{position:relative;z-index:3;flex:1;margin:0;padding-right:1.7rem;overflow:hidden;font-size:.78rem;line-height:1.5}
+.pc-mini .postcard-from{position:absolute;z-index:4;bottom:.55rem;left:.6rem;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;opacity:.78}
+.mark-wall{display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.mark-wall h2{margin:0;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(249,245,237,.66)}
+.wall-caption{margin:0;font-size:.8rem;line-height:1.6;color:rgba(249,245,237,.6)}
+.wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem 1rem;padding-top:.4rem}
+.wall-card{position:relative;padding-top:.55rem}
+.wall-card .pc-mini{transform:rotate(-1.8deg);transition:transform .25s}
+.wall-card:nth-child(even) .pc-mini{transform:rotate(1.6deg)}
+.wall-card:hover .pc-mini{transform:rotate(0)}
+.wall-card.is-mine .pc-mini{outline:1px dashed rgba(249,245,237,.8);outline-offset:3px}
+.wall-pin{position:absolute;z-index:3;top:0;left:50%;width:.5rem;height:.5rem;border-radius:50%;background:#e8e0d2;box-shadow:0 .12rem .3rem rgba(0,0,0,.45);transform:translateX(-50%)}
+.mystrip{display:flex;flex-direction:column;gap:.55rem;padding-top:.5rem;border-top:1px solid rgba(249,245,237,.18)}
+.mystrip h3{margin:0;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(249,245,237,.66)}
+.strip-row{display:flex;flex-wrap:wrap;gap:.9rem;align-items:flex-start}
+.strip-card{display:flex;flex-direction:column;gap:.45rem;width:9.5rem;margin:0;padding:0;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+.strip-card .pc-mini{width:100%;transition:transform .2s}
+.strip-card:hover .pc-mini{transform:translateY(-2px)}
+.strip-card.is-editing .pc-mini{outline:2px solid rgba(249,245,237,.85);outline-offset:2px}
+.strip-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;width:9.5rem;min-height:6.3rem;padding:.6rem;color:rgba(249,245,237,.85);background:rgba(249,245,237,.06);border:1px dashed rgba(249,245,237,.4);cursor:pointer;font-size:.74rem;letter-spacing:.06em}
+.strip-add:hover{background:rgba(249,245,237,.12)}
+.chip{align-self:flex-start;padding:.16rem .5rem;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(249,245,237,.45);color:rgba(249,245,237,.9)}
+.chip.is-approved{color:#cfe0bd;border-color:rgba(160,190,135,.75)}
+.chip.is-pending{color:#e6d3a3;border-color:rgba(214,183,112,.7)}
+.style-swatches{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.style-swatches button{width:1.75rem;height:1.75rem;padding:0;border:2px solid transparent;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.style-swatches button:hover{transform:scale(1.1)}
+.style-swatches button.is-on{border-color:var(--bx-paper);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 2px rgba(249,245,237,.35)}
+.style-swatches .caption{font-size:.74rem;color:rgba(249,245,237,.64)}
