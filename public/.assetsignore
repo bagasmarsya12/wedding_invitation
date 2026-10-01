@@ -1,0 +1,3 @@
+# Finder metadata is local-only, not a web asset. Keep actual botanicals intact.
+.DS_Store
+._*

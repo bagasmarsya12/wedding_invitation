@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { mountGardenJourney } from "../lib/garden-journey";
 
 export function GardenBackground({ active }: { active: boolean }) {
   const host = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!active || !host.current?.parentElement) return;
+    return mountGardenJourney(host.current.parentElement);
+  }, [active]);
 
   useEffect(() => {
     if (!active || !host.current) return;

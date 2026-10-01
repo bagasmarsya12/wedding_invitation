@@ -1,0 +1,67 @@
+/* A paired editorial folio. Only this room owns these overrides.
+   Paper #f7f2e7 / ink #292721 / sage #879477 / rose #c88d96 / edge #c8c0a7.
+   Existing Baskerville for names, Avenir for navigation and small facts. */
+.v2-botanical-continuum > .v2-profile-folio { padding:clamp(4.5rem,7vw,7rem) clamp(1.25rem,7vw,7rem) clamp(5rem,8vw,8rem); }
+.v2-botanical-continuum > .v2-profile-folio::before { background:linear-gradient(#eeeddf,#f7f2e7 18%,#f7f2e7 78%,#eee9dd); }
+.v2-botanical-continuum > .v2-profile-folio::after { background-image:url('/assets/authored/destination-canopy-shadow.svg'); background-size:min(28vw,25rem) auto; background-position:-5% 32%; opacity:.06; filter:blur(3px); }
+.v2-profile-folio > header { max-width:68rem; grid-template-columns:.7fr 1.3fr; gap:3rem; margin-bottom:clamp(3rem,5vw,5rem); align-items:center; }
+.v2-profile-folio > header > p { max-width:22ch; text-transform:none; letter-spacing:0; font:400 .95rem/1.7 var(--v2-sans); color:#59604f; }
+.v2-profile-folio > header > h2 { max-width:20ch; font-size:clamp(2.8rem,4.3vw,4.5rem); letter-spacing:-.055em; line-height:1.02; }
+.v2-profile-folio .v2-person { max-width:68rem; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(3rem,7vw,7rem); }
+.v2-profile-folio .v2-person-iga { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); }
+.v2-profile-folio .v2-profile-portrait { width:min(100%,24rem); margin:0; isolation:isolate; translate:none; scale:none; }
+.v2-profile-folio .v2-profile-portrait::before { inset:1.4rem -1.1rem 2.9rem 1.1rem; rotate:0deg; border-radius:1px; border:1px solid #87947755; background:#dedfcc66; z-index:-1; }
+.v2-profile-folio .v2-person-iga .v2-profile-portrait::before { inset:1.4rem 1.1rem 2.9rem -1.1rem; background:#dfccc266; border-color:#c88d9666; }
+.v2-profile-folio .v2-profile-print { display:block; padding:.75rem .75rem 1.3rem; border:1px solid #c8c0a780; border-radius:1px; aspect-ratio:auto; overflow:visible; background:#faf6ee; box-shadow:0 2px 0 #dcd5c5,6px 14px 24px #29272114; }
+.v2-profile-folio .v2-profile-print::after { display:none; }
+.v2-profile-window { position:relative; isolation:isolate; display:grid; width:100%; place-items:center; aspect-ratio:4/5; overflow:hidden; background:linear-gradient(135deg,#dce0cd,#a4b196); }
+.v2-person-iga .v2-profile-window { background:linear-gradient(145deg,#edd8cd,#ccaaa7); }
+.v2-profile-window::before { content:''; position:absolute; inset:9% 10%; border:1px solid #f7f2e766; border-radius:50% 50% 0 0 / 36% 36% 0 0; box-shadow:inset 18px 0 36px #f7f2e721; pointer-events:none; }
+.v2-profile-window::after { content:''; position:absolute; inset:0; opacity:.25; background-image:url('/assets/authored/destination-canopy-shadow.svg'); background-position:-5rem -5rem; background-repeat:no-repeat; background-size:100% auto; filter:blur(2px); mix-blend-mode:multiply; pointer-events:none; translate:calc(var(--profile-light-shift,0px) * -.5) 0; }
+.v2-profile-folio .v2-profile-portrait .v2-portrait-initial { font:400 clamp(13rem,23vw,23rem)/1 var(--v2-serif); color:#f7f2e799; letter-spacing:-.07em; transform:translateY(-.07em); text-shadow:1px 3px 0 #68745714; }
+.v2-profile-folio .v2-profile-portrait .v2-portrait-placeholder { position:absolute; left:15%; right:15%; bottom:11%; z-index:2; font:400 .88rem/1.5 var(--v2-sans); font-style:normal; color:#343c30; letter-spacing:.015em; padding:.6rem .25rem; background:#f7f2e7b8; }
+.v2-profile-folio .v2-person-iga .v2-portrait-placeholder { color:#493935; top:8%; bottom:auto; }
+.v2-portrait-light { position:absolute; z-index:1; inset:-10% -25%; background:linear-gradient(110deg,transparent 22%,#fff8e440 44%,#fff8e46b 48%,transparent 67%); translate:var(--profile-light-shift,0px) 0; pointer-events:none; }
+.v2-profile-folio .v2-profile-portrait > img { position:absolute; z-index:3; pointer-events:none; height:auto; object-fit:contain; filter:drop-shadow(2px 5px 3px #2927211c); }
+/* Never enlarge raster beyond its source pixels at the current screen density. */
+.v2-portrait-orchid { left:-1.4rem; bottom:2.8rem; width:min(7.5rem,calc(251px / var(--botanical-dpr,2))); transform:rotate(-8deg); transform-origin:50% 100%; }
+.v2-portrait-melastoma { right:-1.5rem; bottom:2.8rem; width:min(9.3rem,calc(503px / var(--botanical-dpr,2))); transform:rotate(7deg); transform-origin:50% 100%; }
+.v2-profile-folio .v2-profile-portrait figcaption { margin-top:1.4rem; font:italic .95rem/1.5 var(--v2-serif); color:#59604f; }
+.v2-profile-folio .v2-person-iga figcaption { text-align:left; }
+.v2-profile-folio .v2-profile-copy > p { margin:0 0 1.5rem; font:400 .9rem/1.5 var(--v2-sans); text-transform:none; letter-spacing:0; color:#59604f; }
+.v2-profile-folio .v2-profile-copy > h3 { font-size:clamp(5rem,8.5vw,8.5rem); line-height:.95; letter-spacing:-.065em; }
+.v2-profile-folio .v2-profile-copy > small { max-width:36ch; margin:1rem 0 2.2rem; font:400 .9rem/1.6 var(--v2-sans); letter-spacing:.015em; text-transform:none; }
+.v2-profile-folio .v2-person dl { border-top:1px solid #87947766; }
+.v2-profile-folio .v2-person dl > div { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:1.2rem; padding:1rem 0; border-color:#87947740; }
+.v2-profile-folio .v2-person dt { font:400 .8rem/1.55 var(--v2-sans); text-transform:none; letter-spacing:0; color:#59604f; }
+.v2-profile-folio .v2-person dd { font:italic 1rem/1.6 var(--v2-serif); }
+.v2-profile-folio .v2-profile-join { display:flex; align-items:center; justify-content:center; gap:2rem; width:min(100%,26rem); aspect-ratio:auto; height:4.5rem; margin:clamp(2.5rem,4vw,4rem) auto; border:0; border-radius:0; background:none; }
+.v2-profile-folio .v2-profile-join::before,.v2-profile-folio .v2-profile-join::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#87947766); }
+.v2-profile-folio .v2-profile-join::after { transform:scaleX(-1); }
+.v2-profile-folio .v2-profile-join img { width:2rem; height:3rem; object-fit:contain; mix-blend-mode:multiply; }
+@media(max-width:900px) {
+  .v2-profile-folio > header { grid-template-columns:1fr; gap:1rem; }
+  .v2-profile-folio > header > p { max-width:none; }
+  .v2-profile-folio .v2-person,.v2-profile-folio .v2-person-iga { grid-template-columns:1fr; direction:ltr; gap:2.4rem; }
+  .v2-profile-folio .v2-profile-portrait { width:min(85%,23rem); justify-self:center; }
+  .v2-profile-folio .v2-profile-copy { width:min(100%,32rem); justify-self:center; }
+  .v2-profile-folio .v2-profile-copy > h3 { font-size:clamp(4.6rem,16vw,7rem); }
+  .v2-profile-folio .v2-person-iga figure { order:-1; }
+  .v2-profile-folio .v2-profile-portrait .v2-portrait-initial { font-size:clamp(13rem,48vw,21rem); }
+  .v2-profile-folio .v2-profile-copy > small { margin-bottom:1.8rem; }
+}
+@media(max-width:480px) {
+  .v2-botanical-continuum > .v2-profile-folio { padding:4.5rem 1.25rem 5rem; }
+  .v2-profile-folio > header > h2 { font-size:clamp(2.5rem,10.5vw,3.25rem); }
+  .v2-profile-folio .v2-profile-print { padding:.6rem .6rem 1rem; }
+  .v2-profile-folio .v2-person dl > div { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:.8rem; }
+  .v2-profile-folio .v2-person dd { font-size:.95rem; }
+  .v2-profile-folio .v2-profile-join { margin:2.75rem auto; width:75%; }
+  .v2-profile-folio .v2-profile-portrait::before { inset:1rem -.6rem 2.9rem .6rem; }
+  .v2-profile-folio .v2-person-iga .v2-profile-portrait::before { inset:1rem .6rem 2.9rem -.6rem; }
+  .v2-portrait-orchid { left:-1.25rem; }
+  .v2-portrait-melastoma { right:-1.25rem; width:min(6.5rem,calc(503px / var(--botanical-dpr,2))); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .v2-profile-window::after,.v2-portrait-light { translate:none; }
+}

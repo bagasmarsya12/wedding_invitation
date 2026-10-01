@@ -153,7 +153,7 @@ export function AdminClient() {
     </section>
 
     <section className="admin-panel admin-wide"><header><p>Attendance</p><h2>RSVP records</h2></header>
-      <dl className="record-counts"><div><dt>Households</dt><dd>{state.guests.length}</dd></div><div><dt>People invited</dt><dd>{invitedPeople}</dd></div><div><dt>Responded</dt><dd>{responded}</dd></div><div><dt>Attending</dt><dd>{attending}</dd></div><div><dt>Declined</dt><dd>{declined}</dd></div><div><dt>Pending</dt><dd>{Math.max(0, state.guests.length - responded)}</dd></div><div><dt>Headcount</dt><dd>{headcount}</dd></div></dl>
+      <dl className="record-counts"><div><dt>Households</dt><dd>{state.guests.length}</dd></div><div><dt>People invited</dt><dd>{invitedPeople}</dd></div><div><dt>Responded</dt><dd>{responded}</dd></div><div><dt>Attending</dt><dd>{attending}</dd></div><div><dt>Declined</dt><dd>{declined}</dd></div><div><dt>Pending</dt><dd>{Math.max(0, state.guests.length - responded)}</dd></div><div><dt>Expected places</dt><dd>{headcount}</dd></div></dl>
       <button type="button" onClick={() => exportFile("rsvps")}>Export RSVP CSV</button> <button type="button" onClick={() => exportFile("backup")}>Download private data backup</button>
       <div className="admin-table">{state.rsvps.length ? state.rsvps.map(row => <article key={string(row.id)}><strong>{string(row.display_name)}</strong><span>{string(row.attendance)} · party {string(row.party_size)}</span><small>{string(row.updated_at)}</small></article>) : <p>No RSVP responses yet.</p>}</div>
     </section>

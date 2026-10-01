@@ -7,7 +7,6 @@ import {
   createContext,
   type AnimationEvent,
   type CSSProperties,
-  type FormEvent,
   type ReactNode,
   useContext,
   useEffect,
@@ -17,13 +16,14 @@ import {
 } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
-import { Postcard } from "./postcard";
-import { MarkEditor } from "./mark-editor";
+import { ReplyStudio } from "./reply-studio";
+import { InvitationClosing } from "./invitation-closing";
+import { GiftShelf } from "./gift-shelf";
+import { ArchiveTable, type ArchiveItem } from "./archive-table";
 import { defaultStyleForEdition } from "@/lib/mark-styles";
 import { T, LanguageSwitch, useLanguage } from "./language";
 
 type Props = { guestName?: string; token?: string; partyLimit?: number };
-type Attendance = "" | "yes" | "no";
 type MotionPreferences = { reduced: boolean; precise: boolean };
 
 const MotionContext = createContext<MotionPreferences>({ reduced: false, precise: false });
@@ -32,8 +32,7 @@ const EVENT_DATE_UTC = Date.UTC(2026, 10, 1);
 const MAPS_URL = "https://maps.app.goo.gl/JFL3wrzj7qsBXbz56";
 const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
-type ArchiveItem = { type: string; title: string; note: string; image?: string; alt?: string };
-type LiveMark = { id: string; author_name: string; message: string | null; drawingUrl: string | null; created_at: string | null };
+type SiteState = { phase?: string; rsvpEnabled?: boolean; giftsEnabled?: boolean; marksEnabled?: boolean };
 const archiveItems: ArchiveItem[] = [
   {
     type: "The mark",
@@ -41,6 +40,7 @@ const archiveItems: ArchiveItem[] = [
     note: "The identity began with an old joke about a missing rib. The B holds the curved I without turning the story into a slogan.",
     image: "/assets/bagas-iga-mark.webp",
     alt: "Monogram Bagas dan Iga",
+    slug: "the-mark",
   },
   {
     type: "Photograph",
@@ -75,14 +75,14 @@ function MotionProvider({ children }: { children: ReactNode }) {
 
 function useExperienceClock() {
   const { language } = useLanguage();
-  const [phaseOverride, setPhaseOverride] = useState("");
+  const [siteState, setSiteState] = useState<SiteState | null>(null);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     fetch("/api/site-state")
-      .then(response => response.ok ? response.json() as Promise<{ phase?: string }> : null)
-      .then(state => setPhaseOverride(state?.phase || ""))
-      .catch(() => {});
+      .then(response => { if (!response.ok) throw new Error("Site state unavailable"); return response.json() as Promise<SiteState>; })
+      .then(state => { if (state) setSiteState(state); })
+      .catch(() => setSiteState({ rsvpEnabled: false, giftsEnabled: false, marksEnabled: false }));
     const interval = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(interval);
   }, []);
@@ -97,8 +97,8 @@ function useExperienceClock() {
     const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
     const localDate = Date.UTC(Number(value.year), Number(value.month) - 1, Number(value.day));
     const days = Math.round((EVENT_DATE_UTC - localDate) / 86_400_000);
-    const forcedToday = phaseOverride === "wedding-day";
-    const forcedPast = phaseOverride === "post-wedding";
+    const forcedToday = siteState?.phase === "wedding-day";
+    const forcedPast = siteState?.phase === "post-wedding";
     const state = forcedPast || days < 0 ? "past" : forcedToday || days === 0 ? "today" : days === 1 ? "tomorrow" : "countdown";
     const countdown = state === "past"
       ? "AND JUST LIKE THAT, WE'RE MARRIED."
@@ -110,8 +110,15 @@ function useExperienceClock() {
     const caption = language === "id"
       ? state === "past" ? "DAN SEKARANG, KAMI SUDAH MENIKAH." : state === "today" ? "HARINYA TIBA." : state === "tomorrow" ? "BESOK HARINYA." : `${Math.max(days, 0)} HARI LAGI.`
       : countdown;
-    return { state, countdown: caption };
-  }, [now, phaseOverride, language]);
+    return {
+      state,
+      countdown: caption,
+      ready: siteState !== null,
+      rsvpEnabled: siteState?.rsvpEnabled === true,
+      giftsEnabled: siteState?.giftsEnabled === true,
+      marksEnabled: siteState?.marksEnabled === true,
+    };
+  }, [now, siteState, language]);
 }
 
 function hashEdition(token: string) {
@@ -155,36 +162,16 @@ function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggl
         </div>
         <p className="v2-info-place"><strong>Pandiga Cimahi</strong><span>Jl. Sirnarasa No.11, Cibabat</span></p>
         <nav aria-label={t("Practical wedding links")}>
-          <a href={MAPS_URL} target="_blank" rel="noreferrer" onClick={onToggle}><T>Maps</T></a>
+          <a href="#details" onClick={onToggle}><T>Details</T></a>
+          <a href="#profiles" onClick={onToggle}><T>People</T></a>
+          <a href="#archive" onClick={onToggle}><T>Archive</T></a>
           <a href="#rsvp" onClick={onToggle}>RSVP</a>
-          <a href="#useful-bits" onClick={onToggle}><T>Useful bits</T></a>
+          <a href="#gifts" onClick={onToggle}><T>Gifts</T></a>
+          <a href="#leave-a-mark" onClick={onToggle}><T>Postcards</T></a>
+          <a href={MAPS_URL} target="_blank" rel="noreferrer" onClick={onToggle}><T>Maps</T></a>
         </nav>
       </div>
     </header>
-  );
-}
-
-function ArchiveArtifact({ item, index }: { item: (typeof archiveItems)[number]; index: number }) {
-  const [turned, setTurned] = useState(false);
-  return (
-    <article className={`v2-artifact artifact-${index + 1} ${turned ? "is-turned" : ""}`}>
-      <button type="button" onClick={() => setTurned(value => !value)} aria-pressed={turned}>
-        <span className="v2-artifact-side v2-artifact-front">
-          <span className="v2-artifact-index">{String(index + 1).padStart(2, "0")}</span>
-          {item.image
-            ? <img src={item.image} alt={item.alt || ""} />
-            : <span className="v2-artifact-placeholder" aria-hidden="true"><i /><i /><i /></span>}
-          <span className="v2-artifact-type"><T>{item.type}</T></span>
-          <strong><T>{item.title}</T></strong>
-          <small><T>Turn it over</T></small>
-        </span>
-        <span className="v2-artifact-side v2-artifact-back">
-          <span><T>{item.type}</T> / Bagas × Iga</span>
-          <strong><T>{item.note}</T></strong>
-          <small><T>Return to the front</T></small>
-        </span>
-      </button>
-    </article>
   );
 }
 
@@ -341,7 +328,7 @@ function DestinationMap() {
   );
 }
 
-function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
+function WeddingWorld({ guestName = "", token = "" }: Props) {
   const { t } = useLanguage();
   const { reduced, precise } = useContext(MotionContext);
   const clock = useExperienceClock();
@@ -350,17 +337,8 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   const [entered, setEntered] = useState(false);
   const [opening, setOpening] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [attendance, setAttendance] = useState<Attendance>("");
-  const [partySize, setPartySize] = useState(1);
-  const [guestNames, setGuestNames] = useState("");
-  const [dietary, setDietary] = useState("");
-  const [message, setMessage] = useState("");
-  const [rsvpStatus, setRsvpStatus] = useState("");
   const [rsvpSaved, setRsvpSaved] = useState(false);
-  const [rsvpBusy, setRsvpBusy] = useState(false);
-  const [rsvpEnabled, setRsvpEnabled] = useState(true);
   const [featuredArchive, setFeaturedArchive] = useState<ArchiveItem[]>([]);
-  const [liveMarks, setLiveMarks] = useState<LiveMark[]>([]);
   const edition = useMemo(() => hashEdition(token), [token]);
   const displayName = guestName.trim();
   const hasGuestName = Boolean(displayName);
@@ -384,28 +362,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
   }, [entered]);
 
   useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, { cache: "no-store" })
-      .then(async response => { const result = await response.json() as { error?: string; enabled: boolean; rsvp: { attendance: string; party_size: number; guest_names?: string; dietary?: string; message?: string } | null }; if (!response.ok) throw new Error(result.error || "RSVP is unavailable."); return result; })
-      .then(result => {
-        if (cancelled) return;
-        setRsvpEnabled(result.enabled !== false);
-        if (!result.rsvp) return;
-        const saved = result.rsvp;
-        const nextAttendance: Attendance = saved.attendance === "yes" ? "yes" : saved.attendance === "no" ? "no" : "";
-        setAttendance(nextAttendance);
-        setPartySize(Math.max(1, Number(saved.party_size) || 1));
-        setGuestNames(saved.guest_names || "");
-        setDietary(saved.dietary || "");
-        setMessage(saved.message || "");
-        setRsvpSaved(nextAttendance === "yes");
-      })
-      .catch(error => { if (!cancelled) setRsvpStatus(error instanceof Error ? error.message : "RSVP is unavailable."); });
-    return () => { cancelled = true; };
-  }, [token]);
-
-  useEffect(() => {
     if (!entered) return;
     let cancelled = false;
     fetch("/api/archive?featured=1")
@@ -413,23 +369,13 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
       .then(result => {
         if (cancelled || !result) return;
         setFeaturedArchive(result.entries.filter(entry => entry.slug !== "the-mark").slice(0, 2).map(entry => ({
-          type: entry.type, title: entry.title, note: entry.excerpt || entry.title,
+          type: entry.type, title: entry.title, note: entry.excerpt || entry.title, slug: entry.slug,
           image: entry.media_url || undefined, alt: entry.title,
         })));
       })
       .catch(() => { /* The editorial placeholders remain until real entries are available. */ });
     return () => { cancelled = true; };
   }, [entered]);
-
-  useEffect(() => {
-    if (!entered || token) return;
-    let cancelled = false;
-    fetch("/api/marks?limit=3")
-      .then(async response => response.ok ? await response.json() as { marks: LiveMark[] } : null)
-      .then(result => { if (!cancelled && result) setLiveMarks(result.marks); })
-      .catch(() => { /* The decorative installation stands in until postcards are approved. */ });
-    return () => { cancelled = true; };
-  }, [entered, token]);
 
   useEffect(() => {
     if (!entered || !rootRef.current) return;
@@ -486,34 +432,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
     setOpening(false);
   }
 
-  async function submitRsvp(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!rsvpEnabled) { setRsvpStatus("RSVP is closed. Thank you for being part of our day."); return; }
-    if (!attendance) return;
-    if (!token) {
-      setRsvpStatus(attendance === "yes" ? "Preview only — open your personal invitation to save this." : "Preview only — nothing was saved.");
-      return;
-    }
-    setRsvpBusy(true);
-    setRsvpStatus("Saving your answer…");
-    try {
-      const response = await fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ attendance, partySize, guestNames, dietary, message }),
-      });
-      const result = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(result.error || "Your answer could not be saved.");
-      const attending = attendance === "yes";
-      setRsvpSaved(attending);
-      setRsvpStatus(attending ? "YOU'RE ON THE LIST." : "WE'LL MISS YOU. THANKS FOR LETTING US KNOW.");
-    } catch (error) {
-      setRsvpStatus(error instanceof Error ? error.message : "Your answer could not be saved.");
-    } finally {
-      setRsvpBusy(false);
-    }
-  }
-
   const editionStyle = { "--edition": edition } as CSSProperties;
 
   return (
@@ -567,7 +485,10 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <BotanicalImage eager src="/assets/botanicals/combretum/tendril.webp" className="day-tendril" />
             <BotanicalImage eager src="/assets/botanicals/melastoma/full-stem.webp" className="day-melastoma" />
           </div>
+          <div className="v2-conservatory" aria-hidden="true"><i /></div>
           <div className="v2-grand-portal" aria-hidden="true" />
+          <div className="v2-garden-steps" aria-hidden="true"><i /><i /><i /></div>
+          <div className="v2-hero-exit" aria-hidden="true" />
           <div className="v2-day-copy">
             <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
             <p className="v2-grand-prelude"><T>We’re getting married.</T></p>
@@ -576,7 +497,6 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
               <p className="v2-grand-note"><T>Our favourite people. One very good reason to gather.</T></p>
               <time dateTime="2026-11-01"><span><T>Sunday</T></span>01 November 2026</time>
               <p className="v2-grand-venue">Pandiga, Cimahi <span>Akad 14:00 · <T>Reception</T> 18:00 WIB</span></p>
-              <div className="v2-grand-actions"><a href="#details"><T>Wedding details</T></a><a href="#rsvp">RSVP <ArrowRight size={15} aria-hidden="true" /></a></div>
             </div>
             <p className="v2-day-countdown" suppressHydrationWarning><T>The day we’ve been dreaming of</T><span>{clock.countdown}</span></p>
           </div>
@@ -622,40 +542,57 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           <BotanicalImage src="/assets/botanicals/combretum/flower-tip.webp" className="v2-world-emergence" />
         </section>
 
-        <section className="v2-profiles v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
-          <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-background-bloom v2-background-bloom-profiles" />
-          <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-profiles-secondary" />
-          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-profiles" />
+        <section className="v2-profiles v2-profile-folio v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
           <header>
             <p><T>For those who know one of us better.</T></p>
             <h2 id="profiles-title"><T>The two of us,</T><br /><T>as observed by the other.</T></h2>
           </header>
-          <article className="v2-person v2-person-bagas">
-            <figure><div><span><T>Portrait of Bagas</T><br /><T>to be added</T></span></div><figcaption><T>Bagas, as himself.</T></figcaption></figure>
-            <div>
-              <p>Bagas</p><h3>Bagas</h3><small>Bagas Marsya Pratama Nugraha</small>
+          <article className="v2-person v2-person-bagas" aria-labelledby="profile-bagas-title">
+            <figure className="v2-profile-portrait">
+              <div className="v2-profile-print">
+                <div className="v2-profile-window">
+                  <span className="v2-portrait-initial" aria-hidden="true">B</span>
+                  <span className="v2-portrait-placeholder"><T>Portrait of Bagas</T><br /><T>to be added</T></span>
+                  <i className="v2-portrait-light" aria-hidden="true" />
+                </div>
+              </div>
+              <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-portrait-orchid" />
+              <figcaption><T>Bagas, as himself.</T></figcaption>
+            </figure>
+            <div className="v2-profile-copy">
+              <p><T>As observed by Iga</T></p><h3 id="profile-bagas-title">Bagas</h3><small>Bagas Marsya Pratama Nugraha</small>
               <dl>
-                <div><dt><T>Known for</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
-                <div><dt><T>According to Iga</T></dt><dd><T>“A real sentence will live here.”</T></dd></div>
+                <div><dt><T>Known for</T></dt><dd><T>To be added.</T></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T>To be added.</T></dd></div>
+                <div><dt><T>According to Iga</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
               </dl>
             </div>
           </article>
-          <div className="v2-profile-join"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
-          <article className="v2-person v2-person-iga">
-            <figure><div><span><T>Portrait of Iga</T><br /><T>to be added</T></span></div><figcaption><T>Iga, as herself.</T></figcaption></figure>
-            <div>
-              <p>Iga</p><h3>Iga</h3><small>Iga Noviyanti Rohman</small>
+          <div className="v2-profile-join" aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
+          <article className="v2-person v2-person-iga" aria-labelledby="profile-iga-title">
+            <figure className="v2-profile-portrait">
+              <div className="v2-profile-print">
+                <div className="v2-profile-window">
+                  <span className="v2-portrait-initial" aria-hidden="true">I</span>
+                  <span className="v2-portrait-placeholder"><T>Portrait of Iga</T><br /><T>to be added</T></span>
+                  <i className="v2-portrait-light" aria-hidden="true" />
+                </div>
+              </div>
+              <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-portrait-melastoma" />
+              <figcaption><T>Iga, as herself.</T></figcaption>
+            </figure>
+            <div className="v2-profile-copy">
+              <p><T>As observed by Bagas</T></p><h3 id="profile-iga-title">Iga</h3><small>Iga Noviyanti Rohman</small>
               <dl>
-                <div><dt><T>Known for</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
-                <div><dt><T>According to Bagas</T></dt><dd><T>“A real sentence will live here.”</T></dd></div>
+                <div><dt><T>Known for</T></dt><dd><T>To be added.</T></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T>To be added.</T></dd></div>
+                <div><dt><T>According to Bagas</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
               </dl>
             </div>
           </article>
         </section>
 
-        <section className="v2-archive v2-scene" id="archive" data-light="archive" aria-labelledby="archive-title">
+        <section className="v2-archive v2-scene v2-archive-table-scene" id="archive" data-light="archive" aria-labelledby="archive-title">
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-archive" />
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-near-field v2-near-archive-bloom" />
           <div className="v2-archive-heading">
@@ -663,50 +600,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
             <h2 id="archive-title"><T>Some things were</T><br /><T>worth keeping.</T></h2>
             <span><T>Photographs, objects, and little things that became our things.</T></span>
           </div>
-          <div className="v2-evidence-field">
-            {[archiveItems[0], ...featuredArchive, ...archiveItems.slice(1)].slice(0, 3).map((item, index) => <ArchiveArtifact item={item} index={index} key={`${item.type}-${index}`} />)}
-            <BotanicalImage src="/assets/botanicals/combretum/tendril.webp" className="archive-tendril" />
-          </div>
-          <Link className="v2-text-link" href="/archive"><T>Open the archive </T><span aria-hidden="true">↗</span></Link>
-        </section>
-
-        <section className="v2-rsvp v2-scene" id="rsvp" data-light="rsvp" aria-labelledby="rsvp-title">
-          <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-rsvp" />
-          <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-rsvp-secondary" />
-          <div className="v2-rsvp-copy">
-            <p><T>Will you be there?</T></p>
-            <h2 id="rsvp-title"><T>We’re doing</T><br /><T>a headcount.</T></h2>
-            <span><T>Apparently venues care about these things.</T></span>
-          </div>
-          <form className={`v2-rsvp-form ${rsvpSaved ? "is-confirmed" : ""}`} onSubmit={submitRsvp}>
-            <p className="v2-form-person"><T>Invitation for </T><strong>{displayName || t("our favourite people")}</strong></p>
-            <fieldset>
-              <legend><T>Your answer</T></legend>
-              <label className={attendance === "yes" ? "is-selected" : ""}>
-                <input type="radio" name="attendance" value="yes" checked={attendance === "yes"} onChange={() => setAttendance("yes")} />
-                <span><T>I’ll be there.</T></span>
-              </label>
-              <label className={attendance === "no" ? "is-selected" : ""}>
-                <input type="radio" name="attendance" value="no" checked={attendance === "no"} onChange={() => setAttendance("no")} />
-                <span><T>I’ll miss this one.</T></span>
-              </label>
-            </fieldset>
-            {attendance === "yes" && (
-              <div className="v2-rsvp-details">
-                <label><T>Number of guests</T><select value={partySize} onChange={event => setPartySize(Number(event.target.value))}>
-                    {Array.from({ length: Math.max(1, partyLimit) }, (_, index) => <option value={index + 1} key={index + 1}>{index + 1}</option>)}
-                  </select>
-                </label>
-                <label><T>Guest names </T><span><T>optional</T></span><input value={guestNames} onChange={event => setGuestNames(event.target.value)} maxLength={300} /></label>
-                <label><T>Dietary notes </T><span><T>optional</T></span><input value={dietary} onChange={event => setDietary(event.target.value)} maxLength={300} /></label>
-                <label><T>A note for us </T><span><T>optional</T></span><textarea value={message} onChange={event => setMessage(event.target.value)} maxLength={800} rows={3} /></label>
-              </div>
-            )}
-            <button className="v2-rsvp-submit" type="submit" disabled={!attendance || rsvpBusy || !rsvpEnabled}>{t(rsvpBusy ? "Saving…" : token ? "Save my answer" : "Preview my answer")}</button>
-            {!rsvpEnabled && <p className="v2-rsvp-status" role="status">{t("RSVP is closed. Thank you for being part of our day.")}</p>}
-            <p className="v2-rsvp-status" role="status">{t(rsvpStatus)}</p>
-            {rsvpSaved && <div className={`v2-acceptance-mark edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /><span><T>Accepted / 01.11.26</T></span></div>}
-          </form>
+          <ArchiveTable items={[archiveItems[0], ...featuredArchive, ...archiveItems.slice(1)].slice(0, 3)} />
         </section>
 
         <section className="v2-useful v2-scene" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
@@ -722,33 +616,21 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
           </div>
         </section>
 
-        <section className="v2-gifts v2-scene" id="gifts" data-light="late" aria-labelledby="gifts-title">
+        <section className="v2-gifts v2-scene v2-gift-gallery" id="gifts" data-light="late" aria-labelledby="gifts-title">
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-gifts" />
           <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-gifts-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
           <div className="v2-gifts-heading"><p><T>A few things</T></p><h2 id="gifts-title"><T>We’re saving room for.</T></h2><span><T>The catalogue opens from a private invitation so reservations stay private.</T></span></div>
-          <div className="v2-gift-shelf" aria-label={t("Gift collections")}>
-            {["For Bagas", "For Iga", "For Our Home"].map((label, index) => (
-              <article key={label}>
-                <div className={`v2-object object-${index + 1}`} aria-hidden="true"><i /><i /></div>
-                <span>{String(index + 1).padStart(2, "0")}</span><h3>{t(label)}</h3><p><T>Curated objects will be added here.</T></p>
-              </article>
-            ))}
-          </div>
-          <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></Link>
+          <GiftShelf href={clock.giftsEnabled ? token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts" : null} />
+          {clock.giftsEnabled
+            ? <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></Link>
+            : <p className="v2-feature-note"><T>The gift catalogue will open later.</T></p>}
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
         </section>
 
-        <section className={`v2-mark v2-scene${token ? " has-studio" : ""}`} id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="v2-mark-copy"><p><T>Leave a mark</T></p><h2 id="mark-title"><T>Make a mess.</T><br /><T>We’ll keep it.</T></h2><span><T>Write something, draw something, or do both.</T></span></div>
-          {token ? <div className="v2-mark-studio"><MarkEditor token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} /></div> : <div className="v2-postcard-installation" aria-label={t(liveMarks.length ? "Postcards from our guests" : "Guest postcard installation preview")}>
-            {liveMarks.length ? liveMarks.slice(0, 3).map((mark, index) => <Postcard key={mark.id} className={`v2-postcard-live slot-${index}`} mark={{ ...mark, index }} />) : <>
-              <div className="v2-postcard card-a"><small><T>Text / drawing</T></small><strong><T>Something from you</T><br /><T>will live here.</T></strong><span><T>Kept for Bagas × Iga</T></span></div>
-              <div className="v2-postcard card-b" aria-hidden="true"><i /><i /><i /></div>
-              <div className={`v2-postcard card-c edition-${edition}`} aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></div>
-            </>}
-            {liveMarks.length > 0 && <Link className="v2-postcard-link" href="/marks"><T>See every postcard</T> <span aria-hidden="true">↗</span></Link>}
-          </div>}
+        <section className="v2-mark v2-scene has-studio v2-reply-scene" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
+          <div className="v2-mark-copy"><p><T>Your reply</T></p><h2 id="mark-title"><T>A little word</T><br /><T>from you.</T></h2><span><T>Tell us if you’re coming. Leave a little love, if you like.</T></span></div>
+          {entered && <div className="v2-mark-studio" id="rsvp"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} rsvpEnabled={clock.rsvpEnabled} marksEnabled={clock.marksEnabled} onAttendanceSaved={setRsvpSaved} /></div>}
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="mark-melastoma" />
         </section>
 
@@ -774,12 +656,7 @@ function WeddingWorld({ guestName = "", token = "", partyLimit = 2 }: Props) {
         </div>
       </main>
 
-      <footer className="v2-footer" aria-hidden={!entered}>
-        <div className={`v2-footer-edition edition-${edition}`}><img src="/assets/bagas-iga-mark.webp" alt="" /><span><T>Guest edition </T>{String(edition + 1).padStart(2, "0")}</span></div>
-        <p>Bagas × Iga<br /><span>2026</span></p>
-        <small><T>Made with unreasonable attention to detail</T><br /><T>and approximately 1 billion tokens.</T></small>
-        <button type="button" onClick={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }}><T>View the envelope again</T></button>
-      </footer>
+      <InvitationClosing entered={entered} edition={edition} past={clock.state === "past"} onReopen={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }} />
     </div>
   );
 }

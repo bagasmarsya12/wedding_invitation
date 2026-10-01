@@ -1,0 +1,84 @@
+/* One reply paper and the original public wall. Attendance never decorates a public card. */
+.v2-botanical-continuum > .v2-reply-scene { padding:clamp(5rem,8vw,8rem) clamp(1.25rem,5vw,5rem); min-height:0; }
+.v2-botanical-continuum > .v2-reply-scene::before { background:radial-gradient(ellipse at 15% 22%,#ac7880,#785e62 48%,#394438 100%); }
+.v2-reply-scene .v2-mark-copy { display:grid; grid-template-columns:1fr .7fr; column-gap:3rem; width:100%; max-width:82rem; margin:auto; }
+.v2-reply-scene .v2-mark-copy > p { grid-column:1/-1; margin:0 0 1.25rem; }
+.v2-reply-scene .v2-mark-copy h2 { margin:0; line-height:.98; font-size:clamp(3.4rem,5.8vw,5.8rem); letter-spacing:-.05em; }
+.v2-reply-scene .v2-mark-copy > span { align-self:end; max-width:23rem; margin:0 0 .35rem; line-height:1.65; }
+#rsvp { scroll-margin-top:6rem; }
+.reply-editor-slot { min-height:66rem; }
+.reply-editor-loading { min-height:28rem; max-width:35rem; margin:3rem 0; padding:2rem; border:1px solid #f4eada80; color:#676451; background:#f7f2e7 url("/assets/15-paper-fiber-texture.webp") center/560px; font:.8rem/1.65 var(--v2-sans); }
+.reply-editor-loading button { min-height:44px; padding:.7rem; border:1px solid currentColor; color:#596949; background:transparent; cursor:pointer; }
+.v2-reply-scene .mark-melastoma { bottom:8rem; width:min(33vw,31rem,calc(var(--botanical-pixels) * 1px / var(--botanical-dpr,2))); }
+.reply-studio { grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr); align-items:start; gap:clamp(1.5rem,3vw,3rem); }
+.reply-studio > .mark-composer {
+  position:relative; border-radius:2px; padding:clamp(1.2rem,2.4vw,2.25rem); border:1px solid #f4eada80;
+  background:#f7f2e7 url("/assets/15-paper-fiber-texture.webp") center/560px;
+  box-shadow:0 3px 0 #e2d8c8,0 6px 0 #cabdab,8px 20px 35px #28312835; color:#292721;
+}
+.reply-attendance { position:relative; }
+.reply-recipient { margin:0 0 1.5rem; font:400 .82rem/1.6 var(--v2-sans); color:#66624e; overflow-wrap:anywhere; }
+.reply-recipient strong { display:block; font:400 1.35rem/1.4 var(--v2-serif); color:#292721; }
+.reply-attendance fieldset { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin:0; padding:0; border:0; min-width:0; }
+.reply-attendance legend { margin-bottom:1rem; padding:0; font:400 1.65rem/1.2 var(--v2-serif); }
+.reply-attendance label { display:flex; align-items:center; gap:.6rem; min-width:0; min-height:52px; padding:.75rem; border:1px solid #8b876c70; background:#faf6ec80; cursor:pointer; transition:background .25s ease,border-color .25s ease; }
+.reply-attendance label.is-selected { background:#e0e5d6; border-color:#6f7d60; }
+.reply-attendance input { width:17px; height:17px; flex:none; margin:0; accent-color:#596949; }
+.reply-attendance label span { font:500 .85rem/1.4 var(--v2-sans); }
+.reply-attendance fieldset:disabled label { cursor:default; opacity:.65; }
+.reply-privacy,.reply-closed,.reply-loading,.reply-unsaved,.reply-postcards-closed { margin:.9rem 0 0; font:400 .76rem/1.65 var(--v2-sans); color:#676451; }
+.reply-closed,.reply-unsaved { color:#86545c; }
+.reply-received { display:flex; align-items:center; gap:.7rem; width:fit-content; margin:1rem 0 0; color:#506440; font:500 .76rem/1.4 var(--v2-sans); animation:reply-confirm .45s ease-out; }
+.reply-received > span:first-child { display:grid; place-items:center; width:2rem; height:2rem; border:1px solid #82906e; border-radius:50%; font-size:1rem; }
+.reply-received small { display:block; margin-top:.25rem; font:400 .76rem/1.4 var(--v2-sans); }
+.reply-postcard-intro { margin:1rem 0 0; padding-top:1.25rem; border-top:1px solid #8b876c40; font:italic 1.25rem/1.4 var(--v2-serif); }
+.reply-postcard-intro > span { display:block; margin-top:.45rem; font:400 .74rem/1.65 var(--v2-sans); color:#676451; }
+.reply-studio .mark-modes { flex-wrap:wrap; }
+.reply-studio .mark-modes button { color:#5a614c; border-color:#b1ac93; }
+.reply-studio .mark-modes button.is-active { background:#62734c; color:#f7f2e7; }
+.reply-studio .mark-toolbar button,.reply-studio .font-option { color:#4a5340; background:#faf7ed; border-color:#b2b69d; }
+.reply-studio .font-option.is-on { border-color:#62734c; background:#e0e5d6; }
+.reply-studio :is(.caption,.mark-hint,.mark-editing-note,.char-count,.mark-empty,.product-status,.reply-status) { color:#676451; }
+.reply-studio .mark-hint { font-size:.74rem; line-height:1.65; margin:0; }
+.reply-studio .style-swatches button.is-on { border-color:#62734c; box-shadow:0 0 0 2px #87957155; }
+.reply-studio .submit-row { flex-wrap:wrap; }
+.reply-studio .submit-row .paper-button { min-height:48px; width:100%; margin-top:.35rem; color:#f7f2e7; border:1px solid #596949; background:#596949; }
+.reply-studio .paper-button:disabled { opacity:.55; cursor:default; }
+.reply-studio .reply-status,.reply-studio .product-status { margin:0; font:.78rem/1.65 var(--v2-sans); }
+.reply-studio .reply-status:empty,.reply-studio .product-status:empty { display:none; }
+.reply-studio .mystrip { border-color:#8b876c40; padding-top:1.15rem; }
+.reply-studio .mystrip h3 { color:#5a614c; }
+.reply-studio .strip-add { color:#5a614c; border-color:#8b876c80; background:#e8e4d780; }
+.reply-studio .chip { color:#756341; border-color:#a99b77; }
+.reply-studio .chip.is-approved { color:#52633e; border-color:#82906e; }
+.reply-studio > .mark-wall { position:sticky; top:6rem; padding:1.4rem 0; border:0; border-radius:0; background:transparent; }
+.reply-studio .mark-wall > h2 { font:400 1.55rem/1.3 var(--v2-serif); color:#f7f2e7; text-transform:none; letter-spacing:0; }
+.reply-studio .wall-caption { color:#f0e7da; }
+.reply-retry { min-height:44px; margin-top:.7rem; padding:.5rem .7rem; border:1px solid #8b876c80; background:transparent; color:#596949; cursor:pointer; }
+.reply-studio :is(button,input,textarea):focus-visible { outline:2px solid #a66b79; outline-offset:3px; }
+/* The editor shares the reader's measured gutters. Keep writing below stamps,
+   above the signature, and readable on 320px screens rather than shrinking ink. */
+.reply-studio .postcard-canvas { aspect-ratio:auto; height:24rem; width:100%; max-width:none; box-shadow:3px 5px 12px #28312820; border:1px solid #8b876c40; }
+.reply-studio .postcard-canvas::after { inset:.65rem; }
+.reply-studio .postcard-canvas .postcard-writing { inset:5.6rem 1.5rem 3.5rem; width:auto; }
+.reply-studio .postcard-canvas .postcard-writing textarea { font-size:1.2rem; line-height:1.6; }
+.reply-studio .postcard-canvas > .postcard-from { bottom:1.2rem; left:1.5rem; right:1.5rem; font-size:.65rem; line-height:1.5; overflow-wrap:anywhere; }
+.reply-studio .postcard-canvas .postcard-stamp { top:1.1rem; right:1.1rem; width:2.6rem; height:3.1rem; }
+.reply-studio .postcard-canvas .postcard-postmark { top:1.4rem; right:4.15rem; width:2.3rem; font-size:.48rem; }
+.reply-studio .postcard-canvas.pc--airmail .postcard-writing { top:6rem; bottom:4rem; }
+.reply-studio .postcard-canvas.pc--airmail > .postcard-from { bottom:2.1rem; }
+@keyframes reply-confirm { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:none; } }
+@media(max-width:960px) {
+  .reply-editor-slot { min-height:100rem; }
+  .v2-reply-scene .v2-mark-copy { grid-template-columns:1fr; gap:1rem; }
+  .reply-studio { grid-template-columns:1fr; }
+  .reply-studio > .mark-wall { position:relative; top:auto; padding-top:1rem; }
+}
+@media(max-width:400px) {
+  .reply-attendance fieldset { grid-template-columns:1fr; gap:.6rem; }
+  .reply-studio .postcard-canvas .postcard-writing { left:1.1rem; right:1.1rem; }
+  .reply-studio .postcard-canvas > .postcard-from { left:1.1rem; right:1.1rem; }
+  .reply-studio .style-swatches,.reply-studio .font-picker { gap:.4rem; }
+  .reply-studio :is(.style-swatches,.font-picker) .caption { width:100%; }
+}
+@media(prefers-reduced-motion:reduce) { .reply-received { animation:none; } .reply-attendance label { transition:none; } }

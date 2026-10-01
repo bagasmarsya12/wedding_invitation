@@ -29,6 +29,14 @@ export function validateRsvp(attendance: unknown, partySize: unknown, partyLimit
   return { attendance, partySize: size };
 }
 
+/** No guest-facing count: keep an existing answer's count, otherwise use the
+ * invitation's allocated places. This is an allocation, not a new headcount survey. */
+export function validateSimpleRsvp(attendance: unknown, partyLimit: number, previous?: { attendance: string; party_size: number } | null) {
+  const size = previous?.attendance === "yes" && previous.party_size > 0
+    ? Math.min(previous.party_size, partyLimit) : partyLimit;
+  return validateRsvp(attendance, size, partyLimit);
+}
+
 export function safeExternalUrl(value: unknown): string | null {
   if (typeof value !== "string" || value.length > 500) return null;
   try {

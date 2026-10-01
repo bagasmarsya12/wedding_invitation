@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { csvCell, parseCsv, phaseForDate, pngDimensions, randomInviteToken, safeExternalUrl, safeMediaUrl, sha256, toCsv, validateRsvp } from "../lib/production.ts";
+import { csvCell, parseCsv, phaseForDate, pngDimensions, randomInviteToken, safeExternalUrl, safeMediaUrl, sha256, toCsv, validateRsvp, validateSimpleRsvp } from "../lib/production.ts";
 
 function database() {
   const db = new DatabaseSync(":memory:");
@@ -52,6 +52,16 @@ test("RSVP remains one authoritative record per invitation", () => {
   assert.deepEqual({ ...db.prepare("SELECT attendance, party_size FROM rsvps WHERE guest_id = ?").get("guest-a") }, { attendance: "no", party_size: 0 });
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM rsvps").get().count, 1);
   db.close();
+});
+
+test("simple RSVP uses admin allocation, preserves existing counts and never exceeds the invitation", () => {
+  assert.deepEqual(validateSimpleRsvp("yes", 3), { attendance:"yes", partySize:3 });
+  assert.deepEqual(validateSimpleRsvp("yes", 3, { attendance:"yes",party_size:2 }), { attendance:"yes", partySize:2 });
+  assert.deepEqual(validateSimpleRsvp("yes", 1, { attendance:"yes",party_size:3 }), { attendance:"yes", partySize:1 });
+  assert.deepEqual(validateSimpleRsvp("yes", 3, { attendance:"no",party_size:0 }), { attendance:"yes", partySize:3 });
+  assert.deepEqual(validateSimpleRsvp("no", 3), { attendance:"no", partySize:0 });
+  assert.equal(validateSimpleRsvp("maybe", 3), null);
+  assert.equal(validateSimpleRsvp("yes", 0), null);
 });
 
 test("gift conditional reservation excludes a racing second guest and unique active history", () => {

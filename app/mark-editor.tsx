@@ -1,10 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { T, useLanguage } from "./language";
+import { PostcardWall } from "./postcard-wall";
 import { markStyleOr, markFontOr, MARK_STYLES, MARK_FONTS, DEFAULT_MARK_STYLE, DEFAULT_MARK_FONT, type MarkStyle, type MarkFont } from "@/lib/mark-styles";
 
 
-import { PointerEvent, useEffect, useRef, useState } from "react";
+import { PointerEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
 type Tool = "pen" | "eraser";
 type Mode = "write" | "draw";
@@ -55,7 +56,12 @@ function MiniCard({ mark, index }: { mark: WallMark; index: number }) {
   );
 }
 
-export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE }: { token: string; guestName: string; defaultStyle?: MarkStyle }) {
+type ReplyControls = {
+  controls: ReactNode; footer: ReactNode; canSubmit: boolean; marksEnabled: boolean;
+  preview: boolean; allowEmpty: boolean; submitLabel: string; saveAttendance: () => Promise<boolean>;
+};
+
+export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE, reply }: { token: string; guestName: string; defaultStyle?: MarkStyle; reply?: ReplyControls }) {
   const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
@@ -70,12 +76,14 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [marks, setMarks] = useState<OwnMark[] | null>(null);
-  const [wall, setWall] = useState<WallMark[] | null>(null);
+  const [wallRefresh, setWallRefresh] = useState(0);
   const [editing, setEditing] = useState<OwnMark | null>(null);
   const touched = useRef(false);
+  const sending = useRef(false);
   const postmarkRef = useRef<HTMLSpanElement>(null);
   const writingRef = useRef<HTMLTextAreaElement>(null);
   const focusPaper = () => { if (mode === "write") writingRef.current?.focus(); };
+  const editorEnabled = !reply || reply.marksEnabled;
 
   const canvas = () => canvasRef.current;
   const context = () => canvas()?.getContext("2d", { willReadFrequently: true });
@@ -89,25 +97,32 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
     if (snapshot) restore(snapshot);
   };
   const restore = (url: string) => { const ctx = context(); const element = canvas(); if (!ctx || !element) return; ctx.clearRect(0, 0, element.width, element.height); if (!url) return; const image = new Image(); image.onload = () => { ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.drawImage(image, 0, 0, element.clientWidth, element.clientHeight); ctx.restore(); }; image.src = url; };
-  useEffect(() => { const node = postmarkRef.current; if (node) node.textContent = stampToday(); }, []);
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  useEffect(() => { resize(); const onResize = () => resize(); addEventListener("resize", onResize); return () => removeEventListener("resize", onResize); }, []);
+  useEffect(() => { const node = postmarkRef.current; if (node) node.textContent = stampToday(); }, [editorEnabled]);
+  useEffect(() => {
+    if (!editorEnabled) return;
+    resize(); const onResize = () => resize(); addEventListener("resize", onResize);
+    return () => removeEventListener("resize", onResize);
+    // Canvas access is ref-based. Rebind only when the gated editor mounts,
+    // never on each pen stroke or text edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editorEnabled]);
   const loadMarks = async () => {
+    if (!token) return;
     try {
       const response = await fetch(`/api/invite/${encodeURIComponent(token)}/marks`);
       const result = await response.json() as { marks?: OwnMark[] };
       setMarks(result.marks ?? []);
     } catch { setMarks([]); }
   };
-  const loadWall = async () => {
-    try {
-      const response = await fetch("/api/marks");
-      const result = await response.json() as { marks?: WallMark[] };
-      setWall(result.marks ?? []);
-    } catch { setWall([]); }
-  };
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  useEffect(() => { fetch(`/api/invite/${encodeURIComponent(token)}/marks`).then(response => response.json() as Promise<{ marks?: OwnMark[] }>).then(result => setMarks(result.marks ?? [])).catch(() => setMarks([])); fetch("/api/marks").then(response => response.json() as Promise<{ marks?: WallMark[] }>).then(result => setWall(result.marks ?? [])).catch(() => setWall([])); }, []);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetch(`/api/invite/${encodeURIComponent(token)}/marks`)
+      .then(response => response.json() as Promise<{ marks?: OwnMark[] }>)
+      .then(result => { if (!cancelled) setMarks(result.marks ?? []); })
+      .catch(() => { if (!cancelled) setMarks([]); });
+    return () => { cancelled = true; };
+  }, [token]);
   const point = (event: PointerEvent<HTMLCanvasElement>) => { const rect = event.currentTarget.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
   const start = (event: PointerEvent<HTMLCanvasElement>) => { const ctx = context(); if (!ctx) return; event.currentTarget.setPointerCapture(event.pointerId); const snapshot = event.currentTarget.toDataURL(); setHistory(items => [...items.slice(-19), snapshot]); setFuture([]); drawing.current = true; touched.current = true; const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
   const move = (event: PointerEvent<HTMLCanvasElement>) => { if (!drawing.current) return; const ctx = context(); if (!ctx) return; const p = point(event); ctx.globalCompositeOperation = tool === "eraser" ? "destination-out" : "source-over"; ctx.strokeStyle = color; ctx.lineWidth = tool === "eraser" ? 22 : 3; ctx.lineTo(p.x, p.y); ctx.stroke(); };
@@ -119,27 +134,45 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
   const resetEditor = () => { setEditing(null); setMessage(""); setStyle(defaultStyle); setFont(DEFAULT_MARK_FONT); clear(); setHistory([]); setFuture([]); touched.current = false; setMode("write"); };
   const beginEdit = (mark: OwnMark) => {
     setEditing(mark); setMessage(mark.message ?? ""); setStyle(markStyleOr(mark.style)); setFont(markFontOr(mark.font));
-    setHistory([]); setFuture([]); touched.current = Boolean(mark.drawing);
+    setHistory([]); setFuture([]); touched.current = false;
     requestAnimationFrame(() => restore(mark.drawing ?? ""));
     setMode(mark.message ? "write" : "draw");
     setStatus(""); writingRef.current?.focus();
   };
   const submit = async () => {
-    const element = canvas(); if (!element) return; setBusy(true); setStatus("Keeping your mark…");
+    if (sending.current || (reply && (editing ? !reply.marksEnabled : !reply.canSubmit))) return;
+    sending.current = true; setBusy(true); setStatus("");
     try {
+      // Saving/editing another postcard never writes attendance again. A failed
+      // mark also leaves a successfully persisted reply intact and retryable.
+      if (reply && !editing && !(await reply.saveAttendance())) return;
+      if (reply?.preview) { setStatus("Preview only — no answer or postcard was saved."); return; }
+      if (reply && !reply.marksEnabled) return;
+      const element = canvas();
+      if (!element) return;
+      const pixels = touched.current ? context()?.getImageData(0, 0, element.width, element.height).data : undefined;
+      let hasDrawing = false;
+      if (pixels) for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] > 0) { hasDrawing = true; break; } }
+      if (!editing && !message.trim() && !hasDrawing) {
+        if (!reply || !reply.allowEmpty) setStatus("Write or draw something first.");
+        return;
+      }
+      setStatus("Keeping your mark…");
       const body = editing
         ? { id: editing.id, message, style, font, drawing: touched.current ? element.toDataURL("image/png") : undefined }
-        : { message, style, font, drawing: history.length || touched.current ? element.toDataURL("image/png") : "" };
-      if (!body.message && body.drawing !== undefined && !body.drawing) { setStatus("Write or draw something first."); setBusy(false); return; }
+        : { message: message.trim(), style, font, drawing: hasDrawing ? element.toDataURL("image/png") : "" };
       const response = await fetch(`/api/invite/${encodeURIComponent(token)}/marks`, { method: editing ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const result = await response.json() as { error?: string }; if (!response.ok) throw new Error(result.error || "Your mark could not be saved.");
-      setStatus("Kept."); resetEditor(); await loadMarks(); loadWall();
+      setStatus("Kept."); resetEditor(); await loadMarks(); setWallRefresh(value => value + 1);
     } catch (error) { setStatus(error instanceof Error ? error.message : "Your mark could not be saved."); }
-    finally { setBusy(false); }
+    finally { sending.current = false; setBusy(false); }
   };
   const ownIds = new Set((marks ?? []).map(mark => mark.id));
-  return <div className="mark-studio">
+  return <div className={`mark-studio${reply ? " reply-studio" : ""}`}>
     <div className="mark-composer">
+      {reply?.controls}
+      {(!reply || reply.marksEnabled) && <>
+      {reply && <p className="reply-postcard-intro"><T>A little note, if you like.</T><span><T>Write, draw, or leave this blank. Either answer is welcome.</T></span></p>}
       <div className="mark-modes" role="tablist" aria-label={t("Leave a mark")}>
         <button type="button" role="tab" aria-selected={mode === "write"} className={mode === "write" ? "is-active" : ""} onClick={() => setMode("write")}><T>Write</T></button>
         <button type="button" role="tab" aria-selected={mode === "draw"} className={mode === "draw" ? "is-active" : ""} onClick={() => setMode("draw")}><T>Draw</T></button>
@@ -153,7 +186,7 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
         <span className="postcard-postmark" aria-hidden="true" ref={postmarkRef} />
         <label className="postcard-writing"><textarea ref={writingRef} aria-label={t("Your message")} value={message} maxLength={200} onChange={event => setMessage(event.target.value.slice(0, 200))} readOnly={mode === "draw"} rows={6} placeholder={mode === "write" ? t("Write something you want us to keep.") : ""} /></label>
         <canvas ref={canvasRef} onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} aria-label={t("Postcard drawing area")} />
-        <span className="postcard-from"><T>From </T>{guestName}</span>
+        <span className="postcard-from"><T>From </T>{guestName || (reply?.preview ? t("Your name") : "")}</span>
         {DECOR[style] && <img className="pc-decor" src={DECOR[style] as string} alt="" aria-hidden="true" />}
       </div>
       <p className="mark-hint"><T>Click the paper and write — or switch to Draw and sketch over it.</T></p>
@@ -165,11 +198,15 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
         {MARK_FONTS.map(value => <button type="button" key={value} className={`font-option pc-font-${value}${font === value ? " is-on" : ""}`} onClick={() => setFont(value)} title={t(FONT_LABELS[value])} aria-label={t(FONT_LABELS[value])} aria-pressed={font === value}><span className="font-preview">Aa</span></button>)}
         <span className="caption"><T>Card font — click to try</T></span>
       </div>
+      </>}
+      {reply && !reply.marksEnabled && <p className="reply-postcards-closed"><T>Postcards are closed for now. The wall remains open.</T></p>}
       <div className="submit-row">
-        <button type="button" className="paper-button" disabled={busy} onClick={submit}><T>{editing ? "Update this card" : "Keep this mark"}</T></button>
+        <button type="button" className="paper-button reply-submit" disabled={busy || Boolean(reply && (editing ? !reply.marksEnabled : !reply.canSubmit))} onClick={submit}><T>{busy ? "Saving…" : editing ? "Update this card" : reply ? reply.submitLabel : "Keep this mark"}</T></button>
         {message.length > 0 && <span className="char-count">{message.length}/200</span>}
       </div>
+      {reply?.footer}
       <p className="product-status" role="status">{t(status)}</p>
+      {token && <>
       <div className="mystrip">
         <h3><T>Your postcards</T></h3>
         {marks === null && <p className="mark-empty"><T>Loading your postcards…</T></p>}
@@ -182,20 +219,12 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
           <button type="button" className="strip-add" onClick={resetEditor}><span aria-hidden="true">+</span><span><T>New card</T></span></button>
         </div>}
       </div>
+      </>}
     </div>
     <aside className="mark-wall" aria-label={t("The wall")}>
       <h2><T>The wall</T></h2>
       <p className="wall-caption"><T>Approved postcards from every guest.</T></p>
-      {wall === null && <p className="mark-empty"><T>Loading the wall…</T></p>}
-      {wall?.length === 0 && <p className="mark-empty"><T>Nothing here yet — approved postcards will fill the wall.</T></p>}
-      {wall && wall.length > 0 && <div className="wall-scroll">
-        <div className="wall-grid">
-          {wall.map((mark, index) => <div key={mark.id} className={`wall-card${ownIds.has(mark.id) ? " is-mine" : ""}`}>
-            <span className="wall-pin" aria-hidden="true" />
-            <MiniCard mark={mark} index={index} />
-          </div>)}
-        </div>
-      </div>}
+      <PostcardWall ownIds={ownIds} refresh={wallRefresh} />
     </aside>
   </div>;
 }

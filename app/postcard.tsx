@@ -33,11 +33,11 @@ export function Postcard({ mark, className = "", note }: { mark: PostcardMark; c
   const font = markFontOr(mark.font);
   const decor = MARK_DECOR[style];
   return (
-    <article className={`postcard pc--${style} pc-font-${font} ${className}`.trim()}>
-      {decor && <img className="pc-decor" src={decor} alt="" aria-hidden="true" />}
-      <span className="postcard-stamp" aria-hidden="true"><img src={STAMPS[index % STAMPS.length]} alt="" /></span>
+    <article className={`postcard pc--${style} pc-font-${font}${drawing ? " has-drawing" : ""}${mark.message ? " has-message" : ""} ${className}`.trim()}>
+      {decor && <img className="pc-decor" src={decor} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
+      <span className="postcard-stamp" aria-hidden="true"><img src={STAMPS[index % STAMPS.length]} alt="" loading="lazy" decoding="async" /></span>
       {stamp && <span className="postcard-postmark" aria-hidden="true">{stamp}</span>}
-      {drawing && <img className="postcard-ink" src={drawing} alt={mark.message ? "" : `${mark.author_name}'s drawing`} />}
+      {drawing && <img className="postcard-ink" src={drawing} alt={mark.message ? "" : `${mark.author_name}'s drawing`} loading="lazy" decoding="async" />}
       <div className="postcard-body">
         {mark.message
           ? <p className="postcard-writing">{mark.message}</p>

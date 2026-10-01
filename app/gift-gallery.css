@@ -1,0 +1,138 @@
+/* A collection cabinet, not a shop. The architecture is CSS; empty mounts do
+   not imply wishlist items. Only projected light and interaction affordances move. */
+.v2-botanical-continuum > .v2-gift-gallery { padding:clamp(5rem,8vw,8rem) clamp(1.25rem,7vw,7rem); min-height:0; }
+.v2-gift-gallery .v2-gifts-heading { position:relative; z-index:3; grid-template-columns:1.2fr .65fr; gap:1.4rem 4rem; max-width:82rem; margin-bottom:3.8rem; }
+.v2-gift-gallery .v2-gifts-heading > p { grid-column:1/-1; margin:0; font-size:.88rem; letter-spacing:0; text-transform:none; }
+.v2-gift-gallery .v2-gifts-heading h2 { max-width:12ch; font-size:clamp(3.6rem,6.1vw,6.2rem); line-height:.98; letter-spacing:-.045em; }
+.v2-gift-gallery .v2-gifts-heading > span { max-width:28ch; font-size:1.05rem; font-style:normal; }
+.v2-gift-gallery .gift-collection-shelf { display:grid; grid-template-columns:1fr 1fr 1.08fr; align-items:end; gap:clamp(1.4rem,3.7vw,4rem); width:100%; max-width:82rem; padding:0 0 2rem; margin:0 auto 2.2rem; overflow:visible; border:0; border-bottom:1px solid #625c4240; }
+.v2-gift-gallery .gift-collection { display:block; min-height:0; width:100%; padding:0; background:none; box-shadow:none; border:0!important; }
+.gift-collection-link { display:block; text-decoration:none; }
+.gift-collection-link.is-closed { cursor:default; }
+.gift-niche { --niche-light:#e0e6d3; --niche-deep:#879379; position:relative; height:clamp(17rem,25vw,25rem); margin-bottom:1.6rem; overflow:hidden; border:1px solid #6f70525a; border-radius:47% 47% 2px 2px / 38% 38% 2px 2px; background:linear-gradient(115deg,var(--niche-deep),var(--niche-light) 66%,#f0ede3); box-shadow:inset 9px 8px 20px #39443830,inset -1px 0 0 #fff9,0 2px 0 #c7c2b1,0 7px 13px #514c3520; }
+.gift-niche-iga { --niche-light:#ebd7ce; --niche-deep:#b38f87; height:clamp(19rem,28vw,28rem); border-radius:49% 49% 2px 2px / 28% 28% 2px 2px; }
+.gift-niche-home { --niche-light:#e5dfcf; --niche-deep:#b0a28b; height:clamp(15.7rem,22.5vw,22.5rem); border-radius:37% 37% 2px 2px / 25% 25% 2px 2px; }
+.gift-niche-shadow,.gift-niche-light { position:absolute; inset:-1.25rem; pointer-events:none; }
+.gift-niche-shadow { background:url("/assets/authored/destination-canopy-shadow.svg") 58% 20%/cover no-repeat; opacity:.10; filter:blur(2px); mix-blend-mode:multiply; translate:var(--gift-light-shift,0px) 0; }
+.gift-niche-iga .gift-niche-shadow { transform:rotate(-14deg) scale(1.2); transform-origin:60% 80%; }
+.gift-niche-home .gift-niche-shadow { transform:scaleX(-1) scale(1.1); opacity:.08; }
+.gift-niche-light { background:linear-gradient(118deg,transparent 20%,#fff5 38%,#fff1 56%,transparent 59%); translate:calc(var(--gift-light-shift,0px) * -.6) 0; }
+.gift-niche-plinth { position:absolute; left:8%; right:8%; bottom:14%; height:1.05rem; background:linear-gradient(#efece3 0 30%,#c6c5b4 33% 75%,#9e9e8970); box-shadow:0 10px 13px #3d44343a,inset 0 1px 0 #fffc; }
+.gift-niche-ticket { position:absolute; left:50%; bottom:calc(14% + 1rem); display:grid; place-items:center; width:57%; min-height:5rem; padding:1rem; color:#514f3e; border:1px solid #fff6; background:#f6f0e1e8; box-shadow:2px 4px 7px #343b2425; font:italic 1.2rem/1.4 var(--v2-serif,var(--bx-serif)); translate:-50% 0; transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s ease; }
+.v2-gift-gallery .gift-collection-caption h3 { margin:0 0 .5rem; font:400 clamp(1.8rem,2.6vw,2.8rem)/1.15 var(--v2-serif); letter-spacing:-.025em; }
+.v2-gift-gallery .gift-collection-caption > p { max-width:27ch; margin:0; font:.82rem/1.65 var(--v2-sans); font-style:normal; color:#605b48; }
+.gift-collection-action { display:flex; justify-content:space-between; gap:1rem; margin-top:1.25rem; font:.78rem/1.5 var(--v2-sans,var(--bx-sans)); color:#4e5a3f; }
+.gift-shelf-hint { display:none; }
+.gift-collection-link:not(.is-closed):focus-visible { outline:2px solid #98616b; outline-offset:8px; }
+.gift-collection-link:not(.is-closed):focus-visible .gift-niche-ticket { transform:translateY(-5px); box-shadow:2px 9px 12px #343b242a; }
+.v2-gift-gallery > .v2-text-link { position:relative; z-index:3; display:inline-flex; gap:1.5rem; min-height:44px; align-items:center; font-size:.8rem; letter-spacing:0; text-transform:none; }
+.v2-gift-gallery .gifts-syzygium { width:min(26vw,25rem,calc(var(--botanical-pixels) * 1px / var(--botanical-dpr,2))); bottom:1rem; pointer-events:none; }
+.v2-gift-gallery .v2-near-gifts { width:min(22vw,22rem,calc(var(--botanical-pixels) * 1px / var(--botanical-dpr,2))); }
+
+/* The private catalogue shares the cabinet material without inheriting global
+   invitation transforms or adding another rendering loop. */
+.gift-gallery-page { background:#f7f2e7; }
+.gift-gallery-page .product-header { flex-wrap:wrap; gap:1rem; padding-block:1rem; }
+.gift-gallery-page .product-header nav { text-transform:none; letter-spacing:0; }
+.gift-gallery-page .catalogue-hero { grid-template-columns:1.2fr .65fr; gap:3rem; min-height:25rem; padding:4.5rem max(1.5rem,calc((100vw - 82rem)/2)); color:#292721; background:linear-gradient(110deg,#d4d9c8,#ede7d7 60%,#d9c7bd); }
+.gift-hero-light { position:absolute; pointer-events:none; inset:0; background:url("/assets/authored/destination-canopy-shadow.svg") right 40%/60% auto no-repeat; opacity:.10; }
+.gift-gallery-page .gift-hero-copy,.gift-gallery-page .gift-hero-aside { position:relative; z-index:1; }
+.gift-hero-copy > p { max-width:28ch; margin:0 0 1.7rem; font:.9rem/1.6 var(--bx-sans); }
+.gift-gallery-page .catalogue-hero h1 { font-size:clamp(5rem,10vw,9rem); line-height:.95; letter-spacing:-.045em; }
+.gift-hero-aside > p { max-width:32ch; margin:0; font:400 1.1rem/1.6 var(--bx-serif); }
+.gift-hero-aside > a { display:flex; justify-content:space-between; gap:1rem; width:fit-content; min-height:44px; align-items:center; margin-top:1rem; font:.85rem/1.6 var(--bx-sans); text-underline-offset:.4rem; }
+.gift-gallery-page .catalogue-body { width:min(100% - 3rem,82rem); padding:3rem 0 5rem; }
+.gift-gallery-page .catalogue-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; margin-bottom:1.5rem; padding:0; border:0; border-bottom:1px solid #7c7c6040; }
+.gift-gallery-page .catalogue-tabs button { position:relative; min-height:56px; padding:1rem .5rem; border:0; background:none; font:400 clamp(1rem,2vw,1.7rem)/1.25 var(--bx-serif); letter-spacing:0; text-transform:none; }
+.gift-gallery-page .catalogue-tabs button.is-active { background:none; color:#4e6041; }
+.gift-gallery-page .catalogue-tabs button::after { position:absolute; bottom:-1px; left:15%; right:15%; height:2px; content:""; background:#62734c; opacity:0; transform:scaleX(.65); transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s ease; }
+.gift-gallery-page .catalogue-tabs button.is-active::after { opacity:1; transform:none; }
+.gift-gallery-page .product-status { min-height:1.4rem; margin:0 0 1.4rem; font:.85rem/1.6 var(--bx-sans); color:#596949; }
+.gift-gallery-page .gift-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1.5rem,4vw,4rem); align-items:start; }
+.gift-gallery-page .gift-card { padding:0 0 1.75rem; border:0; min-width:0; }
+/* A bounded track prevents tall source photos from expanding the display's grid. */
+.gift-gallery-page .gift-image { position:relative; grid-template-rows:minmax(0,1fr); height:clamp(17rem,26vw,25rem); aspect-ratio:auto; padding:1.5rem 1.5rem 2.3rem; margin:0 0 1.4rem; border:1px solid #a3a58c80; border-radius:44% 44% 2px 2px / 28% 28% 2px 2px; background:linear-gradient(115deg,#bac6a9,#e4e8d9 67%,#f6f2e7); box-shadow:inset 5px 8px 18px #39443825,0 3px 0 #c9cbbb,0 7px 12px #353e2d14; }
+.gift-gallery-page .gift-display-iga { border-radius:48% 48% 2px 2px / 35% 35% 2px 2px; background:linear-gradient(115deg,#c6a7a2,#eee0d8 68%,#f6f2e7); }
+.gift-gallery-page .gift-display-home { border-radius:32% 32% 2px 2px / 25% 25% 2px 2px; background:linear-gradient(115deg,#bbaf9a,#e7e0d1 68%,#f6f2e7); }
+.gift-gallery-page .gift-image img { position:relative; z-index:1; align-self:end; min-height:0; width:min(88%,var(--gift-native-width,88%)); height:auto; max-height:92%; object-fit:contain; object-position:center bottom; mix-blend-mode:normal; transition:transform .45s cubic-bezier(.22,1,.36,1); }
+.gift-display-light { position:absolute; inset:0; padding:0!important; background:url("/assets/authored/destination-canopy-shadow.svg") center/cover; opacity:.09; pointer-events:none; }
+.gift-display-plinth { position:absolute; bottom:1.5rem; left:12%; right:12%; height:.7rem; padding:0!important; background:linear-gradient(#f2eee4,#b8b8a5); box-shadow:0 7px 8px #353e2d30; }
+.gift-gallery-page .gift-photo-placeholder { position:relative; z-index:1; max-width:24ch; font:italic 1.1rem/1.5 var(--bx-serif); color:#6e6b58; }
+.gift-gallery-page .gift-card-caption > h2 { margin:.5rem 0 .7rem; font:400 clamp(1.7rem,2.3vw,2.3rem)/1.2 var(--bx-serif); overflow-wrap:anywhere; letter-spacing:-.02em; }
+.gift-card-caption > p:not(.gift-availability) { max-width:45ch; margin:0; font:.9rem/1.65 var(--bx-sans); overflow-wrap:anywhere; }
+.gift-card-caption > small { display:block; margin-top:.8rem; color:#6f6c5b; font:.8rem/1.6 var(--bx-sans); }
+.gift-availability { display:flex; align-items:center; gap:.45rem; margin:0; font:.75rem/1.6 var(--bx-sans); color:#697156; }
+.gift-availability > span { width:5px; height:5px; flex:none; border-radius:50%; background:currentColor; }
+.gift-availability.is-reserved { color:#8b6665; }.gift-availability.is-purchased { color:#676b60; }
+.gift-gallery-page .gift-actions { gap:.6rem; margin-top:1rem; }
+.gift-gallery-page .gift-actions :is(button,a) { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.75rem 1rem; font:.8rem/1.4 var(--bx-sans); text-transform:none; letter-spacing:0; }
+.gift-gallery-page .gift-actions button:first-child { color:#f7f2e7; background:#596949; border-color:#596949; }
+.gift-gallery-page .gift-actions button:disabled { opacity:.5; cursor:default; }
+.gift-gallery-page .gift-actions > span { display:block; font:.8rem/1.6 var(--bx-sans); color:#76695a; }
+.gift-gallery-page .private-note { padding:1.5rem clamp(1.2rem,3vw,2rem); border-left:3px solid #62734c; background:#e3e7d8; color:#394438; }
+.gift-gallery-page .private-note :is(p,small) { line-height:1.65; overflow-wrap:anywhere; }
+.gift-gallery-page .cash-gift { max-width:48rem; padding:clamp(1.3rem,4vw,3rem); border:1px solid #c6bea980; background:#ede5d7; box-shadow:3px 6px 0 #d5cbb766; }
+.gift-gallery-page .cash-gift h2 { font:400 clamp(2rem,4vw,3rem)/1.2 var(--bx-serif); }
+.gift-gallery-page .cash-gift pre { overflow-wrap:anywhere; font:.95rem/1.8 var(--bx-sans); }
+.gift-gallery-page .cash-gift button,.gift-refresh { min-height:44px; padding:.65rem .9rem; border:1px solid #7c7c60; color:#4e6041; background:transparent; font:.8rem/1.5 var(--bx-sans); text-transform:none; letter-spacing:0; cursor:pointer; }
+.gift-refresh { margin-top:1rem; }
+.gift-saving { font:.85rem/1.6 var(--bx-sans); color:#596949; }
+.gift-gallery-page .empty-catalogue { position:relative; isolation:isolate; display:flex; flex-direction:column; justify-content:center; min-height:25rem; padding:clamp(1.5rem,5vw,4rem); overflow:hidden; border:0; background:#e6e9dc; }
+.gift-gallery-page .empty-catalogue > span { position:relative; z-index:1; font:.85rem/1.6 var(--bx-sans); letter-spacing:0; text-transform:none; }
+.gift-gallery-page .empty-catalogue h2 { position:relative; z-index:1; max-width:14ch; margin:1rem 0; font:400 clamp(2.5rem,5vw,4.5rem)/1.05 var(--bx-serif); letter-spacing:-.03em; }
+.gift-gallery-page .empty-catalogue p { position:relative; z-index:1; max-width:30ch; margin:0; font:.9rem/1.7 var(--bx-sans); }
+.gift-gallery-page .gift-empty-iga { background:#eadbd4; }.gift-gallery-page .gift-empty-home { background:#e8e0d2; }
+.gift-empty-niche { position:absolute; right:5%; bottom:-10%; width:36%; height:90%; border:1px solid #6e775040; border-radius:50% 50% 0 0 / 35% 35% 0 0; box-shadow:inset 14px 10px 24px #6f775021; background:linear-gradient(112deg,#8e987125,#fff3); }
+.gift-loading { min-height:20rem; }.gift-loading > p { font:.9rem/1.6 var(--bx-sans); }
+.gift-loading > div { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; }
+.gift-loading span { display:block; height:16rem; background:#e2e5d7; border-radius:42% 42% 0 0 / 30% 30% 0 0; }
+.gift-load-error { min-height:10rem; }
+.gift-gallery-page :is(button,a,[role=tabpanel]):focus-visible { outline:2px solid #99636b; outline-offset:5px; }
+.gift-gallery-page [role=tabpanel]:focus { outline-offset:8px; }
+.gift-gate-page { display:block; padding:0; background:#e3e6d9; }
+.gift-gate-page > .product-header { width:100%; min-height:5rem; gap:1rem; }
+.gift-gate-page .gate-brand { position:static; }
+.gift-gate-page .language-switch button,.gift-gallery-page .language-switch button { min-width:36px; min-height:44px; }
+.gift-gate-page > section { position:relative; width:100%; max-width:none; overflow:hidden; min-height:calc(100svh - 5rem); padding:clamp(5rem,10vw,10rem) max(1.5rem,calc((100vw - 72rem)/2)); }
+.gift-gate-page > section > :not(.gift-gate-niche) { position:relative; z-index:1; }
+.gift-gate-page > section h1 { max-width:14ch; font:400 clamp(3.2rem,7vw,6rem)/1.02 var(--bx-serif); letter-spacing:-.035em; }
+.gift-gate-page > section > p { max-width:40ch; line-height:1.75; }
+.gift-gate-niche { position:absolute; right:6%; bottom:-8%; width:35%; height:90%; background:linear-gradient(115deg,#b9c3a9,#eef0e4); border-radius:50% 50% 0 0 / 30% 30% 0 0; box-shadow:inset 10px 10px 30px #39443820; }
+@media(hover:hover) and (pointer:fine) {
+  .gift-collection-link:not(.is-closed):hover .gift-niche-ticket { transform:translateY(-5px); box-shadow:2px 9px 12px #343b242a; }
+  .gift-gallery-page .gift-card:hover .gift-image img { transform:translateY(-4px); }
+}
+@media(max-width:960px) {
+  .v2-gift-gallery .v2-gifts-heading { grid-template-columns:1fr; gap:1rem; margin-bottom:2.5rem; }
+  .v2-gift-gallery .v2-gifts-heading > span { max-width:44ch; }
+  .v2-gift-gallery .gift-collection-shelf { gap:1.5rem; }
+  .gift-gallery-page .gift-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:720px) {
+  .v2-gift-gallery .gift-shelf-hint { position:relative; z-index:3; display:block; margin:0 0 1rem; font:.75rem/1.65 var(--v2-sans); color:#605b48; }
+  .v2-gift-gallery .gift-collection-shelf { width:100%; grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:min(78vw,22rem); gap:1.5rem; align-items:end; overflow-x:auto; overflow-y:hidden; padding:8px 8px 1.7rem; scroll-snap-type:x mandatory; scroll-padding-inline:8px; scrollbar-width:thin; scrollbar-color:#87916d #c6c8b866; }
+  .v2-gift-gallery .gift-collection { scroll-snap-align:start; }
+  .v2-gift-gallery .gift-collection-caption h3 { font-size:2rem; }
+  .gift-niche { height:19rem; }.gift-niche-iga { height:21rem; }.gift-niche-home { height:17.5rem; }
+  .v2-gift-gallery .v2-gifts-heading h2 { font-size:clamp(3.5rem,14vw,5rem); }
+  .gift-gallery-page .catalogue-hero { grid-template-columns:1fr; gap:2rem; min-height:0; padding:3.5rem 1.5rem; }
+  .gift-gallery-page .catalogue-body { padding-top:2rem; }
+  .gift-gallery-page .gift-grid { grid-template-columns:1fr; gap:2.75rem; }
+  .gift-gallery-page .gift-image { height:23rem; }
+  .gift-gallery-page .gift-card-caption > h2 { font-size:2rem; }
+  .gift-empty-niche { width:60%; right:-15%; opacity:.5; }
+  .gift-loading > div { gap:.75rem; }.gift-loading span { height:10rem; }
+  .gift-gate-niche { width:65%; right:-20%; opacity:.6; }
+}
+@media(max-width:500px) {
+  .gift-gallery-page .product-header > a { font-size:1rem; }
+  .gift-gallery-page .product-header nav { order:3; width:100%; justify-content:space-between; gap:1rem; }
+  .gift-gallery-page .catalogue-body { width:calc(100% - 2rem); }
+  .gift-gallery-page .catalogue-tabs button { font-size:1.05rem; }
+  .gift-gallery-page .gift-actions { gap:.65rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .gift-niche-light,.gift-niche-shadow { translate:none; }
+  .gift-niche-ticket,.gift-gallery-page .gift-image img,.gift-gallery-page .catalogue-tabs button::after { transition:none!important; transform:none!important; }
+  .gift-collection-shelf { scroll-behavior:auto!important; }
+}

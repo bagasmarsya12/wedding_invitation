@@ -14,27 +14,23 @@ function decodePng(dataUrl: string) {
   return pngDimensions(bytes) ? bytes : null;
 }
 
-async function drawingDataUrl(key: string | null) {
-  if (!key) return null;
-  const object = await bucket().get(key);
-  if (!object) return null;
-  const buffer = await object.arrayBuffer();
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return `data:image/png;base64,${btoa(binary)}`;
-}
-
 export async function GET(_: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
-    const guest = await guestFromToken((await params).token);
+    const { token } = await params;
+    const guest = await guestFromToken(token);
     if (!guest) return apiError("Invitation not found.", 404);
     const rows = await db().prepare("SELECT id, author_name, message, drawing_key, style, font, moderation_status, created_at FROM guest_marks WHERE guest_id = ? AND moderation_status != 'rejected' ORDER BY created_at DESC LIMIT 10")
       .bind(guest.id).all<{ id: string; author_name: string; message: string | null; drawing_key: string | null; style: string; font: string; moderation_status: string; created_at: string }>();
-    const marks = [];
-    for (const row of rows.results ?? []) {
-      marks.push({ id: row.id, author: row.author_name, message: row.message, drawing: await drawingDataUrl(row.drawing_key), style: markStyleOr(row.style), font: markFontOr(row.font), status: row.moderation_status, createdAt: row.created_at });
-    }
+    const marks = (rows.results ?? []).map(row => ({
+      id: row.id,
+      author: row.author_name,
+      message: row.message,
+      drawing: row.drawing_key ? `/api/invite/${encodeURIComponent(token)}/marks/${encodeURIComponent(row.id)}/image` : null,
+      style: markStyleOr(row.style),
+      font: markFontOr(row.font),
+      status: row.moderation_status,
+      createdAt: row.created_at,
+    }));
     return privateJson({ marks }, 200);
   } catch (error) { logFailure("mark_list", error); return apiError("Your marks could not be loaded. Please try again.", 503); }
 }

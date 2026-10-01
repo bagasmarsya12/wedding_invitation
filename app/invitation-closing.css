@@ -1,0 +1,47 @@
+/* Night garden → the last page of the invitation. No floating plants, no loop. */
+.v2-footer.v2-closing {
+  display:block; min-height:0; padding:clamp(2.5rem,6vw,6rem) clamp(1rem,5vw,5rem) clamp(1rem,3vw,3rem);
+  color:var(--v2-charcoal); background:#101f19;
+}
+.v2-footer.v2-closing::before { display:none; }
+.v2-closing-paper {
+  position:relative; isolation:isolate; overflow:hidden; max-width:86rem; margin:auto;
+  border:1px solid #e7ddca; border-radius:2px; background:#f6f0e3 url("/assets/15-paper-fiber-texture.webp") center/620px;
+  box-shadow:0 2px 0 #c7baa0,0 5px 0 #857c68,0 25px 65px #00000040;
+}
+.v2-closing-light {
+  position:absolute; z-index:-1; inset:-2rem; pointer-events:none;
+  background:linear-gradient(115deg,transparent 18%,#e2d6bf30 29%,#fffaf280 45%,#fffdf8a0 52%,transparent 69%);
+  transform:translateX(var(--closing-light-shift,0px));
+}
+.v2-closing-folio,.v2-closing-colophon {
+  position:relative; display:flex; align-items:center; justify-content:space-between; gap:1.25rem;
+  margin:0 clamp(1.4rem,3.8vw,3.5rem); padding:1.5rem 0; border-bottom:1px solid #6e725f30;
+  font:400 .65rem/1.6 var(--v2-sans); letter-spacing:.14em; text-transform:uppercase;
+}
+.v2-closing-folio > span { font:400 .85rem/1.5 var(--v2-serif); letter-spacing:.18em; }
+.v2-closing-note { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; min-height:32rem; justify-content:center; padding:3.5rem 1.25rem; text-align:center; }
+.v2-closing-mark { display:block; width:5.5rem; height:5.5rem; object-fit:contain; mix-blend-mode:multiply; }
+.v2-closing-note > p { margin:1.3rem 0 .75rem; color:#696852; font:italic 1.25rem/1.4 var(--v2-serif); }
+.v2-closing-note h2 { max-width:18ch; margin:0; font:400 clamp(2.7rem,5vw,5rem)/1.02 var(--v2-serif); letter-spacing:-.045em; text-wrap:balance; }
+.v2-closing-signature { margin:1.5rem 0 0; font:400 .78rem/1.5 var(--v2-sans); letter-spacing:.22em; text-transform:uppercase; }
+.v2-closing-signature i { margin:0 .65rem; color:#a96c78; font-style:normal; }
+.v2-closing-note button { min-height:44px; margin:2rem 0 0; padding:.5rem 0; border:0; border-bottom:1px solid #6e725f70; color:#49533d; background:transparent; font:400 .65rem/1.5 var(--v2-sans); letter-spacing:.08em; cursor:pointer; }
+.v2-closing-note button:focus-visible { outline:2px solid #a66b79; outline-offset:5px; }
+.v2-closing-note button:hover { color:#9c626c; border-color:currentColor; }
+.v2-closing-colophon { align-items:end; border-bottom:0; border-top:1px solid #6e725f30; letter-spacing:.06em; }
+.v2-closing-colophon .v2-footer-edition { opacity:1; color:#66694f; }
+.v2-closing-colophon > span { color:#66694f; font-size:.6rem; }
+.v2-closing-colophon small { color:#77735f; font:italic .73rem/1.6 var(--v2-serif); letter-spacing:0; text-transform:none; text-align:right; }
+.v2-closing-botanical { position:absolute; z-index:0; pointer-events:none; width:min(12vw,10rem,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); height:auto; }
+.closing-orchid { right:clamp(.5rem,2vw,2rem); bottom:5rem; }
+.closing-leaf { left:clamp(.5rem,2vw,2rem); bottom:5rem; }
+@media(max-width:720px) {
+  .v2-closing-note { min-height:30rem; padding:3.5rem 1.2rem 4rem; }
+  .v2-closing-note h2 { max-width:12ch; }
+  .v2-closing-colophon { display:grid; grid-template-columns:1fr auto; gap:.7rem; }
+  .v2-closing-colophon small { grid-column:1/-1; text-align:left; max-width:100%; }
+  .v2-closing-botanical { width:min(17vw,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); }
+  .closing-orchid,.closing-leaf { bottom:7rem; }
+}
+@media(prefers-reduced-motion:reduce) { .v2-closing-light { transform:none; transition:none !important; animation:none !important; } }

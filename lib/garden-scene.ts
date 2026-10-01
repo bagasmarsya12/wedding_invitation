@@ -1,13 +1,16 @@
 import * as THREE from "three";
+import { gardenPortalProfile, makeGardenPortal } from "./garden-portal";
+import { heroCameraDistance } from "./hero-passage";
+import { gardenWindow } from "./garden-window";
 
 // Botanical forms are curved meshes, not enlarged raster cutouts. Units are CSS pixels.
 // A single canvas serves the chapters; only the visible chapter groups are drawn.
-type Kind = "leaf" | "petal" | "stem" | "heart" | "bud";
+type Kind = "leaf" | "petal" | "stem" | "heart" | "bud" | "grass";
 type Species = "combretum" | "orchid" | "cosmos" | "wisteria" | "fern";
 type Instance = { matrix: THREE.Matrix4; color: THREE.Color; anchor: number[] };
 type Bounds = { left: number; top: number; width: number; height: number };
-type Chapter = { element: HTMLElement; group: THREE.Group; top: number; height: number; safe: Bounds[] };
-const KINDS: Kind[] = ["stem", "leaf", "bud", "petal", "heart"];
+type Chapter = { element: HTMLElement; group: THREE.Group | null; top: number; width: number; height: number; safe: Bounds[] };
+const KINDS: Kind[] = ["stem", "leaf", "bud", "petal", "heart", "grass"];
 const Y = new THREE.Vector3(0, 1, 0);
 const TAU = Math.PI * 2;
 
@@ -46,6 +49,27 @@ function blade(petal: boolean) {
   return geometry;
 }
 
+// A tapered, bent ribbon. Grass is geometry too: no enlarged sprites or textures.
+function grassBlade() {
+  const positions: number[] = [], uv: number[] = [], indices: number[] = [];
+  for (let row = 0; row <= 10; row++) {
+    const t = row / 10;
+    for (let side = 0; side < 3; side++) {
+      positions.push((side - 1) * .025 * (1 - t) + .24 * t * t, t, .09 * t * t + (side === 1 ? .012 : 0));
+      uv.push(side / 2, t);
+      if (row < 10 && side < 2) {
+        const a = row * 3 + side;
+        indices.push(a, a + 1, a + 3, a + 1, a + 4, a + 3);
+      }
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(indices); geometry.computeVertexNormals();
+  return geometry;
+}
+
 export function mountGarden(host: HTMLDivElement): () => void {
   const parent = host.parentElement;
   if (!parent) return () => {};
@@ -62,15 +86,26 @@ export function mountGarden(host: HTMLDivElement): () => void {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.12;
   renderer.autoClear = false;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.add(new THREE.HemisphereLight(0xfff8e4, 0x3c5140, 2.7));
+  const sky = new THREE.HemisphereLight(0xfff8e4, 0x3c5140, 2.7);
+  scene.add(sky);
   const sun = new THREE.DirectionalLight(0xfff3d8, 1.6);
   sun.position.set(-250, 450, 800); scene.add(sun);
+  scene.add(sun.target);
+  sun.shadow.mapSize.set(innerWidth < 721 ? 512 : 1024, innerWidth < 721 ? 512 : 1024);
+  sun.shadow.bias = -.0003;
+  sun.shadow.normalBias = 1.5;
+  sun.shadow.radius = 3;
   const fill = new THREE.DirectionalLight(0xc6d3c2, .65);
   fill.position.set(400, -80, 200); scene.add(fill);
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 3000);
   camera.position.z = 1400;
+  const heroCamera = new THREE.PerspectiveCamera(45, 1, 1, 5000);
+  const rootProbe = new THREE.Vector3();
+  const rootMatrix = new THREE.Matrix4();
+  const viewportProbe = new THREE.Vector4();
   const media = matchMedia("(prefers-reduced-motion: reduce)");
   const coarse = matchMedia("(pointer: coarse)");
   const uniforms = {
@@ -78,7 +113,42 @@ export function mountGarden(host: HTMLDivElement): () => void {
     uGardenViewport: { value: new THREE.Vector2(1, 1) },
     uGardenSafe: { value: Array.from({ length: 12 }, () => new THREE.Vector4(-10, -10, -9, -9)) },
     uGardenSafeCount: { value: 0 }, uGardenNight: { value: 0 },
+    uGardenTravel: { value: 0 }, uGardenPointer: { value: new THREE.Vector2() },
+    uGardenHero: { value: 0 },
   };
+
+  // The visible mesh and its shadow share exactly the same rooted deformation.
+  const gardenVertex = `
+    vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
+    float angle = sin(uGardenTime * .42 + gardenAnchor.z) * .009 * uGardenMotion;
+    vec2 relative = mvPosition.xy - gardenAnchor.xy;
+    mvPosition.xy = gardenAnchor.xy + mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * relative;
+    float depth = gardenAnchor.w * uGardenMotion;
+    if (uGardenHero < .5) {
+      float dolly = uGardenTravel * .14 * depth;
+      mvPosition.x *= 1.0 + dolly;
+      mvPosition.y += uGardenTravel * 48.0 * depth;
+      mvPosition.xy += uGardenPointer * depth;
+    }
+    mvPosition.x += relative.y * abs(relative.y) * .00006 * sin(uGardenTime * .6 + gardenAnchor.z) * depth;
+    mvPosition = modelViewMatrix * mvPosition;
+    gl_Position = projectionMatrix * mvPosition;
+  `;
+  const gardenVertexUniforms = `
+    attribute vec4 gardenAnchor;
+    uniform float uGardenTime;
+    uniform float uGardenMotion;
+    uniform float uGardenTravel;
+    uniform float uGardenHero;
+    uniform vec2 uGardenPointer;
+  `;
+  const leafDepth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+  leafDepth.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>\n${gardenVertexUniforms}`)
+      .replace("#include <project_vertex>", gardenVertex);
+  };
+  leafDepth.customProgramCacheKey = () => "hero-rooted-leaf-shadow";
 
   function material(kind: Kind) {
     const mat = new THREE.MeshStandardMaterial({
@@ -88,19 +158,10 @@ export function mountGarden(host: HTMLDivElement): () => void {
     mat.onBeforeCompile = shader => {
       Object.assign(shader.uniforms, uniforms);
       shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>
-        attribute vec4 gardenAnchor;
-        uniform float uGardenTime;
-        uniform float uGardenMotion;
+        ${gardenVertexUniforms}
         varying vec2 vGardenUv;
       `).replace("#include <uv_vertex>", "#include <uv_vertex>\nvGardenUv = uv;")
-        .replace("#include <project_vertex>", `
-          vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
-          float angle = sin(uGardenTime * .42 + gardenAnchor.z) * .009 * uGardenMotion;
-          vec2 relative = mvPosition.xy - gardenAnchor.xy;
-          mvPosition.xy = gardenAnchor.xy + mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * relative;
-          mvPosition = modelViewMatrix * mvPosition;
-          gl_Position = projectionMatrix * mvPosition;
-        `);
+        .replace("#include <project_vertex>", gardenVertex);
       shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>
         uniform vec2 uGardenViewport;
         uniform vec4 uGardenSafe[12];
@@ -117,7 +178,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
         ` : kind === "petal" ? `
           float ribs = sin((vGardenUv.x-.5) * 37.0 / (.28 + vGardenUv.y));
           diffuseColor.rgb *= .93 + .055 * ribs + .055 * vGardenUv.y;
-        ` : ""}
+        ` : kind === "grass" ? `diffuseColor.rgb *= .70 + .30 * vGardenUv.y;` : ""}
         vec2 screen = vec2(gl_FragCoord.x / uGardenViewport.x, 1.0 - gl_FragCoord.y / uGardenViewport.y);
         float safe = 1.0;
         for (int i = 0; i < 12; i++) {
@@ -137,29 +198,50 @@ export function mountGarden(host: HTMLDivElement): () => void {
   const geometries: Record<Kind, THREE.BufferGeometry> = {
     leaf: blade(false), petal: blade(true), stem: new THREE.CylinderGeometry(1, 1, 1, 5),
     heart: new THREE.SphereGeometry(1, 8, 6), bud: new THREE.SphereGeometry(1, 8, 8),
+    grass: grassBlade(),
   };
   const colors = {
     leaf: ["#344f2b", "#526b35", "#667a3e", "#405e32", "#738546"],
     flower: ["#fff8e5", "#f4d4cc", "#d9869b", "#b63662", "#e7abb5", "#f5eee0"],
   };
   let chapters: Chapter[] = [], frame = 0, resizeFrame = 0, width = 1, height = 1, disposed = false;
-  let lastDraw = 0, dirty = true, animationOrigin = performance.now(), contextUnavailable = false;
+  let lastDraw = 0, dirty = true, contextUnavailable = false;
+  const animationOrigin = performance.now();
+  let sceneryScroll = window.scrollY, lastTick = performance.now(), activeUntil = 0;
+  let ambientTimer = 0;
+  let cancelHydration: (() => void) | null = null;
+  const pointerTarget = new THREE.Vector2();
 
   function makeChapter(element: HTMLElement, index: number) {
+    // Chapter identity, not current DOM order, owns each approved arrangement.
+    // Merging RSVP into the postcard room must not reshuffle Beyond's garden.
+    const originalIndex = ["the-day", "details", "profiles", "archive", "rsvp", "useful-bits", "gifts", "leave-a-mark", "beyond"].indexOf(element.id);
+    if (originalIndex >= 0) index = originalIndex;
     const rect = element.getBoundingClientRect();
     const w = rect.width, h = rect.height, mobile = w < 721;
+    const hero = element.id === "the-day";
+    const distance = heroCameraDistance(h);
     const rng = random(720 + index * 183);
     // Beyond retains its original seed, geometry, palette and arrangement.
     const habitat: Species = ({ profiles: "orchid", archive: "fern", rsvp: "cosmos", "useful-bits": "orchid", gifts: "cosmos", "leave-a-mark": "wisteria" } as Record<string, Species>)[element.id] || "combretum";
     const group = new THREE.Group();
-    const pool: Record<Kind, Instance[]> = { stem: [], leaf: [], bud: [], petal: [], heart: [] };
+    const pool: Record<Kind, Instance[]> = { stem: [], leaf: [], bud: [], petal: [], heart: [], grass: [] };
     const scale = mobile ? .65 : Math.min(1.1, w / 1200);
     const position = new THREE.Vector3(), rotation = new THREE.Quaternion(), size = new THREE.Vector3();
     const transform = new THREE.Matrix4();
     let anchor = [0, 0, 0, 0];
+    let heroLayer = .5;
     function add(kind: Kind, p: THREE.Vector3, q: THREE.Quaternion, s: THREE.Vector3, color: string) {
-      transform.compose(p, q, s);
-      pool[kind].push({ matrix: transform.clone(), color: new THREE.Color(color), anchor: [...anchor] });
+      if (hero) {
+        const z = anchor[3] * h * .24 - h * .12;
+        const compensation = (distance - z) / distance;
+        const located = new THREE.Vector3(p.x * compensation, (p.y + h / 2) * compensation - h / 2, p.z * compensation + z);
+        transform.compose(located, q, s.clone().multiplyScalar(compensation));
+        pool[kind].push({ matrix: transform.clone(), color: new THREE.Color(color), anchor: [anchor[0] * compensation, (anchor[1] + h / 2) * compensation - h / 2, anchor[2], anchor[3]] });
+      } else {
+        transform.compose(p, q, s);
+        pool[kind].push({ matrix: transform.clone(), color: new THREE.Color(color), anchor: [...anchor] });
+      }
     }
     function stem(a: THREE.Vector3, b: THREE.Vector3, radius: number, color = "#6c7546") {
       const delta = b.clone().sub(a);
@@ -203,7 +285,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
     }
     function shrub(edge: number, y: number, direction: number, amplitude = 1, species: Species = habitat) {
       const root = new THREE.Vector3(edge, -y, -35 + rng() * 15);
-      anchor = [root.x, root.y, rng() * TAU, 0];
+      anchor = [root.x, root.y, rng() * TAU, element.id === "beyond" ? 0 : hero ? heroLayer : .35 + amplitude * .45];
       const extent = scale * amplitude;
       for (let b = 0; b < (species === "fern" ? 3 : 4); b++) {
         const reach = (100 + b * 34 + rng() * 45) * extent;
@@ -259,7 +341,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
             : colors.flower[Math.floor(rng() * colors.flower.length)];
           flower(p, (base + rng() * 6.5) * extent * (species === "wisteria" ? 1 - f * .022 : 1), tint, species);
         }
-        for (let f = 0; f < 4; f++) {
+        for (let f = 0; f < (species === "fern" ? 0 : 4); f++) {
           const p = end.clone().add(new THREE.Vector3((rng() - .5) * 105 * extent, (rng() - .5) * 100 * extent, 4));
           stem(end, p, .48 * extent);
           const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(.2, 0, (rng() - .5) * 1.8));
@@ -267,18 +349,82 @@ export function mountGarden(host: HTMLDivElement): () => void {
         }
       }
     }
+    function meadow(center: number, baseline: number, spread: number, count: number, species: Species) {
+      for (let tuft = 0; tuft < count; tuft++) {
+        const x = center + (rng() - .5) * spread;
+        const root = new THREE.Vector3(x, -baseline - rng() * 18, 30 + rng() * 30);
+        const edgeWeight = Math.min(1, Math.abs(x) / (w * .38));
+        // Keep the center walkable even at the closest camera position.
+        // The perspective foreground needs a lower silhouette than flat rooms.
+        const length = (35 + rng() * 85 + edgeWeight * 80) * scale * (hero ? .28 + edgeWeight * .35 : 1);
+        anchor = [root.x, root.y, rng() * TAU, .65 + rng() * .65];
+        for (let shoot = 0; shoot < (hero ? 3 : 5); shoot++) {
+          const q = new THREE.Quaternion().setFromEuler(new THREE.Euler((rng() - .5) * .5, rng() * .9, (rng() - .5) * 1.25));
+          const l = length * (.55 + rng() * .6);
+          add("grass", root, q, new THREE.Vector3(l * (.65 + rng()), l, l), ["#425b35", "#617449", "#83905a", "#a4a870"][tuft % 4]);
+        }
+        if (tuft % 4 !== 0 || edgeWeight < .42) continue;
+        const tip = root.clone().add(new THREE.Vector3((rng() - .5) * 70 * scale, length * 1.25, 12));
+        const curve = new THREE.QuadraticBezierCurve3(root, root.clone().lerp(tip, .55).add(new THREE.Vector3(18 * scale, 0, 0)), tip);
+        for (let joint = 0; joint < 6; joint++) stem(curve.getPoint(joint / 6), curve.getPoint((joint + 1) / 6), .8 * scale);
+        for (let leaf = 1; leaf < 4; leaf++) {
+          const p = curve.getPoint(leaf / 5);
+          add("leaf", p, new THREE.Quaternion().setFromEuler(new THREE.Euler(.3, .2, leaf % 2 ? -.75 : .85)), new THREE.Vector3(17 * scale, 42 * scale, 32 * scale), "#63794a");
+        }
+        flower(tip, (11 + rng() * 7) * scale, ["#f2d9cd", "#e1a5ad", "#fff5dc"][tuft % 3], species);
+      }
+    }
     // Local arrangements emerge from chapter edges, never a continuous vertical vine.
     const left = -w / 2 - 38 * scale, right = w / 2 + 38 * scale;
     if (element.id === "the-day") {
-      shrub(left, h * .18, 1, mobile ? 1.12 : 1.6, "orchid");
-      shrub(right, h * .15, -1, mobile ? 1 : 1.65, "wisteria");
-      shrub(left, h * .72, 1, 1.32, "fern");
-      shrub(right, h * .69, -1, 1.35, "orchid");
-      shrub(left, h * .98, 1, 1.65, "combretum");
-      shrub(right, h * .98, -1, 1.65, "cosmos");
-      if (!mobile) { shrub(-w * .26, 0, 1, .9, "wisteria"); shrub(w * .27, 0, -1, .85, "orchid"); }
+      heroLayer = .55;
+      shrub(left, h * .12, 1, mobile ? .9 : 1.25, "orchid");
+      shrub(right, h * .10, -1, mobile ? .9 : 1.2, "wisteria");
+      heroLayer = .18;
+      shrub(left, h * .80, 1, 1.05, "fern");
+      shrub(right, h * .79, -1, .95, "orchid");
+      heroLayer = 1.4;
+      shrub(left, h * .98, 1, 1.3, "combretum");
+      shrub(right, h * .97, -1, 1.22, "cosmos");
+      heroLayer = .9;
+      if (!mobile) { shrub(-w * .32, -20, 1, .65, "wisteria"); shrub(w * .32, -20, -1, .7, "orchid"); }
+      meadow(0, h + 12, w * 1.08, mobile ? 62 : 120, "cosmos");
+      // One attached floral garland follows the architectural curve. The left
+      // shoulder is fuller; a lighter right-hand arc leaves the paper breathing.
+      const gate = gardenPortalProfile(w, h)[0];
+      const arc = (angle: number) => new THREE.Vector3(gate.half * Math.cos(angle), -gate.top - gate.rise + gate.rise * Math.sin(angle), 14);
+      const knots = mobile ? 20 : 34;
+      for (let knot = 0; knot < knots; knot++) {
+        const angle = .10 + knot / (knots - 1) * (Math.PI - .20);
+        const root = arc(angle);
+        anchor = [root.x, root.y, rng() * TAU, (.14 + .12) / .24];
+        if (knot < knots - 1) stem(root, arc(.10 + (knot + 1) / (knots - 1) * (Math.PI - .20)), .9 * scale, "#63774c");
+        const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(.25, -.2, angle - Math.PI / 2 + (knot % 2 ? .8 : -.7)));
+        const leafLength = (mobile ? 21 : 32) * (1 + .2 * Math.sin(angle));
+        add("leaf", root, q, new THREE.Vector3(leafLength * .48, leafLength, leafLength * .75), knot % 2 ? "#83946a" : "#637b53");
+        // No mirrored bouquets or solid floral halo; keep a few gaps in the vine.
+        if (knot % 4 === 0 || (angle < 1.1 && knot % 2)) continue;
+        const radius = mobile ? 7 + rng() * 3 : 11 + rng() * 6;
+        const bloom = root.clone().add(new THREE.Vector3((rng() - .5) * 18 * scale, -8 * scale, 6));
+        stem(root, bloom, .5 * scale);
+        flower(bloom, radius, knot % 3 ? "#f4e9dc" : "#dcb0b6", knot % 3 ? "orchid" : "combretum");
+        if (angle > 2.1 && knot % 3 === 0) {
+          const pendant = bloom.clone().add(new THREE.Vector3(10 * scale, -22 * scale, 3));
+          stem(bloom, pendant, .45 * scale);
+          flower(pendant, radius * .75, "#e6bdc2", "combretum");
+        }
+      }
+      group.add(makeGardenPortal(w, h, distance));
     } else if (element.id === "details") {
       shrub(right, h * .18, -1, 1.2); shrub(left, h * .85, 1, 1.1);
+    } else if (element.id === "profiles") {
+      // A portrait folio, not another gateway: local stems frame each spread.
+      shrub(left, h * .34, 1, mobile ? .48 : .72, "fern");
+      shrub(right, h * .76, -1, mobile ? .48 : .74, "orchid");
+    } else if (element.id === "useful-bits" || element.id === "gifts") {
+      // A quiet interval between the denser archive, postcard studio and night garden.
+      shrub(right, h * .09, -1, .62);
+      shrub(left, h * .88, 1, .72, "fern");
     } else {
       shrub(index % 2 ? left : right, Math.min(190, h * .17), index % 2 ? 1 : -1, 1.08);
       shrub(index % 2 ? right : left, Math.min(85, h * .07), index % 2 ? -1 : 1, mobile ? .68 : .86);
@@ -288,88 +434,233 @@ export function mountGarden(host: HTMLDivElement): () => void {
       if (h > 1300) shrub(index % 2 ? right : left, h * .39, index % 2 ? -1 : 1, .9);
       if (element.id === "beyond") { shrub(left, h * .42, 1, 1.12); shrub(right, h * .32, -1, 1.08); }
     }
+    if (!["the-day", "beyond", "details", "profiles", "useful-bits", "gifts"].includes(element.id)) {
+      const side = index % 2 ? -1 : 1;
+      meadow(side * w * .42, h + 12, w * .38, mobile ? 24 : 48, habitat === "orchid" ? "orchid" : "cosmos");
+      // A second species gives each room a different silhouette, not simply a new tint.
+      if (!mobile) shrub(-side * w * .52, h * .54, side, .7, habitat === "fern" ? "wisteria" : "fern");
+    }
     KINDS.forEach((kind, order) => {
-      const instances = pool[kind], geometry = geometries[kind].clone();
+      const instances = pool[kind];
+      if (!instances.length) return;
+      const geometry = geometries[kind].clone();
       const mesh = new THREE.InstancedMesh(geometry, materials[kind], instances.length);
       const anchors = new Float32Array(instances.length * 4);
       instances.forEach((item, i) => { mesh.setMatrixAt(i, item.matrix); mesh.setColorAt(i, item.color); anchors.set(item.anchor, i * 4); });
       geometry.setAttribute("gardenAnchor", new THREE.InstancedBufferAttribute(anchors, 4));
       mesh.frustumCulled = false; mesh.renderOrder = order;
+      if (hero && kind === "leaf") { mesh.castShadow = true; mesh.customDepthMaterial = leafDepth; }
       group.add(mesh);
     });
     group.visible = false; scene.add(group);
-    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading > p, .v2-gifts-heading > p, .v2-person > div, .v2-rsvp-copy, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy";
+    return { element, group, top: rect.top + window.scrollY, width: w, height: h, safe: measureSafe(element) };
+  }
+
+  function measureSafe(element: HTMLElement) {
+    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading > p, .v2-gifts-heading > p, .v2-person > div, .v2-profile-portrait, .v2-rsvp-copy, .reply-attendance, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy";
     const safe = Array.from(element.querySelectorAll<HTMLElement>(selectors)).slice(0, 12).map(node => {
       const box = node.getBoundingClientRect();
       return { left: box.left, top: box.top + window.scrollY, width: box.width, height: box.height };
     });
-    return { element, group, top: rect.top + window.scrollY, height: h, safe };
+    return safe;
+  }
+
+  function clearChapter(chapter: Chapter) {
+    if (!chapter.group) return;
+    chapter.group.traverse(object => {
+      if (object instanceof THREE.InstancedMesh) { object.geometry.dispose(); object.dispose(); }
+      else if (object instanceof THREE.Mesh && object.userData.ownsMaterial) {
+        object.geometry.dispose();
+        const owned = Array.isArray(object.material) ? object.material : [object.material];
+        owned.forEach(material => material.dispose());
+      }
+    });
+    scene.remove(chapter.group);
+    chapter.group = null;
   }
 
   function clearChapters() {
     for (const chapter of chapters) {
-      chapter.group.traverse(object => { if (object instanceof THREE.InstancedMesh) { object.geometry.dispose(); object.dispose(); } });
-      scene.remove(chapter.group);
+      clearChapter(chapter);
     }
     chapters = [];
+  }
+  function hydrateChapter(chapter: Chapter) {
+    if (chapter.group || disposed) return chapter;
+    const index = chapters.indexOf(chapter);
+    const hydrated = makeChapter(chapter.element, index < 0 ? 0 : index);
+    Object.assign(chapter, hydrated);
+    return chapter;
+  }
+  function scheduleHydration() {
+    cancelHydration?.(); cancelHydration = null;
+    if (disposed || document.hidden || contextUnavailable) return;
+    // Keep nearby rooms warm, not the entire document. Seeds and mesh detail
+    // remain identical when a distant chapter is revisited.
+    for (const chapter of chapters) {
+      if (!gardenWindow(chapter.top, chapter.height, window.scrollY, height).retain) clearChapter(chapter);
+    }
+    canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
+    const next = chapters.filter(chapter => !chapter.group && gardenWindow(chapter.top, chapter.height, window.scrollY, height).prepare)
+      .sort((a, b) => Math.abs(a.top - window.scrollY) - Math.abs(b.top - window.scrollY))[0];
+    if (!next) return;
+    const win = window as Window & {
+      requestIdleCallback?: (callback: (deadline: IdleDeadline) => void, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (win.requestIdleCallback) {
+      const handle = win.requestIdleCallback(deadline => {
+        cancelHydration = null;
+        if (!deadline.didTimeout && deadline.timeRemaining() < 5) { scheduleHydration(); return; }
+        hydrateChapter(next); dirty = true; schedule(); scheduleHydration();
+      }, { timeout: 1200 });
+      cancelHydration = () => win.cancelIdleCallback?.(handle);
+      return;
+    }
+    const handle = window.setTimeout(() => {
+      cancelHydration = null;
+      hydrateChapter(next); dirty = true; schedule(); scheduleHydration();
+    }, 180);
+    cancelHydration = () => window.clearTimeout(handle);
   }
   function measure() {
     if (disposed) return;
     width = document.documentElement.clientWidth; height = window.innerHeight;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, coarse.matches ? 2 : 2.5));
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, coarse.matches ? 1.5 : 2));
     renderer.setSize(width, height);
     renderer.getDrawingBufferSize(uniforms.uGardenViewport.value);
     camera.left = -width / 2; camera.right = width / 2; camera.top = height / 2; camera.bottom = -height / 2; camera.updateProjectionMatrix();
-    clearChapters();
-    chapters = Array.from(parent!.querySelectorAll<HTMLElement>(":scope > .v2-scene")).map(makeChapter);
-    dirty = true; schedule();
+    chapters = Array.from(parent!.querySelectorAll<HTMLElement>(":scope > .v2-scene")).map((element, index) => {
+      const previous = chapters.find(chapter => chapter.element === element);
+      const rect = element.getBoundingClientRect();
+      // Mobile browser chrome and content movement must not regenerate an entire garden.
+      if (previous && Math.abs(previous.width - rect.width) < 2 && Math.abs(previous.height - rect.height) < 2) {
+        return { ...previous, top: rect.top + window.scrollY, safe: measureSafe(element) };
+      }
+      if (previous) clearChapter(previous);
+      const nearViewport = gardenWindow(rect.top + window.scrollY, rect.height, window.scrollY, height).prepare;
+      return nearViewport
+        ? makeChapter(element, index)
+        : { element, group: null, top: rect.top + window.scrollY, width: rect.width, height: rect.height, safe: measureSafe(element) };
+    });
+    dirty = true; activeUntil = performance.now() + 650; schedule(); scheduleHydration();
   }
   function draw(now: number) {
     frame = 0;
     if (disposed || document.hidden || contextUnavailable) return;
     const scroll = window.scrollY;
+    canvas.dataset.gardenMotion = String(uniforms.uGardenMotion.value);
+    const dt = Math.min(64, now - lastTick); lastTick = now;
+    sceneryScroll = media.matches ? scroll : sceneryScroll + (scroll - sceneryScroll) * (1 - Math.exp(-dt / 145));
+    const travelling = Math.abs(scroll - sceneryScroll) > .15;
     const visible = chapters.filter(chapter => chapter.top < scroll + height && chapter.top + chapter.height > scroll);
-    if (dirty || now - lastDraw > 1000 / 30) {
+    const active = travelling || now < activeUntil;
+    const heroVisible = visible.some(chapter => chapter.element.id === "the-day");
+    const ambientCadence = heroVisible ? 1000 / (coarse.matches ? 24 : 30) : 1000 / 12;
+    const cadence = active ? 1000 / 60 : ambientCadence;
+    if (dirty || travelling || now - lastDraw > cadence) {
       renderer.setScissorTest(false); renderer.clear(); renderer.setScissorTest(true);
       uniforms.uGardenTime.value = (now - animationOrigin) / 1000;
+      uniforms.uGardenPointer.value.lerp(pointerTarget, 1 - Math.exp(-Math.min(now - lastDraw, 64) / 150));
       for (const chapter of visible) {
+        hydrateChapter(chapter);
+        if (!chapter.group) continue;
         const top = chapter.top - scroll;
         const start = Math.max(0, top), end = Math.min(height, top + chapter.height);
         renderer.setScissor(0, height - end, width, end - start);
         chapter.group.position.y = height / 2 - top;
         chapter.group.visible = true;
         uniforms.uGardenNight.value = chapter.element.id === "beyond" ? 1 : 0;
+        const hero = chapter.element.id === "the-day";
+        uniforms.uGardenHero.value = hero ? 1 : 0;
+        renderer.shadowMap.enabled = hero;
+        sun.castShadow = hero;
+        if (hero) {
+          const distance = heroCameraDistance(chapter.height);
+          // Project the complete room, then scroll its viewport as one surface.
+          // Translating a perspective group in a screen-centered camera causes
+          // each depth plane to travel at a different vertical scroll velocity.
+          chapter.group.position.y = 0;
+          renderer.setViewport(0, height - top - chapter.height, width, chapter.height);
+          heroCamera.aspect = width / chapter.height;
+          heroCamera.fov = 45;
+          heroCamera.position.set(0, -chapter.height / 2, distance);
+          heroCamera.lookAt(0, -chapter.height / 2, 0); heroCamera.updateProjectionMatrix();
+          canvas.dataset.heroCamera = "perspective";
+          canvas.dataset.heroTravel = "0";
+          sky.intensity = 2.0; sun.intensity = 1.9; fill.intensity = .4;
+          const drift = media.matches ? 0 : Math.sin(uniforms.uGardenTime.value * .065) * width * .08;
+          sun.position.set(-width * .4 + drift, chapter.height * .25, distance * .85);
+          sun.target.position.set(0, -chapter.height * .5, -chapter.height * .25);
+          sun.target.updateMatrixWorld();
+          Object.assign(sun.shadow.camera, { left: -width, right: width, top: chapter.height, bottom: -chapter.height, near: 1, far: distance * 4 });
+          sun.shadow.camera.updateProjectionMatrix();
+        } else {
+          renderer.setViewport(0, 0, width, height);
+          sky.intensity = 2.7; sun.intensity = 1.6; fill.intensity = .65;
+          sun.position.set(-250, 450, 800); sun.target.position.set(0, 0, 0); sun.target.updateMatrixWorld();
+        }
+        uniforms.uGardenTravel.value = hero
+          ? 0
+          : chapter.element.id === "profiles" ? 0
+          : THREE.MathUtils.clamp((sceneryScroll + height / 2 - chapter.top - chapter.height / 2) / (height + chapter.height) * 2, -1, 1);
         uniforms.uGardenSafeCount.value = chapter.safe.length;
         chapter.safe.forEach((box, i) => uniforms.uGardenSafe.value[i].set(box.left / width, (box.top - scroll) / height, (box.left + box.width) / width, (box.top + box.height - scroll) / height));
-        renderer.render(scene, camera);
+        renderer.render(scene, hero ? heroCamera : camera);
+        if (hero) {
+          const grass = chapter.group.children.find(object => object instanceof THREE.InstancedMesh && object.material === materials.grass) as THREE.InstancedMesh | undefined;
+          if (grass) {
+            grass.getMatrixAt(0, rootMatrix);
+            rootProbe.setFromMatrixPosition(rootMatrix).applyMatrix4(grass.matrixWorld).project(heroCamera);
+            // Read-only QA probe: the real projection/viewport, not a declared anchor.
+            renderer.getViewport(viewportProbe);
+            canvas.dataset.heroRootPageY = (scroll + height - viewportProbe.y - (rootProbe.y + 1) * viewportProbe.w / 2).toFixed(3);
+          }
+        }
         chapter.group.visible = false;
       }
       parent!.classList.add("has-garden-renderer");
+      canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
       dirty = false; lastDraw = now;
     }
-    if (!media.matches && visible.length) schedule();
+    if (!media.matches && visible.length) schedule(active ? 0 : ambientCadence);
   }
-  function schedule() { if (!frame && !disposed && !document.hidden && !contextUnavailable) frame = requestAnimationFrame(draw); }
-  function scroll() { dirty = true; schedule(); }
+  function schedule(delay = 0) {
+    if (frame || disposed || document.hidden || contextUnavailable) return;
+    if (delay > 0) {
+      if (!ambientTimer) ambientTimer = window.setTimeout(() => { ambientTimer = 0; schedule(); }, delay);
+      return;
+    }
+    if (ambientTimer) { window.clearTimeout(ambientTimer); ambientTimer = 0; }
+    frame = requestAnimationFrame(draw);
+  }
+  function scroll() { activeUntil = performance.now() + 500; dirty = true; schedule(); scheduleHydration(); }
   function resize() { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(measure); }
   function motion() { uniforms.uGardenMotion.value = media.matches ? 0 : 1; dirty = true; schedule(); }
-  function visibility() { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else { animationOrigin = performance.now(); scroll(); } }
-  function contextLost(event: Event) { event.preventDefault(); contextUnavailable = true; parent!.classList.remove("has-garden-renderer"); cancelAnimationFrame(frame); frame = 0; }
+  function pointer(event: PointerEvent) {
+    if (coarse.matches || media.matches) return;
+    pointerTarget.set((event.clientX / width - .5) * 12, (.5 - event.clientY / height) * 9);
+    activeUntil = performance.now() + 240; dirty = true; schedule();
+  }
+  function visibility() { if (document.hidden) { cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); cancelHydration?.(); cancelHydration = null; frame = 0; ambientTimer = 0; } else { lastTick = performance.now(); sceneryScroll = window.scrollY; scroll(); scheduleHydration(); } }
+  function contextLost(event: Event) { event.preventDefault(); contextUnavailable = true; parent!.classList.remove("has-garden-renderer"); cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); cancelHydration?.(); cancelHydration = null; frame = 0; ambientTimer = 0; }
   function contextRestored() { contextUnavailable = false; measure(); }
   canvas.addEventListener("webglcontextlost", contextLost);
   canvas.addEventListener("webglcontextrestored", contextRestored);
   addEventListener("scroll", scroll, { passive: true }); addEventListener("resize", resize, { passive: true });
+  addEventListener("pointermove", pointer, { passive: true });
   addEventListener("wedding-language-change", resize);
   document.addEventListener("visibilitychange", visibility); media.addEventListener("change", motion);
   const observer = new ResizeObserver(resize);
   parent.querySelectorAll(":scope > .v2-scene").forEach(element => observer.observe(element));
   measure();
   return () => {
-    disposed = true; cancelAnimationFrame(frame); cancelAnimationFrame(resizeFrame); observer.disconnect();
+    disposed = true; cancelAnimationFrame(frame); cancelAnimationFrame(resizeFrame); window.clearTimeout(ambientTimer); cancelHydration?.(); observer.disconnect();
     removeEventListener("scroll", scroll); removeEventListener("resize", resize); document.removeEventListener("visibilitychange", visibility); media.removeEventListener("change", motion);
+    removeEventListener("pointermove", pointer);
     removeEventListener("wedding-language-change", resize);
     canvas.removeEventListener("webglcontextlost", contextLost); canvas.removeEventListener("webglcontextrestored", contextRestored);
-    clearChapters(); KINDS.forEach(kind => { geometries[kind].dispose(); materials[kind].dispose(); });
-    renderer.dispose(); canvas.remove(); parent.classList.remove("has-garden-renderer");
+    clearChapters(); leafDepth.dispose(); KINDS.forEach(kind => { geometries[kind].dispose(); materials[kind].dispose(); });
+    sun.shadow.dispose(); renderer.dispose(); canvas.remove(); parent.classList.remove("has-garden-renderer");
   };
 }

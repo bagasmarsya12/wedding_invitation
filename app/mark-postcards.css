@@ -39,7 +39,7 @@
 .mark-wall{display:flex;flex-direction:column;gap:.8rem;min-width:0}
 .mark-wall h2{margin:0;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(249,245,237,.66)}
 .wall-caption{margin:0;font-size:.8rem;line-height:1.6;color:rgba(249,245,237,.6)}
-.wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem 1rem;padding-top:.4rem}
+.wall-grid{--wall-rows:3;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 2.1rem)/4);grid-template-rows:repeat(var(--wall-rows),auto);gap:.8rem .7rem;padding:.55rem .2rem .6rem}
 .wall-card{position:relative;padding-top:.55rem}
 .wall-card .pc-mini{transform:rotate(-1.8deg);transition:transform .25s}
 .wall-card:nth-child(even) .pc-mini{transform:rotate(1.6deg)}
@@ -59,7 +59,7 @@
 .chip.is-approved{color:#cfe0bd;border-color:rgba(160,190,135,.75)}
 .chip.is-pending{color:#e6d3a3;border-color:rgba(214,183,112,.7)}
 .style-swatches{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
-.style-swatches button{width:1.75rem;height:1.75rem;padding:0;border:2px solid transparent;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.style-swatches button{width:2.75rem;height:2.75rem;padding:0;border:2px solid transparent;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .style-swatches button:hover{transform:scale(1.1)}
 .style-swatches button.is-on{border-color:var(--bx-paper);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 2px rgba(249,245,237,.35)}
 .style-swatches .caption{font-size:.74rem;color:rgba(249,245,237,.64)}
@@ -68,8 +68,8 @@
 .mark-composer .postcard-canvas{max-width:32rem}
 @media (max-width:60rem){.mark-studio > .mark-composer,.mark-studio > .mark-wall{padding:1.05rem .95rem}}
 /* --- wall: two rows + scroll --- */
-.wall-scroll{max-height:22rem;overflow-y:auto;overscroll-behavior:contain;padding:.15rem .4rem .15rem 0;scrollbar-width:thin;scrollbar-color:rgba(249,245,237,.3) transparent}
-.wall-scroll::-webkit-scrollbar{width:6px}
+.wall-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;padding:.15rem 0 .45rem;scrollbar-width:thin;scrollbar-color:rgba(249,245,237,.3) transparent;scroll-snap-type:x proximity}
+.wall-scroll::-webkit-scrollbar{height:6px}
 .wall-scroll::-webkit-scrollbar-thumb{background:rgba(249,245,237,.25);border-radius:99px}
 /* --- card fonts --- */
 .pc-font-hand{--pc-font:var(--bx-serif);--pc-font-style:italic}
@@ -80,7 +80,7 @@
 .postcard-canvas .postcard-writing textarea::placeholder{font-style:var(--pc-font-style,italic)}
 .pc-mini .postcard-writing{font-size:.9rem;line-height:1.45}
 .font-picker{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
-.font-option{display:grid;place-items:center;min-width:2.7rem;height:2.3rem;padding:0 .55rem;color:rgba(249,245,237,.92);background:rgba(249,245,237,.05);border:1px solid rgba(249,245,237,.28);border-radius:8px;cursor:pointer}
+.font-option{display:grid;place-items:center;min-width:2.75rem;height:2.75rem;padding:0 .55rem;color:rgba(249,245,237,.92);background:rgba(249,245,237,.05);border:1px solid rgba(249,245,237,.28);border-radius:8px;cursor:pointer}
 .font-option:hover{background:rgba(249,245,237,.12)}
 .font-option.is-on{border-color:var(--bx-paper);background:rgba(249,245,237,.16)}
 .font-preview{font-family:var(--pc-font,var(--bx-serif));font-style:var(--pc-font-style,italic);font-size:1.08rem;line-height:1}
@@ -89,3 +89,106 @@
 .submit-row{display:flex;align-items:center;gap:.8rem}
 .submit-row .paper-button{color:var(--bx-charcoal);background:var(--bx-paper)}
 .char-count{font-size:.72rem;letter-spacing:.08em;color:rgba(249,245,237,.62);font-variant-numeric:tabular-nums}
+
+/* The invitation wall is one finite viewing window: 3 × 4 cards on wide screens,
+   2 × 3 on mobile. Further cards continue sideways instead of leaving the page. */
+.v2-postcard-installation:has(.v2-postcard-wall){display:flex;min-width:0;min-height:0;align-items:center;perspective:none}
+.v2-postcard-wall{position:relative;width:100%;overflow-x:auto;overflow-y:hidden;padding:.85rem .4rem 1.25rem;outline:none;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:rgba(249,245,237,.48) transparent;scroll-snap-type:x proximity}
+.v2-postcard-wall::-webkit-scrollbar{height:7px}
+.v2-postcard-wall::-webkit-scrollbar-track{background:rgba(249,245,237,.08)}
+.v2-postcard-wall::-webkit-scrollbar-thumb{background:rgba(249,245,237,.42);border-radius:99px}
+.v2-postcard-wall:focus-visible{outline:1px solid rgba(249,245,237,.7);outline-offset:5px}
+.v2-postcard-wall-grid{--wall-rows:3;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 2.55rem)/4);grid-template-rows:repeat(var(--wall-rows),auto);gap:.85rem}
+.postcard-wall-room{position:relative;width:100%;min-width:0}
+.postcard-wall-heading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem;margin-bottom:.85rem;color:var(--v2-paper,var(--bx-paper));font-size:.8rem;line-height:1.5}
+.postcard-wall-heading small{font-size:.7rem;opacity:.78}
+.postcard-wall-card{position:relative;display:block;width:100%;min-width:0;aspect-ratio:3/2;padding:0;border:0;color:inherit;background:transparent;cursor:pointer;scroll-snap-align:start;text-align:left}
+.postcard-wall-card:focus-visible{outline:2px solid #f7f2e7;outline-offset:4px}
+.postcard-wall-card.is-mine{outline:1px dashed #f7f2e7;outline-offset:3px}
+.postcard-wall-card .v2-postcard-live{height:100%;background-color:var(--pc-bg);background-blend-mode:multiply;color:var(--pc-ink,var(--v2-charcoal))}
+.postcard-wall-retry{min-height:44px;padding:.75rem;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+.postcard-reader{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:1.5rem;border:0;overflow:auto;color:#f9f5ed;background:transparent}
+.postcard-reader::backdrop{background:rgba(15,27,21,.86);backdrop-filter:blur(10px)}
+.postcard-reader-shell{width:min(46rem,100%);min-height:100%;margin:auto;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:1.5rem;pointer-events:none}
+.postcard-reader-shell>*{pointer-events:auto}
+.postcard-reader-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase}
+.postcard-reader-close{display:flex;min-height:44px;gap:.75rem;align-items:center;padding:0 .5rem;border:0;color:inherit;background:transparent;cursor:pointer;font-size:.7rem;letter-spacing:.08em}
+.postcard-reader-close span{font-size:1.5rem;font-weight:300}
+.postcard-reader-deck{position:relative;isolation:isolate;width:100%;height:clamp(22rem,62dvh,30rem);perspective:1200px}
+.postcard-reader-back{position:absolute;inset:0;border:1px solid rgba(249,245,237,.15);border-radius:3px;background-color:var(--pc-bg);background-image:url("/assets/15-paper-fiber-texture.webp");background-blend-mode:multiply;box-shadow:0 12px 35px #0003;pointer-events:none}
+.postcard-reader-back.back-2{transform:translateY(14px) rotate(2.2deg) scale(.965)}
+.postcard-reader-back.back-1{transform:translateY(7px) rotate(-1.3deg) scale(.985)}
+.postcard-reader-active{position:relative;z-index:2;width:100%;height:100%;touch-action:pan-y;cursor:grab;will-change:transform;user-select:none}
+.postcard-reader-active:active{cursor:grabbing}
+.postcard-reader .postcard{--pc-frame:clamp(.85rem,2.5vw,1.1rem);--pc-gutter:clamp(1.05rem,3vw,1.65rem);--pc-padding:calc(var(--pc-frame) + var(--pc-gutter));display:grid;grid-template-rows:3rem minmax(0,1fr) auto;gap:1rem;width:100%;height:100%;min-height:0;aspect-ratio:auto;padding:var(--pc-padding);border-radius:3px;background-image:linear-gradient(color-mix(in srgb,var(--pc-bg) 55%,transparent),color-mix(in srgb,var(--pc-bg) 55%,transparent)),url("/assets/15-paper-fiber-texture.webp");background-blend-mode:normal,multiply;box-shadow:0 20px 60px #0005;transform:none}
+/* Frame and content use the same fixed-distance geometry at every aspect ratio. */
+.postcard-reader .postcard::after{inset:var(--pc-frame);border-color:color-mix(in srgb,var(--pc-ink,#292721) 14%,transparent)}
+.postcard-reader .pc--airmail::after{inset:auto 0 0 0;border:0}
+.postcard-reader .postcard.pc--airmail{padding-top:max(3.5rem,var(--pc-padding));padding-bottom:max(3.5rem,var(--pc-padding))}
+.postcard-reader .postcard-stamp{top:calc(var(--pc-frame) + var(--pc-gutter)/2);right:calc(var(--pc-frame) + var(--pc-gutter)/2);width:2.4rem;height:2.85rem}
+.postcard-reader .pc--midnight .postcard-stamp{background:rgba(244,239,226,.06)}
+.postcard-reader .postcard-postmark{top:calc(var(--pc-frame) + var(--pc-gutter)/2 + .4rem);right:calc(var(--pc-frame) + var(--pc-gutter)/2 + 2.9rem);width:2.3rem;font-size:.48rem}
+.postcard-reader .postcard-body{grid-row:2;min-width:0;min-height:0;margin:0;padding:0;overflow:hidden}
+.postcard-reader .postcard-writing{width:100%;min-height:0;max-height:100%;margin:0;padding-right:.5rem;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.65;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--pc-ink,#292721) 35%,transparent) transparent}
+.postcard-reader .postcard-from{position:relative;grid-row:3;z-index:3;align-self:end;margin:0;padding:0;border:0;font-size:.78rem;line-height:1.5;opacity:.8;overflow-wrap:anywhere}
+.postcard-reader .pc-decor{left:auto;right:-6%;width:26%;opacity:.12}
+.postcard-reader .has-drawing.has-message{grid-template-rows:2.8rem minmax(0,.85fr) minmax(0,1fr) auto}
+.postcard-reader .has-drawing .postcard-ink{position:relative;grid-row:2;z-index:2;inset:auto;min-height:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.postcard-reader .has-drawing.has-message .postcard-body{grid-row:3}
+.postcard-reader .has-drawing .postcard-from{grid-row:4}
+.postcard-reader .has-drawing:not(.has-message) .postcard-body{display:none}
+.postcard-reader .has-drawing:not(.has-message) .postcard-from{grid-row:3}
+.postcard-reader .pc--midnight .postcard-writing.is-drawn{color:#f4efe2}
+.postcard-reader-controls{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding-top:.4rem;text-align:center}
+.postcard-reader-arrow{display:grid;place-items:center;width:3.1rem;height:3.1rem;border:1px solid #f9f5ed55;border-radius:50%;background:#f9f5ed0a;color:#f9f5ed;cursor:pointer;font-size:1.4rem;transition:background .2s,transform .2s}
+.postcard-reader-arrow:hover:not(:disabled){background:#f9f5ed22;transform:translateY(-2px)}
+.postcard-reader-arrow:disabled{opacity:.3;cursor:default}
+.postcard-reader button:focus-visible{outline:2px solid #f9f5ed;outline-offset:4px}
+.postcard-reader-count{margin:0 0 .35rem;font-size:.75rem;letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.postcard-reader-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.postcard-reader-controls small,.postcard-reader-status{font-size:.7rem;letter-spacing:.02em;opacity:.75}
+.postcard-reader-status{margin:0;text-align:center}
+.v2-mark .mark-melastoma{z-index:2}
+.v2-mark:not(.has-studio){grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:clamp(2rem,4vw,5rem)}
+.v2-mark:not(.has-studio) .v2-mark-copy h2{font-size:clamp(3.2rem,4.3vw,5rem);line-height:.98;letter-spacing:-.055em}
+.mark-studio{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:1.5rem}
+.v2-postcard-wall .v2-postcard-live{position:relative;inset:auto;width:100%;min-width:0;aspect-ratio:3/2;padding:.65rem;border-radius:2px;box-shadow:.35rem .55rem 1rem rgba(26,32,27,.2);scroll-snap-align:start;transform:none}
+.v2-postcard-wall .v2-postcard-live .postcard-stamp{top:.45rem;right:.45rem;width:1.55rem;height:1.85rem}
+.v2-postcard-wall .v2-postcard-live .postcard-postmark{top:.56rem;right:2.25rem;width:1.35rem;font-size:.28rem}
+.v2-postcard-wall .v2-postcard-live .postcard-body{margin-right:1.9rem;padding-right:.15rem}
+.v2-postcard-wall .v2-postcard-live .postcard-writing{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;font-size:clamp(.52rem,.68vw,.72rem);line-height:1.38}
+.v2-postcard-wall .v2-postcard-live .postcard-from,.v2-postcard-wall .v2-postcard-live .postcard-note{margin-top:.25rem;font-size:.36rem;letter-spacing:.08em}
+.v2-postcard-wall .v2-postcard-live .pc-decor{opacity:.22}
+.v2-postcard-wall .has-drawing .postcard-ink{inset:.4rem 2.1rem 1.1rem .4rem;width:calc(100% - 2.5rem);height:calc(100% - 1.5rem);pointer-events:none}
+.v2-postcard-wall .has-drawing .postcard-body{visibility:hidden}
+.v2-postcard-wall .has-drawing .postcard-from{margin-top:auto}
+
+@media (max-width:60rem){
+  .v2-mark:not(.has-studio){grid-template-columns:minmax(0,1fr)}
+  .v2-mark:not(.has-studio) .v2-mark-copy h2{font-size:clamp(3.3rem,13vw,5rem)}
+  .mark-studio{grid-template-columns:minmax(0,1fr)}
+  .wall-grid,.v2-postcard-wall-grid{--wall-rows:2}
+  .wall-grid{grid-auto-columns:calc((100% - 1.4rem)/3)}
+  .v2-postcard-installation:has(.v2-postcard-wall){width:100%;min-height:0}
+  .v2-postcard-wall{padding:.65rem .15rem 1rem}
+  .v2-postcard-wall-grid{gap:.55rem;grid-auto-columns:calc((100% - 1.1rem)/3)}
+  .v2-postcard-wall .v2-postcard-live{padding:.45rem;box-shadow:.2rem .35rem .7rem rgba(26,32,27,.18)}
+  .v2-postcard-wall .v2-postcard-live .postcard-stamp{top:.3rem;right:.3rem;width:1.15rem;height:1.35rem}
+  .v2-postcard-wall .v2-postcard-live .postcard-postmark{display:none}
+  .v2-postcard-wall .v2-postcard-live .postcard-body{margin-right:1.25rem}
+  .v2-postcard-wall .v2-postcard-live .postcard-writing{font-size:clamp(.44rem,1.7vw,.6rem);line-height:1.3}
+  .v2-postcard-wall .v2-postcard-live .postcard-from{font-size:.3rem}
+}
+@media(max-width:40rem){
+  .postcard-reader{padding:1rem}
+  .postcard-reader-shell{gap:1.25rem}
+  .postcard-reader-header{font-size:.55rem;letter-spacing:.1em}
+  .postcard-reader-deck{height:clamp(26rem,65dvh,34rem)}
+  .postcard-reader .postcard{grid-template-rows:3rem minmax(0,1fr) auto}
+  .postcard-reader .has-drawing.has-message{grid-template-rows:2.8rem minmax(0,.85fr) minmax(0,1fr) auto}
+  .postcard-reader .postcard-writing{font-size:1.08rem}
+  .postcard-reader-controls{gap:.8rem}
+  .postcard-reader-controls small{font-size:.65rem}
+  .v2-postcard-wall .has-drawing .postcard-ink{inset:.3rem 1.65rem .8rem .3rem;width:calc(100% - 1.95rem);height:calc(100% - 1.1rem)}
+}
+@media(prefers-reduced-motion:reduce){.postcard-reader-arrow{transition:none}}
