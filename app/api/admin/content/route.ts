@@ -1,3 +1,4 @@
+import { ACTIVE_CONTENT_KEYS } from '@/lib/content-usage';
 import { allowMutation, cleanText, db, privateJson, readJsonBody, requireAdmin, sameOriginMutation } from "@/lib/server";
 import { CONTENT_DEFAULTS, CONTENT_SECTIONS } from "@/lib/content-defaults";
 import { knownContentKeys } from "@/lib/landing-content";
@@ -20,7 +21,10 @@ export async function GET() {
       overrides[key] = row.updated_at;
     }
   }
-  return privateJson({ sections: CONTENT_SECTIONS, values, overrides });
+  const active=new Set<string>(ACTIVE_CONTENT_KEYS);
+  for(const key of ['hero.hero date','misc.di','beyond.arch t'])active.delete(key);
+  const sections=CONTENT_SECTIONS.map(section=>({...section,fields:section.fields.filter(field=>section.id==='copy'||section.id==='keepsakeUi'||active.has(`${section.id}.${field.key}`))})).filter(section=>section.fields.length);
+  return privateJson({ sections, values, overrides });
 }
 
 /**
@@ -37,8 +41,9 @@ export async function PUT(request: Request) {
     return privateJson({ error: "Body must be {values: {key: value}}." }, 400);
   }
   const known = new Set(knownContentKeys());
-  const entries = Object.entries(body.values as Record<string, unknown>)
-    .filter(([key]) => known.has(key))
+  const supplied=Object.entries(body.values as Record<string,unknown>);
+  if(supplied.some(([key,value])=>!known.has(key) || typeof value!=='string' || value.length>(key.replace(/^id\./,'').startsWith('keepsake.')?120:key.replace(/^id\./,'').startsWith('keepsakeUi.')?500:2000))) return privateJson({error:'Unknown content field or text over 2000 characters.'},400);
+  const entries = supplied
     .map(([key, value]) => [`content.${key}`, value] as [string, unknown]);
   if (!entries.length) return privateJson({ error: "No valid content keys supplied." }, 400);
   if (entries.length > 120) return privateJson({ error: "Too many keys in one request." }, 413);
@@ -65,6 +70,6 @@ export async function PUT(request: Request) {
     return privateJson({ error: "Could not save content. Try again." }, 500);
   }
   const saved = statements.length;
-  const cleared = entries.filter(([key]) => (body.values as Record<string, unknown>)[key] === "").length;
+  const cleared = supplied.filter(([,value])=>value==='').length;
   return privateJson({ ok: true, saved, cleared, note: CONTENT_DEFAULTS ? "empty values fall back to defaults" : undefined });
 }

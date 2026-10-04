@@ -12,13 +12,13 @@ export function randomInviteToken(): string {
   return btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
-export function phaseForDate(now: Date, override?: string | null): SitePhase {
+export function phaseForDate(now: Date, override?: string | null, eventDate = weddingDay): SitePhase {
   if (override === "pre-wedding" || override === "wedding-day" || override === "post-wedding") return override;
   const jakartaDay = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit",
   }).format(now);
-  if (jakartaDay < weddingDay) return "pre-wedding";
-  return jakartaDay === weddingDay ? "wedding-day" : "post-wedding";
+  if (jakartaDay < eventDate) return "pre-wedding";
+  return jakartaDay === eventDate ? "wedding-day" : "post-wedding";
 }
 
 export function validateRsvp(attendance: unknown, partySize: unknown, partyLimit: number): { attendance: "yes" | "no"; partySize: number } | null {
@@ -46,6 +46,7 @@ export function safeExternalUrl(value: unknown): string | null {
 }
 
 export function safeMediaUrl(value: unknown): string | null {
+  if (typeof value === "string" && /^\/api\/gifts\/gift_[A-Za-z0-9_-]{1,100}\/image\?v=[a-f0-9-]{36}$/.test(value)) return value;
   if (typeof value === "string" && value.length <= 500 && /^\/assets\/[A-Za-z0-9_./-]+$/.test(value) && !value.includes("..")) return value;
   return safeExternalUrl(value);
 }
@@ -71,7 +72,7 @@ export function toCsv(rows: unknown[][]): string {
 }
 
 export function parseCsv(input: string): string[][] | null {
-  if (input.length > 32_000) return null;
+  if (input.length > 160_000) return null;
   const rows: string[][] = []; let row: string[] = []; let cell = ""; let quoted = false;
   for (let i = 0; i < input.length; i++) {
     const char = input[i];
@@ -91,5 +92,5 @@ export function parseCsv(input: string): string[][] | null {
   if (quoted) return null;
   row.push(cell);
   if (row.some(value => value.trim())) rows.push(row);
-  return rows.length <= 101 ? rows : null;
+  return rows.length <= 501 ? rows : null;
 }

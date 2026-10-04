@@ -1,0 +1,46 @@
+/* The existing rooms share their actual neighbor's color at each threshold. */
+.v2-scene :is(h1,h2,#rsvp)[tabindex="-1"]:focus-visible { outline:2px solid #ad6979; outline-offset:6px; }
+.v2-botanical-continuum > .v2-details::before {
+  background:linear-gradient(#a6ab94,transparent 14rem),linear-gradient(transparent calc(100% - 6rem),#62734c),radial-gradient(ellipse at 48% 30%,#d8d8c6 0%,#a6ab94 58%,#666d58 100%);
+}
+.v2-details + .v2-archive-table-scene::before {
+  background:linear-gradient(#62734c,transparent 5rem),radial-gradient(ellipse at 36% 39%,#626c50 0,#374938 45%,#21382c 90%);
+}
+.v2-archive + .v2-useful::before {
+  background:linear-gradient(#21382c,transparent 4rem),radial-gradient(ellipse at 100% 85%,#dce2ce,transparent 60%),#f7f3eb;
+}
+.v2-useful + .v2-reply-scene::before {
+  background:linear-gradient(#f7f3eb,transparent 4rem),radial-gradient(ellipse at 15% 22%,#ac7880,#785e62 48%,#394438 100%);
+}
+.v2-archive + .v2-reply-scene::before {
+  background:linear-gradient(#21382c,transparent 4rem),radial-gradient(ellipse at 15% 22%,#ac7880,#785e62 48%,#394438 100%);
+}
+.v2-reply-scene + .v2-beyond::before {
+  background:linear-gradient(#394438,transparent 5rem),radial-gradient(circle at 50% 38%,#314b3b,#1d3429 48%,#12231c 100%);
+}
+
+/* Keep the native specimens sharp; group them around the existing envelope. */
+.v2-opening .opening-syzygium { top:-3%; left:-2%; }
+.v2-opening .opening-combretum-top { top:-2%; right:0; }
+.v2-opening .opening-melastoma-left { left:1%; bottom:5rem; transform:rotate(12deg); }
+.v2-opening .opening-orchid { right:2%; top:23%; transform:rotate(-19deg); }
+.v2-opening .opening-orchid-left { left:2%; top:19%; width:min(15vw,12rem); transform:rotate(26deg); }
+
+/* Repeat the garden's leaf/bloom relationship in two corners of the last folio. */
+.v2-footer.v2-closing { background:#12231c; }
+.v2-closing-paper .closing-fern { left:-1rem; bottom:6rem; width:min(18vw,15rem,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); transform:rotate(-14deg); }
+.v2-closing-paper .closing-cluster { right:-.6rem; top:5.5rem; width:min(13vw,10rem,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); transform:rotate(20deg); }
+.v2-closing-paper .closing-leaf { left:clamp(.5rem,2vw,2rem); bottom:5rem; }
+
+@media(max-width:720px) {
+  .v2-opening .opening-syzygium { left:-9%; top:-3%; }
+  .v2-opening .opening-combretum-top { right:-4%; top:6%; }
+  .v2-opening .opening-melastoma-left { left:-4%; bottom:5.5rem; }
+  .v2-opening .opening-orchid { right:-6%; top:23%; }
+  .v2-opening .opening-orchid-left { left:-4%; top:19%; width:29vw; }
+  .v2-closing-paper .closing-fern { left:-1.7rem; bottom:9rem; width:min(31vw,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); }
+  .v2-closing-paper .closing-cluster { right:-1.4rem; top:6rem; width:min(24vw,calc(var(--native-pixels)*1px/var(--botanical-dpr,2))); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .v2-opening .opening-orchid-left,.v2-closing-paper :is(.closing-fern,.closing-cluster) { transform:none; }
+}

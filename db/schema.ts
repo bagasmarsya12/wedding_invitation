@@ -9,11 +9,14 @@ const timestamps = {
 export const guests = sqliteTable("guests", {
   id: text("id").primaryKey(),
   tokenHash: text("token_hash").notNull(),
+  invitationTokenEnc: text("invitation_token_enc"),
   importKey: text("import_key"),
   displayName: text("display_name").notNull(),
   email: text("email"),
   partyLimit: integer("party_limit").notNull().default(1),
   status: text("status").notNull().default("active"),
+  guestGroup: text("guest_group").notNull().default("unassigned"),
+  invitationSentAt: text("invitation_sent_at"),
   ...timestamps,
 }, table => [uniqueIndex("guests_token_hash_unique").on(table.tokenHash), uniqueIndex("guests_import_key_unique").on(table.importKey)]);
 
@@ -28,6 +31,37 @@ export const rsvps = sqliteTable("rsvps", {
   ...timestamps,
 }, table => [uniqueIndex("rsvps_guest_unique").on(table.guestId)]);
 
+export const guestPasses = sqliteTable("guest_passes", {
+  id: text("id").primaryKey(),
+  guestId: text("guest_id").notNull().references(() => guests.id),
+  tokenHash: text("token_hash").notNull(),
+  ...timestamps,
+}, table => [uniqueIndex("guest_passes_guest_unique").on(table.guestId)]);
+
+export const guestCheckins = sqliteTable("guest_checkins", {
+  guestId: text("guest_id").primaryKey().references(() => guests.id),
+  passId: text("pass_id").notNull(),
+  partySize: integer("party_size").notNull(),
+  checkedInAt: text("checked_in_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  checkedInBy: text("checked_in_by").notNull(),
+  checkinMethod: text("checkin_method").notNull().default("qr"),
+});
+
+export const staffUsers = sqliteTable("staff_users", {
+  id: text("id").primaryKey(),
+  username: text("username").notNull(),
+  displayName: text("display_name").notNull(),
+  credential: text("credential").notNull(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  ...timestamps,
+}, table => [uniqueIndex("staff_users_username_unique").on(table.username)]);
+
+export const staffSessions = sqliteTable("staff_sessions", {
+  tokenHash: text("token_hash").primaryKey(),
+  staffId: text("staff_id").notNull().references(() => staffUsers.id, { onDelete: "cascade" }),
+  expiresAt: integer("expires_at").notNull(),
+}, table => [index("staff_sessions_staff_idx").on(table.staffId), index("staff_sessions_expiry_idx").on(table.expiresAt)]);
+
 export const gifts = sqliteTable("gifts", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
@@ -41,6 +75,8 @@ export const gifts = sqliteTable("gifts", {
   reservedAt: text("reserved_at"),
   purchasedAt: text("purchased_at"),
   shippingRequired: integer("shipping_required", { mode: "boolean" }).notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  published: integer("published", {mode:'boolean'}).notNull().default(true),
   ...timestamps,
 }, table => [index("gifts_category_idx").on(table.recipientCategory), index("gifts_status_idx").on(table.status)]);
 
@@ -53,6 +89,13 @@ export const giftReservations = sqliteTable("gift_reservations", {
   reservedAt: text("reserved_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   releasedAt: text("released_at"),
   purchasedAt: text("purchased_at"),
+}, table => [uniqueIndex("gift_reservations_one_active").on(table.giftId).where(sql`${table.status} IN ('reserved', 'purchased')`)]);
+
+export const giftMedia = sqliteTable("gift_media", {
+  giftId: text("gift_id").primaryKey().references(() => gifts.id),
+  objectKey: text("object_key").notNull(),
+  contentType: text("content_type").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const archiveEntries = sqliteTable("archive_entries", {
@@ -98,3 +141,13 @@ export const mutationLimits = sqliteTable("mutation_limits", {
   windowStart: integer("window_start").notNull(),
   count: integer("count").notNull().default(0),
 });
+
+export const pageVisits = sqliteTable("page_visits", {
+  id: text("id").primaryKey(),
+  guestId: text("guest_id").references(() => guests.id, { onDelete: "cascade" }),
+  sessionHash: text("session_hash").notNull(),
+  page: text("page").notNull(),
+  views: integer("views").notNull().default(1),
+  firstAt: text("first_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  lastAt: text("last_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [index("page_visits_guest_idx").on(table.guestId), index("page_visits_last_idx").on(table.lastAt)]);

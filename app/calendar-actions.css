@@ -1,0 +1,23 @@
+/* Calendar choices belong to the existing event paper. */
+.v2-calendar { position: relative; margin-top: .65rem; font-family: var(--v2-sans); }
+.v2-calendar > summary { display: flex; min-height: 44px; align-items: center; gap: .4rem; padding: .4rem 0; color: var(--v2-olive); font-family: var(--v2-sans); font-size: .72rem; line-height: 1.25; cursor: pointer; list-style: none; }
+.v2-calendar > summary::-webkit-details-marker { display: none; }
+.v2-calendar > summary::marker { content: ""; }
+.v2-calendar > summary span { min-width: 0; }
+.v2-calendar > summary svg { flex-shrink: 0; }
+.v2-calendar > summary svg:last-child { margin-left: auto; }
+.v2-calendar[open] > summary svg:last-child { transform: rotate(180deg); }
+.v2-calendar > summary:hover { color: #354332; }
+.v2-calendar > summary:focus-visible, .v2-calendar-options a:focus-visible { outline: 2px solid var(--v2-olive); outline-offset: 3px; }
+.v2-calendar[open] { z-index: 10; }
+.v2-calendar-options { position: absolute; top: 100%; left: -1.8rem; z-index: 1; width: min(17rem,calc(100vw - 5rem)); padding: .9rem; border: 1px solid rgba(81,72,58,.25); border-radius: .2rem; background: #fcfaf5 url("/assets/15-paper-fiber-texture.webp") center / 560px; box-shadow: .2rem .45rem .8rem rgba(51,43,32,.16); }
+.v2-calendar-reception .v2-calendar-options { right: -.25rem; left: auto; }
+.v2-calendar-options strong { display: block; margin: 0 0 .5rem; font-size: .75rem; font-weight: 500; }
+.v2-calendar-options a { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .25rem; color: var(--v2-charcoal); border-top: 1px solid rgba(81,72,58,.18); font-size: .76rem; line-height: 1.3; text-decoration: none; }
+.v2-calendar-options a:hover { color: var(--v2-olive); text-decoration: underline; text-underline-offset: 3px; }
+.v2-destination-events .v2-calendar-options p { margin: .55rem .25rem 0; font-family: var(--v2-sans); font-size: .67rem; font-style: normal; line-height: 1.5; opacity: .8; }
+@media(max-width:600px) {
+  .v2-calendar > summary { gap: .3rem; font-size: .68rem; }
+  .v2-calendar-options { left: -1.55rem; }
+  .v2-calendar-reception .v2-calendar-options { right: 0; left: auto; }
+}

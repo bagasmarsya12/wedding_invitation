@@ -1,7 +1,7 @@
 // Runs only against an isolated local Wrangler database. Requires `npm run build` first.
 import assert from "node:assert/strict";
 import { execFileSync, spawn } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer } from "node:net";
@@ -42,7 +42,7 @@ async function waitFor(base) {
 }
 
 try {
-  for (const file of ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql"]) migrate(file);
+  for (const file of (await readdir(join(root, "drizzle"))).filter(name=>/^\d{4}_.+\.sql$/.test(name)).sort()) migrate(file);
   const [a, b] = [randomInviteToken(), randomInviteToken()];
   sql(`INSERT INTO guests (id, token_hash, display_name, party_limit) VALUES
     ('fixture-a','${await sha256(a)}','Fixture A',2),('fixture-b','${await sha256(b)}','Fixture B',1);
@@ -99,6 +99,32 @@ try {
     assert.equal((await response(base, `/api/invite/${b}/rsvp`)).data.rsvp.party_size, 1);
     assert.match((await response(base, `/api/invite/${a}/rsvp`)).headers.get("cache-control"), /private.*no-store/);
     console.log("guest identity and RSVP: OK");
+    const keepsakeResponse = await fetch(new URL(`/invite/${a}/keepsake`, base));
+    assert.equal(keepsakeResponse.status, 200);
+    assert.match(keepsakeResponse.headers.get("cache-control"), /no-store/);
+    assert.match(await keepsakeResponse.text(), /noindex/);
+
+
+    sql(`INSERT INTO archive_entries (id,slug,type,title,excerpt,story,visibility,published,featured) VALUES
+      ('content-real','content-real','note','REAL_CONTENT_SENTINEL','A confirmed original note.','A confirmed original story.','public',1,1),
+      ('content-empty','content-empty','note','INCOMPLETE_CONTENT_SENTINEL','Photograph to come',NULL,'public',1,1),
+      ('content-private','content-private','note','PRIVATE_CONTENT_SENTINEL','A private note.','A private story.','guests',1,1),
+      ('content-draft','content-draft','note','DRAFT_CONTENT_SENTINEL','An unpublished note.','An unpublished story.','public',0,1);`);
+    const homeHtml = await (await fetch(new URL("/", base))).text();
+    const archiveHtml = await (await fetch(new URL("/archive", base))).text();
+    for (const html of [homeHtml, archiveHtml]) {
+      assert.ok(html.includes("REAL_CONTENT_SENTINEL"));
+      for (const sentinel of ["INCOMPLETE_CONTENT_SENTINEL", "PRIVATE_CONTENT_SENTINEL", "DRAFT_CONTENT_SENTINEL"]) assert.ok(!html.includes(sentinel), sentinel);
+    }
+    assert.ok(homeHtml.includes("Fixture Gift"), "Real gift preview data reaches the homepage");
+    assert.ok(!homeHtml.includes("PRIVATE FIXTURE ADDRESS"), "Public preview excludes private shipping data");
+    assert.equal((await fetch(new URL("/archive/content-real", base))).status, 200);
+    for (const slug of ["content-empty", "content-private", "content-draft"]) assert.equal((await fetch(new URL(`/archive/${slug}`, base))).status, 404, slug);
+    const markHtml = await (await fetch(new URL("/archive/the-mark", base))).text();
+    const renderedMark = markHtml.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+    assert.ok(!renderedMark.includes("Original sketches and iterations can be added here later."));
+    sql("DELETE FROM archive_entries WHERE id IN ('content-real','content-empty','content-private','content-draft');");
+    console.log("public content readiness, published Archive routes and gift preview privacy: OK");
 
     const race = await Promise.all([a, b].map(token => response(base, `/api/invite/${token}/gifts`, "POST", { action: "reserve", giftId: "fixture-gift" })));
     assert.deepEqual(race.map(item => item.status).sort(), [200, 409]);

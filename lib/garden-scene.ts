@@ -10,6 +10,10 @@ type Species = "combretum" | "orchid" | "cosmos" | "wisteria" | "fern";
 type Instance = { matrix: THREE.Matrix4; color: THREE.Color; anchor: number[] };
 type Bounds = { left: number; top: number; width: number; height: number };
 type Chapter = { element: HTMLElement; group: THREE.Group | null; top: number; width: number; height: number; safe: Bounds[] };
+type Arrangement = {
+  branches?: number; reach?: number; rises?: number[]; spread?: number;
+  bloomScale?: number; blossoms?: number; buds?: number;
+};
 const KINDS: Kind[] = ["stem", "leaf", "bud", "petal", "heart", "grass"];
 const Y = new THREE.Vector3(0, 1, 0);
 const TAU = Math.PI * 2;
@@ -167,6 +171,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
         uniform vec4 uGardenSafe[12];
         uniform int uGardenSafeCount;
         uniform float uGardenNight;
+        uniform float uGardenHero;
         varying vec2 vGardenUv;
       `).replace("#include <color_fragment>", `#include <color_fragment>
         ${kind === "leaf" ? `
@@ -188,7 +193,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
           safe = min(safe, smoothstep(-.006, .028, max(outside.x, outside.y)));
         }
         float edge = 1.0 - smoothstep(.07, .30, min(screen.x, 1.0 - screen.x));
-        diffuseColor.a *= mix(.07 + uGardenNight * .16, .94, safe) * mix(.52, 1.0, edge);
+        float readingOpacity = uGardenHero > .5 ? .01 : .04 + uGardenNight * .19;
+        diffuseColor.a *= mix(readingOpacity, .94, safe) * mix(.52, 1.0, edge);
       `);
     };
     mat.customProgramCacheKey = () => `garden-${kind}`;
@@ -283,13 +289,15 @@ export function mountGarden(host: HTMLDivElement): () => void {
         add("heart", tip, new THREE.Quaternion(), new THREE.Vector3(.48, .48, .45).multiplyScalar(scale), "#eee5b0");
       }
     }
-    function shrub(edge: number, y: number, direction: number, amplitude = 1, species: Species = habitat) {
+    function shrub(edge: number, y: number, direction: number, amplitude = 1, species: Species = habitat, arrangement: Arrangement = {}) {
       const root = new THREE.Vector3(edge, -y, -35 + rng() * 15);
       anchor = [root.x, root.y, rng() * TAU, element.id === "beyond" ? 0 : hero ? heroLayer : .35 + amplitude * .45];
-      const extent = scale * amplitude;
-      for (let b = 0; b < (species === "fern" ? 3 : 4); b++) {
-        const reach = (100 + b * 34 + rng() * 45) * extent;
-        const rise = (b % 2 ? -1 : 1) * (55 + rng() * 130) * extent;
+      // Keep the live species, roots and seeds; increase volume at chapter edges.
+      const extent = scale * amplitude * (hero ? 1 : 1.12);
+      for (let b = 0; b < (arrangement.branches ?? (species === "fern" ? 3 : 4)); b++) {
+        const reach = (100 + b * 34 + rng() * 45) * extent * (arrangement.reach ?? 1);
+        const naturalRise = (b % 2 ? -1 : 1) * (55 + rng() * 130);
+        const rise = (arrangement.rises?.[b] ?? naturalRise) * extent;
         const end = root.clone().add(new THREE.Vector3(direction * reach, rise, 15 + rng() * 35));
         const curve = new THREE.CubicBezierCurve3(root,
           root.clone().add(new THREE.Vector3(direction * reach * .28, rise * .05, 0)),
@@ -320,28 +328,28 @@ export function mountGarden(host: HTMLDivElement): () => void {
             }
           }
         }
-        const blossoms = species === "fern" ? 0 : species === "orchid" ? 7 : species === "cosmos" ? 8 : species === "wisteria" ? 22 : mobile ? 10 : 14;
+        const blossoms = arrangement.blossoms ?? (species === "fern" ? 0 : species === "orchid" ? 7 : species === "cosmos" ? 8 : species === "wisteria" ? 22 : mobile ? 10 : 14);
         for (let f = 0; f < blossoms; f++) {
-          const phi = f * 2.39996 + b, spread = Math.sqrt((f + .5) / blossoms) * 40 * extent;
+          const phi = f * 2.39996 + b, spread = Math.sqrt((f + .5) / blossoms) * 40 * extent * (arrangement.spread ?? 1);
           const p = end.clone().add(new THREE.Vector3(Math.cos(phi) * spread, Math.sin(phi) * spread * .85 - f * extent * 1.35, 12 + rng() * 16));
           if (species === "wisteria") {
-            p.x = end.x + Math.cos(phi) * (27 - f * .8) * extent;
+            p.x = end.x + Math.cos(phi) * (27 - f * .8) * extent * (arrangement.spread ?? 1);
             p.y = end.y - f * 6 * extent;
             const joint = new THREE.Vector3(end.x, p.y, end.z);
             stem(f ? new THREE.Vector3(end.x, p.y + 6 * extent, end.z) : end, joint, .5 * extent);
             stem(joint, p, .35 * extent);
           } else stem(end, p, .42 * extent, "#968f5b");
           if (species === "combretum") {
-            flower(p, (10 + rng() * 6.5) * extent, colors.flower[Math.floor(rng() * colors.flower.length)]);
+            flower(p, (10 + rng() * 6.5) * extent * (arrangement.bloomScale ?? 1), colors.flower[Math.floor(rng() * colors.flower.length)]);
             continue;
           }
           const base = species === "orchid" ? 18 : species === "cosmos" ? 17 : 10;
           const tint = species === "wisteria" ? ["#b8a1c7", "#ddd0df", "#9875ad"][f % 3]
             : species === "cosmos" ? (element.id === "gifts" ? ["#eed596", "#f9e7bf", "#dbaa55"] : ["#e2a2b8", "#ad426d", "#f5d5db"])[f % 3]
             : colors.flower[Math.floor(rng() * colors.flower.length)];
-          flower(p, (base + rng() * 6.5) * extent * (species === "wisteria" ? 1 - f * .022 : 1), tint, species);
+          flower(p, (base + rng() * 6.5) * extent * (arrangement.bloomScale ?? 1) * (species === "wisteria" ? 1 - f * .022 : 1), tint, species);
         }
-        for (let f = 0; f < (species === "fern" ? 0 : 4); f++) {
+        for (let f = 0; f < (arrangement.buds ?? (species === "fern" ? 0 : 4)); f++) {
           const p = end.clone().add(new THREE.Vector3((rng() - .5) * 105 * extent, (rng() - .5) * 100 * extent, 4));
           stem(end, p, .48 * extent);
           const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(.2, 0, (rng() - .5) * 1.8));
@@ -377,54 +385,87 @@ export function mountGarden(host: HTMLDivElement): () => void {
     // Local arrangements emerge from chapter edges, never a continuous vertical vine.
     const left = -w / 2 - 38 * scale, right = w / 2 + 38 * scale;
     if (element.id === "the-day") {
-      heroLayer = .55;
-      shrub(left, h * .12, 1, mobile ? .9 : 1.25, "orchid");
-      shrub(right, h * .10, -1, mobile ? .9 : 1.2, "wisteria");
+      // Broad foliage behind the shoulders; rooted clusters in front of them.
       heroLayer = .18;
-      shrub(left, h * .80, 1, 1.05, "fern");
-      shrub(right, h * .79, -1, .95, "orchid");
-      heroLayer = 1.4;
-      shrub(left, h * .98, 1, 1.3, "combretum");
-      shrub(right, h * .97, -1, 1.22, "cosmos");
+      shrub(left, 74, 1, mobile ? 1.12 : 1.62, "combretum", { branches: 2, reach: .86, rises: [30, -36], blossoms: 0, buds: 0 });
+      shrub(right, 68, -1, mobile ? 1.04 : 1.45, "combretum", { branches: 2, reach: .78, rises: [24, -60], blossoms: 0, buds: 0 });
+      heroLayer = 1.12;
+      shrub(left, mobile ? 112 : 145, 1, mobile ? 1.34 : 1.68, "orchid", { branches: 3, reach: .68, rises: [30, -10, -60], spread: .76, bloomScale: 1.2, buds: 2 });
+      shrub(right, mobile ? 100 : 128, -1, mobile ? 1.28 : 1.56, "wisteria", { branches: 2, reach: .72, rises: [25, -18], spread: .92, bloomScale: 1.13, blossoms: 18, buds: 2 });
+      // Foreground shoulders enter the first mobile view; the middle stays low.
+      heroLayer = .38;
+      shrub(left, h * .89, 1, 1.25, "fern", { branches: 2, reach: .76, rises: [40, 118] });
+      shrub(right, h * .93, -1, 1.03, "fern", { branches: 1, reach: .8, rises: [85] });
+      heroLayer = 1.35;
+      shrub(left, h * (mobile ? .86 : .92), 1, mobile ? 1.38 : 1.62, "combretum", { branches: 3, reach: .66, rises: [-25, 44, 96], spread: .78, bloomScale: 1.16, buds: 2 });
+      shrub(right, h * (mobile ? .88 : .94), -1, mobile ? 1.27 : 1.53, "cosmos", { branches: 3, reach: .67, rises: [-30, 28, 82], spread: .8, bloomScale: 1.14, buds: 2 });
       heroLayer = .9;
-      if (!mobile) { shrub(-w * .32, -20, 1, .65, "wisteria"); shrub(w * .32, -20, -1, .7, "orchid"); }
-      meadow(0, h + 12, w * 1.08, mobile ? 62 : 120, "cosmos");
-      // One attached floral garland follows the architectural curve. The left
-      // shoulder is fuller; a lighter right-hand arc leaves the paper breathing.
+      if (!mobile) {
+        shrub(-w * .32, -20, 1, .72, "wisteria", { branches: 2, reach: .6, rises: [-40, -70], blossoms: 14 });
+        shrub(w * .32, -20, -1, .82, "orchid", { branches: 2, reach: .6, rises: [-40, -80], spread: .7 });
+      }
+      meadow(0, h + 12, w * 1.08, mobile ? 64 : 120, "cosmos");
+      // A continuous stem, with larger bouquets at the two shoulders and crown.
       const gate = gardenPortalProfile(w, h)[0];
       const arc = (angle: number) => new THREE.Vector3(gate.half * Math.cos(angle), -gate.top - gate.rise + gate.rise * Math.sin(angle), 14);
-      const knots = mobile ? 20 : 34;
+      const knots = mobile ? 28 : 42;
       for (let knot = 0; knot < knots; knot++) {
         const angle = .10 + knot / (knots - 1) * (Math.PI - .20);
         const root = arc(angle);
         anchor = [root.x, root.y, rng() * TAU, (.14 + .12) / .24];
         if (knot < knots - 1) stem(root, arc(.10 + (knot + 1) / (knots - 1) * (Math.PI - .20)), .9 * scale, "#63774c");
         const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(.25, -.2, angle - Math.PI / 2 + (knot % 2 ? .8 : -.7)));
-        const leafLength = (mobile ? 21 : 32) * (1 + .2 * Math.sin(angle));
+        const leafLength = (mobile ? 31 : 44) * (1 + .2 * Math.sin(angle));
         add("leaf", root, q, new THREE.Vector3(leafLength * .48, leafLength, leafLength * .75), knot % 2 ? "#83946a" : "#637b53");
-        // No mirrored bouquets or solid floral halo; keep a few gaps in the vine.
-        if (knot % 4 === 0 || (angle < 1.1 && knot % 2)) continue;
-        const radius = mobile ? 7 + rng() * 3 : 11 + rng() * 6;
-        const bloom = root.clone().add(new THREE.Vector3((rng() - .5) * 18 * scale, -8 * scale, 6));
-        stem(root, bloom, .5 * scale);
-        flower(bloom, radius, knot % 3 ? "#f4e9dc" : "#dcb0b6", knot % 3 ? "orchid" : "combretum");
-        if (angle > 2.1 && knot % 3 === 0) {
-          const pendant = bloom.clone().add(new THREE.Vector3(10 * scale, -22 * scale, 3));
-          stem(bloom, pendant, .45 * scale);
-          flower(pendant, radius * .75, "#e6bdc2", "combretum");
+        if (knot % 2 === 0) {
+          const companion = q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -1.15));
+          add("leaf", root, companion, new THREE.Vector3(leafLength * .38, leafLength * .78, leafLength * .6), "#71875b");
+        }
+        const bouquet = Math.abs(angle - 2.48) < .3 || Math.abs(angle - .56) < .24 || Math.abs(angle - 1.65) < .18;
+        if (bouquet || knot % 7 === 0) {
+          const count = bouquet ? (angle > 2 ? 3 : 2) : 1;
+          const radius = (mobile ? 14 : 21) * (bouquet ? 1 : .72);
+          for (let bloomIndex = 0; bloomIndex < count; bloomIndex++) {
+            const bloom = root.clone().add(new THREE.Vector3((bloomIndex - (count - 1) / 2) * radius * 1.22, -10 * scale - bloomIndex * radius * .44, 10 + bloomIndex * 2));
+            stem(root, bloom, .55 * scale);
+            flower(bloom, radius * (.86 + rng() * .2), bloomIndex === 1 ? "#dcb0b6" : "#f4e9dc", bloomIndex === 1 ? "combretum" : "orchid");
+          }
         }
       }
       group.add(makeGardenPortal(w, h, distance));
     } else if (element.id === "details") {
-      shrub(right, h * .18, -1, 1.2); shrub(left, h * .85, 1, 1.1);
+      // The folio has a high right shoulder and a rooted left foreground.
+      shrub(right, 96, -1, mobile ? 1.22 : 1.58, "combretum", { branches: 3, reach: .68, rises: [42, -12, -66], spread: .74, bloomScale: 1.22, buds: 2 });
+      shrub(left, 34, 1, .9, "orchid", { branches: 2, reach: .64, rises: [-10, -52], spread: .7, bloomScale: 1.08, buds: 2 });
+      shrub(left, h - 90, 1, mobile ? 1.22 : 1.46, "fern", { branches: 2, reach: .78, rises: [38, 102] });
+      shrub(left, h - 42, 1, 1.1, "combretum", { branches: 2, reach: .74, rises: [36, 86], spread: .76, bloomScale: 1.17, buds: 2 });
+      shrub(right, h - 32, -1, .85, "orchid", { branches: 2, reach: .68, rises: [38, 92], spread: .72, buds: 2 });
+    } else if (element.id === "archive") {
+      shrub(left, 48, 1, 1.28, "fern", { branches: 2, reach: .65, rises: [36, -10] });
+      shrub(right, 32, -1, mobile ? 1.12 : 1.3, "orchid", { branches: 2, reach: .58, rises: [12, -25], spread: .64, bloomScale: 1.16, buds: 2 });
+      shrub(right, h - 90, -1, 1.36, "fern", { branches: 2, reach: .72, rises: [40, 110] });
+      shrub(left, h - 40, 1, 1.08, "combretum", { branches: 2, reach: .7, rises: [30, 96], spread: .7, bloomScale: 1.2, buds: 2 });
+      meadow(w * .43, h + 12, w * .32, mobile ? 18 : 34, "orchid");
+    } else if (element.id === "leave-a-mark") {
+      // Frame the writing room from its margins; leave the entire editor clear.
+      shrub(right, 60, -1, mobile ? .9 : 1.32, "wisteria", { branches: 2, reach: .63, rises: [18, -25], blossoms: 16, spread: .8, bloomScale: 1.08, buds: 2 });
+      shrub(left, 42, 1, .92, "orchid", { branches: 2, reach: .62, rises: [16, -28], spread: .68, buds: 2 });
+      shrub(left, h - 50, 1, 1.27, "fern", { branches: 2, reach: .74, rises: [30, 100] });
+      shrub(right, h - 60, -1, 1.22, "combretum", { branches: 3, reach: .67, rises: [20, 65, 105], spread: .72, bloomScale: 1.2, buds: 2 });
+      if (!mobile && h > 1300) shrub(left, h * .48, 1, .8, "fern", { branches: 1, reach: .55, rises: [60] });
+      meadow(-w * .43, h + 12, w * .32, mobile ? 18 : 34, "cosmos");
     } else if (element.id === "profiles") {
       // A portrait folio, not another gateway: local stems frame each spread.
       shrub(left, h * .34, 1, mobile ? .48 : .72, "fern");
       shrub(right, h * .76, -1, mobile ? .48 : .74, "orchid");
-    } else if (element.id === "useful-bits" || element.id === "gifts") {
+    } else if (element.id === "useful-bits") {
       // A quiet interval between the denser archive, postcard studio and night garden.
-      shrub(right, h * .09, -1, .62);
-      shrub(left, h * .88, 1, .72, "fern");
+      shrub(right, 32, -1, .82, "orchid", { branches: 2, reach: .62, rises: [18, -28], spread: .7, buds: 2 });
+      shrub(left, h - 16, 1, .84, "fern", { branches: 2, reach: .65, rises: [36, 88] });
+    } else if (element.id === "gifts") {
+      shrub(right, 52, -1, 1.0, "cosmos", { branches: 2, reach: .68, rises: [18, -36], spread: .8, bloomScale: 1.15, buds: 2 });
+      shrub(left, h - 45, 1, 1.04, "fern", { branches: 2, reach: .7, rises: [30, 95] });
+      shrub(right, h - 18, -1, .76, "orchid", { branches: 2, reach: .65, rises: [28, 72], spread: .72, buds: 2 });
     } else {
       shrub(index % 2 ? left : right, Math.min(190, h * .17), index % 2 ? 1 : -1, 1.08);
       shrub(index % 2 ? right : left, Math.min(85, h * .07), index % 2 ? -1 : 1, mobile ? .68 : .86);
@@ -434,7 +475,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
       if (h > 1300) shrub(index % 2 ? right : left, h * .39, index % 2 ? -1 : 1, .9);
       if (element.id === "beyond") { shrub(left, h * .42, 1, 1.12); shrub(right, h * .32, -1, 1.08); }
     }
-    if (!["the-day", "beyond", "details", "profiles", "useful-bits", "gifts"].includes(element.id)) {
+    if (!["the-day", "beyond", "details", "profiles", "archive", "useful-bits", "gifts", "leave-a-mark"].includes(element.id)) {
       const side = index % 2 ? -1 : 1;
       meadow(side * w * .42, h + 12, w * .38, mobile ? 24 : 48, habitat === "orchid" ? "orchid" : "cosmos");
       // A second species gives each room a different silhouette, not simply a new tint.
@@ -457,7 +498,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
   }
 
   function measureSafe(element: HTMLElement) {
-    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading > p, .v2-gifts-heading > p, .v2-person > div, .v2-profile-portrait, .v2-rsvp-copy, .reply-attendance, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy";
+    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading, .v2-gifts-heading > p, .v2-person > div, .v2-profile-portrait, .v2-rsvp-copy, .reply-studio, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy, .v2-destination-head, .v2-destination-card, .v2-destination-map-controls";
     const safe = Array.from(element.querySelectorAll<HTMLElement>(selectors)).slice(0, 12).map(node => {
       const box = node.getBoundingClientRect();
       return { left: box.left, top: box.top + window.scrollY, width: box.width, height: box.height };
@@ -560,6 +601,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
     const cadence = active ? 1000 / 60 : ambientCadence;
     if (dirty || travelling || now - lastDraw > cadence) {
       renderer.setScissorTest(false); renderer.clear(); renderer.setScissorTest(true);
+      let visibleInstances = 0, renderCalls = 0, renderTriangles = 0;
       uniforms.uGardenTime.value = (now - animationOrigin) / 1000;
       uniforms.uGardenPointer.value.lerp(pointerTarget, 1 - Math.exp(-Math.min(now - lastDraw, 64) / 150));
       for (const chapter of visible) {
@@ -607,6 +649,11 @@ export function mountGarden(host: HTMLDivElement): () => void {
         uniforms.uGardenSafeCount.value = chapter.safe.length;
         chapter.safe.forEach((box, i) => uniforms.uGardenSafe.value[i].set(box.left / width, (box.top - scroll) / height, (box.left + box.width) / width, (box.top + box.height - scroll) / height));
         renderer.render(scene, hero ? heroCamera : camera);
+        renderCalls += renderer.info.render.calls;
+        renderTriangles += renderer.info.render.triangles;
+        for (const object of chapter.group.children) {
+          if (object instanceof THREE.InstancedMesh) visibleInstances += object.count;
+        }
         if (hero) {
           const grass = chapter.group.children.find(object => object instanceof THREE.InstancedMesh && object.material === materials.grass) as THREE.InstancedMesh | undefined;
           if (grass) {
@@ -621,6 +668,10 @@ export function mountGarden(host: HTMLDivElement): () => void {
       }
       parent!.classList.add("has-garden-renderer");
       canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
+      // Read-only review evidence: counts for this viewport, including hero shadows.
+      canvas.dataset.gardenInstances = String(visibleInstances);
+      canvas.dataset.gardenCalls = String(renderCalls);
+      canvas.dataset.gardenTriangles = String(renderTriangles);
       dirty = false; lastDraw = now;
     }
     if (!media.matches && visible.length) schedule(active ? 0 : ambientCadence);

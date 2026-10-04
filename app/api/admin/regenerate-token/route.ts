@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const token = await randomInviteToken();
     const hash = await sha256(token);
     const result = await db()
-      .prepare("UPDATE guests SET token_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'active' RETURNING display_name")
+      .prepare("UPDATE guests SET token_hash = ?, invitation_sent_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'active' RETURNING display_name")
       .bind(hash, id)
       .first<{ display_name: string }>();
     if (!result) return Response.json({ error: "Guest not found or access revoked." }, { status: 404 });

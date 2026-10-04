@@ -1,4 +1,5 @@
 # Chapter gardens
+> The 2 October accent revision restores the live renderer and architecture and increases botanical volume. Incomplete public sections remain hidden. See [DESIGN-POLISH.md](DESIGN-POLISH.md) for current content readiness; earlier placeholder descriptions below are history.
 
 The user's two recordings dated 23 September 2026 are the visual reference: the dense white, blush, and crimson blossoms surrounding **Beyond the invitation**, with overlapping foliage and a readable center. Other chapters use that abundance as background scenery. No continuous vine connects the page from top to bottom.
 

@@ -14,11 +14,11 @@ export default async function GiftPage({ params, searchParams }: { params: Promi
   const guest = await guestFromToken(token);
   if (!guest) notFound();
   return <main className="product-page gift-page gift-gallery-page">
-    <header className="product-header"><a href={`/invite/${token}`}>Bagas <i>×</i> Iga</a><nav><a href={`/invite/${token}`}><T>Invitation</T></a><a href={`/invite/${token}/mark`}><T>Leave a Mark</T></a></nav><LanguageSwitch /></header>
+    <header className="product-header"><a href={`/invite/${token}`}><T>Bagas</T> <i>×</i><T>Iga</T></a><nav><a href={`/invite/${token}`}><T>Invitation</T></a><a href={`/invite/${token}/mark`}><T>Leave a Mark</T></a></nav><LanguageSwitch /></header>
     <section className="catalogue-hero" aria-labelledby="gift-page-title">
       <div className="gift-hero-light" aria-hidden="true" />
       <div className="gift-hero-copy"><p><T>A few things we’re saving room for</T></p><h1 id="gift-page-title"><T>Gifts</T></h1></div>
-      <div className="gift-hero-aside"><p><T>This is a quiet reservation list, not a shop. Your name stays private when you reserve.</T></p><a href="#gift-catalogue"><T>Browse the collections</T><span aria-hidden="true">↓</span></a></div>
+      <div className="gift-hero-aside"><p><T>Choose a gift to book. Other invited guests will see your name beside it.</T></p><a href="#gift-catalogue"><T>Browse the collections</T><span aria-hidden="true">↓</span></a></div>
     </section>
     <section className="catalogue-body" id="gift-catalogue"><GiftCatalogue key={token} token={token} guestName={guest.display_name} initialCategory={giftCollection(query?.collection)} /></section>
     <footer className="product-footer"><img src="/assets/bagas-iga-mark.jpg" alt="" /><p><T>For </T>{guest.display_name}</p><a href={`/invite/${token}`}><T>Return to invitation</T></a></footer>

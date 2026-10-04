@@ -195,7 +195,7 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
         <span className="caption"><T>Card style — click to try</T></span>
       </div>
       <div className="font-picker" role="group" aria-label={t("Card font")}>
-        {MARK_FONTS.map(value => <button type="button" key={value} className={`font-option pc-font-${value}${font === value ? " is-on" : ""}`} onClick={() => setFont(value)} title={t(FONT_LABELS[value])} aria-label={t(FONT_LABELS[value])} aria-pressed={font === value}><span className="font-preview">Aa</span></button>)}
+        {MARK_FONTS.map(value => <button type="button" key={value} className={`font-option pc-font-${value}${font === value ? " is-on" : ""}`} onClick={() => setFont(value)} title={t(FONT_LABELS[value])} aria-label={t(FONT_LABELS[value])} aria-pressed={font === value}><span className="font-preview"><T>Aa</T></span></button>)}
         <span className="caption"><T>Card font — click to try</T></span>
       </div>
       </>}

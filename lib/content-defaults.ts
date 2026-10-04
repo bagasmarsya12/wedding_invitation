@@ -1,11 +1,28 @@
 // AUTO-GENERATED from sketches/admin-cms-v2 mockup (12 sections / 96 fields).
 // Defaults are the current landing literals; empty DB override = fallback.
 
+import { indonesian } from './invitation-copy';
+import { copyKey, PUBLIC_COPY } from './copy-registry';
+import { KEEPSAKE_UI_EN, KEEPSAKE_UI_ID } from './keepsake-copy';
 export type ContentField = { key: string; label: string; value: string };
 export type ContentSection = { id: string; label: string; photo?: boolean; fields: ContentField[] };
 export type ContentMap = Record<string, string>;
 
-export const CONTENT_SECTIONS: ContentSection[] = [
+const BASE_CONTENT_SECTIONS: ContentSection[] = [
+  {id:"keepsake",label:"Keepsake & ucapan personal",fields:[
+    {"key": "forLabel", "label": "Sapaan penerima", "value": "For"},
+    {"key": "genericRecipient", "label": "Penerima umum", "value": "you"},
+    {"key": "note1", "label": "Ucapan baris pertama", "value": "A little of our day,"},
+    {"key": "note2", "label": "Ucapan baris kedua", "value": "kept for you."},
+    {"key": "love", "label": "Penutup ucapan", "value": "With love,"},
+    {"key": "signatureNames", "label": "Nama pada tanda tangan", "value": "Iga dan Bagas"},
+    {"key": "editionLabel", "label": "Label edisi", "value": "Guest edition"},
+    {"key": "turn", "label": "Tombol balik", "value": "Turn it over"},
+    {"key": "return", "label": "Tombol depan", "value": "Return to the front"},
+    {"key": "front", "label": "Label depan", "value": "Front of the card"},
+    {"key": "back", "label": "Label belakang", "value": "Back of the card"},
+    {"key": "hint", "label": "Petunjuk", "value": "Two sides of the same day."}
+  ]},
   { id: "hero", label: "Opening & Envelope", fields: [
     { key: "env greet", label: "Sapaan amplop", value: "For our very special guest" },
     { key: "env skip", label: "Tombol skip opening", value: "Skip opening" },
@@ -16,7 +33,7 @@ export const CONTENT_SECTIONS: ContentSection[] = [
     { key: "hero head", label: "Heading besar", value: "We’re getting married." },
     { key: "hero sub", label: "Sub-heading", value: "Our favourite people. One very good reason to gather." },
     { key: "hero day", label: "Label hari", value: "Sunday" },
-    { key: "hero date", label: "Tanggal besar", value: "01 November 2026" },
+    { key: "hero date", label: "Tanggal besar", value: "1 November 2026" },
     { key: "hero venue", label: "Venue", value: "Pandiga, Cimahi" },
     { key: "hero time", label: "Jam WIB", value: "18:00 WIB" },
     { key: "hero cta", label: "Tombol lanjut", value: "Wedding details" },
@@ -38,20 +55,36 @@ export const CONTENT_SECTIONS: ContentSection[] = [
     { key: "kicker", label: "Kicker", value: "For those who know one of us better." },
     { key: "head", label: "Heading", value: "The two of us, as observed by the other." },
     { key: "nama1", label: "Nama Bagas", value: "Bagas Marsya Pratama Nugraha" },
-    { key: "b_known", label: "Bagas — Known for", value: "Observation from Iga will be added." },
-    { key: "b_found", label: "Bagas — Usually found", value: "Observation from Iga will be added." },
+    { key: "b_known", label: "Bagas — Known for", value: "A small detail about Bagas, from Iga." },
+    { key: "b_found", label: "Bagas — Usually found", value: "A favourite place or everyday ritual." },
+    { key: "b_family", label: "Keluarga Bagas", value: "Family details will be added." },
     { key: "b_cap", label: "Bagas — caption foto", value: "Bagas, as himself." },
     { key: "i_nama", label: "Nama Iga", value: "Iga Noviyanti Rohman" },
-    { key: "i_known", label: "Iga — Known for", value: "Observation from Bagas will be added." },
-    { key: "i_found", label: "Iga — Usually found", value: "Observation from Bagas will be added." },
+    { key: "i_known", label: "Iga — Known for", value: "A small detail about Iga, from Bagas." },
+    { key: "i_found", label: "Iga — Usually found", value: "A place, a habit, a little thing she loves." },
+    { key: "i_family", label: "Keluarga Iga", value: "Family details will be added." },
     { key: "i_cap", label: "Iga — caption foto", value: "Iga, as herself." },
     { key: "quote label", label: "Label kutipan Iga", value: "According to Iga" },
-    { key: "quote1", label: "Kutipan Iga tentang Bagas", value: "“A real sentence will live here.”" },
+    { key: "quote1", label: "Kutipan Iga tentang Bagas", value: "“A few words from Iga will live here.”" },
     { key: "quote label2", label: "Label kutipan Bagas", value: "According to Bagas" },
-    { key: "quote2", label: "Kutipan Bagas tentang Iga", value: "“A real sentence will live here.”" },
+    { key: "quote2", label: "Kutipan Bagas tentang Iga", value: "“A few words from Bagas will live here.”" },
+  ] },
+  { id: "story", label: "Our Story (template singkat)", fields: [
+    { key: "head", label: "Heading cerita", value: "How we got here." },
+    { key: "title1", label: "Judul bagian 1", value: "The beginning" },
+    { key: "body1", label: "Cerita bagian 1", value: "A short note about how we first met will live here." },
+    { key: "title2", label: "Judul bagian 2", value: "Along the way" },
+    { key: "body2", label: "Cerita bagian 2", value: "A small moment from our time together will be added here." },
+    { key: "title3", label: "Judul bagian 3", value: "The day ahead" },
+    { key: "body3", label: "Cerita bagian 3", value: "A few words about this next chapter will live here." },
+  ] },
+  { id: "gallery", label: "Selected Moments (6 foto)", fields: [
+    { key: "head", label: "Heading galeri", value: "Selected moments." },
+    { key: "sub", label: "Pengantar galeri", value: "A few frames from our life together." },
+    ...Array.from({ length: 6 }, (_, index) => ({ key: `caption${index + 1}`, label: `Caption foto ${index + 1}`, value: `Photograph ${String(index + 1).padStart(2, "0")} — caption to be added.` })),
   ] },
   { id: "archive", label: "Archive", fields: [
-    { key: "head", label: "Heading", value: "From the archive" },
+    { key: "head", label: "Heading", value: "The Archive" },
     { key: "sub", label: "Sub", value: "Some things were worth keeping." },
     { key: "desc", label: "Deskripsi", value: "Photographs, objects, and little things that became our things." },
     { key: "cta", label: "Tombol", value: "Open the archive ↗" },
@@ -85,14 +118,14 @@ export const CONTENT_SECTIONS: ContentSection[] = [
   { id: "gift", label: "Gifts (heading & deskripsi)", fields: [
     { key: "head", label: "Heading", value: "A few things" },
     { key: "sub", label: "Sub", value: "We’re saving room for." },
-    { key: "desc", label: "Deskripsi", value: "The catalogue opens from a private invitation so reservations stay private." },
+    { key: "desc", label: "Deskripsi", value: "The catalogue opens from your private invitation. Each booking is saved under your name." },
     { key: "kosong", label: "Teks saat katalog kosong", value: "Curated objects will be added here." },
     { key: "cta", label: "Tombol", value: "Open the gift catalogue" },
   ] },
   { id: "mark", label: "Leave a mark", fields: [
-    { key: "head", label: "Heading", value: "Leave a mark" },
-    { key: "sub", label: "Sub", value: "Make a mess. We’ll keep it." },
-    { key: "desc", label: "Deskripsi", value: "Write something, draw something, or do both." },
+    { key: "head", label: "Heading", value: "Your reply" },
+    { key: "sub", label: "Sub", value: "A little word from you." },
+    { key: "desc", label: "Deskripsi", value: "Tell us if you’re coming. Leave a little love, if you like." },
     { key: "kosong", label: "Teks saat belum ada kartu", value: "Something from you will live here." },
     { key: "lihat", label: "Tombol lihat semua", value: "See every postcard" },
   ] },
@@ -128,9 +161,9 @@ export const CONTENT_SECTIONS: ContentSection[] = [
   ] },
 ];
 
-export const CONTENT_DEFAULTS: ContentMap = Object.fromEntries(
-  CONTENT_SECTIONS.flatMap(section => section.fields.map(field => [section.id + "." + field.key, field.value])),
-);
+export const CONTENT_SECTIONS: ContentSection[] = [...BASE_CONTENT_SECTIONS, {id:'keepsakeUi',label:'Keepsake — semua tombol & status',fields:Object.entries(KEEPSAKE_UI_EN).map(([key,value])=>({key,label:key,value}))}, {id:'copy',label:'Semua kata-kata & interface',fields:PUBLIC_COPY.map(value=>({key:copyKey(value).slice(5),label:value,value}))}];
+const english: ContentMap = Object.fromEntries(CONTENT_SECTIONS.flatMap(section => section.fields.map(field => [section.id + '.' + field.key, field.value])));
+export const CONTENT_DEFAULTS: ContentMap = {...english,...Object.fromEntries(Object.entries(english).map(([key,value])=>['id.'+key,indonesian[value.trim()] ?? value])),...Object.fromEntries(Object.entries(KEEPSAKE_UI_ID).map(([key,value])=>['id.keepsakeUi.'+key,value])),...{'id.keepsake.forLabel': 'Untuk', 'id.keepsake.genericRecipient': 'kamu', 'id.keepsake.note1': 'Sedikit dari hari kami,', 'id.keepsake.note2': 'untuk kamu simpan.', 'id.keepsake.love': 'Dengan sayang,', 'id.keepsake.editionLabel': 'Edisi tamu', 'id.keepsake.turn': 'Balik kartunya', 'id.keepsake.return': 'Kembali ke depan', 'id.keepsake.front': 'Sisi depan kartu', 'id.keepsake.back': 'Sisi belakang kartu', 'id.keepsake.hint': 'Dua sisi dari hari yang sama.'}};
 
 export function contentKey(sectionId: string, fieldKey: string): string {
   return sectionId + "." + fieldKey;

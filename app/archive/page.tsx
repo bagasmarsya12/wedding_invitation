@@ -4,6 +4,7 @@ import { T, LanguageSwitch } from "../language";
 import { ArchiveCollection, type ArchiveCard } from "./archive-client";
 import { db } from "@/lib/server";
 import { ArchiveImage } from "./archive-media";
+import { hasPublicContent } from "@/lib/public-content";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +19,12 @@ const mark: ArchiveCard = {
 export default async function ArchivePage() {
   let custom: ArchiveCard[] = [];
   try {
-    const result = await db().prepare("SELECT slug, type, title, excerpt, media_url, entry_date, location FROM archive_entries WHERE published = 1 AND visibility = 'public' ORDER BY COALESCE(featured_order, 999), created_at").all<ArchiveCard>();
-    custom = result.results.filter(entry => entry.slug !== "the-mark");
+    const result = await db().prepare("SELECT slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE published = 1 AND visibility = 'public' ORDER BY COALESCE(featured_order, 999), created_at").all<ArchiveCard & { story: string | null }>();
+    custom = result.results.filter(entry => entry.slug !== "the-mark" && hasPublicContent(entry.title) && (hasPublicContent(entry.story) || hasPublicContent(entry.excerpt))).map(entry => ({ ...entry, excerpt: hasPublicContent(entry.excerpt) ? entry.excerpt : null }));
   } catch { /* The built-in story remains available during an empty database state. */ }
   return (
     <main className="product-page archive-page archive-room">
-      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
+      <header className="product-header"><a href="/"><T>Bagas</T> <i>×</i><T>Iga</T></a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
       <section className="collection-hero" aria-labelledby="collection-title">
         <div className="collection-window-shadow" aria-hidden="true" />
         <div className="collection-hero-title"><p><T>Things worth keeping</T></p><h1 id="collection-title"><T>The Archive</T></h1></div>
@@ -39,7 +40,7 @@ export default async function ArchivePage() {
           </nav>
         </noscript>
       </section>
-      <footer className="product-footer"><img src="/assets/bagas-iga-mark.jpg" alt="" /><p>Bagas × Iga<br />1 November 2026</p><a href="/"><T>Return to invitation</T></a></footer>
+      <footer className="product-footer"><img src="/assets/bagas-iga-mark.jpg" alt="" /><p><T>Bagas × Iga</T><br /><T>1 November 2026</T></p><a href="/"><T>Return to invitation</T></a></footer>
     </main>
   );
 }

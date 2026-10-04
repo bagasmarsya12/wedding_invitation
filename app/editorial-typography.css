@@ -1,0 +1,312 @@
+/* Final public typography layer. Keep artwork and operational surfaces independent. */
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-latin-variable.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/fonts/instrument-sans-latin-variable.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+.v2-world, .product-page:not(.admin-page), .gift-booking-sheet {
+  --v2-serif: "Newsreader", "Baskerville", Georgia, serif;
+  --v2-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --bx-serif: var(--v2-serif);
+  --bx-sans: var(--v2-sans);
+  --ed-space-1: .25rem;
+  --ed-space-2: .5rem;
+  --ed-space-3: .75rem;
+  --ed-space-4: 1rem;
+  --ed-space-6: 1.5rem;
+  --ed-space-8: 2rem;
+  --ed-space-12: 3rem;
+  --ed-space-16: 4rem;
+  --ed-gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --ed-section: clamp(4.5rem, 7.5vw, 7rem);
+  --ed-heading: clamp(2.5rem, 4.8vw, 4.75rem);
+  --ed-body: 1rem;
+  --ed-small: .875rem;
+  font-family: var(--v2-sans);
+  font-optical-sizing: auto;
+  line-height: 1.7;
+}
+
+/* Practical chrome: quiet, upright and readable. */
+.v2-world .language-switch, .product-page:not(.admin-page) .language-switch {
+  font-family: var(--v2-sans);
+  font-size: .8125rem;
+  letter-spacing: .025em;
+}
+.v2-world .v2-spine { gap: var(--ed-space-6); padding-inline: var(--ed-gutter); }
+.v2-world .v2-spine-mark { font-size: 1.125rem; letter-spacing: .035em; }
+.v2-world .v2-spine-date { font-size: .75rem; letter-spacing: .06em; }
+.v2-world .v2-spine > button { min-height: 44px; font-size: var(--ed-small); letter-spacing: .02em; text-transform: none; }
+.v2-world .v2-info-drawer { gap: var(--ed-space-6); padding: var(--ed-space-8); }
+.v2-world .v2-info-drawer :is(span, nav a) { font-size: var(--ed-small); letter-spacing: .02em; text-transform: none; line-height: 1.6; }
+.v2-world .v2-info-drawer time { font-variant-numeric: lining-nums tabular-nums; line-height: 1.2; }
+.v2-world .v2-info-place strong { font-size: 1.5rem; line-height: 1.3; }
+.v2-world .v2-opening-folio { font-size: 1rem; letter-spacing: .04em; }
+.v2-world .v2-opening-folio > span:nth-child(2) { font-size: .75rem; letter-spacing: .06em; }
+.v2-world .v2-recipient-copy small { font-size: .75rem; letter-spacing: .08em; line-height: 1.5; }
+.v2-world .v2-recipient-copy strong { font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
+.v2-world .v2-recipient-copy > span { font-size: .75rem; letter-spacing: .04em; }
+.v2-world .v2-opening-date { font-family: var(--v2-sans); font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .v2-opening-skip { min-height: 44px; font-size: var(--ed-small); letter-spacing: .02em; }
+
+/* The names stay monumental; other copy has a clear reading hierarchy. */
+.v2-world .v2-grand-day .v2-day-copy { width: min(100%, 66rem); }
+.v2-world .v2-grand-day .v2-day-copy > .v2-grand-prelude {
+  margin-bottom: var(--ed-space-6);
+  font: 400 1rem/1.6 var(--v2-sans);
+  letter-spacing: .015em;
+}
+.v2-world .v2-grand-day .v2-day-identity h1 {
+  font-size: clamp(4rem, 11.5vw, 11rem);
+  font-weight: 400;
+  letter-spacing: -.025em;
+  line-height: 1.12;
+  gap: .12em;
+}
+.v2-world .v2-grand-day .v2-day-identity h1 > i { font-style: normal; }
+.v2-world .v2-grand-note {
+  max-width: 38ch;
+  margin: var(--ed-space-8) auto;
+  font: 400 1rem/1.7 var(--v2-sans);
+}
+.v2-world .v2-grand-day .v2-day-identity time { gap: var(--ed-space-2); font-size: clamp(1.5rem, 2.2vw, 2rem); line-height: 1.3; }
+.v2-world .v2-grand-day .v2-day-identity time > span { font-size: var(--ed-small); letter-spacing: .02em; }
+.v2-world .v2-grand-venue { margin-top: var(--ed-space-6); font-size: 1rem; line-height: 1.6; }
+.v2-world .v2-grand-day .v2-grand-venue > span { font-size: var(--ed-small); line-height: 1.6; letter-spacing: 0; margin-top: var(--ed-space-2); }
+.v2-world .v2-grand-day .v2-day-countdown { margin-top: var(--ed-space-8); gap: var(--ed-space-2); font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .v2-grand-day .v2-day-countdown span { font-size: var(--ed-small); letter-spacing: 0; }
+.v2-world .v2-scroll-cue { min-height: 44px; font-size: .75rem; letter-spacing: .04em; }
+
+/* Event geography has fixed art placement: fit copy within its authored paper. */
+.v2-world .v2-destination-head > p:first-child { font-size: var(--ed-small); letter-spacing: .035em; text-transform: none; margin-bottom: var(--ed-space-4); }
+.v2-world .v2-destination-head h2 { font-size: clamp(2.25rem, 3.8vw, 3.7rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.12; }
+.v2-world .v2-destination-intro { font: 400 1rem/1.65 var(--v2-sans); max-width: 38ch; margin-top: var(--ed-space-4); }
+.v2-world .v2-destination-card { padding: clamp(1.5rem, 2.5vw, 2.25rem); }
+.v2-world .v2-destination-date { gap: var(--ed-space-2); font-size: clamp(1.7rem, 2.3vw, 2.3rem); line-height: 1.25; padding-bottom: var(--ed-space-6); }
+.v2-world .v2-destination-date > span { font-size: var(--ed-small); letter-spacing: .025em; text-transform: none; }
+.v2-world .v2-destination-events { padding-block: var(--ed-space-6); }
+.v2-world .v2-destination-events time { font-variant-numeric: lining-nums tabular-nums; line-height: 1.2; }
+.v2-world .v2-destination-events h3 { margin: var(--ed-space-2) 0 var(--ed-space-1); font: 500 1.125rem/1.3 var(--v2-sans); }
+.v2-world .v2-destination-events p { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .v2-destination-venue { padding-top: var(--ed-space-6); font: 400 var(--ed-small)/1.65 var(--v2-sans); }
+.v2-world .v2-destination-venue h3 { font: 500 1.5rem/1.3 var(--v2-serif); letter-spacing: -.015em; }
+.v2-world .v2-destination-venue em { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .v2-destination-map-help { font: 400 .8125rem/1.6 var(--v2-sans); }
+.v2-world .v2-destination-venue > p { font: 400 var(--ed-small)/1.65 var(--v2-sans); }
+.v2-world .v2-destination-venue > a { min-height: 44px; font-size: var(--ed-small); line-height: 1.5; letter-spacing: .015em; text-transform: none; }
+.v2-world .v2-calendar > summary { min-height: 44px; font-size: .8125rem; line-height: 1.5; letter-spacing: 0; }
+.v2-world .v2-calendar-options :is(a,strong) { font-size: var(--ed-small); line-height: 1.5; }
+
+/* Common hierarchy, deliberately scoped to the section headings. */
+.v2-world .v2-profile-folio > header > h2,
+.v2-world .ks-story .ks-paper > header h2,
+.v2-world .v2-archive-table-scene .v2-archive-heading h2,
+.v2-world .v2-selected-moments > header h2,
+.v2-world .ks-guide .ks-paper > header h2,
+.v2-world .v2-gift-gallery .v2-gifts-heading h2,
+.v2-world .ks-reply.v2-mark.has-studio .v2-mark-copy h2,
+.v2-world .v2-beyond-copy h2,
+.v2-world .v2-closing-note > h2 {
+  font-family: var(--v2-serif);
+  font-size: var(--ed-heading);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.v2-world .v2-profile-folio > header > p,
+.v2-world .ks-story .ks-paper > header > p,
+.v2-world .v2-archive-heading > p,
+.v2-world .ks-guide .ks-paper > header > p,
+.v2-world .v2-gifts-heading > p,
+.v2-world .ks-reply .v2-mark-copy > p,
+.v2-world .v2-beyond-copy > p {
+  font: 400 var(--ed-small)/1.6 var(--v2-sans);
+  text-transform: none;
+  letter-spacing: .015em;
+}
+.v2-world .v2-archive-heading > span,
+.v2-world .v2-gifts-heading > span,
+.v2-world .ks-reply.v2-mark.has-studio .v2-mark-copy > span {
+  font: 400 var(--ed-body)/1.7 var(--v2-sans);
+  max-width: 38ch;
+  letter-spacing: 0;
+}
+.v2-world .v2-botanical-continuum > :is(.v2-profile-folio,.v2-selected-moments,.ks-story,.ks-guide,.v2-gift-gallery,.ks-reply) {
+  padding-block: var(--ed-section);
+  padding-inline: var(--ed-gutter);
+}
+.v2-world .v2-profile-folio > header { column-gap: var(--ed-space-12); margin-bottom: var(--ed-space-16); }
+.v2-world .v2-profile-folio > header > p { max-width: 25ch; font-size: 1rem; }
+.v2-world .v2-profile-folio .v2-profile-copy > p { font-size: var(--ed-small); margin-bottom: var(--ed-space-4); }
+.v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(4.5rem, 7.5vw, 7.5rem); line-height: 1.12; letter-spacing: -.025em; font-weight: 400; }
+.v2-world .v2-profile-folio .v2-profile-copy > small { margin: var(--ed-space-4) 0 var(--ed-space-8); font-size: var(--ed-small); line-height: 1.6; letter-spacing: 0; }
+.v2-world .v2-profile-folio .v2-person dl > div { gap: var(--ed-space-6); padding-block: var(--ed-space-6); }
+.v2-world .v2-profile-folio .v2-person dt { font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .v2-profile-folio .v2-person dd { font: 400 1rem/1.7 var(--v2-sans); }
+.v2-world .v2-profile-folio .v2-profile-portrait figcaption { margin-top: var(--ed-space-6); font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+
+/* Folios: the frame is ornamental, the reading column is calm. */
+.v2-world .ks-story .ks-paper { padding: clamp(4.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 6rem) clamp(6rem, 10vw, 8rem); }
+.v2-world .ks-story .ks-paper > header { max-width: 46rem; margin-bottom: var(--ed-space-12); }
+.v2-world .ks-story .ks-paper > header > p { margin-bottom: var(--ed-space-4); }
+.v2-world .ks-story ol { gap: var(--ed-space-8); }
+.v2-world .ks-story li { padding-top: var(--ed-space-6); }
+.v2-world .ks-story li > span { width: 2rem; height: 2rem; font: 400 .8125rem/1 var(--v2-sans); }
+.v2-world .ks-story h3 { margin: var(--ed-space-6) 0 var(--ed-space-3); font: 500 clamp(1.5rem, 2.1vw, 2rem)/1.25 var(--v2-serif); letter-spacing: -.015em; }
+.v2-world .ks-story li p { font-size: 1rem; line-height: 1.7; max-width: 32ch; }
+.v2-world .ks-story .ks-botanicals-folio .ks-plant-8 { bottom: -5%; }
+.v2-world .ks-guide .ks-paper { column-gap: var(--ed-space-16); padding: clamp(4rem, 7vw, 6rem) clamp(1.5rem, 5vw, 5rem); }
+.v2-world .ks-guide .ks-paper > header > p { margin-bottom: var(--ed-space-4); }
+.v2-world .ks-guide .ks-paper > header h2 { font-size: clamp(2.25rem, 3.4vw, 3.5rem); max-width: 16ch; }
+.v2-world .ks-guide .v2-useful-list summary { min-height: 4.75rem; padding-block: var(--ed-space-4); gap: var(--ed-space-4); }
+.v2-world .ks-guide .v2-useful-list summary > span { font: 500 1rem/1.5 var(--v2-sans); }
+.v2-world .ks-guide .v2-useful-list summary > small { font-size: .75rem; letter-spacing: 0; text-transform: none; }
+.v2-world .ks-guide .v2-useful-list details > p { font: 400 1rem/1.7 var(--v2-sans); padding: 0 1rem var(--ed-space-6) 0; max-width: 50ch; }
+.v2-world .v2-selected-moments > header { margin-bottom: var(--ed-space-12); padding-bottom: var(--ed-space-8); }
+.v2-world .v2-selected-moments > header p { font-size: 1rem; max-width: 45ch; line-height: 1.7; }
+.v2-world .moment figcaption { padding: var(--ed-space-4) .25rem 0; font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .landing-photo-label { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .v2-profile-folio .landing-photo-label { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+
+/* Collection labels and actions share the reading/control scale. */
+.v2-world .v2-archive-table-scene .v2-archive-heading,
+.v2-world .v2-gift-gallery .v2-gifts-heading { row-gap: var(--ed-space-4); margin-bottom: var(--ed-space-12); }
+.v2-world .archive-table-meta { font-size: var(--ed-small); line-height: 1.6; padding-block: var(--ed-space-4); }
+.v2-world .archive-table-meta > span { font-style: normal; }
+.v2-world .archive-note-label { font-size: var(--ed-small); letter-spacing: .015em; text-transform: none; }
+.v2-world .archive-paper > header p { font-size: .8125rem; letter-spacing: .025em; text-transform: none; }
+.v2-world .archive-paper h3 { font-weight: 500; line-height: 1.25; letter-spacing: -.015em; }
+.v2-world :is(.archive-piece-action,.archive-piece-note > a) { min-height: 44px; font-size: var(--ed-small); line-height: 1.5; letter-spacing: 0; text-transform: none; }
+.v2-world .archive-note-scroll p { font: 400 1rem/1.7 var(--v2-sans); }
+.v2-world .v2-gift-gallery .gift-collection-caption h3 { font-weight: 500; line-height: 1.2; letter-spacing: -.015em; }
+.v2-world .v2-gift-gallery .gift-collection-caption > p { font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .gift-niche-ticket { font: 500 1.125rem/1.35 var(--v2-serif); }
+.v2-world .gift-collection-action { font-size: var(--ed-small); line-height: 1.6; margin-top: var(--ed-space-6); }
+.v2-world .v2-text-link { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: var(--ed-space-3); font-size: var(--ed-small); letter-spacing: .015em; text-transform: none; line-height: 1.5; }
+
+/* Reply UI stays readable; preserve the guest's selected postcard ink styles. */
+.v2-world .ks-reply .ks-reply-heading { padding: var(--ed-space-8) 0 var(--ed-space-12); }
+.v2-world .reply-editor-slot.is-ready { min-height: 0; }
+.v2-world .reply-studio > .mark-composer { padding: clamp(1.25rem, 2.5vw, 2.5rem); }
+.v2-world .reply-recipient { font-size: var(--ed-small); line-height: 1.6; margin-bottom: var(--ed-space-6); }
+.v2-world .reply-recipient strong { margin-top: var(--ed-space-2); font-size: 1.5rem; line-height: 1.3; }
+.v2-world .reply-attendance legend { font: 500 1.25rem/1.35 var(--v2-sans); margin-bottom: var(--ed-space-4); }
+.v2-world .reply-attendance label span { font-size: var(--ed-small); line-height: 1.5; }
+.v2-world :is(.reply-privacy,.reply-closed,.reply-loading,.reply-unsaved,.reply-postcards-closed,.reply-postcard-intro > span) { font-size: var(--ed-small); line-height: 1.65; }
+.v2-world .reply-postcard-intro { font: 500 1.5rem/1.35 var(--v2-serif); margin-top: var(--ed-space-8); padding-top: var(--ed-space-6); }
+.v2-world .reply-studio :is(.caption,.mark-hint,.mark-editing-note,.char-count,.wall-caption,.reply-status,.product-status,.mark-empty) { font: 400 var(--ed-small)/1.6 var(--v2-sans); text-transform: none; letter-spacing: 0; }
+.v2-world .reply-studio :is(.mark-modes button,.mark-toolbar button,.font-option,.paper-button) { font-size: var(--ed-small); line-height: 1.5; text-transform: none; letter-spacing: .015em; }
+.v2-world .reply-studio .mark-wall > h2 { font-weight: 500; line-height: 1.3; }
+.v2-world .reply-studio .postcard-from { font-size: .8125rem; line-height: 1.5; text-transform: none; letter-spacing: 0; }
+.v2-world .reply-studio .wall-caption :is(span,small) { font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .reply-studio .pc-font-hand { --pc-font: Baskerville, "Iowan Old Style", Palatino, Georgia, serif; }
+.v2-world .reply-studio :is(input[type=text],input[type=number],select) { font-size: 1rem; line-height: 1.5; }
+.v2-world .v2-beyond-copy h2 { max-width: 24ch; margin-bottom: var(--ed-space-12); }
+.v2-world .v2-beyond-copy nav { grid-template-columns: repeat(auto-fit,minmax(11rem,1fr)); }
+.v2-world .v2-beyond-copy nav a strong { font-size: 1.5rem; line-height: 1.3; font-weight: 500; }
+.v2-world .v2-beyond-copy nav a span { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.v2-world .v2-closing-note > p { font: 400 var(--ed-small)/1.6 var(--v2-sans); margin-bottom: var(--ed-space-4); }
+.v2-world .v2-closing-actions { gap: var(--ed-space-6); margin-top: var(--ed-space-6); }
+.v2-world .v2-closing-note .v2-closing-actions > button { font-size: var(--ed-small); margin-top: 0; letter-spacing: .015em; }
+.v2-world .v2-closing-colophon small { font: 400 .8125rem/1.6 var(--v2-sans); }
+
+/* Guest rooms. Scope variables here instead of altering the CMS/body defaults. */
+.product-page:not(.admin-page) .product-header > a { font-size: 1.125rem; letter-spacing: .035em; }
+.product-page:not(.admin-page) .product-header nav { font-size: var(--ed-small); letter-spacing: .015em; text-transform: none; }
+.product-page:not(.admin-page) .product-header { padding-inline: var(--ed-gutter); }
+.product-page:not(.admin-page) :is(.collection-hero,.catalogue-hero) { gap: var(--ed-space-12); padding-block: var(--ed-section); padding-inline: var(--ed-gutter); }
+.product-page:not(.admin-page) :is(.collection-hero,.catalogue-hero) h1 { font-size: clamp(3.5rem, 7vw, 7.5rem); line-height: 1.12; font-weight: 500; letter-spacing: -.025em; font-style: normal; }
+.product-page:not(.admin-page) :is(.collection-hero-note p,.gift-hero-aside > p) { font: 400 1rem/1.7 var(--v2-sans); max-width: 40ch; }
+.product-page:not(.admin-page) :is(.gift-card-caption > p,.gift-card-caption > small,.gift-availability,.gift-actions > span,.collection-excerpt p,.collection-story-deck,.collection-prose) { font: 400 1rem/1.7 var(--v2-sans); }
+.product-page:not(.admin-page) .collection-prose { max-width: 62ch; }
+.product-page:not(.admin-page) :is(.collection-story-object figcaption,.collection-colophon,.collection-story-end p) { font: 400 var(--ed-small)/1.6 var(--v2-sans); }
+.product-page:not(.admin-page) :is(.gift-card-caption > h2,.collection-sheet h2) { font-style: normal; font-weight: 500; line-height: 1.2; letter-spacing: -.015em; }
+.product-page:not(.admin-page) :is(.collection-story-link,.gift-actions button,.gift-actions a,.gift-refresh,.product-footer a) { font-size: var(--ed-small); line-height: 1.5; text-transform: none; letter-spacing: .015em; }
+.product-page:not(.admin-page) .collection-story-header h1 { font-weight: 500; line-height: 1.15; letter-spacing: -.02em; font-style: normal; }
+.product-page:not(.admin-page) .gift-gate-page > section h1 { line-height: 1.12; font-weight: 500; letter-spacing: -.02em; }
+.gift-booking-sheet { padding: var(--ed-space-8); }
+.gift-booking-sheet h2 { font-weight: 500; line-height: 1.2; letter-spacing: -.015em; }
+.gift-booking-sheet :is(p,.booking-identity,button) { font-size: 1rem; line-height: 1.65; }
+.v2-world .guest-pass-dialog h2 { font-weight: 500; line-height: 1.25; }
+.v2-world .guest-pass-paper h3 { font-weight: 500; line-height: 1.2; letter-spacing: -.015em; }
+.v2-world :is(.guest-pass-paper p,.guest-pass-help,.guest-pass-trigger,.guest-pass-dialog button) { font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .v2-keepsake-personal h3 { font-weight: 500; line-height: 1.2; letter-spacing: -.015em; }
+.v2-world .v2-keepsake-header h2 { font: 500 clamp(1.375rem,2vw,1.75rem)/1.25 var(--v2-serif); letter-spacing: -.015em; }
+.v2-world .v2-keepsake-loading { font: 400 1rem/1.7 var(--v2-sans); }
+.v2-world .v2-keepsake-personal :is(.v2-keepsake-intro,.v2-keepsake-file-help,.v2-keepsake-event-note) { font-size: var(--ed-small); line-height: 1.65; max-width: 40ch; }
+.v2-world .v2-keepsake-name-form :is(input,button) { font-size: 1rem; line-height: 1.5; }
+.v2-world .v2-keepsake-dialog .v2-keepsake-name-form button { font-size: var(--ed-small); line-height: 1.5; }
+.v2-world .v2-keepsake-name-form :is(label,small) { font-size: var(--ed-small); line-height: 1.6; }
+.v2-world .v2-keepsake-dialog .v2-keepsake-save { font-size: var(--ed-small); line-height: 1.5; }
+
+@media (min-width: 901px) {
+  .v2-world .ks-guide .ks-botanicals-folio .ks-plant-4 { top: -27%; }
+  .v2-world .ks-guide .ks-botanicals-folio .ks-plant-8 { bottom: -12%; }
+}
+@media (max-width: 900px) {
+  .v2-world .v2-profile-folio > header > p { max-width: 45ch; }
+  .v2-world .v2-profile-folio .v2-person { gap: var(--ed-space-8); }
+  .v2-world .ks-guide .ks-paper { gap: var(--ed-space-8); }
+  .v2-world .ks-guide .ks-paper > header h2 { max-width: 22ch; }
+  .v2-world .ks-reply .v2-mark-copy { gap: var(--ed-space-4); }
+}
+@media (max-width: 620px) {
+  .v2-world, .product-page:not(.admin-page) { --ed-heading: clamp(2.25rem, 9.6vw, 3.25rem); }
+  .v2-world .v2-spine { padding-inline: 1.25rem; gap: .75rem; }
+  .v2-world .v2-recipient-copy { width: 76%; }
+  .v2-world .v2-recipient-copy strong { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+  .v2-world .v2-recipient-copy small, .v2-world .v2-recipient-copy > span { font-size: .6875rem; }
+  .v2-world .v2-opening-date { font-size: .8125rem; }
+  .v2-world .v2-opening-date { max-width: calc(100% - 10.5rem); bottom: 1.5rem; }
+  .v2-world .v2-opening-skip { bottom: 1.5rem; }
+  .v2-world .v2-grand-day .v2-day-identity h1 { font-size: clamp(3.4rem, 16.5vw, 6rem); flex-wrap: nowrap; gap: .1em; }
+  .v2-world .v2-grand-note { max-width: 30ch; margin-block: var(--ed-space-6); }
+  .v2-world .v2-destination-head h2 { font-size: clamp(1.875rem, 7.8vw, 2.65rem); }
+  .v2-world .v2-destination-intro { font-size: .9375rem; line-height: 1.65; }
+  .v2-world .v2-destination-card { padding: 1.25rem; }
+  .v2-world .v2-destination-events article { grid-template-columns: 1fr; gap: .5rem; }
+  .v2-world .v2-destination-event-icon { display: none; }
+  .v2-world .v2-destination-events p { font-size: var(--ed-small); }
+  .v2-world .v2-destination-date { font-size: clamp(1.4rem, 6vw, 1.75rem); }
+  .v2-world .v2-profile-folio > header { margin-bottom: var(--ed-space-12); }
+  .v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(4rem, 17vw, 5.5rem); }
+  .v2-world .v2-profile-folio .v2-person dl > div { grid-template-columns: 1fr; gap: var(--ed-space-2); padding-block: var(--ed-space-4); }
+  .v2-world .v2-profile-folio .v2-person dt { font-size: var(--ed-small); }
+  .v2-world .ks-story .ks-paper { padding: 4.5rem 1.5rem 6rem; }
+  .v2-world .ks-story ol { gap: var(--ed-space-6); }
+  .v2-world .ks-story li { grid-template-columns: 2rem minmax(0,1fr); column-gap: var(--ed-space-3); row-gap: var(--ed-space-3); }
+  .v2-world .ks-story li > span { grid-column: 1; grid-row: 1; }
+  .v2-world .ks-story h3 { grid-column: 2; grid-row: 1; margin: 0; font-size: 1.5rem; align-self: center; }
+  .v2-world .ks-story li p { grid-column: 1 / -1; max-width: none; }
+  .v2-world .ks-guide .ks-paper { padding: 4rem 1.5rem; }
+  .v2-world .ks-guide .ks-paper > header h2 { font-size: var(--ed-heading); }
+  .v2-world .ks-guide .v2-useful-list details > p { padding-right: 0; }
+  .v2-world .v2-selected-moments > header { align-items: flex-start; gap: var(--ed-space-4); }
+  .v2-world .v2-selected-moments .ks-monogram { width: 2rem; height: 3rem; }
+  .v2-world .moment figcaption { font-size: var(--ed-small); }
+  .v2-world .ks-reply.v2-mark.has-studio .v2-mark-copy h2 { font-size: var(--ed-heading); }
+  .v2-world .ks-reply.v2-mark.has-studio .v2-mark-copy > span { max-width: 34ch; }
+  .v2-world .v2-closing-actions { gap: var(--ed-space-3); }
+  .product-page:not(.admin-page) :is(.collection-hero,.catalogue-hero) h1 { font-size: clamp(3rem, 12vw, 4.5rem); }
+  .product-page:not(.admin-page) .product-header { padding-inline: 1rem; }
+  .product-page:not(.admin-page) .product-header nav { font-size: .8125rem; gap: .75rem; }
+  .gift-booking-sheet { padding: 1.5rem; }
+}
+@media (max-width: 360px) {
+  .v2-world .ks-story .ks-paper, .v2-world .ks-guide .ks-paper { padding-inline: 1.25rem; }
+  .v2-world .v2-opening-folio > span:first-child { font-size: .875rem; }
+  .v2-world .v2-opening-date { font-size: .8125rem; }
+  .v2-world .v2-opening-skip { font-size: .8125rem; }
+}

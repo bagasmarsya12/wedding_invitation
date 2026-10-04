@@ -1,0 +1,49 @@
+/* CMS uses the invitation's typography, with room for operational data. */
+.admin-page{--bx-serif:"Newsreader",Georgia,serif;--bx-sans:"Instrument Sans",Arial,sans-serif;font-family:var(--bx-sans);color:#25382f}
+.admin-page .admin-hero{display:block;padding-block:2.5rem 1.5rem;min-height:0}
+.admin-page .admin-hero h1{font:500 clamp(3.5rem,6vw,5rem)/1.08 var(--bx-serif);letter-spacing:-.03em;margin:1rem 0}
+.admin-page .admin-hero h1 br{display:none}.admin-page .admin-hero h1 em{font-style:normal}
+.admin-page .admin-grid{padding-block:1.5rem 5rem;gap:1.5rem;max-width:82rem}
+.admin-page .admin-tabs{display:flex;flex-wrap:wrap;gap:.4rem;grid-column:1/-1;margin:0 0 .5rem;padding:.75rem;border:1px solid #b9c1b2;background:#f6f1e8}
+.admin-page .admin-tabs button{min-height:44px;padding:.6rem 1rem;font:500 .875rem/1.5 var(--bx-sans);letter-spacing:0;text-transform:none}
+.admin-page .admin-tabs button.on{background:#253e30;color:#f6f1e8}
+.admin-page .admin-pane{grid-column:1/-1;min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem}
+.admin-page .admin-pane[hidden]{display:none}
+.admin-page .admin-panel{padding:clamp(1.25rem,3vw,2rem);min-width:0;background:#f8f4eb;border:1px solid #bcc4b5}
+.admin-page .admin-panel h2{font:500 clamp(1.75rem,3vw,2.5rem)/1.2 var(--bx-serif);letter-spacing:-.02em}
+.admin-page .admin-panel h3{font:500 1.375rem/1.25 var(--bx-serif);letter-spacing:-.01em;overflow-wrap:anywhere}
+.admin-page :is(p,li,small){line-height:1.65}.admin-page .admin-panel p{max-width:75ch;font-size:.9375rem}
+.admin-page :is(input,select,textarea,button){font-family:var(--bx-sans)}
+.admin-page :is(input,select,textarea){font-size:.9375rem;line-height:1.6;min-width:0;max-width:100%;min-height:44px}
+.admin-page textarea{resize:vertical}.admin-page label{font-size:.875rem;letter-spacing:0;text-transform:none}
+.admin-page .check{display:flex;align-items:center;gap:.65rem;margin-block:1rem}
+.admin-page .check input{width:1.125rem;height:1.125rem;min-height:0;margin:0}
+.admin-page :is(button,a,input,textarea,select):focus-visible{outline:2px solid #506b50;outline-offset:3px}
+.admin-page .cms-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:2rem 0 .5rem;border-top:1px solid #c4cbbb;border-left:1px solid #c4cbbb}
+.admin-page .cms-metrics>div{padding:1.25rem;border-right:1px solid #c4cbbb;border-bottom:1px solid #c4cbbb}
+.admin-page .cms-metrics dt{font-size:.8125rem;line-height:1.5;min-height:2.5em;color:#53614f}
+.admin-page .cms-metrics dd{font:500 2.5rem/1.15 var(--bx-serif);margin:.5rem 0 0}
+.admin-page .cms-bilingual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;width:100%}
+.admin-page .cms-bilingual>label{grid-column:auto}
+.admin-page .admin-panel header>p{font-size:.875rem;letter-spacing:0;text-transform:none}
+.admin-page .cms-content-manager form{display:block}.admin-page .cms-content-manager form>button{margin-top:1rem}
+.admin-page .cms-subtabs{display:flex;flex-wrap:wrap;gap:.5rem;border-block:1px solid #c4cbbb;padding:1rem 0;margin:1.5rem 0}
+.admin-page .cms-subtabs button{background:transparent;color:#253e30;border:1px solid #b9c1b2}
+.admin-page .cms-subtabs button.on{background:#e2e9dc;border-color:#506b50}
+.admin-page :is(.cms-copy-field,.cms-block){padding-block:1.5rem;border-top:1px solid #c4cbbb}
+.admin-page .cms-copy-field h3{max-width:70ch;margin:0 0 1rem}.admin-page .cms-copy-field>button{margin-top:1rem}
+.admin-page .cms-scroll-table{overflow:auto;width:100%;margin-block:1.5rem;max-height:36rem;border:1px solid #c4cbbb;overscroll-behavior:contain}
+.admin-page .cms-scroll-table table{border-collapse:collapse;width:100%;font-size:.8125rem;line-height:1.6;min-width:48rem;text-align:left}
+.admin-page .cms-scroll-table :is(th,td){padding:.85rem 1rem;border-bottom:1px solid #d6dbcf;vertical-align:top}
+.admin-page .cms-scroll-table th{position:sticky;top:0;background:#e6ecdf;font-weight:500;white-space:nowrap}
+.admin-page .cms-scroll-table tbody tr:nth-child(even){background:#f1f2e9}.admin-page .cms-scroll-table td small{display:block}
+.admin-page .cms-moderation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.admin-page .cms-postcard{padding:1.5rem;border:1px solid #c4cbbb;background:#f3eedf;min-width:0}
+.admin-page .cms-postcard img{max-width:100%;max-height:25rem;object-fit:contain;display:block;margin:1rem auto}
+.admin-page .cms-postcard h3{margin:0}.admin-page .cms-postcard p{overflow-wrap:anywhere}
+.admin-page .cms-content-manager .guest-filters,.admin-page .cms-dashboard~section .guest-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-page .cms-import-errors{padding:1rem 1.5rem;border:1px solid #b3897c;background:#f4e5de;color:#813a2d}
+.admin-page .admin-status:empty{display:none}.admin-page .admin-status{margin:0;padding:.75rem 1rem;border:1px solid #c4cbbb;background:#e8eedf;max-width:100%}
+.admin-page .cms-loading-error{color:#8b3429}.admin-page .cms-photo-preview{width:10rem;aspect-ratio:1;object-fit:cover;display:block;margin-block:1rem}
+@media(max-width:900px){.admin-page .cms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-page .admin-pane{grid-template-columns:1fr}.admin-page .admin-tabs{flex-wrap:nowrap;overflow-x:auto}.admin-page .admin-tabs button{white-space:nowrap}.admin-page .cms-bilingual{gap:1rem}}
+@media(max-width:600px){.admin-page .cms-bilingual,.admin-page .cms-moderation-grid{grid-template-columns:1fr}.admin-page .cms-metrics>div{padding:1rem}.admin-page .cms-metrics dd{font-size:2.125rem}.admin-page .admin-grid{width:calc(100% - 1.5rem)}.admin-page .cms-content-manager .guest-filters,.admin-page .cms-dashboard~section .guest-filters{grid-template-columns:1fr}.admin-page .cms-actions{gap:.5rem}.admin-page .cms-actions button{flex-grow:1}}

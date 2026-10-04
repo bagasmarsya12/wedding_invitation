@@ -1,0 +1,21 @@
+[
+  {
+    "family": "Newsreader",
+    "designer": "Production Type (Hugues Gentile and Jean-Baptiste Levee)",
+    "file": "newsreader-latin-variable.woff2",
+    "url": "https://fonts.gstatic.com/s/newsreader/v26/cY9AfjOCX1hbuyalUrK4397yjIJFJpc.woff2",
+    "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/newsreader/OFL.txt",
+    "foundry": "https://productiontype.com/font/newsreader",
+    "style": "Roman; requested weight range 400-600 and optical size 6-72",
+    "bytes": 131848,
+    "sha256": "01817351be3edfc1714fe6d60ddea6a22a169a5ebd033b50c7f9495e5d9c386a"
+  },
+  {
+    "family": "Instrument Sans",
+    "file": "instrument-sans-latin-variable.woff2",
+    "url": "https://fonts.gstatic.com/s/instrumentsans/v4/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0SZe1ZuWi3g.woff2",
+    "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentsans/OFL.txt",
+    "bytes": 29904,
+    "sha256": "6219bc4bfdfc5d9b2201dcdf046218b122a758f932e25ed5f168f929b7ca2311"
+  }
+]

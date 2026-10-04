@@ -5,7 +5,7 @@
 }
 .v2-footer.v2-closing::before { display:none; }
 .v2-closing-paper {
-  position:relative; isolation:isolate; overflow:hidden; max-width:86rem; margin:auto;
+  position:relative; isolation:isolate; overflow:clip; max-width:86rem; margin:auto;
   border:1px solid #e7ddca; border-radius:2px; background:#f6f0e3 url("/assets/15-paper-fiber-texture.webp") center/620px;
   box-shadow:0 2px 0 #c7baa0,0 5px 0 #857c68,0 25px 65px #00000040;
 }

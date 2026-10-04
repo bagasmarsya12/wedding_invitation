@@ -1,0 +1,207 @@
+/* A single open album: varied-size polaroids and a collected story. */
+.v2-world .v2-botanical-continuum > .v2-memory-folio {
+  z-index: 2;
+  isolation: isolate;
+  padding: clamp(4.5rem,7vw,7rem) clamp(1rem,4vw,4rem) clamp(5rem,8vw,8rem);
+}
+.memory-book {
+  position: relative;
+  isolation: isolate;
+  max-width: 76rem;
+  margin: auto;
+  padding: clamp(3rem,5vw,5rem) clamp(1.25rem,4.5vw,4.5rem) clamp(3rem,5vw,5rem);
+  color: #21382c;
+  background: #f6f0e3 url('/assets/15-paper-fiber-texture.webp') center/560px;
+  border: 1px solid #d3c5a6;
+  border-radius: 6rem 2rem .5rem .5rem / 3rem 2rem .5rem .5rem;
+  box-shadow: 0 4px 0 #d3c5a6, 0 8px 0 #62734c, 0 24px 40px #122b2055;
+}
+.memory-book::before {
+  content: '';
+  position: absolute;
+  inset: .75rem 47.5% .75rem;
+  background: linear-gradient(90deg,transparent,#62734c0e 35%,#21382c13 50%,#fff9ee8a 55%,transparent);
+  pointer-events: none;
+}
+.memory-book::after {
+  content: '';
+  position: absolute;
+  width: 3rem;
+  height: 3rem;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,#e7ddc9 48%,#b6aa9166 50%,#f6f0e3 56%);
+  clip-path: polygon(100% 0,100% 100%,0 100%);
+  pointer-events: none;
+}
+.v2-world .v2-memory-folio .v2-archive-heading {
+  position: relative;
+  z-index: 3;
+  display: block;
+  max-width: 38rem;
+  margin: 0 auto clamp(2.75rem,5vw,4.5rem);
+  padding: 0;
+  border: 0;
+  text-align: center;
+}
+.v2-world .v2-memory-folio .v2-archive-heading .ks-monogram {
+  width: 2.75rem;
+  height: 4rem;
+  margin: 0 auto 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  mix-blend-mode: multiply;
+}
+.v2-world .v2-memory-folio .v2-archive-heading h2 { margin: 0; color: #21382c; }
+.v2-world .v2-memory-folio .v2-archive-heading .memory-intro {
+  max-width: 40ch;
+  margin: 1.25rem auto 0;
+  font: 400 1rem/1.7 var(--v2-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  color: #59604f;
+}
+.memory-photographs { position: relative; z-index: 3; min-width: 0; scroll-margin-top: 5rem; }
+.v2-world .v2-memory-folio .moments-album {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr .95fr;
+  grid-auto-flow: row;
+  align-items: center;
+  gap: clamp(1.5rem,3vw,2.75rem);
+  max-width: none;
+  margin: 0;
+}
+.v2-world .v2-memory-folio .moment {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  padding: .65rem .65rem 1rem;
+  border-radius: 0;
+  color: #21382c;
+  background: #fbf7ee;
+  border: 1px solid #d3c5a6;
+  box-shadow: 0 2px 0 #d3c5a6, 5px 9px 15px #122b2024;
+}
+.v2-world .v2-memory-folio .moment figcaption {
+  padding: .85rem .25rem 0;
+  font: 400 .875rem/1.6 var(--v2-sans);
+  color: #59604f;
+  overflow-wrap: anywhere;
+}
+.v2-world .v2-memory-folio .moment .landing-photo { aspect-ratio: 1; border-radius: 0; }
+.v2-world .v2-memory-folio .moment .landing-photo-aperture { border-radius: 0; }
+.v2-world .v2-memory-folio .moment-1 {
+  grid-column: span 2;
+  grid-row: span 2;
+  align-self: start;
+  padding: 1rem;
+  transform: rotate(-1deg);
+}
+.v2-world .v2-memory-folio .moment-2 { grid-column: auto; transform: rotate(2deg); }
+.v2-world .v2-memory-folio .moment-3 {
+  grid-column: auto;
+  align-self: start;
+  margin-top: 1.75rem;
+  transform: rotate(-1.25deg);
+}
+.v2-world .v2-memory-folio .moment-4 { grid-column: auto; transform: rotate(1.25deg); }
+.v2-world .v2-memory-folio .moment-5 { grid-column: auto; align-self: start; margin-top: 2.5rem; transform: rotate(-2deg); }
+.v2-world .v2-memory-folio .moment-6 { grid-column: span 2; align-self: center; transform: rotate(-.7deg); }
+.memory-archive { grid-area: story; width: 100%; max-width: 25rem; min-width: 0; justify-self: center; transform: rotate(1deg); }
+.v2-world .v2-memory-folio .archive-table { max-width: none; }
+.v2-world .v2-memory-folio .archive-table::before { display: none; }
+.v2-world .v2-memory-folio .archive-table .archive-table-field {
+  display: grid;
+  grid-template-columns: none;
+  grid-template-rows: 1fr;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1rem .75rem 2rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-padding-inline: .75rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #62734c88 #f6f0e3;
+}
+.v2-world .v2-memory-folio .archive-table.is-single .archive-table-field {
+  grid-template-columns: minmax(0,1fr);
+  grid-auto-flow: row;
+  overflow: visible;
+}
+.v2-world .v2-memory-folio .archive-piece,
+.v2-world .v2-memory-folio .archive-piece:nth-child(n) { margin: 0; transform: none; scroll-snap-align: start; }
+.v2-world .v2-memory-folio .archive-paper {
+  height: 29rem;
+  padding: 2.5rem 1.5rem 1.25rem;
+  border: 1px solid #62734c55;
+  border-radius: 45% 45% 2px 2px / 12% 12% 2px 2px;
+  background-color: #e5e7d7;
+}
+.v2-memory-folio .archive-paper::before { border-radius: inherit; background: #d3c5a6; }
+.v2-memory-folio .archive-paper > header { text-align: center; }
+.v2-world .v2-memory-folio .archive-paper h3 { font-size: clamp(1.5rem,2vw,1.8rem); line-height: 1.25; }
+.v2-world .v2-memory-folio .archive-piece-mark .archive-piece-visual img { border-radius: 50%; background: #eeeadf; }
+.v2-memory-folio .archive-table-footer { justify-content: flex-end; border: 0; padding-top: 0; }
+.v2-memory-folio .archive-table-navigation { display: flex; }
+.v2-memory-folio .archive-table-navigation button { color: #21382c; background: #f6f0e3; border-color: #62734c88; }
+.memory-footer {
+  position: relative;
+  z-index: 3;
+  margin: clamp(3rem,5vw,4.5rem) auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid #62734c55;
+}
+.memory-footer .v2-text-link { margin: 0; color: #21382c; }
+.memory-book > .ks-botanicals { z-index: 2; }
+.memory-book .ks-botanicals-folio .ks-plant-1 { --ks-plant-width: 15rem; left: -5%; top: -1%; }
+.memory-book .ks-botanicals-folio .ks-plant-2 { --ks-plant-width: 10rem; left: -3%; top: -2%; }
+.memory-book .ks-botanicals-folio .ks-plant-3 { --ks-plant-width: 8rem; left: -6%; top: 20%; }
+.memory-book .ks-botanicals-folio .ks-plant-4 { --ks-plant-width: 12rem; right: -5%; top: -1%; }
+.memory-book .ks-botanicals-folio .ks-plant-5,
+.memory-book .ks-botanicals-folio .ks-plant-6 { --ks-plant-width: 24rem; bottom: -2%; }
+.memory-book .ks-botanicals-folio .ks-plant-7 { bottom: -3%; }
+.memory-book .ks-botanicals-folio .ks-plant-8 { --ks-plant-width: 8rem; right: -3%; bottom: 6%; }
+
+@media (max-width: 1000px) {
+  .v2-world .v2-memory-folio .moments-album {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    grid-auto-flow: row;
+    gap: 2rem;
+  }
+  .v2-world .v2-memory-folio .moment-1 { grid-row: auto; width: 86%; justify-self: center; }
+  .v2-world .v2-memory-folio .moment-5 { margin-top: 1.5rem; }
+  .memory-book::before { left: 1%; right: auto; width: 1.5%; }
+}
+@media (max-width: 620px) {
+  .memory-book { padding: 2.75rem 1.25rem 3rem; border-radius: 3rem 1rem .25rem .25rem; }
+  .v2-world .v2-memory-folio .v2-archive-heading { margin-bottom: 2.5rem; }
+  .v2-world .v2-memory-folio .v2-archive-heading .ks-monogram { width: 2.5rem; height: 3.5rem; }
+  .v2-world .v2-memory-folio .moments-album { gap: 1.5rem 1rem; }
+  .v2-world .v2-memory-folio .moment { padding: .4rem .4rem .75rem; }
+  .v2-world .v2-memory-folio .moment-1 { width: 100%; padding: .65rem; }
+  .v2-world .v2-memory-folio .moment-3 { margin-top: 1rem; }
+  .v2-world .v2-memory-folio .moment figcaption { padding-inline: .15rem; }
+  .v2-world .v2-memory-folio .landing-photo-label { max-width: 100%; padding: .5rem .35rem; font-size: .8125rem; }
+  .v2-world .v2-memory-folio .archive-paper { padding: 2.5rem 1rem 1.25rem; }
+  .memory-footer { margin-top: 2.5rem; }
+  .memory-book .ks-botanicals-folio .ks-plant-1 { --ks-plant-width: 7rem; left: -9%; top: 0; }
+  .memory-book .ks-botanicals-folio .ks-plant-2 { --ks-plant-width: 6rem; left: -8%; top: -1%; }
+  .memory-book .ks-botanicals-folio .ks-plant-3 { --ks-plant-width: 5rem; left: -8%; }
+  .memory-book .ks-botanicals-folio .ks-plant-4 { --ks-plant-width: 7rem; right: -9%; top: 0; }
+  .memory-book .ks-botanicals-folio .ks-plant-5,
+  .memory-book .ks-botanicals-folio .ks-plant-6 { --ks-plant-width: 12rem; bottom: -.5%; }
+  .memory-book .ks-botanicals-folio .ks-plant-7 { --ks-plant-width: 5rem; }
+  .memory-book .ks-botanicals-folio .ks-plant-8 { --ks-plant-width: 5rem; bottom: 5%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-world .v2-memory-folio .moment,
+  .v2-world .v2-memory-folio .memory-archive { transform: none; }
+}

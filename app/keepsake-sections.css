@@ -1,0 +1,186 @@
+/* The original keepsake's paper, arch and specimens, arranged for each room.
+   Scope every change to these rooms; the opening and keepsake card stay intact. */
+.ks-folio {
+  --ks-paper:#f6f0e3;
+  position:relative; z-index:2; isolation:isolate; width:100%; max-width:76rem;
+  margin-inline:auto; padding:clamp(.65rem,1.3vw,1.2rem);
+  background:#21382c; border:1px solid #d3c5a69c;
+  border-radius:48% 48% 2px 2px / 19% 19% 2px 2px;
+  box-shadow:0 3px 0 #62734c,0 6px 0 #d3c5a6,0 23px 42px #122b2026;
+}
+.ks-paper {
+  position:relative; background:var(--ks-paper) url('/assets/15-paper-fiber-texture.webp') center/560px;
+  border:1px solid #d3c5a6; border-radius:inherit; color:#21382c;
+}
+.ks-paper::before {
+  content:''; position:absolute; inset:.5rem; border:1px solid #62734c66; border-radius:inherit; pointer-events:none;
+}
+.ks-paper > * { position:relative; z-index:3; }
+.ks-monogram { display:block; width:3rem; height:4.5rem; object-fit:contain; margin:0 auto 1.5rem; mix-blend-mode:multiply; }
+.ks-botanicals { position:absolute; z-index:4; inset:0; pointer-events:none; }
+.ks-botanicals .ks-plant {
+  position:absolute; display:block; width:min(var(--ks-plant-width,12rem),calc(var(--ks-source-width) / var(--botanical-dpr,1)));
+  height:auto; max-width:none; object-fit:contain; pointer-events:none;
+}
+.ks-botanicals-folio .ks-plant-1 { --ks-plant-width:18rem; left:-3%; top:2%; rotate:108deg; }
+.ks-botanicals-folio .ks-plant-2 { --ks-plant-width:11rem; left:4%; top:-3%; rotate:76deg; }
+.ks-botanicals-folio .ks-plant-3 { --ks-plant-width:10rem; left:-3%; top:18%; rotate:-13deg; }
+.ks-botanicals-folio .ks-plant-4 { --ks-plant-width:12rem; right:1%; top:-3%; rotate:151deg; }
+.ks-botanicals-folio .ks-plant-5 { --ks-plant-width:25rem; left:-5%; bottom:-3%; rotate:-19deg; }
+.ks-botanicals-folio .ks-plant-6 { --ks-plant-width:25rem; right:-5%; bottom:-3%; rotate:19deg; transform:scaleX(-1); }
+.ks-botanicals-folio .ks-plant-7 { --ks-plant-width:8rem; left:1%; bottom:-8%; rotate:-16deg; }
+.ks-botanicals-folio .ks-plant-8 { --ks-plant-width:10rem; right:1%; bottom:3%; rotate:-24deg; }
+
+/* The three chapters share one broad, protected paper surface. */
+.v2-botanical-continuum > .ks-story { padding:clamp(4.5rem,7vw,7rem) clamp(1rem,5vw,5rem) clamp(6rem,8vw,8rem); }
+.v2-botanical-continuum > .ks-story::before { background:#eeeadf; }
+.v2-botanical-continuum > .ks-story::after { display:none; }
+.ks-story .ks-paper { padding:clamp(4.5rem,8vw,7.5rem) clamp(2rem,7vw,7rem) clamp(4.5rem,7vw,7rem); }
+.ks-story header { max-width:40rem; margin:0 auto 3rem; }
+.ks-story header > p { font:.85rem/1.6 var(--v2-sans); text-transform:none; letter-spacing:0; margin:0 0 1rem; color:#62734c; }
+.ks-story h2 { font-size:clamp(3rem,5.5vw,5.5rem); letter-spacing:-.05em; line-height:1.02; margin:0; }
+.ks-story ol { max-width:62rem; gap:clamp(1.5rem,3vw,3rem); }
+.ks-story li { border-top:1px solid #62734c66; padding:1.35rem 0 0; min-width:0; }
+.ks-story li > span { display:inline-grid; place-items:center; width:2.4rem; height:2.4rem; border:1px solid #62734c77; border-radius:50%; font-size:.95rem; }
+.ks-story h3 { font-size:clamp(1.6rem,2.5vw,2rem); margin:1.2rem 0 .7rem; }
+.ks-story li p { font:.88rem/1.85 var(--v2-sans); margin:0; }
+
+/* Portraits remain the CMS's photo slots, now mounted like the keepsake. */
+.v2-profile-folio .v2-profile-print {
+  padding:.85rem .85rem 1rem; background:#21382c;
+  border:1px solid #d3c5a6; border-radius:50% 50% 2px 2px / 32% 32% 2px 2px;
+  box-shadow:0 3px 0 #d3c5a6,7px 15px 24px #122b2026;
+}
+.v2-profile-folio .v2-profile-window { border-radius:50% 50% 0 0 / 32% 32% 0 0; border:1px solid #d3c5a6; }
+.v2-profile-folio .v2-profile-window::before { inset:4%; border-color:#f6f0e366; border-radius:inherit; box-shadow:none; }
+.v2-profile-folio .v2-profile-portrait::before { border-radius:50% 50% 2px 2px / 30% 30% 2px 2px; }
+.v2-profile-folio .v2-profile-portrait > .ks-botanicals-portrait {
+  position:absolute; inset:0 0 3rem; width:auto; height:auto; aspect-ratio:auto;
+  display:block; padding:0; background:none; border:0; border-radius:0;
+  box-shadow:none; overflow:visible;
+}
+.v2-profile-folio .v2-profile-portrait > .ks-botanicals-portrait::before,
+.v2-profile-folio .v2-profile-portrait > .ks-botanicals-portrait::after { display:none; }
+.ks-botanicals-portrait .ks-plant-1 { --ks-plant-width:12rem; right:-14%; bottom:-1.8rem; rotate:12deg; transform:scaleX(-1); }
+.ks-botanicals-portrait .ks-plant-2 { --ks-plant-width:6rem; right:-11%; bottom:-3%; rotate:17deg; }
+.ks-botanicals-portrait .ks-plant-3 { --ks-plant-width:6.5rem; left:-8%; top:6%; rotate:26deg; }
+.v2-person-iga .ks-botanicals-portrait { transform:scaleX(-1); }
+
+/* The album keeps its asymmetrical arrangement and photograph viewer. */
+.v2-botanical-continuum > .ks-album { z-index:2; }
+.ks-album > header { position:relative; z-index:2; display:flex; align-items:center; gap:2rem; padding-bottom:2rem; border-bottom:1px solid #62734c55; }
+.ks-album > header .ks-monogram { flex:none; width:2.5rem; height:4rem; margin:0; }
+.ks-album .moments-album { z-index:2; }
+.ks-album .moment { border:1px solid #62734c88; box-shadow:0 2px 0 #d3c5a6,4px 10px 18px #122b201c; }
+.ks-album .moment-1 { background:#21382c; border-color:#d3c5a6; padding:1rem; }
+.ks-album .moment-1 figcaption,.ks-album .moment-1 .moment-open > span { color:#f6f0e3; }
+.ks-album .moment-1 .landing-photo { border-radius:50% 50% 0 0 / 30% 30% 0 0; border:1px solid #d3c5a6; }
+.ks-album .moment-4 { background:#e5e7d7; }
+.ks-album > .ks-botanicals { z-index:1; }
+.ks-botanicals-album .ks-plant-1 { --ks-plant-width:22rem; left:-5%; bottom:0; rotate:-25deg; }
+.ks-botanicals-album .ks-plant-2 { --ks-plant-width:8rem; right:-1%; top:4%; rotate:154deg; }
+.ks-botanicals-album .ks-plant-3 { --ks-plant-width:8rem; left:3%; bottom:-1%; rotate:-16deg; }
+
+/* A wide guide folio: blossoms stay outside the questions' hit areas. */
+.v2-botanical-continuum > .ks-guide { display:block; padding:clamp(5rem,8vw,8rem) clamp(1rem,5vw,5rem); }
+.v2-botanical-continuum > .ks-guide::before { background:#eeeadd; }
+.v2-botanical-continuum > .ks-guide::after { display:none; }
+.ks-guide-folio { max-width:76rem; border-radius:46% 46% 2px 2px / 15% 15% 2px 2px; }
+.ks-guide .ks-paper { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:clamp(2rem,5vw,5rem); padding:clamp(5rem,8vw,7rem) clamp(2rem,6vw,6rem) clamp(4rem,6vw,6rem); }
+.ks-guide header { position:relative; top:auto; align-self:center; margin:0; }
+.ks-guide header .ks-monogram { width:3rem; height:4rem; margin:0 auto 1.6rem; mix-blend-mode:normal; }
+.ks-guide header > p { color:#62734c; font:.85rem/1.6 var(--v2-sans); text-transform:none; letter-spacing:0; margin:0 0 1rem; }
+.ks-guide header h2 { font-size:clamp(2.6rem,4.1vw,4.1rem); line-height:1.06; letter-spacing:-.04em; max-width:14ch; }
+.ks-guide .v2-useful-list { z-index:3; width:100%; align-self:center; }
+.ks-guide .v2-useful-list details { border-color:#62734c55; }
+.ks-guide .v2-useful-list summary { min-height:4.8rem; gap:1rem; }
+.ks-guide .v2-useful-list summary::after { justify-self:end; margin:0; }
+.ks-guide .v2-useful-list summary > small { justify-self:end; padding-right:1.75rem; margin-right:0; }
+.ks-guide .v2-useful-list summary > span { font-size:1.25rem; }
+.ks-guide .v2-useful-list details > p { font:.85rem/1.85 var(--v2-sans); max-width:48ch; }
+.ks-guide .ks-botanicals { z-index:2; }
+.ks-guide .ks-botanicals-folio .ks-plant-8 { bottom:-5%; }
+
+/* A forest reply room, with the controls on unchanged, readable ivory paper. */
+.v2-botanical-continuum > .ks-reply::before { background:#21382c url('/assets/15-paper-fiber-texture.webp') center/560px; background-blend-mode:multiply; }
+.v2-botanical-continuum > .ks-reply::after { display:none; }
+.ks-reply-heading { position:relative; z-index:2; width:100%; max-width:82rem; margin:auto; padding:2.5rem clamp(1rem,3vw,3rem) 3.5rem; border-top:1px solid #d3c5a677; }
+.ks-reply.v2-mark.has-studio .v2-mark-copy { max-width:82rem; grid-template-columns:auto minmax(0,1fr) minmax(0,.7fr); column-gap:clamp(1.5rem,3vw,3rem); color:#f6f0e3; }
+.ks-reply .v2-mark-copy .ks-monogram { grid-column:1; grid-row:1/4; width:3.6rem; height:5.5rem; margin:0; align-self:center; padding:.5rem; background:#f6f0e3; border:1px solid #d3c5a6; border-radius:50% 50% 1px 1px / 30% 30% 1px 1px; mix-blend-mode:normal; }
+.ks-reply .v2-mark-copy > p { grid-column:2/4; text-transform:none; font:.85rem/1.6 var(--v2-sans); letter-spacing:0; color:#d3c5a6; }
+.ks-reply.v2-mark.has-studio .v2-mark-copy h2 { grid-column:2; font-size:clamp(3.4rem,5.3vw,5.3rem); margin:0; }
+.ks-reply.v2-mark.has-studio .v2-mark-copy > span { grid-column:3; color:#ede8d9; font-size:.9rem; margin:0; }
+.ks-reply-heading .ks-botanicals { z-index:-1; }
+.ks-botanicals-reply .ks-plant-1 { --ks-plant-width:13rem; right:-3%; top:-3rem; rotate:117deg; }
+.ks-botanicals-reply .ks-plant-2 { --ks-plant-width:8rem; right:0; top:-3rem; rotate:150deg; }
+.ks-botanicals-reply .ks-plant-3 { --ks-plant-width:8rem; left:-6%; bottom:-1rem; rotate:-15deg; }
+.ks-botanicals-reply .ks-plant-4 { --ks-plant-width:18rem; left:-18%; bottom:-1rem; rotate:-18deg; }
+.ks-reply .reply-studio > .mark-composer { border:6px double #62734c; outline:1px solid #d3c5a6; outline-offset:3px; }
+.ks-reply .mark-melastoma { opacity:.5; }
+
+/* The existing event paper receives a fine, quiet binding. */
+.v2-destination-card.ks-event-paper { border:5px double #62734c99; outline:1px solid #d3c5a6; outline-offset:3px; }
+
+@media(max-width:900px) {
+  .ks-guide .ks-paper { grid-template-columns:1fr; gap:2rem; padding-top:5.5rem; }
+  .ks-guide header { text-align:center; }
+  .ks-guide header .ks-monogram { margin:0 auto 1.25rem; }
+  .ks-guide header h2 { max-width:20ch; margin-inline:auto; font-size:clamp(2.5rem,6vw,3.8rem); }
+  .ks-reply.v2-mark.has-studio .v2-mark-copy { grid-template-columns:auto minmax(0,1fr); }
+  .ks-reply .v2-mark-copy > p { grid-column:2; }
+  .ks-reply.v2-mark.has-studio .v2-mark-copy > span { grid-column:2; margin-top:1rem; max-width:32ch; }
+}
+@media(max-width:620px) {
+  .ks-folio { border-radius:48% 48% 2px 2px / 8% 8% 2px 2px; }
+  .ks-story .ks-paper { padding:4.5rem 1.6rem 5rem; }
+  .ks-story header { margin-bottom:2rem; }
+  .ks-story h2 { font-size:clamp(2.5rem,10vw,3.5rem); }
+  .ks-story ol { grid-template-columns:1fr; gap:1.5rem; }
+  .ks-story li { display:grid; grid-template-columns:2.4rem 1fr; column-gap:1rem; }
+  .ks-story li > span { grid-row:1/3; }
+  .ks-story h3 { margin:.35rem 0 .65rem; font-size:1.65rem; }
+  .ks-story li p { grid-column:2; max-width:none; font-size:.84rem; }
+  .ks-monogram { width:2.5rem; height:3.8rem; }
+  .ks-botanicals-folio .ks-plant-1 { --ks-plant-width:7rem; left:-8%; top:1%; }
+  .ks-botanicals-folio .ks-plant-2 { --ks-plant-width:6rem; left:-5%; top:-1%; }
+  .ks-botanicals-folio .ks-plant-3 { --ks-plant-width:5rem; left:-7%; top:12%; }
+  .ks-botanicals-folio .ks-plant-4 { --ks-plant-width:6rem; right:-6%; top:0; }
+  .ks-botanicals-folio .ks-plant-5,.ks-botanicals-folio .ks-plant-6 { --ks-plant-width:12rem; bottom:-1%; }
+  .ks-botanicals-folio .ks-plant-7 { --ks-plant-width:5rem; bottom:-2%; left:0; }
+  .ks-botanicals-folio .ks-plant-8 { --ks-plant-width:5rem; bottom:2%; right:-5%; }
+  .ks-guide .ks-paper { padding:5rem 1.65rem 4.5rem; }
+  .ks-guide header h2 { font-size:2.55rem; }
+  .ks-guide .v2-useful-list summary { min-height:4.5rem; }
+  .ks-guide .v2-useful-list summary > span { font-size:1.15rem; }
+  .ks-guide .v2-useful-list summary > small { font-size:.58rem; letter-spacing:.06em; flex:none; }
+  .ks-guide .v2-useful-list details > p { font-size:.83rem; }
+  .ks-guide .ks-botanicals-folio .ks-plant-3 { top:8%; }
+  .ks-guide .ks-botanicals-folio .ks-plant-8 { bottom:-1%; }
+  .ks-reply-heading { padding:2rem .25rem 3rem; }
+  .ks-reply.v2-mark.has-studio .v2-mark-copy { grid-template-columns:1fr; gap:1rem; }
+  .ks-reply .v2-mark-copy .ks-monogram { grid-row:auto; grid-column:1; width:2.8rem; height:4.2rem; margin:0 0 .5rem; }
+  .ks-reply .v2-mark-copy > p,.ks-reply.v2-mark.has-studio .v2-mark-copy h2,.ks-reply.v2-mark.has-studio .v2-mark-copy > span { grid-column:1; }
+  .ks-reply .v2-mark-copy > p { margin:0; }
+  .ks-reply.v2-mark.has-studio .v2-mark-copy h2 { font-size:3.5rem; }
+  .ks-reply.v2-mark.has-studio .v2-mark-copy > span { margin:0; max-width:28ch; }
+  .ks-botanicals-reply .ks-plant-1 { --ks-plant-width:7rem; right:-4%; top:-1rem; }
+  .ks-botanicals-reply .ks-plant-2 { --ks-plant-width:6rem; right:-4%; top:-.5rem; }
+  .ks-botanicals-reply .ks-plant-3 { --ks-plant-width:5rem; left:auto; right:0; bottom:0; }
+  .ks-botanicals-reply .ks-plant-4 { --ks-plant-width:12rem; left:auto; right:-10%; bottom:0; transform:scaleX(-1); }
+  .ks-album > header { gap:1.25rem; }
+  .ks-album > header .ks-monogram { width:2rem; height:3rem; }
+  .ks-album h2 { font-size:2.7rem; }
+  .ks-album .moment-1 { padding:.7rem; }
+  .ks-botanicals-album .ks-plant-1 { --ks-plant-width:12rem; }
+  .ks-botanicals-album .ks-plant-2,.ks-botanicals-album .ks-plant-3 { --ks-plant-width:5rem; }
+}
+@media(max-width:360px) {
+  .ks-story .ks-paper { padding-inline:1.3rem; }
+  .ks-story li { display:block; }
+  .ks-story li > span { width:2rem; height:2rem; }
+  .ks-story h3 { margin-top:.75rem; }
+  .ks-guide .ks-paper { padding-inline:1.25rem; }
+  .ks-guide header h2 { font-size:2.3rem; }
+  .ks-guide .v2-useful-list summary > small { font-size:0; }
+  .ks-guide .v2-useful-list summary > small::after { font-size:1.2rem; }
+}

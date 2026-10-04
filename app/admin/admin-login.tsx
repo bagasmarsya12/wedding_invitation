@@ -3,7 +3,7 @@
 
 import { useState, type FormEvent } from "react";
 
-export function AdminLogin() {
+export function AdminLogin({ returnTo = "" }: { returnTo?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +20,8 @@ export function AdminLogin() {
         body: JSON.stringify({ email, password }),
       });
       if (response.ok) {
-        window.location.reload();
+        if (/^\/(?:check-in\/[a-f0-9]{32}|admin\/check-in)$/.test(returnTo)) window.location.assign(returnTo);
+        else window.location.reload();
         return;
       }
       const payload = await response.json().catch(() => null) as { error?: string } | null;
@@ -34,7 +35,7 @@ export function AdminLogin() {
   return (
     <main className="product-page admin-page">
       <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><span>Wedding Desk</span></nav></header>
-      <section className="admin-hero"><p>Private management surface</p><h1>Wedding<br /><em>Desk</em></h1><p>Sign in to manage guests, RSVP, gifts, content, and moderation.</p></section>
+      <section className="admin-hero"><p>Private management surface</p><h1>Wedding <em>Desk</em></h1><p>Sign in to manage guests, RSVP, gifts, content, and moderation.</p></section>
       <div className="admin-grid">
         <section className="admin-panel admin-login">
           <header><p>Admin access</p><h2>Sign in</h2></header>

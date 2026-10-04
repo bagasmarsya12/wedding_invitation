@@ -57,7 +57,7 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
         return <article className={`collection-piece material-${kind}${open ? " is-open" : ""}`} key={entry.slug} data-slug={entry.slug}
           onKeyDown={event => { if (event.key === "Escape" && open) { event.stopPropagation(); close(entry.slug); } }}>
           <div className="collection-sheet">
-            <header><span>{t(entry.type)}</span><span aria-hidden="true">B × I</span></header>
+            <header><span>{t(entry.type)}</span><span aria-hidden="true"><T>B × I</T></span></header>
             <div className="collection-mount"><ArchiveMedia key={entry.media_url || "empty"} src={entry.media_url} title={title} type={entry.type} /></div>
             <h2 id={`${id}-title`}>{title}</h2>
             <button type="button" className="collection-open" aria-expanded={open} aria-controls={`${id}-context`} aria-label={`${t(open ? "Put it back" : "Take a closer look")}: ${title}`}
@@ -68,7 +68,7 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
             <div className="collection-context" id={`${id}-context`} role="region" aria-labelledby={`${id}-title`} aria-hidden={!open} inert={!open}>
               <div><div className="collection-context-content">
                 {(entry.entry_date || entry.location) && <p className="collection-metadata">{[entry.entry_date, entry.location].filter(Boolean).join(" / ")}</p>}
-                <div className="collection-excerpt" tabIndex={open ? 0 : -1}><p>{entry.slug === "the-mark" ? <T>{entry.excerpt || "Entry ready for original material."}</T> : entry.excerpt || <T>Entry ready for original material.</T>}</p></div>
+                {entry.excerpt && <div className="collection-excerpt" tabIndex={open ? 0 : -1}><p>{entry.slug === "the-mark" ? <T>{entry.excerpt}</T> : entry.excerpt}</p></div>}
                 <a className="collection-story-link" href={`/archive/${encodeURIComponent(entry.slug)}`} onClick={remember}><T>Open this story</T><span aria-hidden="true">↗</span></a>
               </div></div>
             </div>

@@ -1,4 +1,4 @@
-import { bucket, db, requireAdmin } from "@/lib/server";
+import { bucket, db, requireAdmin, sameOriginMutation, privateJson, allowMutation } from "@/lib/server";
 
 export const runtime = "nodejs";
 
@@ -15,7 +15,8 @@ const MAX_BYTES = 5 * 1024 * 1024;
  * (`content/<slot>.<ext>`) and the setting `media.<slot>` records the key,
  * so consumers always read /api/admin/media/<slot> — the etag query busts caches.
  */
-export async function POST(request: Request) {
+export async function POST(request: Request, { params }: { params: Promise<{ slot: string }> }) {
+  if (!sameOriginMutation(request)) return privateJson({ error: "This request could not be verified." }, 403);
   const admin = await requireAdmin();
   if (!admin) return Response.json({ error: "Admin access is required." }, { status: 403 });
 
@@ -27,12 +28,13 @@ export async function POST(request: Request) {
   }
 
   const file = form.get("file");
-  const slot = String(form.get("slot") ?? "").trim();
+  const slot = (await params).slot.trim();
   if (!(file instanceof File)) return Response.json({ error: "Field 'file' is required." }, { status: 400 });
   if (!/^[a-z0-9-]{1,60}$/.test(slot)) return Response.json({ error: "Field 'slot' must be a slug (a-z, 0-9, -)." }, { status: 400 });
   const ext = ALLOWED_TYPES[file.type];
   if (!ext) return Response.json({ error: "Only JPEG, PNG, WebP, or AVIF images are allowed." }, { status: 415 });
   if (file.size > MAX_BYTES) return Response.json({ error: "Image is larger than 5 MB." }, { status: 413 });
+  if (!(await allowMutation("media", admin.userId, 30, 60_000))) return privateJson({ error: "Please slow down and try again shortly." }, 429);
 
   try {
     const body = await file.arrayBuffer();
@@ -43,9 +45,9 @@ export async function POST(request: Request) {
     const etag = (put as { etag?: string }).etag ?? String(Date.now());
     const url = `/api/admin/media/${slot}?v=${encodeURIComponent(etag)}`;
     await db().prepare(
-      "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) " +
-      "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP",
-    ).bind(`media.${slot}`, key).run();
+      "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?) " +
+      "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+    ).bind(`media.${slot}`, key, new Date().toISOString()).run();
     return Response.json({ ok: true, key, url });
   } catch (error) {
     console.error(JSON.stringify({ action: "admin_media_upload", error: error instanceof Error ? error.name : "Unknown" }));
@@ -54,6 +56,18 @@ export async function POST(request: Request) {
 }
 
 /** Public read of an uploaded slot image (kept keyed off the private bucket). */
+export async function DELETE(request:Request,{params}:{params:Promise<{slot:string}>}) {
+  if(!sameOriginMutation(request)) return privateJson({error:'This request could not be verified.'},403);
+  const admin=await requireAdmin();
+  if(!admin) return privateJson({error:'Admin access is required.'},403);
+  const {slot}=await params;
+  if(!/^[a-z0-9-]{1,60}$/.test(slot)) return privateJson({error:'Invalid photo slot.'},400);
+  if(!await allowMutation('media',admin.userId,30,60_000)) return privateJson({error:'Please wait before updating another image.'},429);
+  // Keep the old R2 object for recovery; clearing its mapping restores the placeholder.
+  await db().prepare('DELETE FROM settings WHERE key=?').bind(`media.${slot}`).run();
+  return privateJson({ok:true});
+}
+
 export async function GET(request: Request) {
   const slot = (new URL(request.url).pathname.split("/").pop() ?? "").replace(/[^a-z0-9-]/g, "");
   if (!slot) return new Response("Not found", { status: 404 });

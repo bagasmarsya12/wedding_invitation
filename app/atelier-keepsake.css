@@ -1,0 +1,18 @@
+.atelier-keepsake-page { min-height:100svh; color:#f4eedf; background:radial-gradient(ellipse at 46% 38%,#3b5038 0,#23372a 48%,#0c1b12 100%); font:400 .82rem/1.5 "Instrument Sans",Arial,sans-serif; }
+.atelier-keepsake-page .keepsake-view { min-height:100svh; max-width:720px; margin:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; }
+.atelier-keepsake-page .stage { position:relative; width:min(520px,100%); height:min(500px,64svh); cursor:pointer; touch-action:pan-y; outline-offset:3px; }
+.atelier-keepsake-page .stage:focus-visible,.atelier-keepsake-page button:focus-visible,.atelier-keepsake-page a:focus-visible { outline:2px solid #e2c591; outline-offset:4px; }
+.atelier-keepsake-page .stage canvas { position:absolute; inset:0; width:100%; height:100%; }
+.atelier-keepsake-page #fallback { position:absolute; width:auto; max-width:85%; height:85%; top:50%; left:50%; transform:translate(-50%,-50%); object-fit:contain; }
+.atelier-keepsake-page #loading { position:absolute; inset:0; display:grid; place-items:center; color:#d6d6ba; }
+.atelier-keepsake-page [hidden] { display:none!important; }
+.atelier-keepsake-page .card-hint { margin:12px 0 24px; color:#c9ccb9; text-align:center; font-size:.72rem; }
+.atelier-keepsake-page .downloads { width:min(400px,100%); display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.atelier-keepsake-page .downloads button,.atelier-keepsake-page .downloads a { display:flex; justify-content:center; align-items:center; gap:9px; min-height:46px; padding:12px; border:1px solid #d5dbc94a; border-radius:1px; background:transparent; color:#f4eedf; text-decoration:none; font:inherit; line-height:1.5; text-align:center; cursor:pointer; }
+.atelier-keepsake-page .downloads .video-download { grid-column:1/-1; background:#f4efe4; color:#26392b; border-color:#f4efe4; min-height:49px; }
+.atelier-keepsake-page .downloads button:disabled { cursor:wait; opacity:.55; }
+.atelier-keepsake-page .export-progress { grid-column:1/-1; display:flex; align-items:center; gap:14px; }
+.atelier-keepsake-page progress { width:100%; height:3px; accent-color:#dbc692; }
+.atelier-keepsake-page .export-progress button { border:0; min-height:44px; padding:0 8px; font-size:.7rem; }
+.atelier-keepsake-page .download-status { grid-column:1/-1; min-height:1em; margin:0; color:#cbd0b9; font-size:.7rem; text-align:center; }
+@media(max-height:600px) { .atelier-keepsake-page .stage { height:60svh; } .atelier-keepsake-page .keepsake-view { padding:12px 16px; } .atelier-keepsake-page .card-hint { margin:8px 0 14px; } }

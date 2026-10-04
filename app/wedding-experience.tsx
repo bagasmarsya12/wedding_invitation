@@ -1,12 +1,12 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import Link from "next/link";
 import { ArrowRight, Sun, Sunset } from "lucide-react";
 import {
   createContext,
   type AnimationEvent,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   useContext,
   useEffect,
@@ -19,40 +19,31 @@ import { GardenBackground } from "./garden-background";
 import { ReplyStudio } from "./reply-studio";
 import { InvitationClosing } from "./invitation-closing";
 import { GiftShelf } from "./gift-shelf";
-import { ArchiveTable, type ArchiveItem } from "./archive-table";
+import { ArchiveCollection } from "./archive-collection";
 import { defaultStyleForEdition } from "@/lib/mark-styles";
 import { T, LanguageSwitch, useLanguage } from "./language";
+import { PROFILE_ENABLED, BEYOND_DESTINATIONS, THE_MARK_TEASER, type HomepageArchiveItem, type GiftCollectionPreview } from "@/lib/public-content";
+import { weddingDisplay } from "@/lib/website-content";
+import { invitationClock } from "@/lib/invitation-clock";
+import { WEDDING_EVENTS, WEDDING_VENUE } from "@/lib/wedding-calendar";
+import { CalendarActions } from "./calendar-actions";
+import { LandingPhoto } from "./landing-photo";
+import { GuestPass } from "./guest-pass";
+import { EnvelopeArt } from "./envelope-art";
+import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
+import { EMPTY_PHOTOS, type LandingPhotos } from "@/lib/public-content";
 
-type Props = { guestName?: string; token?: string; partyLimit?: number };
+type Props = { guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; photos?: LandingPhotos };
 type MotionPreferences = { reduced: boolean; precise: boolean };
 
 const MotionContext = createContext<MotionPreferences>({ reduced: false, precise: false });
 
-const EVENT_DATE_UTC = Date.UTC(2026, 10, 1);
-const MAPS_URL = "https://maps.app.goo.gl/JFL3wrzj7qsBXbz56";
+const MAPS_URL = WEDDING_VENUE.mapsUrl;
 const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
 type SiteState = { phase?: string; rsvpEnabled?: boolean; giftsEnabled?: boolean; marksEnabled?: boolean };
-const archiveItems: ArchiveItem[] = [
-  {
-    type: "The mark",
-    title: "A B embracing a bending I.",
-    note: "The identity began with an old joke about a missing rib. The B holds the curved I without turning the story into a slogan.",
-    image: "/assets/bagas-iga-mark.webp",
-    alt: "Monogram Bagas dan Iga",
-    slug: "the-mark",
-  },
-  {
-    type: "Photograph",
-    title: "Reserved for something real.",
-    note: "We’re choosing a photograph for this spot. Some things deserve a little time.",
-  },
-  {
-    type: "Object",
-    title: "Something that survived.",
-    note: "A small place for an ordinary thing that means something to us. The story is coming.",
-  },
-];
+const DEFAULT_ARCHIVE: HomepageArchiveItem[] = [];
+const EMPTY_GIFTS: GiftCollectionPreview[] = [];
 
 function MotionProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<MotionPreferences>({ reduced: false, precise: false });
@@ -74,7 +65,7 @@ function MotionProvider({ children }: { children: ReactNode }) {
 }
 
 function useExperienceClock() {
-  const { language } = useLanguage();
+  const { language, website } = useLanguage();
   const [siteState, setSiteState] = useState<SiteState | null>(null);
   const [now, setNow] = useState(() => new Date());
 
@@ -88,37 +79,14 @@ function useExperienceClock() {
   }, []);
 
   return useMemo(() => {
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Jakarta",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(now);
-    const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
-    const localDate = Date.UTC(Number(value.year), Number(value.month) - 1, Number(value.day));
-    const days = Math.round((EVENT_DATE_UTC - localDate) / 86_400_000);
-    const forcedToday = siteState?.phase === "wedding-day";
-    const forcedPast = siteState?.phase === "post-wedding";
-    const state = forcedPast || days < 0 ? "past" : forcedToday || days === 0 ? "today" : days === 1 ? "tomorrow" : "countdown";
-    const countdown = state === "past"
-      ? "AND JUST LIKE THAT, WE'RE MARRIED."
-      : state === "today"
-        ? "IS TODAY."
-        : state === "tomorrow"
-          ? "IS TOMORROW."
-          : `IS ${Math.max(days, 0)} DAYS AWAY.`;
-    const caption = language === "id"
-      ? state === "past" ? "DAN SEKARANG, KAMI SUDAH MENIKAH." : state === "today" ? "HARINYA TIBA." : state === "tomorrow" ? "BESOK HARINYA." : `${Math.max(days, 0)} HARI LAGI.`
-      : countdown;
     return {
-      state,
-      countdown: caption,
+      ...invitationClock(now, siteState?.phase, language, website.weddingDate),
       ready: siteState !== null,
       rsvpEnabled: siteState?.rsvpEnabled === true,
       giftsEnabled: siteState?.giftsEnabled === true,
       marksEnabled: siteState?.marksEnabled === true,
     };
-  }, [now, siteState, language]);
+  }, [now, siteState, language, website.weddingDate]);
 }
 
 function hashEdition(token: string) {
@@ -144,30 +112,44 @@ function BotanicalImage({ src, className, eager = false }: { src: string; classN
   return <img className={className} style={style} src={src} alt="" aria-hidden="true" decoding="async" loading={eager ? "eager" : "lazy"} />;
 }
 
-function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggle: () => void; confirmed: boolean }) {
-  const { t } = useLanguage();
+function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnabled }: { open: boolean; onToggle: () => void; confirmed: boolean; profilesEnabled: boolean; giftsEnabled: boolean }) {
+  const { t, website, language } = useLanguage();
+  const display=weddingDisplay(website,language);
+  const MAPS_URL=website.mapsUrl;
+  const VENUE_CENTER: [number,number]=[website.longitude,website.latitude];
+  function navigateChapter(event: ReactMouseEvent<HTMLAnchorElement>) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    onToggle();
+    const href = event.currentTarget.getAttribute("href");
+    if (!href?.startsWith("#")) return;
+    requestAnimationFrame(() => {
+      const target = document.getElementById(href.slice(1));
+      const destination = target?.matches(".v2-scene") ? target.querySelector<HTMLElement>("h1, h2") : target;
+      destination?.focus({ preventScroll: true });
+    });
+  }
   return (
     <header className={`v2-spine ${open ? "is-open" : ""}`}>
-      <a className="v2-spine-mark" href="#the-day" aria-label={t("Return to invitation")}>B <i>×</i> I</a>
-      <span className="v2-spine-date">01 · 11 · 26</span>
+      <a className="v2-spine-mark" href="#the-day" aria-label={t("Return to invitation")}><T>B</T> <i>×</i><T>I</T></a>
+      <span className="v2-spine-date">{display.stamp}</span>
       {confirmed ? <span className="v2-spine-rsvp"><T>You’re on the list</T></span> : <span className="v2-spine-rsvp" aria-hidden="true" />}
       <LanguageSwitch />
       <button type="button" onClick={onToggle} aria-expanded={open} aria-controls="invitation-info">
         {t(open ? "Close" : "Info")}
       </button>
-      <div className="v2-info-drawer" id="invitation-info" aria-hidden={!open}>
+      <div className="v2-info-drawer" id="invitation-info" aria-hidden={!open} inert={!open}>
         <div>
-          <p><time>14:00</time><span>Akad</span></p>
-          <p><time>18:00</time><span><T>Reception</T></span></p>
+          <p><time>{website.akadTime}</time><span><T>Akad</T></span></p>
+          <p><time>{website.receptionTime}</time><span><T>Reception</T></span></p>
         </div>
-        <p className="v2-info-place"><strong>Pandiga Cimahi</strong><span>Jl. Sirnarasa No.11, Cibabat</span></p>
+        <p className="v2-info-place"><strong>{display.venue}</strong><span>{website.venueAddress}</span></p>
         <nav aria-label={t("Practical wedding links")}>
-          <a href="#details" onClick={onToggle}><T>Details</T></a>
-          <a href="#profiles" onClick={onToggle}><T>People</T></a>
-          <a href="#archive" onClick={onToggle}><T>Archive</T></a>
-          <a href="#rsvp" onClick={onToggle}>RSVP</a>
-          <a href="#gifts" onClick={onToggle}><T>Gifts</T></a>
-          <a href="#leave-a-mark" onClick={onToggle}><T>Postcards</T></a>
+          <a href="#details" onClick={navigateChapter}><T>Details</T></a>
+          {profilesEnabled && <a href="#profiles" onClick={navigateChapter}><T>People</T></a>}
+          <a href="#archive" onClick={navigateChapter}><T>Archive</T></a>
+          <a href="#rsvp" onClick={navigateChapter}><T>RSVP</T></a>
+          {giftsEnabled && <a href="#gifts" onClick={navigateChapter}><T>Gifts</T></a>}
+          <a href="#leave-a-mark" onClick={navigateChapter}><T>Postcards</T></a>
           <a href={MAPS_URL} target="_blank" rel="noreferrer" onClick={onToggle}><T>Maps</T></a>
         </nav>
       </div>
@@ -176,7 +158,10 @@ function InvitationSpine({ open, onToggle, confirmed }: { open: boolean; onToggl
 }
 
 function DestinationMap() {
-  const { t } = useLanguage();
+  const { t, website, language } = useLanguage();
+  const display=weddingDisplay(website,language);
+  const MAPS_URL=website.mapsUrl;
+  const VENUE_CENTER: [number,number]=[website.longitude,website.latitude];
   const { reduced } = useContext(MotionContext);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -216,8 +201,8 @@ function DestinationMap() {
         });
         const markerElement = document.createElement("div");
         markerElement.className = "v2-maplibre-marker";
-        markerElement.setAttribute("aria-label", "Pandiga Cimahi");
-        markerElement.innerHTML = '<span class="v2-maplibre-marker-pin"><span>B × I</span></span><span class="v2-maplibre-marker-label">Pandiga</span>';
+        markerElement.setAttribute("aria-label", display.venue);
+        const pin=document.createElement("span"); pin.className="v2-maplibre-marker-pin"; pin.textContent="B × I"; const label=document.createElement("span"); label.className="v2-maplibre-marker-label"; label.textContent=website.venueName; markerElement.appendChild(pin); markerElement.appendChild(label);
         new maplibregl.Marker({ element: markerElement, anchor: "bottom" }).setLngLat(VENUE_CENTER).addTo(map);
         map.on("load", () => {
           if (cancelled) return;
@@ -278,25 +263,25 @@ function DestinationMap() {
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [reduced]);
+  }, [reduced, website.longitude, website.latitude, website.venueName]);
 
   const zoomMap = (delta: number) => {
     const map = mapRef.current;
     if (!map) return;
-    if (delta > 0) map.zoomIn({ duration: 350 });
-    else map.zoomOut({ duration: 350 });
+    if (delta > 0) map.zoomIn({ duration: reduced ? 0 : 350 });
+    else map.zoomOut({ duration: reduced ? 0 : 350 });
   };
 
-  const resetMap = () => mapRef.current?.easeTo({ center: VENUE_CENTER, zoom: 12.9, bearing: 0, pitch: 0, duration: 650, essential: true });
+  const resetMap = () => mapRef.current?.easeTo({ center: VENUE_CENTER, zoom: 12.9, bearing: 0, pitch: 0, duration: reduced ? 0 : 650 });
 
   const handleMapKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const map = mapRef.current;
     if (!map) return;
     const distance = event.shiftKey ? 180 : 90;
-    if (event.key === "ArrowLeft") { event.preventDefault(); map.panBy([-distance, 0], { duration: 350 }); }
-    if (event.key === "ArrowRight") { event.preventDefault(); map.panBy([distance, 0], { duration: 350 }); }
-    if (event.key === "ArrowUp") { event.preventDefault(); map.panBy([0, -distance], { duration: 350 }); }
-    if (event.key === "ArrowDown") { event.preventDefault(); map.panBy([0, distance], { duration: 350 }); }
+    if (event.key === "ArrowLeft") { event.preventDefault(); map.panBy([-distance, 0], { duration: reduced ? 0 : 350 }); }
+    if (event.key === "ArrowRight") { event.preventDefault(); map.panBy([distance, 0], { duration: reduced ? 0 : 350 }); }
+    if (event.key === "ArrowUp") { event.preventDefault(); map.panBy([0, -distance], { duration: reduced ? 0 : 350 }); }
+    if (event.key === "ArrowDown") { event.preventDefault(); map.panBy([0, distance], { duration: reduced ? 0 : 350 }); }
     if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomMap(1); }
     if (event.key === "-" || event.key === "_") { event.preventDefault(); zoomMap(-1); }
     if (event.key === "Home") { event.preventDefault(); resetMap(); }
@@ -315,7 +300,7 @@ function DestinationMap() {
           onKeyDown={handleMapKeyDown}
         />
         {status === "loading" && <div className="v2-maplibre-status" role="status"><T>Loading the actual roads around Pandiga…</T></div>}
-        {status === "error" && <div className="v2-maplibre-fallback"><strong>Pandiga Cimahi</strong><span><T>Live map unavailable right now.</T></span><a href={MAPS_URL} target="_blank" rel="noreferrer"><T>OPEN IN GOOGLE MAPS </T><span aria-hidden="true">→</span></a></div>}
+        {status === "error" && <div className="v2-maplibre-fallback"><strong>{website.venueName}, {website.venueCity}</strong><span><T>Live map unavailable right now.</T></span><a href={MAPS_URL} target="_blank" rel="noreferrer"><T>OPEN IN GOOGLE MAPS </T><span aria-hidden="true">→</span></a></div>}
         <div className="v2-destination-map-controls" role="group" aria-label={t("Map controls")}>
           <button type="button" onClick={() => zoomMap(.1)} aria-label={t("Zoom in")}>+</button>
           <button type="button" onClick={() => zoomMap(-.1)} aria-label={t("Zoom out")}>−</button>
@@ -328,22 +313,31 @@ function DestinationMap() {
   );
 }
 
-function WeddingWorld({ guestName = "", token = "" }: Props) {
-  const { t } = useLanguage();
+function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHIVE, giftCollections = EMPTY_GIFTS, photos = EMPTY_PHOTOS }: Props) {
+  const { t, content, tField, language, website, blocks } = useLanguage();
+  const display=weddingDisplay(website,language);
+  const MAPS_URL=website.mapsUrl;
+  const akad={...WEDDING_EVENTS.akad,time:website.akadTime,startsAt:`${website.weddingDate}T${website.akadTime}:00+07:00`};
+  const reception={...WEDDING_EVENTS.reception,time:website.receptionTime,startsAt:`${website.weddingDate}T${website.receptionTime}:00+07:00`};
   const { reduced, precise } = useContext(MotionContext);
   const clock = useExperienceClock();
   const rootRef = useRef<HTMLDivElement>(null);
   const dayTitleRef = useRef<HTMLHeadingElement>(null);
   const [entered, setEntered] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [opening, setOpening] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [rsvpSaved, setRsvpSaved] = useState(false);
-  const [featuredArchive, setFeaturedArchive] = useState<ArchiveItem[]>([]);
   const edition = useMemo(() => hashEdition(token), [token]);
   const displayName = guestName.trim();
   const hasGuestName = Boolean(displayName);
+  const profilesEnabled = website.profilesEnabled;
+  const giftsEnabled = giftCollections.length > 0 && clock.giftsEnabled;
+  const usefulBits = blocks.faq;
+  const destinations = blocks.links;
 
   useEffect(() => {
+    queueMicrotask(() => setHydrated(true));
     document.body.classList.add("wedding-v2-body");
     const setAssetDensity = () => rootRef.current?.style.setProperty("--botanical-dpr", String(Math.max(1, window.devicePixelRatio || 1)));
     setAssetDensity();
@@ -359,22 +353,6 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
   useEffect(() => {
     if (!entered) return;
     dayTitleRef.current?.focus({ preventScroll: true });
-  }, [entered]);
-
-  useEffect(() => {
-    if (!entered) return;
-    let cancelled = false;
-    fetch("/api/archive?featured=1")
-      .then(async response => response.ok ? await response.json() as { entries: { slug: string; type: string; title: string; excerpt: string | null; media_url: string | null }[] } : null)
-      .then(result => {
-        if (cancelled || !result) return;
-        setFeaturedArchive(result.entries.filter(entry => entry.slug !== "the-mark").slice(0, 2).map(entry => ({
-          type: entry.type, title: entry.title, note: entry.excerpt || entry.title, slug: entry.slug,
-          image: entry.media_url || undefined, alt: entry.title,
-        })));
-      })
-      .catch(() => { /* The editorial placeholders remain until real entries are available. */ });
-    return () => { cancelled = true; };
   }, [entered]);
 
   useEffect(() => {
@@ -426,6 +404,13 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
     else setOpening(true);
   }
 
+  useEffect(() => {
+    if (!opening) return;
+    // CSS completion has a timer backup so a disabled animation cannot trap a guest.
+    const timer=window.setTimeout(()=>{setEntered(true);setOpening(false);},3600);
+    return()=>window.clearTimeout(timer);
+  },[opening]);
+
   function finishOpening(event: AnimationEvent<HTMLDivElement>) {
     if (event.target !== event.currentTarget || event.animationName !== "v2-stage-journey") return;
     setEntered(true);
@@ -441,41 +426,22 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
       {!entered && (
         <section className={`v2-opening ${opening ? "is-opening" : ""}`} role="dialog" aria-modal="true" aria-labelledby="opening-recipient">
           <div className="v2-opening-light" aria-hidden="true" />
-          <div className="v2-drapery" aria-hidden="true" />
-          <header className="v2-opening-folio"><span>Bagas × Iga</span><span>01 · 11 · 2026</span><LanguageSwitch /></header>
-          <div className="v2-opening-botanicals" aria-hidden="true">
-            <BotanicalImage eager src="/assets/botanicals/syzygium/branch-long.webp" className="opening-syzygium" />
-            <BotanicalImage eager src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="opening-fern" />
-            <BotanicalImage eager src="/assets/botanicals/melastoma/branch-short.webp" className="opening-melastoma-left" />
-            <BotanicalImage eager src="/assets/botanicals/combretum/canopy-branch.webp" className="opening-combretum-top" />
-            <BotanicalImage eager src="/assets/botanicals/dendrobium/branch-short.webp" className="opening-orchid" />
-          </div>
+          <header className="v2-opening-folio"><span>{display.names}</span><span>{display.stamp}</span><LanguageSwitch /></header>
           <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
             <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={`${t("Open the invitation")}${hasGuestName ? ` — ${displayName}` : ""}`}>
-              <span className="v2-envelope-shadow" aria-hidden="true" />
-              <span className="v2-envelope-back" aria-hidden="true">
-                <span className="v2-envelope-lining"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
-              </span>
-              <span className="v2-envelope-flap" aria-hidden="true" />
-              <span className="v2-envelope-front">
-                <span className="v2-envelope-fold fold-left" aria-hidden="true" />
-                <span className="v2-envelope-fold fold-right" aria-hidden="true" />
-                <span className="v2-recipient-copy">
-                  <small id={!hasGuestName ? "opening-recipient" : undefined}><T>For our very special guest</T></small>
-                  {hasGuestName && <><strong id="opening-recipient" dir="auto">{displayName}</strong><i aria-hidden="true" /></>}
-                </span>
-                <span className="v2-wax-seal" aria-hidden="true"><img src="/assets/bagas-iga-mark.webp" alt="" /></span>
-              </span>
+              <EnvelopeArt recipient={displayName} opening={opening} reduced={reduced} />
+              <span id="opening-recipient" className="atelier-opening-recipient">{hasGuestName?displayName:t("For our very special guest")}</span>
+              <span className="atelier-open-label">{t("Open the invitation")}<ArrowRight size={16} strokeWidth={1.3} aria-hidden="true" /></span>
             </button>
           </div>
           <button className="v2-opening-skip" type="button" onClick={() => setEntered(true)}><T>Skip opening</T></button>
-          <p className="v2-opening-date">1 November 2026 · Pandiga, Cimahi<br />Akad 14:00 · <T>Reception</T> 18:00</p>
+          <p className="v2-opening-date">{display.date} · {display.venue}<br /><T>Akad</T> {website.akadTime} · <T>Reception</T> {website.receptionTime} <T>WIB</T></p>
         </section>
       )}
 
-      {entered && <InvitationSpine open={infoOpen} onToggle={() => setInfoOpen(value => !value)} confirmed={rsvpSaved} />}
+      {entered && <InvitationSpine open={infoOpen} onToggle={() => setInfoOpen(value => !value)} confirmed={rsvpSaved} profilesEnabled={profilesEnabled} giftsEnabled={giftsEnabled} />}
 
-      <main className="v2-main" aria-hidden={!entered}>
+      <main className="v2-main" aria-hidden={hydrated && !entered} inert={hydrated && !entered}>
         <div className="v2-botanical-continuum">
         <GardenBackground active={entered} />
         <section className={`v2-day v2-grand-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
@@ -490,15 +456,15 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
           <div className="v2-garden-steps" aria-hidden="true"><i /><i /><i /></div>
           <div className="v2-hero-exit" aria-hidden="true" />
           <div className="v2-day-copy">
-            <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Monogram Bagas dan Iga" />
+            <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Bagas × Iga monogram" />
             <p className="v2-grand-prelude"><T>We’re getting married.</T></p>
             <div className="v2-day-identity">
-              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1}><span>Iga</span><i aria-hidden="true">&amp;</i><span>Bagas</span></h1>
+              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1} aria-label={display.names}><span>{website.firstName}</span>{" "}<i aria-hidden="true">×</i>{" "}<span>{website.secondName}</span></h1>
               <p className="v2-grand-note"><T>Our favourite people. One very good reason to gather.</T></p>
-              <time dateTime="2026-11-01"><span><T>Sunday</T></span>01 November 2026</time>
-              <p className="v2-grand-venue">Pandiga, Cimahi <span>Akad 14:00 · <T>Reception</T> 18:00 WIB</span></p>
+              <time dateTime={website.weddingDate}><span>{display.day}</span>{display.date}</time>
+              <p className="v2-grand-venue">{display.venue}<span>{t("Akad")} {website.akadTime} · {t("Reception")} {website.receptionTime} WIB</span></p>
             </div>
-            <p className="v2-day-countdown" suppressHydrationWarning><T>The day we’ve been dreaming of</T><span>{clock.countdown}</span></p>
+            <p className="v2-day-countdown" suppressHydrationWarning><T>{clock.state === "past" ? "And just like that," : "The day we’ve been dreaming of is"}</T><span>{clock.countdown}</span></p>
           </div>
           <a className="v2-scroll-cue" href="#details"><span><T>Continue</T></span><i /></a>
         </section>
@@ -513,28 +479,29 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
             <div className="v2-destination-paper-edge" aria-hidden="true" />
             <header className="v2-destination-head">
               <p><T>The details</T></p>
-              <h2 id="details-title"><span><T>Same place,</T></span><span><T>a very special day.</T></span></h2>
+              <h2 id="details-title" tabIndex={-1}><T field="details.head" /></h2>
               <p className="v2-destination-intro"><T>Here’s when and where to find us. We can’t wait to see you there.</T></p>
             </header>
-            <div className="v2-destination-card">
-              <time className="v2-destination-date" dateTime="2026-11-01"><span><T>Sunday</T></span>01 November 2026</time>
+            <div className="v2-destination-card ks-event-paper">
+              <time className="v2-destination-date" dateTime={website.weddingDate}><span>{display.day}</span>{display.date}</time>
               <div className="v2-destination-events" aria-label={t("Wedding schedule")}>
                 <article>
                   <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime="2026-11-01T14:00:00+07:00">14:00</time><h3>Akad</h3><p><T>The official part.</T></p></div>
+                  <div><time dateTime={akad.startsAt}>{akad.time}</time><h3><T>Akad</T></h3><p><T>The official part.</T></p><CalendarActions eventKey="akad" /></div>
                 </article>
                 <article>
                   <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime="2026-11-01T18:00:00+07:00">18:00</time><h3><T>Reception</T></h3><p><T>The louder part.</T></p></div>
+                  <div><time dateTime={reception.startsAt}>{reception.time}</time><h3><T>Reception</T></h3><p><T>The louder part.</T></p><CalendarActions eventKey="reception" /></div>
                 </article>
               </div>
               <div className="v2-destination-venue">
                 <div className="v2-destination-venue-title">
-                  <h3>Pandiga</h3>
-                  <em>Cimahi</em>
+                  <h3>{website.venueName}</h3>
+                  <em>{website.venueCity}</em>
                 </div>
-                <address>Jl. Sirnarasa No.11, Cibabat,<br />Kec. Cimahi Utara, Kota Cimahi,<br />Jawa Barat 40513</address>
+                <address>{website.venueAddress}</address>
                 <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label={t("Open directions to Pandiga Cimahi in Google Maps")}><T>Open directions </T><ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
+                {token && <div id="guest-pass"><GuestPass token={token} /></div>}
               </div>
             </div>
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
@@ -542,29 +509,27 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
           <BotanicalImage src="/assets/botanicals/combretum/flower-tip.webp" className="v2-world-emergence" />
         </section>
 
-        <section className="v2-profiles v2-profile-folio v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
+        {profilesEnabled && <section className="v2-profiles v2-profile-folio v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
           <header>
             <p><T>For those who know one of us better.</T></p>
-            <h2 id="profiles-title"><T>The two of us,</T><br /><T>as observed by the other.</T></h2>
+            <h2 id="profiles-title" tabIndex={-1}><T field="profil.head" /></h2>
           </header>
           <article className="v2-person v2-person-bagas" aria-labelledby="profile-bagas-title">
             <figure className="v2-profile-portrait">
               <div className="v2-profile-print">
-                <div className="v2-profile-window">
-                  <span className="v2-portrait-initial" aria-hidden="true">B</span>
-                  <span className="v2-portrait-placeholder"><T>Portrait of Bagas</T><br /><T>to be added</T></span>
-                  <i className="v2-portrait-light" aria-hidden="true" />
-                </div>
+                <LandingPhoto key={photos.bagas || "bagas-placeholder"} className="v2-profile-window" src={photos.bagas} alt="Bagas Marsya Pratama Nugraha" initial="B" />
               </div>
               <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-portrait-orchid" />
+              <KeepsakeBotanicals arrangement="portrait" />
               <figcaption><T>Bagas, as himself.</T></figcaption>
             </figure>
             <div className="v2-profile-copy">
-              <p><T>As observed by Iga</T></p><h3 id="profile-bagas-title">Bagas</h3><small>Bagas Marsya Pratama Nugraha</small>
+              <p><T>As observed by Iga</T></p><h3 id="profile-bagas-title">{website.firstName}</h3><small>{tField("profil.nama1")}</small>
               <dl>
-                <div><dt><T>Known for</T></dt><dd><T>To be added.</T></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T>To be added.</T></dd></div>
-                <div><dt><T>According to Iga</T></dt><dd><T>Observation from Iga will be added.</T></dd></div>
+                <div><dt><T>Family</T></dt><dd><T field="profil.b_family" /></dd></div>
+                <div><dt><T>Known for</T></dt><dd><T field="profil.b_known" /></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T field="profil.b_found" /></dd></div>
+                <div><dt><T>According to Iga</T></dt><dd><T field="profil.quote1" /></dd></div>
               </dl>
             </div>
           </article>
@@ -572,65 +537,61 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
           <article className="v2-person v2-person-iga" aria-labelledby="profile-iga-title">
             <figure className="v2-profile-portrait">
               <div className="v2-profile-print">
-                <div className="v2-profile-window">
-                  <span className="v2-portrait-initial" aria-hidden="true">I</span>
-                  <span className="v2-portrait-placeholder"><T>Portrait of Iga</T><br /><T>to be added</T></span>
-                  <i className="v2-portrait-light" aria-hidden="true" />
-                </div>
+                <LandingPhoto key={photos.iga || "iga-placeholder"} className="v2-profile-window" src={photos.iga} alt="Iga Noviyanti Rohman" initial="I" />
               </div>
               <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-portrait-melastoma" />
+              <KeepsakeBotanicals arrangement="portrait" />
               <figcaption><T>Iga, as herself.</T></figcaption>
             </figure>
             <div className="v2-profile-copy">
-              <p><T>As observed by Bagas</T></p><h3 id="profile-iga-title">Iga</h3><small>Iga Noviyanti Rohman</small>
+              <p><T>As observed by Bagas</T></p><h3 id="profile-iga-title">{website.secondName}</h3><small>{tField("profil.i_nama")}</small>
               <dl>
-                <div><dt><T>Known for</T></dt><dd><T>To be added.</T></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T>To be added.</T></dd></div>
-                <div><dt><T>According to Bagas</T></dt><dd><T>Observation from Bagas will be added.</T></dd></div>
+                <div><dt><T>Family</T></dt><dd><T field="profil.i_family" /></dd></div>
+                <div><dt><T>Known for</T></dt><dd><T field="profil.i_known" /></dd></div>
+                <div><dt><T>Usually found</T></dt><dd><T field="profil.i_found" /></dd></div>
+                <div><dt><T>According to Bagas</T></dt><dd><T field="profil.quote2" /></dd></div>
               </dl>
             </div>
           </article>
-        </section>
+        </section>}
 
-        <section className="v2-archive v2-scene v2-archive-table-scene" id="archive" data-light="archive" aria-labelledby="archive-title">
-          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-archive" />
-          <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-near-field v2-near-archive-bloom" />
-          <div className="v2-archive-heading">
-            <p><T>From the archive</T></p>
-            <h2 id="archive-title"><T>Some things were</T><br /><T>worth keeping.</T></h2>
-            <span><T>Photographs, objects, and little things that became our things.</T></span>
-          </div>
-          <ArchiveTable items={[archiveItems[0], ...featuredArchive, ...archiveItems.slice(1)].slice(0, 3)} />
-        </section>
-
-        <section className="v2-useful v2-scene" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
-          <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-background-bloom v2-background-bloom-useful" />
-          <BotanicalImage src="/assets/botanicals/combretum/flower-cluster.webp" className="v2-background-bloom v2-background-bloom-useful-secondary" />
-          <header><p><T>The useful bits</T></p><h2 id="useful-title"><T>The questions someone was going to ask anyway.</T></h2></header>
-          <div className="v2-useful-list">
-            <details><summary><span><T>Dress code</T></span><small><T>Details to follow</T></small></summary><p><T>The dress code will be added after it is confirmed.</T></p></details>
-            <details><summary><span><T>Address and entrance</T></span><small>Pandiga Cimahi</small></summary><p>Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513.</p></details>
-            <details><summary><span><T>Parking and accessibility</T></span><small><T>Details to follow</T></small></summary><p><T>Parking, entrance, and accessibility guidance will be added after venue confirmation.</T></p></details>
-            <details><summary><span><T>Children and plus-ones</T></span><small><T>Details to follow</T></small></summary><p><T>Guest-specific guidance will remain attached to each private invitation.</T></p></details>
-            <details><summary><span><T>Contact person</T></span><small><T>Details to follow</T></small></summary><p><T>A contact person will be added closer to the date.</T></p></details>
+        <section className="v2-our-story v2-scene ks-story" id="our-story" data-light="quiet" aria-labelledby="our-story-title">
+          <div className="ks-folio ks-story-folio">
+            <div className="ks-paper">
+              <header><KeepsakeMonogram /><p><T>A little of our story</T></p><h2 id="our-story-title"><T field="story.head" /></h2></header>
+              <ol>{blocks.story.map((item,index) => <li key={item.id}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span><h3>{item.title[language]}</h3><p>{item.body[language]}</p></li>)}</ol>
+            </div>
+            <KeepsakeBotanicals />
           </div>
         </section>
 
-        <section className="v2-gifts v2-scene v2-gift-gallery" id="gifts" data-light="late" aria-labelledby="gifts-title">
+        <ArchiveCollection items={archiveItems} photos={photos.gallery} />
+
+        {usefulBits.length > 0 && <section className="v2-useful v2-scene ks-guide" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
+          <div className="ks-folio ks-guide-folio">
+            <div className="ks-paper">
+              <header><KeepsakeMonogram /><p><T>The useful bits</T></p><h2 id="useful-title"><T>The questions someone was going to ask anyway.</T></h2></header>
+              <div className="v2-useful-list">
+                {usefulBits.map(item => <details key={item.id}><summary><span>{item.title[language]}</span><small><T>Read more</T></small></summary><p>{item.body[language]}</p></details>)}
+              </div>
+            </div>
+            <KeepsakeBotanicals />
+          </div>
+        </section>}
+
+        {giftsEnabled && <section className="v2-gifts v2-scene v2-gift-gallery" id="gifts" data-light="late" aria-labelledby="gifts-title">
           <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-gifts" />
           <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-gifts-secondary" />
           <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
-          <div className="v2-gifts-heading"><p><T>A few things</T></p><h2 id="gifts-title"><T>We’re saving room for.</T></h2><span><T>The catalogue opens from a private invitation so reservations stay private.</T></span></div>
-          <GiftShelf href={clock.giftsEnabled ? token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts" : null} />
-          {clock.giftsEnabled
-            ? <Link className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></Link>
-            : <p className="v2-feature-note"><T>The gift catalogue will open later.</T></p>}
+          <div className="v2-gifts-heading"><p><T>A few things</T></p><h2 id="gifts-title" tabIndex={-1}><T>We’re saving room for.</T></h2><span><T field="gift.desc" /></span></div>
+          <GiftShelf href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"} collections={giftCollections} />
+          <a className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></a>
           <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
-        </section>
+        </section>}
 
-        <section className="v2-mark v2-scene has-studio v2-reply-scene" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="v2-mark-copy"><p><T>Your reply</T></p><h2 id="mark-title"><T>A little word</T><br /><T>from you.</T></h2><span><T>Tell us if you’re coming. Leave a little love, if you like.</T></span></div>
-          {entered && <div className="v2-mark-studio" id="rsvp"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} rsvpEnabled={clock.rsvpEnabled} marksEnabled={clock.marksEnabled} onAttendanceSaved={setRsvpSaved} /></div>}
+        <section className="v2-mark v2-scene has-studio v2-reply-scene ks-reply" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
+          <div className="ks-reply-heading"><div className="v2-mark-copy"><KeepsakeMonogram /><p><T field="mark.head" /></p><h2 id="mark-title" tabIndex={-1}><T field="mark.sub" /></h2><span><T field="mark.desc" /></span></div><KeepsakeBotanicals arrangement="reply" /></div>
+          {entered && <div className="v2-mark-studio" id="rsvp" tabIndex={-1} role="group" aria-labelledby="mark-title"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} rsvpEnabled={clock.rsvpEnabled} marksEnabled={clock.marksEnabled} onAttendanceSaved={setRsvpSaved} /></div>}
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="mark-melastoma" />
         </section>
 
@@ -648,15 +609,14 @@ function WeddingWorld({ guestName = "", token = "" }: Props) {
             <p><T>Beyond the invitation</T></p>
             <h2 id="beyond-title"><T>The invitation ends here.</T><br /><T>The rest stays open.</T></h2>
             <nav aria-label={t("Beyond the invitation")}>
-              <Link href="/archive"><strong><T>The Archive</T></strong><span><T>Things we kept.</T></span></Link>
-              <span className="is-coming"><strong><T>The Gallery</T></strong><span><T>Then and now. Coming later.</T></span></span>
+              {destinations.map(item => <a key={item.href} href={item.href}><strong>{item.title[language]}</strong><span>{item.body[language]}</span></a>)}
             </nav>
           </div>
         </section>
         </div>
       </main>
 
-      <InvitationClosing entered={entered} edition={edition} past={clock.state === "past"} onReopen={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }} />
+      <InvitationClosing entered={entered} edition={edition} past={clock.state === "past"} guestName={displayName} token={token} onReopen={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }} />
     </div>
   );
 }

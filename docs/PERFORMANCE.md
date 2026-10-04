@@ -20,7 +20,7 @@ No new assets, libraries, autoplay or perpetual footer animation were introduced
 - Failed module loading has an honest error and explicit **Reload the invitation**
   action. A browser can cache a rejected module import: blindly repeating it is
   not a reliable retry. Reloading is offered only before an editor/draft exists.
-- Three.js already loaded after entry, and MapLibre already loaded near the map.
+- The accent revision retains the live lazy-loaded botanical renderer, instanced geometry, chapter windowing, DPR limits, reduced motion and static fallback. Garland and edge plants are fuller; physical-device performance still needs verification. MapLibre loads near the existing venue map.
   Those existing boundaries are preserved rather than claimed as new savings.
 - The garden no longer recursively constructs all eight rooms while idle at the
   hero. Preparation is limited to the nearby viewport window. Distant chapter

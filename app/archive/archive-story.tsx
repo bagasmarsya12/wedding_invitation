@@ -8,7 +8,7 @@ type Story = { title: string; type: string; excerpt: string | null; media_url: s
 
 export function ArchiveStory({ entry, builtIn = false, children }: { entry: Story; builtIn?: boolean; children: ReactNode }) {
   return <main className={`product-page archive-story-room story-material-${archiveMaterial(entry.type)}`}>
-    <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><a href="/archive"><T>Archive</T></a><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
+    <header className="product-header"><a href="/"><T>Bagas</T> <i>×</i><T>Iga</T></a><nav><a href="/archive"><T>Archive</T></a><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
     <article className="collection-story">
       <header className="collection-story-header">
         <a className="collection-return" href="/archive"><span aria-hidden="true">←</span><T>Back to Archive</T></a>
@@ -23,6 +23,6 @@ export function ArchiveStory({ entry, builtIn = false, children }: { entry: Stor
       <div className="collection-story-body">{children}</div>
       <nav className="collection-story-end" aria-label="Archive"><a href="/archive"><T>Return to the collection</T><span aria-hidden="true">↗</span></a><p><T>Only what we really kept.</T></p></nav>
     </article>
-    <footer className="product-footer"><img src="/assets/bagas-iga-mark.webp" alt="" /><p>Bagas × Iga<br />2026</p><a href="/"><T>Return to invitation</T></a></footer>
+    <footer className="product-footer"><img src="/assets/bagas-iga-mark.webp" alt="" /><p><T>Bagas × Iga</T><br />2026</p><a href="/"><T>Return to invitation</T></a></footer>
   </main>;
 }

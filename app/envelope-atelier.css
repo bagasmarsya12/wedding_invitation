@@ -1,0 +1,58 @@
+/* The opening uses the same print, gold and forest setting as Keepsake Atelier. */
+.v2-opening {
+  color:#f6f0e3;
+  background:radial-gradient(ellipse at 47% 42%,#3b5038 0%,#23372a 46%,#0d1c13 100%);
+  isolation:isolate;
+}
+.v2-opening::after { background:none; }
+.v2-opening-light { inset:0; opacity:.32; background:radial-gradient(ellipse at 15% 10%,#c6a35738,transparent 58%); transform:none; }
+.v2-opening .v2-opening-folio { border:0; min-height:4.5rem; color:#e4dcc3; font:400 .85rem var(--v2-serif); letter-spacing:0; }
+.v2-opening .language-switch button { min-height:44px; color:inherit; }
+.v2-opening .v2-opening-stage { width:min(440px,87vw,calc((100svh - 135px)*.75)); aspect-ratio:3/4; transform:none; }
+.v2-opening .v2-envelope { perspective:1400px; }
+.v2-opening .v2-envelope:hover,.v2-opening .v2-envelope:active { transform:none; }
+.atelier-envelope-art { position:absolute; inset:0; display:block; width:100%; height:100%; }
+.atelier-envelope-art canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.atelier-envelope-art.has-foil .atelier-envelope-fallback { visibility:hidden; }
+.atelier-envelope-fallback { position:absolute; inset:13.5% 9.5%; display:block; background:#243b2a; transform-style:preserve-3d; perspective:1000px; }
+.atelier-letter,.atelier-pocket,.atelier-flap { position:absolute; inset:0; display:block; background:#f6f0e3; transform-style:preserve-3d; }
+.atelier-letter img,.atelier-pocket img,.atelier-flap img { width:100%; height:100%; object-fit:fill; }
+.atelier-envelope-fallback .atelier-print { object-fit:cover; }
+.atelier-letter { z-index:1; }
+.atelier-pocket { z-index:3; clip-path:polygon(0 0,50% 25%,100% 0,100% 100%,0 100%); }
+.atelier-flap { z-index:4; clip-path:polygon(0 0,100% 0,50% 25%); transform-origin:50% 0; }
+.atelier-seal { position:absolute; z-index:5; top:25%; left:50%; display:grid; place-items:center; width:16%; aspect-ratio:1; transform:translate(-50%,-50%); border:1px solid #e9cf9a; border-radius:50%; background:radial-gradient(circle at 30% 25%,#f6e3b4,#bb9052 65%,#8b6737); box-shadow:0 3px 10px #07110a18,inset 0 0 0 3px #f2daa655; }
+.atelier-seal img { width:58%; mix-blend-mode:multiply; }
+.atelier-fallback-name { position:absolute; top:43%; left:20%; width:60%; color:#292721; font:400 clamp(1.5rem,5vw,3rem)/1.1 var(--v2-serif); overflow-wrap:anywhere; }
+.atelier-opening-recipient { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.v2-opening .atelier-open-label { position:absolute; top:100%; left:50%; display:flex; align-items:center; justify-content:center; gap:.7rem; min-height:46px; padding:.4rem .9rem; transform:translateX(-50%); color:#f1e8d1; border-bottom:1px solid #c4b18b60; font:400 .8rem var(--v2-sans); white-space:nowrap; }
+.v2-opening .v2-opening-date { bottom:1.25rem; color:#d1cfb6; font:400 .8rem/1.55 var(--v2-serif); }
+.v2-opening .v2-opening-skip { bottom:1.25rem; min-height:44px; color:#d1cfb6; letter-spacing:0; font-size:.75rem; }
+.v2-opening.is-opening { animation:atelier-opening-away 3.4s both; pointer-events:none; }
+.v2-opening.is-opening .v2-opening-stage { animation:v2-stage-journey 3.4s both; }
+.v2-opening.is-opening .atelier-open-label,.v2-opening.is-opening .v2-opening-folio,.v2-opening.is-opening .v2-opening-date,.v2-opening.is-opening .v2-opening-skip { animation:atelier-caption-away .45s both; }
+.v2-opening.is-opening .atelier-flap { animation:atelier-flap-open 1.2s .18s both; }
+.v2-opening.is-opening .atelier-seal { animation:atelier-seal-lift .5s both; }
+.v2-opening.is-opening .atelier-pocket { animation:atelier-pocket-away 1.3s .8s both; }
+.v2-opening.is-opening .atelier-letter { animation:atelier-letter-reveal 2.6s .6s both; }
+@keyframes v2-stage-journey { 0%,76%{opacity:1;transform:none}100%{opacity:0;transform:none} }
+@keyframes atelier-opening-away { 0%,76%{opacity:1}100%{opacity:0;visibility:hidden} }
+@keyframes atelier-caption-away { to{opacity:0} }
+@keyframes atelier-flap-open { to{transform:rotateX(-171deg)} }
+@keyframes atelier-seal-lift { to{opacity:0;transform:translate(-50%,-65%) scale(.92)} }
+@keyframes atelier-pocket-away { to{transform:translateY(96%);opacity:0} }
+@keyframes atelier-letter-reveal { 0%{transform:translateY(0)}55%{transform:translateY(-16%)}100%{transform:translateY(0)} }
+@media(max-width:600px) {
+  .v2-opening .v2-opening-folio { min-height:3.8rem; padding:0 1rem; }
+  .v2-opening .v2-opening-folio>span:nth-child(2) { display:none; }
+  .v2-opening .v2-opening-date { left:1rem; bottom:.6rem; max-width:65%; font-size:.7rem; }
+  .v2-opening .v2-opening-skip { right:1rem; bottom:.6rem; font-size:.7rem; }
+}
+@media(max-height:550px) {
+  .v2-opening .v2-opening-stage { width:min(300px,calc((100svh - 130px)*.75)); }
+  .v2-opening .v2-opening-folio { min-height:3rem; }
+  .v2-opening .v2-opening-date,.v2-opening .v2-opening-skip { bottom:.5rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .v2-opening *, .v2-opening *::before,.v2-opening *::after { animation:none!important;transition:none!important; }
+}

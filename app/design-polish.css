@@ -1,0 +1,31 @@
+/* Finish the existing typography and surfaces; keep the authored palette/art. */
+.v2-grand-day .v2-day-identity h1 > i { font-style:normal; }
+.v2-grand-day .v2-day-countdown span { letter-spacing:.035em; text-transform:none; }
+.language-switch button { opacity:.8; }
+.language-switch button[aria-pressed="true"] { opacity:1; }
+.v2-spine { transition:color 350ms ease,background 350ms ease; }
+.v2-archive-table-scene .archive-table.is-single .archive-table-field {
+  grid-template-columns:minmax(0,1fr); grid-auto-flow:row; max-width:27rem;
+  width:100%; margin-inline:auto; padding-inline:.5rem; overflow:visible;
+}
+.v2-beyond-copy nav:has(> a:only-child) { grid-template-columns:1fr; max-width:28rem; margin-inline:auto; }
+.archive-paper { transition:transform 350ms ease,box-shadow 350ms ease; }
+.archive-piece.is-open .archive-paper { transform:translateY(-4px) rotate(.7deg); }
+.archive-piece-visual { transition:opacity 300ms ease,transform 350ms ease; }
+.archive-piece.is-open .archive-piece-visual { transform:translateY(4px); }
+.archive-piece-visual img { transition:transform 350ms ease; }
+.archive-piece-note { transform:translateY(4px); transition:opacity 300ms ease,transform 350ms ease,visibility 300ms; }
+.archive-piece.is-open .archive-piece-note { transition-delay:0s; }
+.v2-world :is(a,button,summary,input,textarea):focus-visible { outline:2px solid #ad6979; outline-offset:4px; }
+.v2-world :is(a,button,summary) { -webkit-tap-highlight-color:#ad697933; }
+@media(hover:hover) and (pointer:fine) {
+  .archive-piece:not(.is-open) .archive-paper:hover .archive-piece-visual img { transform:scale(1.015); }
+  .v2-spine :is(a,button):hover,.v2-beyond-copy nav a:hover { text-decoration:underline; text-underline-offset:4px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .v2-spine { transition:none; }
+  .archive-paper,.archive-piece-visual,.archive-piece-note,.archive-piece-visual img { transition:none; }
+  .archive-piece.is-open .archive-paper,.archive-piece:not(.is-open) .archive-paper:hover,
+  .archive-piece:not(.is-open) .archive-paper:hover .archive-piece-visual img,
+  .archive-piece.is-open .archive-piece-visual,.archive-piece-note { transform:none; }
+}

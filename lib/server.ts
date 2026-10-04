@@ -169,7 +169,9 @@ export async function allowMutation(kind: string, subjectId: string, limit: numb
 
 export async function sitePhase(): Promise<SitePhase> {
   const setting = await db().prepare("SELECT value FROM settings WHERE key = 'site_phase' LIMIT 1").first<{ value: string }>();
-  return phaseForDate(new Date(), setting?.value);
+  const date=await db().prepare("SELECT value FROM settings WHERE key = 'cms.website' LIMIT 1").first<{value:string}>();
+  let weddingDate: string|undefined; try { weddingDate=date ? JSON.parse(date.value).weddingDate : undefined; } catch {}
+  return phaseForDate(new Date(), setting?.value, weddingDate);
 }
 
 export async function featureEnabled(feature: "rsvp" | "gifts" | "marks"): Promise<boolean> {

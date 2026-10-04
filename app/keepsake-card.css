@@ -1,0 +1,46 @@
+.v2-closing-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem 2rem; }
+.v2-closing-note .v2-keepsake-trigger { display:inline-flex; align-items:center; gap:.6rem; }
+.v2-keepsake-dialog {
+  box-sizing:border-box; width:min(65rem,calc(100vw - 2rem)); max-height:calc(100dvh - 2rem);
+  padding:1.5rem 2rem 2rem; overflow:auto; overscroll-behavior:contain;
+  color:#f6f0e3; background:#12231c; border:1px solid #aab49677; border-radius:3px;
+  font-family:var(--v2-sans); text-align:left;
+}
+.v2-keepsake-dialog::backdrop { background:rgb(7 18 12 / .88); }
+.v2-keepsake-header { position:sticky; top:-1.5rem; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.3rem 0 .6rem; background:#12231c; }
+.v2-keepsake-header h2 { max-width:none; margin:0; font:400 1.65rem/1.2 var(--v2-serif); color:#f6f0e3; letter-spacing:-.025em; }
+.v2-keepsake-dialog .v2-keepsake-close { display:grid; place-items:center; flex:none; width:44px; min-height:44px; margin:0; padding:0; color:#f6f0e3; border:0; background:transparent; cursor:pointer; }
+.v2-keepsake-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(16rem,.85fr); gap:1.5rem; align-items:center; }
+.v2-keepsake-loading { min-height:20rem; display:grid; place-items:center; font:italic 1.3rem/1.5 var(--v2-serif); }
+.v2-keepsake-personal { padding:1.5rem 0; }
+.v2-keepsake-personal h3 { margin:0 0 .8rem; font:400 clamp(2rem,3vw,2.9rem)/1.02 var(--v2-serif); letter-spacing:-.035em; color:#f6f0e3; }
+.v2-keepsake-personal .v2-keepsake-intro { max-width:28ch; margin:0 0 1.8rem; font:400 .85rem/1.65 var(--v2-sans); color:#b7bea3; }
+.v2-keepsake-name-form { display:grid; grid-template-columns:1fr auto; gap:.6rem; }
+.v2-keepsake-name-form label { grid-column:1/-1; font:400 .75rem/1.5 var(--v2-sans); color:#d7dcc9; }
+.v2-keepsake-name-form input { box-sizing:border-box; min-width:0; width:100%; min-height:44px; padding:.65rem .75rem; color:#f6f0e3; background:#21382c; border:1px solid #aab49677; border-radius:1px; font:400 .85rem/1.5 var(--v2-sans); }
+.v2-keepsake-name-form input::placeholder { color:#aab496; }
+.v2-keepsake-dialog .v2-keepsake-name-form button { margin:0; min-height:44px; padding:.55rem .8rem; border:1px solid #aab49677; color:#f6f0e3; background:transparent; font:400 .72rem/1.5 var(--v2-sans); letter-spacing:0; cursor:pointer; }
+.v2-keepsake-name-form button:disabled { opacity:.45; cursor:default; }
+.v2-keepsake-name-form small { grid-column:1/-1; color:#aab496; font:400 .68rem/1.5 var(--v2-sans); }
+.v2-keepsake-status { grid-column:1/-1; min-height:1rem; color:#d7dcc9; font:400 .68rem/1.5 var(--v2-sans); }
+.v2-keepsake-save-area { margin-top:1.4rem; }
+.v2-keepsake-dialog .v2-keepsake-save { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:.6rem; min-height:44px; margin:0; padding:.75rem 1rem; font:400 .78rem/1.5 var(--v2-sans); text-decoration:none; letter-spacing:0; }
+.v2-keepsake-save.digital-save { color:#21382c; background:#f6f0e3; border:1px solid #f6f0e3; }
+.v2-keepsake-save.image-save { color:#d7dcc9; background:transparent; border-bottom:1px solid #aab49677; padding-left:0; padding-right:0; }
+.v2-keepsake-personal .v2-keepsake-file-help { max-width:32ch; margin:.7rem 0 .65rem; color:#aab496; font:400 .7rem/1.6 var(--v2-sans); }
+.v2-keepsake-save-area > p[role=status] { font:400 .8rem/1.6 var(--v2-sans); color:#d7dcc9; }
+.v2-keepsake-dialog .v2-keepsake-retry { margin:.7rem 0 0; min-height:44px; border:1px solid #aab49677; color:#f6f0e3; background:transparent; font:400 .75rem/1.5 var(--v2-sans); }
+.v2-keepsake-personal .v2-keepsake-event-note { margin:1.8rem 0 0; padding-top:1rem; border-top:1px solid #aab49633; color:#b7bea3; font:400 .75rem/1.7 var(--v2-sans); }
+.v2-keepsake-dialog :is(button,a,input):focus-visible { outline:2px solid #c4878d; outline-offset:4px; }
+@media(max-width:720px) {
+  .v2-closing-actions { flex-direction:column; align-items:center; gap:0; margin-top:1.5rem; }
+  .v2-closing-note .v2-closing-actions > button { margin-top:.5rem; }
+  .v2-keepsake-dialog { width:calc(100vw - 1.25rem); max-height:calc(100dvh - 1.25rem); padding:1rem; }
+  .v2-keepsake-header { top:-1rem; padding:.25rem 0 .5rem; }
+  .v2-keepsake-header h2 { font-size:1.35rem; }
+  .v2-keepsake-layout { grid-template-columns:minmax(0,1fr); gap:.75rem; }
+  .v2-keepsake-personal { padding:1.25rem .5rem 0; }
+  .v2-keepsake-personal h3 { font-size:2.1rem; }
+  .v2-keepsake-personal .v2-keepsake-intro { margin-bottom:1.25rem; }
+}
+@media(max-width:360px) { .v2-keepsake-name-form { grid-template-columns:minmax(0,1fr); } }

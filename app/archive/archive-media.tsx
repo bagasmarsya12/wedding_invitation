@@ -18,7 +18,7 @@ export function ArchiveImage({ src, alt = "", decorative = false, className = ""
 
 export function ArchiveMedia({ src, title, type }: { src: string | null; title: string; type: string }) {
   const [failed, setFailed] = useState(false);
-  if (!src) return <span className="collection-media-missing"><T>Original material</T><br /><T>to be added</T></span>;
+  if (!src) return null;
   if (type === "audio") return failed ? <span className="collection-media-missing"><T>Audio unavailable.</T></span>
     : <div className="collection-audio"><span aria-hidden="true" className="collection-audio-groove" /><audio controls preload="none" aria-label={title} src={src} onError={() => setFailed(true)} /><small><T>Listen when you like.</T></small></div>;
   return <ArchiveImage key={src} src={src} alt={title} />;
