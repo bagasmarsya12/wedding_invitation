@@ -143,6 +143,34 @@ try {
     assert.equal((await fetch(new URL("/invite/not-a-real-token/keepsake", base))).status, 404);
     console.log("literal CMS copy, personal keepsake, access control and guest isolation: OK");
 
+    const messagePath=`/api/admin/invitations?id=${guestId}`;
+    assert.equal((await api(base,messagePath,"")).status,403);
+    const beforeCopy=(await api(base,"/api/admin/state",cookie)).body.guests;
+    const template="Halo {{nama}},\nIni undanganmu: {{link}}\nSampai bertemu di {{lokasi}} pada {{tanggal}}!";
+    assert.equal((await api(base,"/api/admin/state",cookie,{op:"set_setting",key:"invitation_message_template",value:template})).status,200);
+    const personal=await api(base,messagePath,cookie);
+    assert.equal(personal.status,200);
+    assert.match(personal.headers.get("cache-control"),/no-store/);
+    assert.equal(personal.body.guestId,guestId);
+    assert.equal(personal.body.inviteUrl,first.body.links[0].invitationUrl);
+    assert.ok(personal.body.message.startsWith("Halo Fixture Household,"));
+    assert.ok(personal.body.message.includes(first.body.links[0].invitationUrl));
+    assert.ok(!personal.body.message.includes("{{")&&!personal.body.message.includes(otherToken));
+    const secondMessage=await api(base,`/api/admin/invitations?id=${otherId}`,cookie);
+    assert.ok(secondMessage.body.message.startsWith("Halo Other Fixture,"));
+    assert.ok(secondMessage.body.message.includes(another.body.links[0].invitationUrl));
+    assert.ok(!secondMessage.body.message.includes(first.body.links[0].invitationUrl));
+    const updatedTemplate="Untuk {{nama}},\nTemplate terbaru: {{link}}";
+    assert.equal((await api(base,"/api/admin/state",cookie,{op:"set_setting",key:"invitation_message_template",value:updatedTemplate})).status,200);
+    assert.equal((await api(base,messagePath,cookie)).body.message,`Untuk Fixture Household,\nTemplate terbaru: ${first.body.links[0].invitationUrl}`);
+    assert.deepEqual((await api(base,"/api/admin/state",cookie)).body.guests,beforeCopy);
+    const replaced=await api(base,"/api/admin/state",cookie,{op:"regenerate_token",id:otherId});
+    assert.equal(replaced.status,200);
+    const replacedMessage=await api(base,`/api/admin/invitations?id=${otherId}`,cookie);
+    assert.equal(replacedMessage.body.inviteUrl,new URL(replaced.body.inviteUrl,base).toString());
+    assert.ok(!replacedMessage.body.message.includes(otherToken));
+    console.log("personal WA message: current template, isolated guest links, read-only copy and refreshed links: OK");
+
     const pass = await api(base, `/api/invite/${token}/pass`, "");
     assert.equal(pass.status, 200);
     assert.ok(pass.body.qrData.startsWith("data:image/svg+xml;base64,"));
@@ -153,6 +181,7 @@ try {
     assert.equal(arrival.body.guest.arrival.partySize, 2);
     assert.equal((await api(base, "/api/admin/check-in", cookie, { code: pass.body.code, partySize: 2 })).status, 409);
     assert.equal((await api(base, "/api/admin/state", cookie, { op: "update_guest", id: guestId, displayName: "Fixture Household", partyLimit: 2, status: "revoked" })).status, 200);
+    assert.equal((await api(base,messagePath,cookie)).status,404);
     assert.equal((await fetch(new URL(`/invite/${token}/keepsake`, base))).status, 404);
     assert.equal((await api(base, `/api/invite/${token}/pass`, "")).status, 404);
     assert.equal((await api(base, `/api/admin/check-in?code=${pass.body.code}`, cookie)).status, 404);

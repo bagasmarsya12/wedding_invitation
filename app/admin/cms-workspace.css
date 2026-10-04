@@ -45,5 +45,19 @@
 .admin-page .cms-import-errors{padding:1rem 1.5rem;border:1px solid #b3897c;background:#f4e5de;color:#813a2d}
 .admin-page .admin-status:empty{display:none}.admin-page .admin-status{margin:0;padding:.75rem 1rem;border:1px solid #c4cbbb;background:#e8eedf;max-width:100%}
 .admin-page .cms-loading-error{color:#8b3429}.admin-page .cms-photo-preview{width:10rem;aspect-ratio:1;object-fit:cover;display:block;margin-block:1rem}
+.admin-page .cms-guest-table table{min-width:58rem}
+.admin-page .cms-guest-table:focus-visible{outline:2px solid #506b50;outline-offset:3px}
+.admin-page .cms-guest-table caption{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.admin-page .cms-guest-table tbody th{position:static;background:transparent;white-space:normal;min-width:12rem;font-weight:400}
+.admin-page .cms-guest-table :is(td,th){vertical-align:middle}
+.admin-page .cms-guest-table tbody th strong{font-size:.9375rem;font-weight:500;overflow-wrap:anywhere}
+.admin-page .cms-guest-table tbody th small{display:block;color:#53614f;font-size:.75rem;margin-top:.3rem}
+.admin-page .cms-guest-row-actions{display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.admin-page .cms-guest-row-actions button{padding:.6rem .85rem;white-space:nowrap}
+.admin-page .cms-guest-row-actions .cms-copy-wa{background:#253e30;color:#f6f1e8;border-color:#253e30;min-width:9rem}
+.admin-page .cms-guest-table .cms-guest-detail{background:#eaf0e3}
+.admin-page .cms-guest-detail-body{padding:.5rem;max-width:56rem}
+.admin-page .cms-guest-detail-body form{margin-block:1rem}
+.admin-page .cms-message-template summary{cursor:pointer;font:500 1.25rem/1.6 var(--bx-sans);min-height:44px}
 @media(max-width:900px){.admin-page .cms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-page .admin-pane{grid-template-columns:1fr}.admin-page .admin-tabs{flex-wrap:nowrap;overflow-x:auto}.admin-page .admin-tabs button{white-space:nowrap}.admin-page .cms-bilingual{gap:1rem}}
 @media(max-width:600px){.admin-page .cms-bilingual,.admin-page .cms-moderation-grid{grid-template-columns:1fr}.admin-page .cms-metrics>div{padding:1rem}.admin-page .cms-metrics dd{font-size:2.125rem}.admin-page .admin-grid{width:calc(100% - 1.5rem)}.admin-page .cms-content-manager .guest-filters,.admin-page .cms-dashboard~section .guest-filters{grid-template-columns:1fr}.admin-page .cms-actions{gap:.5rem}.admin-page .cms-actions button{flex-grow:1}}

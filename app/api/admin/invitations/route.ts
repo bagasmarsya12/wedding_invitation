@@ -17,7 +17,7 @@ export async function GET(request:Request) {
     const token=await vault.open(row.invitation_token_enc);
     if(token && await sha256(token)===row.token_hash) { const invitationUrl=new URL(`/invite/${token}`,url.origin).toString(); links.push({guestId:row.id,guest:row.display_name,invitationUrl,message:invitationMessage(template,row.display_name,invitationUrl,config)}); }
   }
-  if(id) return links[0] ? privateJson({ok:true,inviteUrl:links[0].invitationUrl}) : apiError('This older link was not saved in the CMS. Paste the original saved link, or regenerate it.',404);
+  if(id) return links[0] ? privateJson({ok:true,guestId:links[0].guestId,inviteUrl:links[0].invitationUrl,message:links[0].message}) : apiError('Link tamu belum tersimpan atau sudah tidak aktif. Tempel link lama melalui detail pesan, atau perbarui link secara manual.',404);
   if(url.searchParams.get('export')==='csv') return new Response(toCsv([['Guest','Invitation URL','WhatsApp Message'],...links.map(l=>[l.guest,l.invitationUrl,l.message])]),{headers:{...privateHeaders,'content-type':'text/csv; charset=utf-8','content-disposition':'attachment; filename=bagas-iga-invitations.csv'}});
   return privateJson({links,unavailable:rows.results.length-links.length});
 }
