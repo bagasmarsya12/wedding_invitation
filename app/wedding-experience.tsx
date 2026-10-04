@@ -30,6 +30,7 @@ import { CalendarActions } from "./calendar-actions";
 import { LandingPhoto } from "./landing-photo";
 import { GuestPass } from "./guest-pass";
 import { EnvelopeArt } from "./envelope-art";
+import { AtelierFloralAccent, AtelierFloralFrame, type AtelierCorner } from "./atelier-flowers";
 import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
 import { EMPTY_PHOTOS, type LandingPhotos } from "@/lib/public-content";
 
@@ -95,21 +96,9 @@ function hashEdition(token: string) {
   return hash % 3;
 }
 
-function BotanicalImage({ src, className, eager = false }: { src: string; className: string; eager?: boolean }) {
-  const pixels: Record<string, number> = {
-    "syzygium/branch-long": 496, "syzygium/branch-short": 270,
-    "nephrolepis/frond-arched-01": 657, "nephrolepis/frond-short-02": 123,
-    "combretum/canopy-branch": 1005, "combretum/climber-left": 372,
-    "combretum/climber-right": 252, "combretum/flower-cascade": 278,
-    "combretum/flower-tip": 173, "combretum/tendril": 444,
-    "combretum/flower-cluster": 323, "combretum/flower-spray": 307,
-    "combretum/flower-tip-pink": 221, "combretum/leaf-sprig": 153,
-    "melastoma/full-stem": 503, "melastoma/branch-short": 286,
-    "dendrobium/branch-short": 251,
-  };
-  const key = src.replace("/assets/botanicals/", "").replace(".webp", "");
-  const style = pixels[key] ? { "--botanical-pixels": pixels[key] } as CSSProperties : undefined;
-  return <img className={className} style={style} src={src} alt="" aria-hidden="true" decoding="async" loading={eager ? "eager" : "lazy"} />;
+function BotanicalImage({src,className}:{src:string;className:string;eager?:boolean}) {
+  const corner:AtelierCorner=className.includes("fern")||className.includes("tendril")?"bottom-left":className.includes("melastoma")||className.includes("front")||className.includes("right")?"bottom-right":src.includes("dendrobium")?"top-right":"top-left";
+  return <AtelierFloralAccent corner={corner} className={className} style={{"--botanical-pixels":1086} as CSSProperties} />;
 }
 
 function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnabled }: { open: boolean; onToggle: () => void; confirmed: boolean; profilesEnabled: boolean; giftsEnabled: boolean }) {
@@ -407,7 +396,7 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
   useEffect(() => {
     if (!opening) return;
     // CSS completion has a timer backup so a disabled animation cannot trap a guest.
-    const timer=window.setTimeout(()=>{setEntered(true);setOpening(false);},3600);
+    const timer=window.setTimeout(()=>{setEntered(true);setOpening(false);},3800);
     return()=>window.clearTimeout(timer);
   },[opening]);
 
@@ -426,6 +415,7 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
       {!entered && (
         <section className={`v2-opening ${opening ? "is-opening" : ""}`} role="dialog" aria-modal="true" aria-labelledby="opening-recipient">
           <div className="v2-opening-light" aria-hidden="true" />
+          <AtelierFloralFrame className="atelier-opening-garden" />
           <header className="v2-opening-folio"><span>{display.names}</span><span>{display.stamp}</span><LanguageSwitch /></header>
           <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
             <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={`${t("Open the invitation")}${hasGuestName ? ` — ${displayName}` : ""}`}>

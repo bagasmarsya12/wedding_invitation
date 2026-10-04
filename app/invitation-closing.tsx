@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import type { CSSProperties } from "react";
+import { AtelierFloralFrame } from "./atelier-flowers";
 import { weddingDisplay } from "@/lib/website-content";
 import { T, useLanguage } from "./language";
 import { KeepsakeCard } from "./keepsake-card";
@@ -14,10 +14,7 @@ export function InvitationClosing({ entered, edition, past, token = "", onReopen
   return <footer className="v2-footer v2-closing" data-light="closing" aria-hidden={!entered} aria-labelledby="closing-title">
     <div className="v2-closing-paper">
       <div className="v2-closing-light" aria-hidden="true" />
-      <img className="v2-closing-botanical closing-orchid" src="/assets/botanicals/dendrobium/branch-short.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" style={{ "--native-pixels": 251 } as CSSProperties} />
-      <img className="v2-closing-botanical closing-leaf" src="/assets/botanicals/combretum/leaf-sprig.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" style={{ "--native-pixels": 153 } as CSSProperties} />
-      <img className="v2-closing-botanical closing-fern" src="/assets/botanicals/nephrolepis/frond-arched-01.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" style={{ "--native-pixels": 657 } as CSSProperties} />
-      <img className="v2-closing-botanical closing-cluster" src="/assets/botanicals/combretum/flower-cluster.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" style={{ "--native-pixels": 323 } as CSSProperties} />
+      <AtelierFloralFrame className="atelier-closing-garden" />
       <div className="v2-closing-folio"><span>{display.names}</span><time dateTime={website.weddingDate}>{display.stamp}</time></div>
       <div className="v2-closing-note">
         <img className="v2-closing-mark" src="/assets/bagas-iga-mark.webp" alt="" width="400" height="400" loading="lazy" decoding="async" />

@@ -2,20 +2,16 @@
 import type { CSSProperties } from "react";
 import { KEEPSAKE_ART } from "@/lib/keepsake-design";
 
-const arrangements = {
-  folio: ["leaf", "orchid", "buds", "rose", "fern", "fern", "rose", "orchid"],
-  portrait: ["fern", "buds", "orchid"],
-  reply: ["leaf", "orchid", "rose", "fern"],
-  album: ["fern", "buds", "rose"],
-} as const;
+import { AtelierFloralAccent, type AtelierCorner } from "./atelier-flowers";
+const arrangements:Record<string,AtelierCorner[]>={
+  folio:["top-left","top-right","bottom-left","bottom-right"],
+  portrait:["bottom-right","top-left"], reply:["top-right","bottom-left"],
+  album:["bottom-left","top-right","bottom-right"],
+};
 
-/** Static cutouts from the same approved masters as the digital keepsake. */
-export function KeepsakeBotanicals({ arrangement = "folio" }: { arrangement?: keyof typeof arrangements }) {
-  return <div className={`ks-botanicals ks-botanicals-${arrangement}`} aria-hidden="true">
-    {arrangements[arrangement].map((name, index) => {
-      const art = KEEPSAKE_ART[name];
-      return <img key={`${name}-${index}`} className={`ks-plant ks-plant-${index + 1}`} src={art.src} alt="" width={art.width} height={art.height} loading="lazy" decoding="async" draggable={false} style={{ "--ks-source-width": `${art.width}px` } as CSSProperties} />;
-    })}
+export function KeepsakeBotanicals({arrangement="folio"}:{arrangement?:"folio"|"portrait"|"reply"|"album"}) {
+  return <div className={`ks-botanicals ks-botanicals-${arrangement} atelier-botanicals`} aria-hidden="true">
+    {arrangements[arrangement].map((corner,index)=><AtelierFloralAccent key={corner} corner={corner} className={`ks-plant ks-plant-${index+1}`} style={{"--ks-source-width":"1086px"} as CSSProperties} />)}
   </div>;
 }
 

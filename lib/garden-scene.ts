@@ -238,6 +238,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
     let anchor = [0, 0, 0, 0];
     let heroLayer = .5;
     function add(kind: Kind, p: THREE.Vector3, q: THREE.Quaternion, s: THREE.Vector3, color: string) {
+      // Keep architectural foliage and light; flowers use the shared Atelier illustration.
+      if (kind === "petal" || kind === "heart" || kind === "bud") return;
       if (hero) {
         const z = anchor[3] * h * .24 - h * .12;
         const compensation = (distance - z) / distance;

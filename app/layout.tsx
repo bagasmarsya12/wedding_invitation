@@ -24,6 +24,7 @@ import "./archive-collection.css";
 import "./admin/cms-workspace.css";
 import "./envelope-atelier.css";
 import "./atelier-keepsake.css";
+import "./atelier-floral-accents.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { LanguageProvider } from "./language";
 import { VisitTracker } from "./visit-tracker";

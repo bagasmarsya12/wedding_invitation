@@ -10,7 +10,7 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
   const host = useRef<HTMLSpanElement>(null);
   const motion = useRef({ opening, reduced, started:null as number|null });
   const [foil, setFoil] = useState(false);
-  const [preview, setPreview] = useState("");
+  const [preview, setPreview] = useState({front:"",letter:""});
   const label=tField("keepsake.forLabel"),generic=tField("keepsake.genericRecipient");
   const frontNote=t("We’re getting married.");
   const signature=tField("keepsake.love"),names=tField("keepsake.signatureNames");
@@ -25,7 +25,7 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
       const current=motion.current;
       time=current.started===null?0:(now-current.started)/1000;
       scene?.draw({time,opening:current.opening,x:pointer.x,y:pointer.y});last=now;
-      if(current.opening&&time<3.45)frame=requestAnimationFrame(render);
+      if(current.opening&&time<3.65)frame=requestAnimationFrame(render);
     };
     const wake=()=>{if(!frame&&!stopped)frame=requestAnimationFrame(render);};
     const move=(event:PointerEvent)=>{if(motion.current.reduced)return;const r=el.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width*2-1;pointer.y=(event.clientY-r.top)/r.height*2-1;wake();};
@@ -36,11 +36,11 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
     el.addEventListener('pointermove',move);el.addEventListener('pointerleave',leave);document.addEventListener('visibilitychange',visibility);
     const prepare=async()=>{
       try{
-        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/envelope-scene.js?v=7';
+        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/envelope-scene.js?v=8';
         const [composition,renderer]=await Promise.all([import(/* @vite-ignore */ designPath),import(/* @vite-ignore */ scenePath)]);
         const assets=await composition.loadDesignAssets();if(stopped)return;
-        const design=composition.composeKeepsake(assets,{content:{recipient,card:{forLabel:label,genericRecipient:generic,frontNote,message:frontNote,signatureGreeting:signature,signatureNames:names}}});
-        setPreview(design.front.preview);design.mark=assets.mark;
+        const design=renderer.composeEnvelope(assets,{recipient,forLabel:label,genericRecipient:generic,frontNote,signature,names});
+        setPreview({front:design.front.preview,letter:design.letter.preview});
         try{
           scene=new renderer.EnvelopeScene(design,{reduced:motion.current.reduced});
           scene!.canvas.setAttribute('aria-hidden','true');el.appendChild(scene!.canvas);
@@ -55,9 +55,9 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
 
   return <span ref={host} className={`atelier-envelope-art ${foil?'has-foil':''}`} aria-hidden="true">
     <span className="atelier-envelope-fallback">
-      <span className="atelier-letter">{preview ? <img src={preview} alt="" /> : <><img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" /><span className="atelier-fallback-name">{recipient||generic}</span></>}</span>
-      <span className="atelier-pocket">{preview ? <img src={preview} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
-      <span className="atelier-flap">{preview ? <img src={preview} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
+      <span className="atelier-letter">{preview.letter ? <img src={preview.letter} alt="" /> : <><img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" /><span className="atelier-fallback-name">{recipient||generic}</span></>}</span>
+      <span className="atelier-pocket">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
+      <span className="atelier-flap">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
       <span className="atelier-seal"><img src="/atelier/assets/keepsake-mark.webp" alt="" /></span>
     </span>
   </span>;

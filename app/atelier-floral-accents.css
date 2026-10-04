@@ -1,0 +1,50 @@
+/* Shared floral vocabulary for the invitation's architecture and paper surfaces. */
+.v2-botanical-continuum .v2-day-garden { z-index:2; }
+.has-garden-renderer .day-tendril.atelier-floral-sprig,
+.has-garden-renderer .day-melastoma.atelier-floral-sprig,
+.has-garden-renderer .v2-background-bloom.atelier-floral-sprig { display:block; }
+
+.v2-world .atelier-floral-sprig { filter:none; }
+.v2-day-garden .day-combretum { position:absolute; width:clamp(18rem,34vw,34rem); top:1%; left:-5%; opacity:.95; transform:none; }
+.v2-day-garden .day-tendril { position:absolute; width:clamp(10rem,18vw,18rem); bottom:-20%; left:-4%; top:auto; opacity:.7; transform:none; }
+.v2-day-garden .day-melastoma { position:absolute; width:clamp(20rem,38vw,38rem); right:-8%; bottom:10%; top:auto; left:auto; opacity:.95; transform:none; }
+.v2-world .atelier-botanicals .ks-plant { width:var(--atelier-width,13rem); height:auto; rotate:0deg; transform:none; opacity:1; }
+.atelier-botanicals.ks-botanicals-folio .ks-plant-1 { --atelier-width:clamp(10rem,20vw,19rem); left:-4%; top:-7%; right:auto; bottom:auto; }
+.atelier-botanicals.ks-botanicals-folio .ks-plant-2 { --atelier-width:clamp(8rem,13vw,13rem); right:-3%; top:-4%; left:auto; bottom:auto; }
+.atelier-botanicals.ks-botanicals-folio .ks-plant-3 { --atelier-width:clamp(6rem,12vw,12rem); left:-3%; bottom:-15%; top:auto; right:auto; }
+.atelier-botanicals.ks-botanicals-folio .ks-plant-4 { --atelier-width:clamp(12rem,24vw,23rem); right:-7%; bottom:-8%; left:auto; top:auto; }
+.atelier-botanicals.ks-botanicals-portrait .ks-plant-1 { --atelier-width:clamp(7rem,17vw,14rem); right:-14%; bottom:-7%; left:auto; top:auto; }
+.atelier-botanicals.ks-botanicals-portrait .ks-plant-2 { --atelier-width:clamp(5rem,9vw,8rem); left:-12%; top:-5%; right:auto; bottom:auto; }
+.v2-person-iga .atelier-botanicals.ks-botanicals-portrait { transform:none; }
+.atelier-botanicals.ks-botanicals-reply .ks-plant-1 { --atelier-width:clamp(8rem,17vw,15rem); right:-9%; top:-2rem; left:auto; bottom:auto; }
+.atelier-botanicals.ks-botanicals-reply .ks-plant-2 { --atelier-width:clamp(7rem,13vw,12rem); left:-10%; bottom:-5rem; right:auto; top:auto; }
+.atelier-botanicals.ks-botanicals-album .ks-plant-1 { --atelier-width:clamp(8rem,14vw,14rem); left:-4%; bottom:-14%; right:auto; top:auto; }
+.atelier-botanicals.ks-botanicals-album .ks-plant-2 { --atelier-width:clamp(7rem,10vw,11rem); right:-4%; top:-3%; left:auto; bottom:auto; }
+.atelier-botanicals.ks-botanicals-album .ks-plant-3 { --atelier-width:clamp(11rem,20vw,20rem); right:-5%; bottom:-5%; left:auto; top:auto; }
+.v2-profile-portrait > .v2-portrait-orchid,.v2-profile-portrait > .v2-portrait-melastoma { display:none; }
+.v2-world .details-syzygium { width:clamp(7rem,15vw,14rem); filter:none; opacity:.95; }
+.v2-world .v2-world-emergence { width:clamp(6rem,12vw,11rem); opacity:.75; }
+.v2-world .mark-melastoma { display:none; }
+.atelier-closing-garden { z-index:0; }
+.v2-closing-folio,.v2-closing-colophon { z-index:1; }
+.atelier-closing-garden .atelier-corner-top-left { width:clamp(10rem,20vw,19rem); top:4.8rem; left:-8%; }
+.atelier-closing-garden .atelier-corner-top-right { width:clamp(6rem,12vw,11rem); top:4.8rem; right:-3%; }
+.atelier-closing-garden .atelier-corner-bottom-left { width:clamp(7rem,13vw,13rem); bottom:5.8rem; left:-5%; }
+.atelier-closing-garden .atelier-corner-bottom-right { width:clamp(12rem,24vw,22rem); bottom:5.8rem; right:-8%; }
+@media(max-width:700px) {
+ .v2-day-garden .day-combretum { width:58vw; top:2%; left:-17%; }
+ .v2-day-garden .day-tendril { width:32vw; bottom:-12%; left:-10%; }
+ .v2-day-garden .day-melastoma { width:50vw; bottom:7%; right:-21%; }
+ .v2-world .atelier-botanicals.ks-botanicals-folio .ks-plant-1 { --atelier-width:8rem; left:-8%; top:-4%; }
+ .v2-world .atelier-botanicals.ks-botanicals-folio .ks-plant-2 { --atelier-width:5rem; right:-9%; top:2%; }
+ .v2-world .atelier-botanicals.ks-botanicals-folio .ks-plant-3 { --atelier-width:5rem; left:-7%; bottom:-4%; }
+ .v2-world .atelier-botanicals.ks-botanicals-folio .ks-plant-4 { --atelier-width:9rem; right:-11%; bottom:-5%; }
+ .v2-world .atelier-botanicals.ks-botanicals-portrait .ks-plant-1 { --atelier-width:7rem; }
+ .v2-world .atelier-botanicals.ks-botanicals-portrait .ks-plant-2 { --atelier-width:4.5rem; }
+ .v2-world .atelier-botanicals.ks-botanicals-reply .ks-plant-1 { --atelier-width:6rem; top:0; right:-9%; }
+ .v2-world .atelier-botanicals.ks-botanicals-reply .ks-plant-2 { --atelier-width:5rem; left:-9%; bottom:-1rem; }
+ .atelier-closing-garden .atelier-corner-top-left { width:42vw; top:5rem; left:-18%; }
+ .atelier-closing-garden .atelier-corner-top-right { width:26vw; top:5rem; right:-11%; }
+ .atelier-closing-garden .atelier-corner-bottom-left { width:27vw; left:-12%; bottom:8rem; }
+ .atelier-closing-garden .atelier-corner-bottom-right { width:42vw; right:-20%; bottom:7rem; }
+}
