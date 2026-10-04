@@ -6,8 +6,11 @@ if (!base || !/^https?:\/\//.test(base)) {
 }
 
 const checks = [
-  ["homepage", "/", 200, ["Pandiga", "01 November 2026"]],
+  ["homepage", "/", 200, ["Pandiga", "1 November 2026"]],
   ["archive", "/archive", 200, []],
+  ["keepsake preview", "/keepsake", 200, ["save-front", "save-back", "save-video"]],
+  ["invalid private keepsake", "/invite/not-a-real-invitation/keepsake", 404, []],
+  ["foil module", "/atelier/envelope-scene.js", 200, ["EnvelopeScene"]],
   ["invalid guest", "/invite/not-a-real-invitation", 404, []],
 ];
 for (const [name, path, status, markers] of checks) {
@@ -21,6 +24,10 @@ for (const [name, path, status, markers] of checks) {
 const admin = await fetch(new URL("/api/admin/state", base), { redirect: "manual" });
 if (admin.status === 200) { console.error("anonymous admin access: unexpectedly allowed"); process.exitCode = 1; }
 else console.log(`anonymous admin access: blocked (${admin.status})`);
+
+const keepsakeAdmin = await fetch(new URL("/api/admin/keepsake", base), { redirect: "manual" });
+if (keepsakeAdmin.status !== 403) { console.error(`anonymous keepsake admin: got ${keepsakeAdmin.status}`); process.exitCode = 1; }
+else console.log("anonymous keepsake admin: blocked (403)");
 
 if (process.env.INVITE_TEST_URL) {
   const invite = await fetch(process.env.INVITE_TEST_URL, { redirect: "manual" });
