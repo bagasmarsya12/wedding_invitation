@@ -1,3 +1,4 @@
+import { PROFILE_LABEL_FIELDS, PROFILE_LABEL_TRANSLATIONS } from './profile-labels';
 // AUTO-GENERATED from sketches/admin-cms-v2 mockup (12 sections / 96 fields).
 // Defaults are the current landing literals; empty DB override = fallback.
 
@@ -56,20 +57,19 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
   { id: "profil", label: "Profil (foto + kata-kata)", photo: true, fields: [
     { key: "kicker", label: "Kicker", value: "For those who know one of us better." },
     { key: "head", label: "Heading", value: "The two of us, as observed by the other." },
+    ...PROFILE_LABEL_FIELDS.map(({ key, label, value }) => ({ key, label, value })),
     { key: "nama1", label: "Nama Bagas", value: "Bagas Marsya Pratama Nugraha" },
-    { key: "b_known", label: "Bagas — Known for", value: "A small detail about Bagas, from Iga." },
+    { key: "b_known", label: "Bagas — Hal Spesial Menurut Iga", value: "A small detail about Bagas, from Iga." },
     { key: "b_found", label: "Bagas — Usually found", value: "A favourite place or everyday ritual." },
-    { key: "b_family", label: "Keluarga Bagas", value: "Family details will be added." },
+    { key: "b_family", label: "Bagas — Di Balik Nama", value: "Family details will be added." },
     { key: "b_cap", label: "Bagas — caption foto", value: "Bagas, as himself." },
     { key: "i_nama", label: "Nama Iga", value: "Iga Noviyanti Rohman" },
-    { key: "i_known", label: "Iga — Known for", value: "A small detail about Iga, from Bagas." },
+    { key: "i_known", label: "Iga — Hal Spesial Menurut Bagas", value: "A small detail about Iga, from Bagas." },
     { key: "i_found", label: "Iga — Usually found", value: "A place, a habit, a little thing she loves." },
-    { key: "i_family", label: "Keluarga Iga", value: "Family details will be added." },
+    { key: "i_family", label: "Iga — Di Balik Nama", value: "Family details will be added." },
     { key: "i_cap", label: "Iga — caption foto", value: "Iga, as herself." },
-    { key: "quote label", label: "Label kutipan Iga", value: "According to Iga" },
-    { key: "quote1", label: "Kutipan Iga tentang Bagas", value: "“A few words from Iga will live here.”" },
-    { key: "quote label2", label: "Label kutipan Bagas", value: "According to Bagas" },
-    { key: "quote2", label: "Kutipan Bagas tentang Iga", value: "“A few words from Bagas will live here.”" },
+    { key: "quote1", label: "Bagas — Di Mata Iga", value: "“A few words from Iga will live here.”" },
+    { key: "quote2", label: "Iga — Di Mata Bagas", value: "“A few words from Bagas will live here.”" },
   ] },
   { id: "story", label: "Our Story (template singkat)", fields: [
     { key: "head", label: "Heading cerita", value: "How we got here." },
@@ -175,3 +175,5 @@ export function contentKey(sectionId: string, fieldKey: string): string {
 
 Object.assign(CONTENT_DEFAULTS, EXTRA_CONTENT_TRANSLATIONS);
 Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,,value])=>['id.photoComments.'+key,value])));
+
+Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);

@@ -1,3 +1,4 @@
+import { upgradeProfileLabelCopy } from './profile-labels';
 import { contentEditorSections } from './content-editor-sections';
 import { CONTENT_DEFAULTS } from './content-defaults';
 import { validateWebsiteBlocks, validateWebsiteConfig, type WebsiteBlocks, type WebsiteConfig } from './website-content';
@@ -20,7 +21,7 @@ function record(input:unknown):input is Record<string,unknown>{return Boolean(in
 export function validateSectionSnapshot(id:string,input:unknown,base:{config:WebsiteConfig;blocks:WebsiteBlocks}):SectionSnapshot|null {
   if(!sectionDefinition(id)||!record(input)||Object.keys(input).some(k=>!['copy','config','blocks','arrival','media'].includes(k))||!record(input.copy)||!record(input.config)||!record(input.blocks)||!record(input.media))return null;
   const copyKeys=sectionCopyKeys(id),configKeys=sectionConfigKeys(id),blockKeys=sectionBlockKeys(id);
-  const copy=input.copy,configInput=input.config,blocksInput=input.blocks;
+  const copy=id==='profil'?upgradeProfileLabelCopy(input.copy):input.copy,configInput=input.config,blocksInput=input.blocks;
   if(Object.keys(copy).length!==copyKeys.length||copyKeys.some(k=>typeof copy[k]!=='string')||Object.keys(copy).some(k=>!copyKeys.includes(k)))return null;
   for(const field of sectionDefinition(id)!.fields)for(const key of [field.key,`id.${field.key}`])if((copy[key] as string).length>field.limit)return null;
   if(Object.keys(configInput).some(k=>!configKeys.includes(k as keyof WebsiteConfig))||configKeys.some(k=>!(k in configInput)))return null;
@@ -35,7 +36,7 @@ export function validateSectionSnapshot(id:string,input:unknown,base:{config:Web
     media[slot]=value as string|null;
   }
   for(const slot of slots)if(!(slot in media))media[slot]=null;
-  return {copy:Object.fromEntries(copyKeys.map(k=>[k,(input.copy as Record<string,string>)[k].trim()])),config:Object.fromEntries(configKeys.map(k=>[k,config[k]])),blocks:Object.fromEntries(blockKeys.map(k=>[k,blocks[k]])),...(arrival?{arrival}:{}),media};
+  return {copy:Object.fromEntries(copyKeys.map(k=>[k,(copy as Record<string,string>)[k].trim()])),config:Object.fromEntries(configKeys.map(k=>[k,config[k]])),blocks:Object.fromEntries(blockKeys.map(k=>[k,blocks[k]])),...(arrival?{arrival}:{}),media};
 }
 export function snapshotChanges(a:SectionSnapshot,b:SectionSnapshot){return [
   ...Object.keys(b.copy).filter(k=>a.copy[k]!==b.copy[k]).map(k=>({key:k,label:`${k.startsWith('id.')?'Indonesia':'English'} · ${sectionDefinitionForKey(k)}`,before:a.copy[k]??'',after:b.copy[k]})),

@@ -523,10 +523,10 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <div className="v2-profile-copy">
               <h3 id="profile-bagas-title">{tField("profil.nama1")}</h3>
               <dl>
-                <div><dt><T>Family</T></dt><dd><T field="profil.b_family" /></dd></div>
-                <div><dt><T>Known for</T></dt><dd><T field="profil.b_known" /></dd></div>
+                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.b_family" /></dd></div>
+                <div><dt><T field="profil.b_known_label" /></dt><dd><T field="profil.b_known" /></dd></div>
                 <div><dt><T>Usually found</T></dt><dd><T field="profil.b_found" /></dd></div>
-                <div><dt><T>According to Iga</T></dt><dd><T field="profil.quote1" /></dd></div>
+                <div><dt><T field="profil.b_eyes_label" /></dt><dd><T field="profil.quote1" /></dd></div>
               </dl>
             </div>
           </article>
@@ -542,10 +542,10 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <div className="v2-profile-copy">
               <h3 id="profile-iga-title">{tField("profil.i_nama")}</h3>
               <dl>
-                <div><dt><T>Family</T></dt><dd><T field="profil.i_family" /></dd></div>
-                <div><dt><T>Known for</T></dt><dd><T field="profil.i_known" /></dd></div>
+                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.i_family" /></dd></div>
+                <div><dt><T field="profil.i_known_label" /></dt><dd><T field="profil.i_known" /></dd></div>
                 <div><dt><T>Usually found</T></dt><dd><T field="profil.i_found" /></dd></div>
-                <div><dt><T>According to Bagas</T></dt><dd><T field="profil.quote2" /></dd></div>
+                <div><dt><T field="profil.i_eyes_label" /></dt><dd><T field="profil.quote2" /></dd></div>
               </dl>
             </div>
           </article>

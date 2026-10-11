@@ -1,7 +1,9 @@
+import { PROFILE_LABEL_KEYS } from './profile-labels';
 // Live public copy fields. Event settings and repeatable collections have their own editors.
 import { PHOTO_COMMENT_KEYS } from './photo-comment-copy';
 export const ACTIVE_CONTENT_KEYS = [
   ...PHOTO_COMMENT_KEYS,
+  ...PROFILE_LABEL_KEYS,
   "archive.desc",
   "archive.head",
   "beyond.arch t",
@@ -55,8 +57,6 @@ export const ACTIVE_CONTENT_KEYS = [
   "profil.i_nama",
   "profil.kicker",
   "profil.nama1",
-  "profil.quote label",
-  "profil.quote label2",
   "profil.quote1",
   "profil.quote2",
   "rsvp.hadir",
