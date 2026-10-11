@@ -1,3 +1,4 @@
+import { validRichText, validPlainText } from './rich-text';
 import { CONTENT_DEFAULTS, type ContentMap } from './content-defaults';
 import { indonesian } from './invitation-copy';
 
@@ -56,7 +57,7 @@ export function validateWebsiteConfig(input: unknown): WebsiteConfig | null {
 export function validateWebsiteBlocks(input: unknown): WebsiteBlocks | null {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   const c=input as Record<string,unknown>;
-  const localized=(v:unknown,max:number)=>Boolean(v && typeof v==='object' && !Array.isArray(v) && ['en','id'].every(k=>typeof (v as Record<string,unknown>)[k]==='string' && ((v as Record<string,string>)[k]).length<=max));
+  const localized=(v:unknown,max:number,rich=false)=>Boolean(v && typeof v==='object' && !Array.isArray(v) && ['en','id'].every(k=>(rich?validRichText:validPlainText)((v as Record<string,unknown>)[k],max)));
   const result: Record<string,unknown[]>={};
   for (const kind of ['story','faq','photos','links']) {
     if (!Array.isArray(c[kind]) || (c[kind] as unknown[]).length>24) return null;
@@ -70,7 +71,7 @@ export function validateWebsiteBlocks(input: unknown): WebsiteBlocks | null {
         if(typeof row.slot!=='string' || !/^[a-z0-9-]{1,60}$/.test(row.slot) || !localized(row.caption,500)) return null;
         result[kind].push({id:row.id,slot:row.slot,caption:row.caption});
       } else {
-        if(!localized(row.title,200) || !localized(row.body,2000)) return null;
+        if(!localized(row.title,200) || !localized(row.body,2000,true)) return null;
         if(kind==='links') {
           if(typeof row.href!=='string' || row.href.length>500) return null;
           let safe=/^\/(?!\/)[A-Za-z0-9_./?#=-]*$/.test(row.href) && !row.href.includes('..');

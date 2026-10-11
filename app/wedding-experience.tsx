@@ -1,4 +1,5 @@
 "use client";
+import { FormattedText } from "./formatted-text";
 /* eslint-disable @next/next/no-img-element */
 
 import { ArrowRight, Sun, Sunset } from "lucide-react";
@@ -458,7 +459,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <p className="v2-grand-prelude"><T>We’re getting married.</T></p>
             <div className="v2-day-identity">
               <h1 id="day-title" ref={dayTitleRef} tabIndex={-1} aria-label={display.names}><span>{website.secondName}</span>{" "}<i aria-hidden="true">&amp;</i>{" "}<span>{website.firstName}</span></h1>
-              <p className="v2-grand-note"><T>Our favourite people. One very good reason to gather.</T></p>
+              <p className="v2-grand-note"><T field="hero.hero sub" rich /></p>
               <time dateTime={website.weddingDate}><span>{display.day}</span>{display.date}</time>
               <p className="v2-grand-venue">{display.venue}<span>{t("Akad")} {website.akadTime} · {t("Reception")} {website.receptionTime} <T>WIB</T></span></p>
             </div>
@@ -477,18 +478,18 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <header className="v2-destination-head">
               <p><T>The details</T></p>
               <h2 id="details-title" tabIndex={-1}><T field="details.head" /></h2>
-              <p className="v2-destination-intro"><T>Here’s when and where to find us. We can’t wait to see you there.</T></p>
+              <p className="v2-destination-intro"><T field="details.sub" rich /></p>
             </header>
             <div className="v2-destination-card ks-event-paper">
               <time className="v2-destination-date" dateTime={website.weddingDate}><span>{display.day}</span>{display.date}</time>
               <div className="v2-destination-events" aria-label={t("Wedding schedule")}>
                 <article>
                   <Sun aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime={akad.startsAt}>{akad.time}</time><h3><T>Akad</T></h3><p><T>The official part.</T></p><CalendarActions eventKey="akad" /></div>
+                  <div><time dateTime={akad.startsAt}>{akad.time}</time><h3><T>Akad</T></h3><p><T field="details.akad" rich /></p><CalendarActions eventKey="akad" /></div>
                 </article>
                 <article>
                   <Sunset aria-hidden="true" className="v2-destination-event-icon" strokeWidth={1.35} />
-                  <div><time dateTime={reception.startsAt}>{reception.time}</time><h3><T>Reception</T></h3><p><T>The louder part.</T></p><CalendarActions eventKey="reception" /></div>
+                  <div><time dateTime={reception.startsAt}>{reception.time}</time><h3><T>Reception</T></h3><p><T field="details.resepsi" rich /></p><CalendarActions eventKey="reception" /></div>
                 </article>
               </div>
               <div className="v2-destination-venue">
@@ -523,9 +524,9 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <div className="v2-profile-copy">
               <h3 id="profile-bagas-title">{tField("profil.nama1")}</h3>
               <dl>
-                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.b_family" /></dd></div>
-                <div><dt><T field="profil.b_known_label" /></dt><dd><T field="profil.b_known" /></dd></div>
-                <div><dt><T field="profil.b_eyes_label" /></dt><dd><T field="profil.quote1" /></dd></div>
+                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.b_family" rich /></dd></div>
+                <div><dt><T field="profil.b_known_label" /></dt><dd><T field="profil.b_known" rich /></dd></div>
+                <div><dt><T field="profil.b_eyes_label" /></dt><dd><T field="profil.quote1" rich /></dd></div>
               </dl>
             </div>
           </article>
@@ -541,9 +542,9 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <div className="v2-profile-copy">
               <h3 id="profile-iga-title">{tField("profil.i_nama")}</h3>
               <dl>
-                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.i_family" /></dd></div>
-                <div><dt><T field="profil.i_known_label" /></dt><dd><T field="profil.i_known" /></dd></div>
-                <div><dt><T field="profil.i_eyes_label" /></dt><dd><T field="profil.quote2" /></dd></div>
+                <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.i_family" rich /></dd></div>
+                <div><dt><T field="profil.i_known_label" /></dt><dd><T field="profil.i_known" rich /></dd></div>
+                <div><dt><T field="profil.i_eyes_label" /></dt><dd><T field="profil.quote2" rich /></dd></div>
               </dl>
             </div>
           </article>
@@ -553,7 +554,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
           <div className="ks-folio ks-story-folio">
             <div className="ks-paper">
               <header><KeepsakeMonogram /><p><T>Our story</T></p><h2 id="our-story-title"><T field="story.head" /></h2></header>
-              <ol>{blocks.story.map((item,index) => <li key={item.id}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span><h3>{item.title[language]}</h3><p>{item.body[language]}</p></li>)}</ol>
+              <ol>{blocks.story.map((item,index) => <li key={item.id}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span><h3>{item.title[language]}</h3><p><FormattedText value={item.body[language]}/></p></li>)}</ol>
             </div>
             <KeepsakeBotanicals />
           </div>
@@ -564,8 +565,8 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
         {giftsEnabled && <GiftSection token={token} guestName={displayName} gifts={giftItems} />}
 
         <section className="v2-mark v2-scene has-studio v2-reply-scene ks-reply" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="ks-reply-heading"><div className="v2-mark-copy"><p><T field="mark.head" /></p><h2 id="mark-title" tabIndex={-1}><T field="mark.sub" /></h2><span><T field="mark.desc" /></span></div><KeepsakeBotanicals arrangement="reply" /></div>
-          {entered && <div className="v2-mark-studio" id="rsvp" tabIndex={-1} role="group" aria-labelledby="mark-title"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} marksEnabled={clock.marksEnabled} rsvp={rsvp} partyLimit={partyLimit} /></div>}
+          <div className="ks-reply-heading"><div className="v2-mark-copy"><p><T field="mark.head" /></p><h2 id="mark-title" tabIndex={-1}><T field="mark.sub" /></h2><span><T field="mark.desc" rich /></span></div><KeepsakeBotanicals arrangement="reply" /></div>
+          {entered && <div className="v2-mark-studio" id="rsvp" tabIndex={-1} role="group" aria-labelledby="mark-title"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} marksEnabled={clock.marksEnabled} rsvp={rsvp} /></div>}
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="mark-melastoma" />
         </section>
 
@@ -583,14 +584,14 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <p><T>Beyond the invitation</T></p>
             <h2 id="beyond-title"><T>The invitation ends here.</T><br /><T>The rest stays open.</T></h2>
             <nav aria-label={t("Beyond the invitation")}>
-              {destinations.map(item => <a key={item.href} href={item.href}><strong>{item.title[language]}</strong><span>{item.body[language]}</span></a>)}
+              {destinations.map(item => <a key={item.href} href={item.href}><strong>{item.title[language]}</strong><span><FormattedText value={item.body[language]}/></span></a>)}
             </nav>
           </div>
         </section>
         </div>
       </main>
 
-      <InvitationClosing keepsakeNote={keepsakeNote} entered={entered} edition={edition} past={clock.state === "past"} guestName={displayName} onReopen={() => { scrollTo({top:0,behavior:'instant'});setEntered(false);setOpening(false);setLiftedLetter(null);setCinematicEntry(false); }} />
+      <InvitationClosing keepsakeNote={keepsakeNote} entered={entered} edition={edition} past={clock.state === "past"} guestName={displayName} />
     </div>
   );
 }

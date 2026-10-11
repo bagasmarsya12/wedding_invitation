@@ -19,7 +19,7 @@ export function KeepsakeCard({ guestName = "", edition = 0, keepsakeNote }: { gu
   }, [open]);
 
   return <>
-    <button type="button" className="v2-keepsake-trigger" aria-haspopup="dialog" aria-controls={id} onClick={() => { dialog.current?.showModal(); setOpen(true); }}><T>Open your keepsake</T><ArrowUpRight size={14} strokeWidth={1.4} aria-hidden="true" /></button>
+    <button type="button" className="v2-keepsake-trigger" aria-haspopup="dialog" aria-controls={id} aria-expanded={open} onClick={() => { dialog.current?.showModal(); setOpen(true); }}><span className="v2-keepsake-trigger-copy"><span><T>Open your keepsake</T></span><small><T field="keepsake.openHint" /></small></span><ArrowUpRight size={20} strokeWidth={1.4} aria-hidden="true" /></button>
     <dialog ref={dialog} id={id} className="v2-keepsake-dialog" aria-labelledby={`${id}-title`} onClose={() => setOpen(false)}>
       <header className="v2-keepsake-header">
         <h2 id={`${id}-title`}><T>Your digital keepsake.</T></h2>

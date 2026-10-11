@@ -15,7 +15,7 @@ export function ArchiveCollection({ items, photos }: { items: ArchiveItem[]; pho
       <header className="v2-archive-heading">
         <KeepsakeMonogram />
         <h2 id="archive-title" tabIndex={-1}><T field="archive.head" /></h2>
-        <p className="memory-intro"><T field="archive.desc" /></p>
+        <p className="memory-intro"><T field="archive.desc" rich /></p>
       </header>
       <SelectedMoments photos={photos} />
       <footer className="memory-footer">

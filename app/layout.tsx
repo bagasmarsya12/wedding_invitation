@@ -32,6 +32,7 @@ import "./admin/jukebox-manager.css";
 import "./gift-section.css";
 import "./invitation-audit.css";
 import "./photo-comments.css";
+import "./cms-prose.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { LanguageProvider } from "./language";
 import { VisitTracker } from "./visit-tracker";

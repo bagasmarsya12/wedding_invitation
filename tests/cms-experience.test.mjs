@@ -30,7 +30,7 @@ test('profile editor hides removed captions and duplicate labels without deletin
 
 test('arrival and closing editors hide wording already removed from the invitation', () => {
   const fields = contentEditorSections().flatMap(section => visibleEditorFields(section)).map(field => field.key);
-  for (const key of ['guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending', 'useful.head', 'useful.sub', 'footer.edisi']) assert.ok(!fields.includes(key), key);
+  for (const key of ['guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending', 'useful.head', 'useful.sub', 'footer.edisi', 'footer.amplop', 'guest.party', ...['A reply from','Reply received','View the envelope again'].map(copyKey)]) assert.ok(!fields.includes(key), key);
   for (const key of ['guest.arrival', 'guest.faq', 'guest.contact', 'guest.access', 'guest.transport', 'keepsake.hashtag']) assert.ok(fields.includes(key), key);
 });
 

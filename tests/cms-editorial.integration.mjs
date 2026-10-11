@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { serializeRichText, RICH_TEXT_PREFIX } from '../lib/rich-text.ts';
 export async function verifyEditorialFlows(base,cookie){
   async function request(path,body,{method=body?'POST':'GET',auth=true,origin=base}={}){
     const response=await fetch(base+path,{method,redirect:'manual',headers:{...(auth?{cookie}:{}),...(body?{'content-type':'application/json',origin}:{})},body:body?JSON.stringify(body):undefined});
@@ -57,6 +58,29 @@ export async function verifyEditorialFlows(base,cookie){
   const raced=await Promise.all([act('hero',hero,'save',{snapshot:a}),act('hero',hero,'save',{snapshot:b})]);assert.deepEqual(raced.map(r=>r.status).sort(),[200,409]);
   hero=(await read('hero')).data;const winner=hero.document.draft.copy[key];assert.ok(['RACE_A','RACE_B'].includes(winner));
   const historyDrafts=await Promise.all(hero.document.history.filter(r=>r.kind==='draft').map(r=>request(`/api/admin/editor?section=hero&revision=${r.id}`)));assert.ok(!historyDrafts.some(r=>r.data.revision.copy[key]===(winner==='RACE_A'?'RACE_B':'RACE_A')));
+  // Rich text survives private drafts, publication, reload and historical restoration.
+  let proseState=(await read('profil')).data;
+  const proseOriginal=structuredClone(proseState.live);
+  const proseDraft=structuredClone(proseOriginal);
+  const prose=serializeRichText({type:'doc',content:[{type:'paragraph',attrs:{spaceAfter:'airy'},content:[{type:'text',text:'RICH_PROSE_FIXTURE',marks:[{type:'bold'}]}]},{type:'paragraph',content:[{type:'text',text:'Italic fixture',marks:[{type:'italic'}]},{type:'hardBreak'},{type:'text',text:'Next line'}]}]});
+  proseDraft.copy['id.profil.i_known']=prose;
+  response=await act('profil',proseState,'save',{snapshot:proseDraft});assert.equal(response.status,200,response.text);proseState=response.data;
+  assert.ok(!(await request('/')).text.includes('RICH_PROSE_FIXTURE'));
+  const prosePreview=await request('/admin/content-preview?section=profil');
+  assert.ok(prosePreview.text.includes('<strong>RICH_PROSE_FIXTURE</strong>'));
+  assert.ok(prosePreview.text.includes('data-space="airy"'));
+  response=await act('profil',proseState,'publish');assert.equal(response.status,200,response.text);proseState=response.data;
+  assert.equal((await read('profil')).data.live.copy['id.profil.i_known'],prose);
+  assert.ok((await request('/')).text.includes('<em>Italic fixture</em>'));
+  const malformed=structuredClone(proseDraft);malformed.copy['id.profil.i_known']=RICH_TEXT_PREFIX+'{"type":"script"}';
+  assert.equal((await act('profil',proseState,'save',{snapshot:malformed})).status,400);
+  const titleInjection=structuredClone(proseDraft);titleInjection.copy['id.profil.i_nama']=prose;
+  assert.equal((await act('profil',proseState,'save',{snapshot:titleInjection})).status,400);
+  const proseBaseline=proseState.document.history.find(r=>r.kind==='baseline');
+  response=await act('profil',proseState,'restore',{revision:proseBaseline.id});assert.equal(response.status,200,response.text);proseState=response.data;
+  assert.deepEqual(proseState.document.draft,proseOriginal);
+  response=await act('profil',proseState,'publish');assert.equal(response.status,200,response.text);
+  assert.ok(!(await request('/')).text.includes('RICH_PROSE_FIXTURE'));
   // Draft media stays private and immutable, and only publication changes a live slot.
   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6xAAAAABJRU5ErkJggg==','base64');
   async function upload(){const form=new FormData();form.set('file',new Blob([png],{type:'image/png'}),'fixture.png');const r=await fetch(base+'/api/admin/editor/media/bagas?section=profil',{method:'POST',headers:{cookie,origin:base},body:form});return {status:r.status,data:await r.json()};}

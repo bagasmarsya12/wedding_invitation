@@ -31,6 +31,7 @@ export const ACTIVE_CONTENT_KEYS = [
   "keepsake.front",
   "keepsake.genericRecipient",
   "keepsake.hint",
+  "keepsake.openHint",
   "keepsake.love",
   "keepsake.note1",
   "keepsake.note2",

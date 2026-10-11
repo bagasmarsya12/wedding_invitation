@@ -24,6 +24,7 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     {"key": "front", "label": "Label depan", "value": "Front of the card"},
     {"key": "back", "label": "Label belakang", "value": "Back of the card"},
     {"key": "hashtag", "label": "Hashtag pernikahan", "value": "#IganyaBagas"},
+    {"key": "openHint", "label": "Petunjuk tombol buka kartu", "value": "View your card · download photos & video"},
     {"key": "hint", "label": "Petunjuk", "value": "Two sides of the same day."}
   ]},
   { id: "hero", label: "Opening & Envelope", fields: [
@@ -177,3 +178,5 @@ Object.assign(CONTENT_DEFAULTS, EXTRA_CONTENT_TRANSLATIONS);
 Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,,value])=>['id.photoComments.'+key,value])));
 
 Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);
+
+CONTENT_DEFAULTS['id.keepsake.openHint'] = 'Lihat kartumu · unduh gambar & video';

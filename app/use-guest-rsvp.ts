@@ -23,7 +23,7 @@ export function useGuestRsvp({ token, partyLimit, active, rsvpEnabled }: { token
   useEffect(() => {
     if (!token || !active) return;
     const controller = new AbortController();
-    setLoaded(false); setMessage('loading');
+    queueMicrotask(()=>{if(!controller.signal.aborted){setLoaded(false);setMessage('loading');}});
     fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, { cache: 'no-store', signal: controller.signal })
       .then(async response => {
         const data = await response.json() as ReplyResponse;
@@ -44,7 +44,8 @@ export function useGuestRsvp({ token, partyLimit, active, rsvpEnabled }: { token
   const setAttendance = useCallback((value: Attendance) => { setAttendanceState(value); setMessage(''); }, []);
   const setPartySize = useCallback((value: number) => { setPartySizeState(value); setMessage(''); }, []);
   const reload = useCallback(() => setRevision(value => value + 1), []);
-  const dirty = saved?.attendance !== attendance || (attendance === 'yes' && saved?.partySize !== partySize);
+  // The form only edits attendance; the server owns the invitation's party count.
+  const dirty = saved?.attendance !== attendance;
 
   async function save() {
     if (!enabled) { setMessage('closed'); return false; }
@@ -55,7 +56,8 @@ export function useGuestRsvp({ token, partyLimit, active, rsvpEnabled }: { token
     try {
       const response = await fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ attendance, partySize: attendance === 'yes' ? partySize : 0 }),
+        // Attendance-only updates preserve a previous party count; first replies use the invitation quota.
+        body: JSON.stringify({ attendance }),
       });
       const result = await response.json() as { attendance: 'yes' | 'no'; partySize: number; error?: string };
       if (!response.ok) {

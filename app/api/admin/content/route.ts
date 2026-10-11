@@ -1,8 +1,9 @@
+import { isRichTextField, validRichText, validPlainText } from '@/lib/rich-text';
 import { publishLegacySettings,EditorialConflict } from '@/lib/cms-editorial-server';
 import { resolveContentAliases, replacedContentAliases } from '@/lib/content-aliases';
 import { contentEditorSections } from '@/lib/content-editor-sections';
 import { ACTIVE_CONTENT_KEYS } from '@/lib/content-usage';
-import { allowMutation, cleanText, db, privateJson, readJsonBody, requireAdmin, sameOriginMutation } from "@/lib/server";
+import { allowMutation, db, privateJson, readJsonBody, requireAdmin, sameOriginMutation } from "@/lib/server";
 import { CONTENT_DEFAULTS, CONTENT_SECTIONS } from "@/lib/content-defaults";
 import { knownContentKeys } from "@/lib/landing-content";
 
@@ -46,7 +47,7 @@ export async function PUT(request: Request) {
   }
   const known = new Set(knownContentKeys());
   const supplied=Object.entries(body.values as Record<string,unknown>);
-  if(supplied.some(([key,value])=>!known.has(key) || typeof value!=='string' || value.length>(key.replace(/^id\./,'').startsWith('keepsake.')?120:2000))) return privateJson({error:'Unknown content field or text over 2000 characters.'},400);
+  if(supplied.some(([key,value])=>!known.has(key) || !(isRichTextField(key)?validRichText:validPlainText)(value,key.replace(/^id\./,'').startsWith('keepsake.')?120:2000))) return privateJson({error:'Unknown content field or text over 2000 characters.'},400);
   const entries = supplied
     .map(([key, value]) => [`content.${key}`, value] as [string, unknown]);
   if (!entries.length) return privateJson({ error: "No valid content keys supplied." }, 400);
@@ -56,7 +57,7 @@ export async function PUT(request: Request) {
   }
 
   const changes=new Map<string,string|null>(replacedContentAliases(supplied.map(([key])=>key)).map(key=>[`content.${key}`,null]));
-  for(const [key,raw]of entries)changes.set(key,cleanText(raw,2000)||null);
+  for(const [key,raw]of entries)changes.set(key,(raw as string).trim()||null);
   try{await publishLegacySettings(changes,admin.email);}catch(error){return privateJson({error:error instanceof EditorialConflict?error.message:'Could not save content. Try again.'},error instanceof EditorialConflict?409:500);}
   const saved=changes.size;
   const cleared = supplied.filter(([,value])=>value==='').length;

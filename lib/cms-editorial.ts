@@ -1,3 +1,4 @@
+import { isRichTextField, richTextPlain, validRichText, validPlainText } from './rich-text';
 import { upgradeProfileLabelCopy } from './profile-labels';
 import { contentEditorSections } from './content-editor-sections';
 import { CONTENT_DEFAULTS } from './content-defaults';
@@ -21,9 +22,11 @@ function record(input:unknown):input is Record<string,unknown>{return Boolean(in
 export function validateSectionSnapshot(id:string,input:unknown,base:{config:WebsiteConfig;blocks:WebsiteBlocks}):SectionSnapshot|null {
   if(!sectionDefinition(id)||!record(input)||Object.keys(input).some(k=>!['copy','config','blocks','arrival','media'].includes(k))||!record(input.copy)||!record(input.config)||!record(input.blocks)||!record(input.media))return null;
   const copyKeys=sectionCopyKeys(id),configKeys=sectionConfigKeys(id),blockKeys=sectionBlockKeys(id);
-  const copy=id==='profil'?upgradeProfileLabelCopy(input.copy):input.copy,configInput=input.config,blocksInput=input.blocks;
+  const copy={...(id==='profil'?upgradeProfileLabelCopy(input.copy):input.copy)},configInput=input.config,blocksInput=input.blocks;
+  // Backfill only this newly introduced control when restoring an older keepsake revision.
+  if(id==='keepsake')for(const key of ['keepsake.openHint','id.keepsake.openHint'])if(!(key in copy))copy[key]='';
   if(Object.keys(copy).length!==copyKeys.length||copyKeys.some(k=>typeof copy[k]!=='string')||Object.keys(copy).some(k=>!copyKeys.includes(k)))return null;
-  for(const field of sectionDefinition(id)!.fields)for(const key of [field.key,`id.${field.key}`])if((copy[key] as string).length>field.limit)return null;
+  for(const field of sectionDefinition(id)!.fields)for(const key of [field.key,`id.${field.key}`])if(!(isRichTextField(field.key)?validRichText(copy[key],field.limit):validPlainText(copy[key],field.limit)))return null;
   if(Object.keys(configInput).some(k=>!configKeys.includes(k as keyof WebsiteConfig))||configKeys.some(k=>!(k in configInput)))return null;
   if(Object.keys(blocksInput).some(k=>!blockKeys.includes(k as keyof WebsiteBlocks))||blockKeys.some(k=>!(k in blocksInput)))return null;
   const config=validateWebsiteConfig({...base.config,...input.config}),blocks=validateWebsiteBlocks({...base.blocks,...input.blocks});
@@ -40,7 +43,7 @@ export function validateSectionSnapshot(id:string,input:unknown,base:{config:Web
 }
 export function snapshotChanges(a:SectionSnapshot,b:SectionSnapshot){return [
   ...Object.keys(b.copy).filter(k=>a.copy[k]!==b.copy[k]).map(k=>({key:k,label:`${k.startsWith('id.')?'Indonesia':'English'} · ${sectionDefinitionForKey(k)}`,before:a.copy[k]??'',after:b.copy[k]})),
-  ...(['config','blocks','arrival','media'] as const).filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])).map(k=>({key:k,label:{config:'Jadwal / identitas / share',blocks:'Susunan & isi',arrival:'Panduan kedatangan',media:'Foto'}[k],before:JSON.stringify(a[k]??{}),after:JSON.stringify(b[k]??{})})),
+  ...(['config','blocks','arrival','media'] as const).filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])).map(k=>({key:k,label:{config:'Jadwal / identitas / share',blocks:'Susunan & isi',arrival:'Panduan kedatangan',media:'Foto'}[k],before:JSON.stringify(a[k]??{},(_key,value)=>typeof value==='string'?richTextPlain(value):value),after:JSON.stringify(b[k]??{},(_key,value)=>typeof value==='string'?richTextPlain(value):value)})),
 ];}
 function sectionDefinitionForKey(key:string){const base=key.replace(/^id\./,'');return editorialSections.flatMap(s=>s.fields).find(f=>f.key===base)?.label??base;}
 export const emptyEditorialDocument=():EditorialDocument=>({version:'initial',draft:null,draftAt:null,draftAuthor:null,draftBaseHash:null,publishedId:null,history:[]});

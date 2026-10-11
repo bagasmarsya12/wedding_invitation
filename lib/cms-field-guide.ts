@@ -4,6 +4,8 @@ import { copyKey } from './copy-registry';
 // Keep these keys in snapshots and history, but never offer controls for removed UI.
 const retiredControls = new Set([
   'profil.kicker', 'profil.b_cap', 'profil.i_cap', 'footer.edisi',
+  'footer.amplop', 'guest.party',
+  ...['A reply from', 'our favourite people', 'Reply received', 'View the envelope again'].map(copyKey),
   'useful.head', 'useful.sub', 'guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending',
   ...['For those who know one of us better.', 'Bagas, as himself.', 'Iga, as herself.', 'As observed by Iga', 'As observed by Bagas'].map(copyKey),
 ]);
@@ -34,15 +36,16 @@ const groups: Record<string, GroupDefinition[]> = {
   archive: [{ title: 'Pengantar album', keys: ['archive.head', 'archive.desc', ...literal('Open our archive', 'Look closer', 'Read more')] }],
   rsvp: [
     { title: 'Pengantar kartu ucapan', keys: ['mark.head', 'mark.sub', 'mark.desc'] },
-    { title: 'Kehadiran & kirim kartu', keys: ['rsvp.head', 'rsvp.hadir', 'guest.party', ...literal('I can’t make it.', 'Send card', 'Preview my reply')] },
+    { title: 'Kehadiran & kirim kartu', keys: ['rsvp.head', 'rsvp.hadir', ...literal('I can’t make it.', 'Send card', 'Preview my reply')] },
   ],
   gift: [{ title: 'Pengantar tanda kasih', keys: ['gift.head', 'gift.desc', 'gift.kosong', ...literal('Gift an object', 'Cash gift', 'Open DANA', 'Copy phone number', 'Copy account number')] }],
   keepsake: [
+    { title: 'Tombol pembuka kartu', keys: [...literal('Open your keepsake'), 'keepsake.openHint'] },
     { title: 'Pesan pada kartu', keys: ['keepsake.note1', 'keepsake.note2', 'keepsake.love', 'keepsake.hashtag'] },
     { title: 'Penerima kartu', keys: ['keepsake.forLabel', 'keepsake.genericRecipient'] },
     { title: 'Unduhan gambar & video', keys: ['storyDownload.title', 'storyDownload.video', 'storyDownload.front', 'storyDownload.back'] },
   ],
-  footer: [{ title: 'Penutup undangan', keys: ['beyond.head', ...literal('The invitation ends here.', 'The rest stays open.', 'See you in Cimahi.', 'Thank you for being part of our day.'), 'footer.amplop', ...literal('Made with unreasonable attention to detail', 'and approximately 1 billion tokens.')] }],
+  footer: [{ title: 'Penutup undangan', keys: ['beyond.head', ...literal('The invitation ends here.', 'The rest stays open.', 'See you in Cimahi.', 'Thank you for being part of our day.'), ...literal('Made with unreasonable attention to detail', 'and approximately 1 billion tokens.')] }],
 };
 export function groupEditorFields(section: EditorSection, query = '', values: Record<string, string> = {}): EditorFieldGroup[] {
   const search = query.trim().toLocaleLowerCase('id');

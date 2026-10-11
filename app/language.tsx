@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { FormattedText } from "./formatted-text";
 import { indonesian } from "../lib/invitation-copy";
 import { normalizeCoupleWording } from '@/lib/couple-wording';
 import { copyKey } from '@/lib/copy-registry';
@@ -74,7 +75,7 @@ export function LanguageProvider({ children, content, overrides: suppliedOverrid
 }
 
 export const useLanguage = () => useContext(LanguageContext);
-export function T({ children, field }: { children?: string; field?: string }) { const { t, tField } = useLanguage(); return <>{field ? tField(field) : t(children ?? "")}</>; }
+export function T({ children, field, rich = false }: { children?: string; field?: string; rich?: boolean }) { const { t, tField } = useLanguage(); const value=field?tField(field):t(children??""); return rich?<FormattedText value={value}/>:<>{value}</>; }
 
 export function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();

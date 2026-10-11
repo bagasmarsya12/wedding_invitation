@@ -32,7 +32,7 @@
 .gift-options-items .gift-availability { margin:0 0 .2rem; font:.72rem/1.4 var(--bx-sans); }
 .gift-options-items .gift-actions { margin-top:.65rem; }
 .gift-options-items .gift-actions button,.gift-options-items .gift-actions a { padding:.5rem .65rem; font-size:.8rem; line-height:1.4; min-height:44px; text-transform:none; letter-spacing:0; }
-.gift-options-transfer { margin-top:1.75rem; padding-top:1.35rem; border-top:1px solid #21382c40; }
+.gift-options-items { margin-top:1.75rem; padding-top:1.35rem; border-top:1px solid #21382c40; }
 .gift-options-items .gift-photo-placeholder { padding:.5rem; font-size:.75rem; line-height:1.45; }
 
 /* The recipient gets a full row, including longer account-holder names. */
@@ -70,7 +70,7 @@
   .gift-options-items .gift-card-caption h4 { font-size:1.1rem; }
   .gift-options-items .gift-card-caption > .gift-reason { font-size:.85rem; }
   .gift-options-items .gift-photo-placeholder { padding:.2rem; font-size:.7rem; }
-  .gift-options-transfer { margin-top:1.5rem; }
+  .gift-options-items { margin-top:1.5rem; }
   .v2-closing-colophon { grid-template-columns:1fr; justify-items:center; text-align:center; }
   .v2-closing-colophon > .v2-closing-hashtag,.v2-closing-colophon > small { grid-column:1; justify-self:center; }
 }

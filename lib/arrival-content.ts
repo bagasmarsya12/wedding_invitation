@@ -1,3 +1,4 @@
+import { validRichText, validPlainText } from './rich-text';
 import type { Localized } from './website-content';
 
 export const ARRIVAL_STEP_IDS = ['parking', 'entrance', 'checkin', 'celebration'] as const;
@@ -46,17 +47,17 @@ export function validateArrivalContent(input: unknown): ArrivalContent | null {
   const row = input as Record<string, unknown>;
   if (typeof row.enabled !== 'boolean' || typeof row.isExample !== 'boolean') return null;
   if (typeof row.contactPhone !== 'string' || row.contactPhone.length > 40 || (row.contactPhone.trim() && !whatsappPhone(row.contactPhone))) return null;
-  const localized = (value: unknown, max: number): value is Localized => Boolean(value && typeof value === 'object' && !Array.isArray(value) && ['id', 'en'].every(key => typeof (value as Record<string, unknown>)[key] === 'string' && (value as Record<string, string>)[key].length <= max));
+  const localized = (value: unknown, max: number, rich = false): value is Localized => Boolean(value && typeof value === 'object' && !Array.isArray(value) && ['id', 'en'].every(key => (rich ? validRichText : validPlainText)((value as Record<string, unknown>)[key], max)));
   const shortFields = ['title', 'contactName', 'parkingCaption', 'entranceCaption', 'mapAlt'] as const;
   const longFields = ['intro', 'sampleNote', 'mapCaption', 'dressCode', 'accessibility', 'transport', 'contactMessage'] as const;
   for (const key of shortFields) if (!localized(row[key], 300)) return null;
-  for (const key of longFields) if (!localized(row[key], 2000)) return null;
+  for (const key of longFields) if (!localized(row[key], 2000, ['intro','mapCaption','accessibility','transport'].includes(key))) return null;
   if (!Array.isArray(row.steps) || row.steps.length !== ARRIVAL_STEP_IDS.length) return null;
   const steps: ArrivalStep[] = [];
   for (const [index, raw] of row.steps.entries()) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
     const step = raw as Record<string, unknown>;
-    if (step.id !== ARRIVAL_STEP_IDS[index] || !localized(step.title, 200) || !localized(step.body, 2000)) return null;
+    if (step.id !== ARRIVAL_STEP_IDS[index] || !localized(step.title, 200) || !localized(step.body, 2000, true)) return null;
     steps.push({ id: ARRIVAL_STEP_IDS[index], title: { ...step.title }, body: { ...step.body } });
   }
   return { enabled: row.enabled, isExample: row.isExample, contactPhone: row.contactPhone.trim(), ...Object.fromEntries([...shortFields, ...longFields].map(key => [key, { ...(row[key] as Localized) }])), steps } as ArrivalContent;

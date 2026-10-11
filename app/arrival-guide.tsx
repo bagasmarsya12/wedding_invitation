@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { FormattedText } from './formatted-text';
 import { T, useLanguage } from './language';
 import { EMPTY_ARRIVAL_PHOTOS, whatsappPhone, type ArrivalPhotos } from '@/lib/arrival-content';
 import type { TextBlock } from '@/lib/website-content';
@@ -48,18 +49,18 @@ export function ArrivalGuide({ photos = EMPTY_ARRIVAL_PHOTOS, guestName = '', fa
     {arrival.enabled && <div className="arrival-compact-panel" id="arrival-guide-panel" role="tabpanel" aria-labelledby="arrival-guide-tab" hidden={active !== 'arrival'}>
       <div className="arrival-compact-list">
         {guideItem('route', arrival.title[language], <>
-          <p>{arrival.intro[language]}</p>
-          <ol className="arrival-compact-steps" aria-label={tField('guest.route')}>{arrival.steps.map((step, index) => <li id={`arrival-step-${step.id}`} key={step.id}><span aria-hidden="true">{index + 1}</span><div><h3>{step.title[language]}</h3><p>{step.body[language].replace(' Foto patokan di bawah bisa membantu mengenali pintunya.', '').replace(' The landmark photograph below will help you recognize the entrance.', '')}</p></div></li>)}</ol>
-          {photos.map && !mapFailed && <figure className="arrival-compact-map"><img src={photos.map} alt={arrival.mapAlt[language]} loading="lazy" decoding="async" onError={() => setMapFailed(true)} /><figcaption>{arrival.mapCaption[language]}</figcaption></figure>}
+          <p><FormattedText value={arrival.intro[language]}/></p>
+          <ol className="arrival-compact-steps" aria-label={tField('guest.route')}>{arrival.steps.map((step, index) => <li id={`arrival-step-${step.id}`} key={step.id}><span aria-hidden="true">{index + 1}</span><div><h3>{step.title[language]}</h3><p><FormattedText value={step.body[language].replace(' Foto patokan di bawah bisa membantu mengenali pintunya.', '').replace(' The landmark photograph below will help you recognize the entrance.', '')}/></p></div></li>)}</ol>
+          {photos.map && !mapFailed && <figure className="arrival-compact-map"><img src={photos.map} alt={arrival.mapAlt[language]} loading="lazy" decoding="async" onError={() => setMapFailed(true)} /><figcaption><FormattedText value={arrival.mapCaption[language]}/></figcaption></figure>}
         </>)}
-        {guideItem('access', <T field="guest.access" />, <p>{arrival.accessibility[language]}</p>)}
-        {guideItem('transport', <T field="guest.transport" />, <p>{arrival.transport[language]}</p>)}
+        {guideItem('access', <T field="guest.access" />, <p><FormattedText value={arrival.accessibility[language]}/></p>)}
+        {guideItem('transport', <T field="guest.transport" />, <p><FormattedText value={arrival.transport[language]}/></p>)}
       </div>
     </div>}
     {faq.length > 0 && <div className="arrival-compact-panel" id="arrival-faq-panel" role="tabpanel" aria-labelledby="arrival-faq-tab" hidden={active !== 'faq'}>
       <div className="arrival-compact-list">{faq.map(item => <details className="arrival-compact-item" key={item.id} open={openFaq === item.id}
         onToggle={event => { const opened = event.currentTarget.open; setOpenFaq(current => opened ? item.id : current === item.id ? '' : current); }}>
-        <summary>{item.title[language]}<span aria-hidden="true">+</span></summary><div className="arrival-compact-answer"><p>{item.body[language]}</p></div>
+        <summary>{item.title[language]}<span aria-hidden="true">+</span></summary><div className="arrival-compact-answer"><p><FormattedText value={item.body[language]}/></p></div>
       </details>)}</div>
     </div>}
     {arrival.enabled && phone && <aside className="arrival-compact-help" id="arrival-help"><p>{arrival.contactName[language]}</p><a href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer"><T field="guest.contact" /><ArrowUpRight size={16} aria-hidden="true" /></a></aside>}
