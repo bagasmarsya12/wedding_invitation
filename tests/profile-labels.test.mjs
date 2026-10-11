@@ -13,6 +13,8 @@ const hook = registerHooks({ resolve(specifier, context, next) {
 } });
 const { PROFILE_LABEL_KEYS, RETIRED_PROFILE_LABEL_KEYS, upgradeProfileLabelCopy } = await import('../lib/profile-labels.ts');
 const { CONTENT_DEFAULTS, CONTENT_SECTIONS } = await import('../lib/content-defaults.ts');
+const { contentEditorSections } = await import('../lib/content-editor-sections.ts');
+const { copyKey } = await import('../lib/copy-registry.ts');
 const editorial = existsSync(new URL('../lib/cms-editorial.ts', import.meta.url)) ? await import('../lib/cms-editorial.ts') : null;
 const website = editorial ? await import('../lib/website-content.ts') : null;
 hook.deregister();
@@ -40,6 +42,18 @@ test('CMS relabels existing profile bodies while keeping their stable keys and d
   })) assert.equal(fields.find(field => field.key === key).label, label);
   assert.equal(CONTENT_DEFAULTS['profil.b_family'], 'Family details will be added.');
   assert.equal(CONTENT_DEFAULTS['profil.b_known'], 'A small detail about Bagas, from Iga.');
+});
+
+test('CMS exposes only the three retained profile rows and keeps legacy data dormant', () => {
+  const keys = contentEditorSections().find(section => section.id === 'profil').fields.map(field => field.key);
+  for (const key of ['profil.b_found', 'profil.i_found', copyKey('Usually found')]) {
+    assert.ok(!keys.includes(key));
+    assert.ok(RETIRED_PROFILE_LABEL_KEYS.includes(key));
+    assert.equal(typeof CONTENT_DEFAULTS[key], 'string');
+  }
+  for (const key of ['profil.b_family', 'profil.i_family', 'profil.b_known', 'profil.i_known', 'profil.quote1', 'profil.quote2']) {
+    assert.ok(keys.includes(key));
+  }
 });
 
 test('old profile revision upgrades preserve authored bodies, media and independent label overrides', () => {

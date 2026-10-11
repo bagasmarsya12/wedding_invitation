@@ -331,7 +331,6 @@ export const COPY_SECTION_MAP: Record<string,string> = {
   "For those who know one of us better.": "profil",
   "Bagas, as himself.": "profil",
   "As observed by Iga": "profil",
-  "Usually found": "profil",
   "Iga, as herself.": "profil",
   "As observed by Bagas": "profil",
   "A little of our story": "story",

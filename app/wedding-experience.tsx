@@ -525,7 +525,6 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
               <dl>
                 <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.b_family" /></dd></div>
                 <div><dt><T field="profil.b_known_label" /></dt><dd><T field="profil.b_known" /></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T field="profil.b_found" /></dd></div>
                 <div><dt><T field="profil.b_eyes_label" /></dt><dd><T field="profil.quote1" /></dd></div>
               </dl>
             </div>
@@ -544,7 +543,6 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
               <dl>
                 <div><dt><T field="profil.person_label" /></dt><dd><T field="profil.i_family" /></dd></div>
                 <div><dt><T field="profil.i_known_label" /></dt><dd><T field="profil.i_known" /></dd></div>
-                <div><dt><T>Usually found</T></dt><dd><T field="profil.i_found" /></dd></div>
                 <div><dt><T field="profil.i_eyes_label" /></dt><dd><T field="profil.quote2" /></dd></div>
               </dl>
             </div>

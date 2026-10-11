@@ -13,10 +13,11 @@ export const PROFILE_LABEL_KEYS = PROFILE_LABEL_FIELDS.map(field => `profil.${fi
 const labelDefaults = Object.fromEntries(PROFILE_LABEL_FIELDS.flatMap(field => [
   [`profil.${field.key}`, field.value], [`id.profil.${field.key}`, field.id],
 ]));
-// Previous revisions used these controls for the labels; the profile body keys stay intact.
+// Ignore retired controls when restoring older profile revisions.
 export const RETIRED_PROFILE_LABEL_KEYS = [
   'profil.quote label', 'profil.quote label2',
   'copy.c46f8f49', 'copy.fc32c35b', 'copy.ee2afecb', 'copy.f3fa749e',
+  'profil.b_found', 'profil.i_found', 'copy.57515082', // Removed fourth profile row.
 ];
 export function upgradeProfileLabelCopy(copy: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries({ ...labelDefaults, ...copy }).filter(([key]) =>
