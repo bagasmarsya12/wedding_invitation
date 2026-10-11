@@ -1,6 +1,5 @@
 "use client";
 
-import { prepareCmsPhoto } from '@/lib/cms-photo-upload';
 import { ActivityPanel } from "./activity-panel";
 import { PhotoCommentsManager } from "./photo-comments-manager";
 import { ContentManager } from "./content-manager";
@@ -44,7 +43,9 @@ export function AdminClient() {
   const rememberLink = (id:string,url:string) => setKnownLinks(current=>({...current,[id]:url}));
   const {website}=useLanguage();
   const [contentMounted,setContentMounted]=useState(false);
-  const [jukeboxMounted,setJukeboxMounted]=useState(false);
+  const [contentDirty,setContentDirty]=useState(false);
+  const [directDirty,setDirectDirty]=useState(false);
+  const [settingsDirty,setSettingsDirty]=useState(false);
   const [contentMode,setContentMode]=useState("copy");
   const [tab, setTab] = useState("dashboard");
 
@@ -72,13 +73,14 @@ export function AdminClient() {
   };
   const action = async (op: string, values: Record<string, unknown>) => {
     setStatus("Menyimpan…");
-    try { const result = await send(op, values); await load(); setStatus("Tersimpan."); return result; }
+    try { const result = await send(op, values); await load(); setDirectDirty(false); setStatus("Tersimpan."); return result; }
     catch (error) { setStatus(error instanceof Error ? error.message : "Could not save."); return null; }
   };
   const submit = async (event: FormEvent<HTMLFormElement>, op: string) => {
     event.preventDefault();
     const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(form));
+    if (op === "create_archive" && !data.slug) data.slug = `${String(data.title || "kenangan").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "kenangan"}-${crypto.randomUUID().slice(0, 8)}`;
     const result = await action(op, { ...data, featured: data.featured === "on", published: data.published === "on", shippingRequired: data.shippingRequired === "on" });
     if (!result) return;
     if (result.inviteUrl) {
@@ -114,17 +116,9 @@ export function AdminClient() {
     })]),'text/csv;charset=utf-8');
   };
 
-  const openTab = (next:string)=>{setStatus('');if(next==='konten'||next==='arsip')setContentMounted(true);if(next==='arsip')setContentMode('photos');if(next==='musik')setJukeboxMounted(true);setTab(next);};
-  const uploadPortrait = async (slot: string, file: File) => {
-    setStatus("Menyiapkan foto untuk web…");
-    try {
-      const body = new FormData();
-      body.set("file", await prepareCmsPhoto(file));
-      const response = await fetch(`/api/admin/media/${slot}`, { method: "POST", body });
-      const result = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(result.error || "Upload failed.");
-      await load(); setStatus("Photograph uploaded — landing updated.");
-    } catch (error) { setStatus(error instanceof Error ? error.message : "Upload failed."); }
+  const openTab = (next:string)=>{
+    if((contentDirty||directDirty||settingsDirty)&&next!==tab){setStatus('Simpan atau batalkan perubahan sebelum berpindah menu.');return false;}
+    setStatus('');if(next==='konten')setContentMounted(true);setTab(next);return true;
   };
   const regenerate = async (guestId: string) => {
     const result = await action("regenerate_token", { id: guestId });
@@ -138,20 +132,20 @@ export function AdminClient() {
   };
 
   const archiveEditor = <>
-    <section className="admin-panel"><header><p>Archive CMS</p><h2>Add entry</h2></header><form onSubmit={event => submit(event, "create_archive")}><label>Title<input name="title" required /></label><label>Slug<input name="slug" required pattern="[a-z0-9-]+" /></label><label>Type<select name="type"><option>photograph</option><option>place</option><option>object</option><option>conversation</option><option>note</option><option>audio</option><option>other</option></select></label><label>Excerpt<textarea name="excerpt" /></label><label>Story<textarea name="story" rows={6} /></label><label>Media URL<input name="mediaUrl" type="url" /></label><label>Visibility<select name="visibility"><option value="guests">Unlisted / draft</option><option value="public">Public</option></select></label><label className="check"><input name="featured" type="checkbox" /> Featured</label><label className="check"><input name="published" type="checkbox" /> Published</label><button>Add archive entry</button></form></section>
+    <section className="admin-panel"><header><h2>Tambah cerita arsip</h2></header><form onSubmit={event => submit(event, "create_archive")}><label>Judul cerita<input name="title" required /></label><label>Alamat cerita (opsional)<input name="slug" pattern="[a-z0-9-]+" placeholder="Dibuat otomatis dari judul" /></label><label>Jenis cerita<select name="type"><option>photograph</option><option>place</option><option>object</option><option>conversation</option><option>note</option><option>audio</option><option>other</option></select></label><label>Ringkasan<textarea name="excerpt" /></label><label>Isi cerita<textarea name="story" rows={6} /></label><label>Link media (opsional)<input name="mediaUrl" type="url" /></label><label>Akses cerita<select name="visibility"><option value="guests">Privat / draf</option><option value="public">Publik</option></select></label><label className="check"><input name="featured" type="checkbox" /> Jadikan sorotan homepage</label><label className="check"><input name="published" type="checkbox" /> Terbitkan cerita</label><button>Simpan cerita</button></form></section>
 
-    <section className="admin-panel admin-wide"><header><p>Archive CMS</p><h2>Manage entries</h2></header><p>Only published public entries appear in the Archive. Unlisted entries remain private drafts.</p><div className="admin-table">
+    <section className="admin-panel admin-wide"><header><h2>Cerita yang tersimpan</h2></header><p>Hanya cerita publik yang diterbitkan muncul di halaman Arsip. Pilihan sorotan menambahkan cuplikan ke homepage (maksimal dua cerita).</p><div className="admin-table">
       {state.archive.map(row => <details key={string(row.id)}><summary>{string(row.title)} · {row.published ? "published" : "draft"} · {string(row.visibility)}</summary>
-        <form onSubmit={event => submit(event, "update_archive")}><input type="hidden" name="id" value={string(row.id)} /><label>Title<input name="title" defaultValue={string(row.title)} required /></label><label>Slug<input name="slug" defaultValue={string(row.slug)} required /></label><label>Type<input name="type" defaultValue={string(row.type)} /></label><label>Excerpt<textarea name="excerpt" defaultValue={string(row.excerpt)} /></label><label>Story<textarea name="story" rows={6} defaultValue={string(row.story)} /></label><label>Media URL<input name="mediaUrl" type="url" defaultValue={string(row.media_url)} /></label><label>Featured order<input name="featuredOrder" type="number" min="0" defaultValue={string(row.featured_order)} /></label><label>Visibility<select name="visibility" defaultValue={string(row.visibility)}><option value="guests">Unlisted / draft</option><option value="public">Public</option></select></label><label className="check"><input name="featured" type="checkbox" defaultChecked={Boolean(row.featured)} /> Featured</label><label className="check"><input name="published" type="checkbox" defaultChecked={Boolean(row.published)} /> Published</label><button>Save entry</button></form>
-        <button type="button" onClick={() => action("archive_entry", { id: row.id })}>Archive / unpublish</button>
+        <form onSubmit={event => submit(event, "update_archive")}><input type="hidden" name="id" value={string(row.id)} /><label>Judul cerita<input name="title" defaultValue={string(row.title)} required /></label><label>Alamat cerita<input name="slug" defaultValue={string(row.slug)} required /></label><label>Jenis cerita<input name="type" defaultValue={string(row.type)} /></label><label>Ringkasan<textarea name="excerpt" defaultValue={string(row.excerpt)} /></label><label>Isi cerita<textarea name="story" rows={6} defaultValue={string(row.story)} /></label><label>Link media (opsional)<input name="mediaUrl" type="url" defaultValue={string(row.media_url)} /></label><label>Urutan sorotan<input name="featuredOrder" type="number" min="0" defaultValue={string(row.featured_order)} /></label><label>Akses cerita<select name="visibility" defaultValue={string(row.visibility)}><option value="guests">Privat / draf</option><option value="public">Publik</option></select></label><label className="check"><input name="featured" type="checkbox" defaultChecked={Boolean(row.featured)} /> Jadikan sorotan homepage</label><label className="check"><input name="published" type="checkbox" defaultChecked={Boolean(row.published)} /> Terbitkan cerita</label><button>Simpan perubahan cerita</button></form>
+        <button type="button" onClick={() => action("archive_entry", { id: row.id })}>Tarik dari website</button>
       </details>)}
     </div></section>
   </>;
-  return <div className="admin-grid">
+  return <div className="admin-grid" data-admin-area={tab}>
     <p className="product-status admin-status" role="status">{status}</p>
 
     <nav className="admin-tabs" role="tablist" aria-label="Admin sections">
-      {[["dashboard","Dashboard"],["tamu","Tamu & link"],["kehadiran","Kehadiran"],["konten","Konten"],["musik","Jukebox"],["foto","Foto"],["hadiah","Hadiah"],["kartu","Mading"],["arsip","Arsip"],["komentar","Komentar foto"],["petugas","Petugas"],["pengaturan","Pengaturan"]].map(([id, label]) => (
+      {[["dashboard","Ringkasan"],["konten","Edit website"],["tamu","Tamu & link"],["kehadiran","Kehadiran"],["kartu","Kartu ucapan"],["komentar","Komentar foto"],["petugas","Petugas"],["pengaturan","Pengaturan"]].map(([id, label]) => (
         <button key={id} type="button" role="tab" aria-selected={tab === id} className={tab === id ? "on" : ""} onClick={() => openTab(id)}>{label}</button>
       ))}
     </nav>
@@ -159,7 +153,6 @@ export function AdminClient() {
     {tab === "dashboard" && <div className="admin-pane"><ActivityPanel guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} marks={state.marks} reservations={state.reservations} notify={setStatus} reload={load} /></div>}
     {tab === "komentar" && <div className="admin-pane"><PhotoCommentsManager notify={setStatus} /></div>}
     {tab === "petugas" && <div className="admin-pane"><StaffPanel /></div>}
-    {jukeboxMounted && <div hidden={tab !== "musik"} className="admin-pane"><JukeboxManager notify={setStatus} /></div>}
     <div hidden={tab !== "tamu"} className="admin-pane">
     <GuestManager guests={state.guests} rsvps={state.rsvps} settings={state.settings} knownLinks={knownLinks} action={action} regenerate={regenerate} rememberLink={rememberLink} notify={setStatus} exportGuests={()=>void exportFile('guests')} />
     <details className="admin-panel admin-wide guest-create-tools"><summary>Tambah tamu & impor daftar</summary>
@@ -176,33 +169,12 @@ export function AdminClient() {
       <AttendanceManager guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} exportFile={kind=>void exportFile(kind)} reload={load} notify={setStatus}/>
     </div>
 
-    <div hidden={tab !== "hadiah"} className="admin-pane">
-    <GiftManager gifts={state.gifts} action={action} reload={load} notify={setStatus} />
-    <section className="admin-panel admin-wide"><h2>Reservation history</h2><div className="admin-table">{state.reservations.length ? state.reservations.map(row=><article key={string(row.id)}><strong>{string(row.gift_title)}</strong><span>{string(row.status)} · {string(row.guest_name)}</span><small>{string(row.reserved_at)}</small></article>) : <p>No reservations recorded.</p>}</div></section>
-    </div>
-
-    <div hidden={tab !== "foto"} className="admin-pane">
-    <section className="admin-panel admin-wide"><header><p>Content CMS</p><h2>Foto profil</h2></header>
-      <button type="button" onClick={()=>{setContentMode("photos");openTab("konten");}}>Kelola album polaroid & caption</button>
-      <p>Foto profil menerima JPG/PNG/WebP/AVIF hingga 50 MB. Foto disiapkan otomatis untuk web. Jumlah, susunan foto polaroid, dan caption diatur melalui Konten → Foto & caption.</p>
-      <div className="admin-table">
-        {["bagas", "iga"].map(who => (
-          <article key={who}>
-            <strong>{who === "bagas" ? "Portrait Bagas" : who === "iga" ? "Portrait Iga" : `Selected Moments ${who.slice(-2)}`}</strong>
-            {state.settings.some(row => row.key === `media.${who}`) && <img className="admin-media-preview" src={`/api/admin/media/${who}?v=${encodeURIComponent(string(state.settings.find(row => row.key === `media.${who}`)?.updated_at))}`} alt={who} />}
-            <input aria-label={`Upload ${who}`} type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={event => { const file = event.target.files?.[0]; if (file) uploadPortrait(who, file); event.target.value = ""; }} />
-          </article>
-        ))}
-      </div>
-    </section>
-    </div>
-
     <div hidden={tab !== "pengaturan"} className="admin-pane">
-    {stateReady?<SettingsPanel key={JSON.stringify(lifecycleSettings(state.settings))} settings={state.settings} weddingDate={website.weddingDate} action={action} notify={setStatus} onGifts={()=>{setContentMode('gifts');openTab('konten');}}/>:<section className="admin-panel admin-wide"><p role="status">Pengaturan belum tersedia. Muat data sebelum mengubahnya.</p><button type="button" onClick={()=>void load().catch(()=>setStatus('Pengaturan belum bisa dimuat. Coba kembali.'))}>Muat ulang pengaturan</button></section>}
+    {stateReady?<SettingsPanel key={JSON.stringify(lifecycleSettings(state.settings))} settings={state.settings} weddingDate={website.weddingDate} action={action} notify={setStatus} onDirtyChange={setSettingsDirty} onGifts={()=>{if(openTab('konten'))setContentMode('transfers');}}/>:<section className="admin-panel admin-wide"><p role="status">Pengaturan belum tersedia. Muat data sebelum mengubahnya.</p><button type="button" onClick={()=>void load().catch(()=>setStatus('Pengaturan belum bisa dimuat. Coba kembali.'))}>Muat ulang pengaturan</button></section>}
     <PasswordPanel />
     </div>
 
-    {contentMounted && <div hidden={tab!=="konten"&&tab!=="arsip"} className="admin-pane"><ContentManager notify={setStatus} requestedMode={contentMode} onModeChange={setContentMode} onOpenArea={openTab} archiveEditor={archiveEditor} commentsEditor={<PhotoCommentsManager notify={setStatus} />} giftEditor={<><GiftSettings settings={state.settings} action={action} /><GiftManager gifts={state.gifts} action={action} reload={load} notify={setStatus} /></>} /></div>}
+    {contentMounted && <div hidden={tab!=="konten"} className="admin-pane"><ContentManager notify={setStatus} requestedMode={contentMode} onModeChange={setContentMode} onDirtyChange={setContentDirty} externalDirty={directDirty} onExternalDirtyChange={setDirectDirty} onOpenArea={openTab} giftsEnabled={lifecycleSettings(state.settings).gifts !== 'off'} archiveEditor={archiveEditor} commentsEditor={<PhotoCommentsManager notify={setStatus} />} transferEditor={<GiftSettings settings={state.settings} action={action} />} giftEditor={<><GiftManager gifts={state.gifts} action={action} reload={load} notify={setStatus} /><details className="cms-advanced-fields"><summary>Riwayat pilihan hadiah</summary><div className="admin-table">{state.reservations.length?state.reservations.map(row=><article key={string(row.id)}><strong>{string(row.gift_title)}</strong><span>{string(row.status)} · {string(row.guest_name)}</span></article>):<p>Belum ada hadiah yang dipilih tamu.</p>}</div></details></>} jukeboxEditor={<JukeboxManager notify={setStatus} onDirtyChange={setDirectDirty} />} /></div>}
 
     <div hidden={tab !== "kartu"} className="admin-pane">
     <ModerationManager marks={state.marks} action={action} />

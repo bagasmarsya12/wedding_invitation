@@ -15,10 +15,11 @@ export function lifecycleSettings(settings:AdminRow[]):Lifecycle {
   return {phase:get('site_phase'),rsvp:get('rsvp_enabled'),gifts:get('gifts_enabled'),marks:get('marks_enabled')};
 }
 
-export function SettingsPanel({settings,weddingDate,action,notify,onGifts}:{settings:AdminRow[];weddingDate:string;action:AdminAction;notify:(message:string)=>void;onGifts:()=>void}) {
+export function SettingsPanel({settings,weddingDate,action,notify,onGifts,onDirtyChange}:{settings:AdminRow[];weddingDate:string;action:AdminAction;notify:(message:string)=>void;onGifts:()=>void;onDirtyChange?:(dirty:boolean)=>void}) {
   const baseline=lifecycleSettings(settings);
   const [draft,setDraft]=useState<Lifecycle>(baseline),[busy,setBusy]=useState(false);
   const dirty=JSON.stringify(draft)!==JSON.stringify(baseline);
+  useEffect(()=>{onDirtyChange?.(dirty);},[dirty,onDirtyChange]);
   const phase=phaseForDate(new Date(),draft.phase,weddingDate);
   useEffect(()=>{const protect=(event:BeforeUnloadEvent)=>{if(dirty){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',protect);return()=>window.removeEventListener('beforeunload',protect);},[dirty]);
   async function save(){setBusy(true);try{const result=await action('set_lifecycle',draft);if(result)notify('Pengaturan website tersimpan.');}finally{setBusy(false);}}
@@ -32,7 +33,6 @@ export function SettingsPanel({settings,weddingDate,action,notify,onGifts}:{sett
       </form>
     </section>
     <section className="admin-panel admin-wide"><h2>Pengaturan hadiah</h2><p>Nomor rekening, DANA, GoPay, dan petunjuk hadiah dikelola bersama pilihan hadiah.</p><button type="button" onClick={onGifts}>Kelola hadiah & tanda kasih</button>
-      <details className="cms-legacy-settings"><summary>Petunjuk hadiah tambahan</summary><p>Isian ini mempertahankan petunjuk lama yang sudah ada. Metode transfer terstruktur tetap diatur di Konten → Tanda kasih.</p>{[['shipping_instructions','Petunjuk pengiriman barang'],['cash_gift_details','Catatan tanda kasih tambahan']].map(([key,label])=><form key={key} onSubmit={async event=>{event.preventDefault();setBusy(true);try{await action('set_setting',{key,value:new FormData(event.currentTarget).get('value')});}finally{setBusy(false);}}}><label>{label}<textarea key={text(settings.find(row=>row.key===key)?.value)} name="value" rows={4} maxLength={2000} defaultValue={text(settings.find(row=>row.key===key)?.value)}/></label><button disabled={busy}>Simpan petunjuk</button></form>)}</details>
     </section>
   </>;
 }

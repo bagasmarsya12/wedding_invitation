@@ -27,7 +27,7 @@ function readDuration(file: File): Promise<number> {
     audio.addEventListener('error', finish, { once: true }); audio.src = url;
   });
 }
-export function JukeboxManager({ notify }: { notify: (message: string) => void }) {
+export function JukeboxManager({ notify, onDirtyChange }: { notify: (message: string) => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [config, setConfig] = useState<JukeboxConfig>(JUKEBOX_DEFAULTS), [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(''), [mode, setMode] = useState<'playlist' | 'copy'>('playlist');
@@ -51,6 +51,7 @@ export function JukeboxManager({ notify }: { notify: (message: string) => void }
     return () => window.removeEventListener('beforeunload', protect);
   }, []);
   const dirty = ready && JSON.stringify(config) !== saved;
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
   const update = (id: string, values: Partial<JukeboxTrack>) => setConfig(current => ({ ...current,
     tracks: current.tracks.map(track => track.id === id ? { ...track, ...values } : track) }));
   function add() {

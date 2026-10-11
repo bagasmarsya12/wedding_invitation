@@ -3,96 +3,193 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { prepareCmsPhoto, PHOTO_UPLOAD_HELP } from '@/lib/cms-photo-upload';
 import { ArrivalEditor } from './arrival-editor';
 import { ARRIVAL_DEFAULTS, type ArrivalContent } from '@/lib/arrival-content';
-import type { ContentSection } from '@/lib/content-defaults';
+import { CONTENT_DEFAULTS } from '@/lib/content-defaults';
 import type { EditorSection } from '@/lib/content-editor-sections';
+import { defaultEditorMode, directSaveMode, editorFieldLabel, editorModeSection, groupEditorFields, sectionHelp, sectionNavHint, sectionWebsiteTarget } from '@/lib/cms-field-guide';
+import { publishSectionChanges } from '@/lib/cms-publish-workflow';
 import { SectionPublishing } from './section-publishing';
-import { sectionCopyKeys,sectionConfigKeys,sectionBlockKeys,sectionMediaSlots,type SectionSnapshot,type EditorialResponse } from '@/lib/cms-editorial';
+import { sectionCopyKeys, sectionConfigKeys, sectionBlockKeys, sectionMediaSlots, type SectionSnapshot, type EditorialResponse } from '@/lib/cms-editorial';
 import { WEBSITE_DEFAULTS, type WebsiteBlocks, type WebsiteConfig, type Localized } from '@/lib/website-content';
 
-type SiteResponse={config:WebsiteConfig;blocks:WebsiteBlocks;arrival:ArrivalContent;media:Record<string,string>;error?:string};
-type ContentResponse={sections:ContentSection[];editorSections:EditorSection[];values:Record<string,string>;error?:string};
-export function ContentManager({notify,requestedMode='copy',onModeChange,onOpenArea,giftEditor,archiveEditor,commentsEditor}:{notify:(message:string)=>void;requestedMode?:string;onModeChange?:(mode:string)=>void;onOpenArea?:(area:string)=>void;giftEditor?:ReactNode;archiveEditor?:ReactNode;commentsEditor?:ReactNode}) {
-  const [data,setData]=useState<ContentResponse|null>(null),[config,setConfig]=useState<WebsiteConfig>(WEBSITE_DEFAULTS),[blocks,setBlocks]=useState<WebsiteBlocks|null>(null);
-  const [arrival,setArrival]=useState<ArrivalContent>(ARRIVAL_DEFAULTS);
-  const [loadError,setLoadError]=useState(''),[loadAttempt,setLoadAttempt]=useState(0);
-  const [section,setSection]=useState('hero'),[query,setQuery]=useState(''),[page,setPage]=useState(0),[busy,setBusy]=useState(false);
-  const [savedValues,setSavedValues]=useState<Record<string,string>>({});
-  const [photoUrls,setPhotoUrls]=useState<Record<string,string>>({});
-  const [draftMedia,setDraftMedia]=useState<Record<string,string|null>>({});
-  const [editorial,setEditorial]=useState<EditorialResponse|null>(null),[editorReady,setEditorReady]=useState(false),[editorError,setEditorError]=useState(''),[editorAttempt,setEditorAttempt]=useState(0);
-  const unsaved=useRef(false);
-  const currentSection=useRef(section);currentSection.current=section;
-  const [mode,setMode]=useState(requestedMode),[editLanguage,setEditLanguage]=useState<'id'|'en'>('id');
-  const saved=useRef<{values:Record<string,string>;config:WebsiteConfig;blocks:WebsiteBlocks;arrival:ArrivalContent}|null>(null);
-  useEffect(()=>{queueMicrotask(()=>{if(unsaved.current)return;setMode(requestedMode);const target=['photos','comments'].includes(requestedMode)?'archive':requestedMode==='gifts'?'gift':null;if(target&&target!==currentSection.current){setEditorReady(false);setEditorial(null);setSection(target);}});},[requestedMode]);
-  useEffect(()=>{const protect=(event:BeforeUnloadEvent)=>{if(unsaved.current){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',protect);return()=>window.removeEventListener('beforeunload',protect);},[]);
-  useEffect(()=>{let alive=true;Promise.all([fetch('/api/admin/content',{cache:'no-store'}),fetch('/api/admin/website',{cache:'no-store'})]).then(async responses=>{const [copy,site]=await Promise.all([responses[0].json() as Promise<ContentResponse>,responses[1].json() as Promise<SiteResponse>]);if(responses.some(r=>!r.ok))throw new Error(copy.error||site.error);if(alive){saved.current={values:copy.values,config:site.config,blocks:site.blocks,arrival:site.arrival};setData(copy);setSavedValues(copy.values);setConfig(site.config);setBlocks(site.blocks);setArrival(site.arrival);setPhotoUrls(site.media);}}).catch(()=>{if(alive){setLoadError('Konten tidak bisa dimuat. Coba lagi.');notify('Konten tidak bisa dimuat. Coba lagi.');}});return()=>{alive=false;};},[loadAttempt,notify]);
-  const contentReady=Boolean(data&&blocks);
-  const applySnapshot=useCallback((snapshot:SectionSnapshot)=>{
-    setData(current=>current?{...current,values:{...current.values,...snapshot.copy}}:current);
-    setSavedValues(current=>({...current,...snapshot.copy}));setConfig(current=>({...current,...snapshot.config}));setBlocks(current=>current?{...current,...snapshot.blocks}:current);if(snapshot.arrival)setArrival(snapshot.arrival);
-    setDraftMedia(current=>({...current,...snapshot.media}));
-    setPhotoUrls(current=>{const next={...current};for(const [slot,key]of Object.entries(snapshot.media)){if(key)next[slot]=`/api/admin/editor/media/${slot}?key=${encodeURIComponent(key)}`;else delete next[slot];}return next;});
-    if(saved.current){saved.current.values={...saved.current.values,...snapshot.copy};saved.current.config={...saved.current.config,...snapshot.config};saved.current.blocks={...saved.current.blocks,...snapshot.blocks};if(snapshot.arrival)saved.current.arrival=snapshot.arrival;}
-  },[]);
-  useEffect(()=>{
-    if(!contentReady)return;let alive=true;
-    queueMicrotask(()=>{setEditorReady(false);setEditorError('');setEditorial(null);});
-    fetch(`/api/admin/editor?section=${section}`,{cache:'no-store'}).then(async response=>{const value=await response.json() as EditorialResponse;if(!response.ok)throw new Error(value.error||'Draf belum tersedia.');if(alive){applySnapshot(value.document.draft??value.live);setEditorial(value);setEditorReady(true);}}).catch(error=>{if(alive)setEditorError(error instanceof Error?error.message:'Draf belum tersedia.');});
-    return()=>{alive=false;};
-  },[contentReady,section,editorAttempt,applySnapshot]);
-  const editorSnapshot:SectionSnapshot={copy:Object.fromEntries(sectionCopyKeys(section).map(key=>[key,data?.values[key]??''])),config:Object.fromEntries(sectionConfigKeys(section).map(key=>[key,config[key]])),blocks:Object.fromEntries(sectionBlockKeys(section).map(key=>[key,blocks?.[key]??[]])),...(section==='details'?{arrival}:{}),media:Object.fromEntries(sectionMediaSlots(section,blocks??{}).map(slot=>[slot,draftMedia[slot]??null]))};
-  const publishingDirty=editorReady&&!!editorial&&JSON.stringify(editorSnapshot)!==JSON.stringify(editorial.document.draft??editorial.live);
-  unsaved.current=publishingDirty;
-  async function editorialAction(op:'save'|'publish'|'discard'|'restore',revision?:string){
-    if(!editorReady||!editorial)return null;setBusy(true);
-    try{
-      const response=await fetch('/api/admin/editor',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({section,op,version:editorial.document.version,...(op==='save'?{snapshot:editorSnapshot}:{}),...(revision?{revision}:{})})});
-      const result=await response.json() as EditorialResponse;if(!response.ok)throw new Error(result.error||'Perubahan belum tersimpan.');
-      applySnapshot(result.document.draft??result.live);setEditorial(result);notify({save:'Draf tersimpan. Tamu masih melihat versi live.',publish:'Section berhasil dipublikasikan.',discard:'Draf dibuang. Editor kembali ke konten live.',restore:'Versi dipulihkan sebagai draf. Periksa sebelum publikasi.'}[op]);return result;
-    }catch(error){notify(error instanceof Error?error.message:'Perubahan belum bisa disimpan.');return null;}finally{setBusy(false);}
+type SiteResponse = { config: WebsiteConfig; blocks: WebsiteBlocks; arrival: ArrivalContent; media: Record<string, string>; error?: string };
+type ContentResponse = { editorSections: EditorSection[]; values: Record<string, string>; error?: string };
+type Props = {
+  notify: (message: string) => void; requestedMode?: string; onModeChange?: (mode: string) => void;
+  onDirtyChange?: (dirty: boolean) => void; onOpenArea?: (area: string) => void;
+  giftsEnabled?: boolean; externalDirty?: boolean; onExternalDirtyChange?: (dirty: boolean) => void;
+  giftEditor?: ReactNode; transferEditor?: ReactNode; archiveEditor?: ReactNode; commentsEditor?: ReactNode; jukeboxEditor?: ReactNode;
+};
+const toolLabels: Record<string, string> = {
+  event: 'Jadwal & lokasi', arrival: 'Panduan kedatangan', story: 'Bab cerita', faq: 'FAQ', photos: 'Album foto',
+  links: 'Tautan penutup', portraits: 'Foto mempelai', gifts: 'Hadiah barang', transfers: 'Rekening & e-wallet',
+  entries: 'Cerita tambahan', comments: 'Komentar foto', jukebox: 'Playlist & teks',
+};
+const itemLabels = { story: 'Bab', faq: 'Pertanyaan', photos: 'Foto', links: 'Tautan' };
+
+export function ContentManager({ notify, requestedMode = 'copy', onModeChange, onDirtyChange, onOpenArea, giftsEnabled = true, externalDirty = false, onExternalDirtyChange, giftEditor, transferEditor, archiveEditor, commentsEditor, jukeboxEditor }: Props) {
+  const [data, setData] = useState<ContentResponse | null>(null);
+  const [config, setConfig] = useState<WebsiteConfig>(WEBSITE_DEFAULTS), [blocks, setBlocks] = useState<WebsiteBlocks | null>(null);
+  const [arrival, setArrival] = useState<ArrivalContent>(ARRIVAL_DEFAULTS);
+  const [loadError, setLoadError] = useState(''), [loadAttempt, setLoadAttempt] = useState(0);
+  const [section, setSection] = useState('hero'), [query, setQuery] = useState(''), [busy, setBusy] = useState(false);
+  const [savedValues, setSavedValues] = useState<Record<string, string>>({});
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({}), [draftMedia, setDraftMedia] = useState<Record<string, string | null>>({});
+  const [editorial, setEditorial] = useState<EditorialResponse | null>(null), [editorReady, setEditorReady] = useState(false);
+  const [editorError, setEditorError] = useState(''), [editorAttempt, setEditorAttempt] = useState(0);
+  const [mode, setMode] = useState(requestedMode), [editLanguage, setEditLanguage] = useState<'id' | 'en'>('id');
+  const [directEditorVersion, setDirectEditorVersion] = useState(0);
+  const unsaved = useRef(false), currentSection = useRef(section), formArea = useRef<HTMLFieldSetElement>(null);
+  useEffect(() => { currentSection.current = section; }, [section]);
+  useEffect(() => { queueMicrotask(() => {
+    if (unsaved.current) return; setMode(requestedMode);
+    const target = editorModeSection(requestedMode);
+    if (target && target !== currentSection.current) { setEditorReady(false); setEditorial(null); setSection(target); setQuery(''); }
+  }); }, [requestedMode]);
+  useEffect(() => {
+    const protect = (event: BeforeUnloadEvent) => { if (unsaved.current) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', protect); return () => window.removeEventListener('beforeunload', protect);
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([fetch('/api/admin/content', { cache: 'no-store' }), fetch('/api/admin/website', { cache: 'no-store' })]).then(async responses => {
+      const [copy, site] = await Promise.all([responses[0].json() as Promise<ContentResponse>, responses[1].json() as Promise<SiteResponse>]);
+      if (responses.some(response => !response.ok)) throw new Error(copy.error || site.error);
+      if (alive) { setData(copy); setSavedValues(copy.values); setConfig(site.config); setBlocks(site.blocks); setArrival(site.arrival); setPhotoUrls(site.media); }
+    }).catch(() => { if (alive) setLoadError('Konten tidak bisa dimuat. Coba muat ulang.'); });
+    return () => { alive = false; };
+  }, [loadAttempt]);
+  const contentReady = Boolean(data && blocks);
+  const applySnapshot = useCallback((snapshot: SectionSnapshot) => {
+    setData(current => current ? { ...current, values: { ...current.values, ...snapshot.copy } } : current);
+    setSavedValues(current => ({ ...current, ...snapshot.copy })); setConfig(current => ({ ...current, ...snapshot.config }));
+    setBlocks(current => current ? { ...current, ...snapshot.blocks } : current); if (snapshot.arrival) setArrival(snapshot.arrival);
+    setDraftMedia(current => ({ ...current, ...snapshot.media }));
+    setPhotoUrls(current => {
+      const next = { ...current };
+      for (const [slot, key] of Object.entries(snapshot.media)) { if (key) next[slot] = `/api/admin/editor/media/${slot}?key=${encodeURIComponent(key)}`; else delete next[slot]; }
+      return next;
+    });
+  }, []);
+  useEffect(() => {
+    if (!contentReady) return; let alive = true;
+    queueMicrotask(() => { setEditorReady(false); setEditorError(''); setEditorial(null); });
+    fetch(`/api/admin/editor?section=${section}`, { cache: 'no-store' }).then(async response => {
+      const value = await response.json() as EditorialResponse; if (!response.ok) throw new Error(value.error || 'Editor belum tersedia.');
+      if (alive) { applySnapshot(value.document.draft ?? value.live); setEditorial(value); setEditorReady(true); }
+    }).catch(error => { if (alive) setEditorError(error instanceof Error ? error.message : 'Editor belum tersedia.'); });
+    return () => { alive = false; };
+  }, [contentReady, section, editorAttempt, applySnapshot]);
+  const editorSnapshot: SectionSnapshot = {
+    copy: Object.fromEntries(sectionCopyKeys(section).map(key => [key, data?.values[key] ?? ''])),
+    config: Object.fromEntries(sectionConfigKeys(section).map(key => [key, config[key]])),
+    blocks: Object.fromEntries(sectionBlockKeys(section).map(key => [key, blocks?.[key] ?? []])),
+    ...(section === 'details' ? { arrival } : {}), media: Object.fromEntries(sectionMediaSlots(section, blocks ?? {}).map(slot => [slot, draftMedia[slot] ?? null])),
+  };
+  const publishingDirty = editorReady && !!editorial && JSON.stringify(editorSnapshot) !== JSON.stringify(editorial.document.draft ?? editorial.live);
+  useEffect(() => { unsaved.current = publishingDirty || externalDirty; onDirtyChange?.(publishingDirty); }, [publishingDirty, externalDirty, onDirtyChange]);
+  async function editorialAction(op: 'save' | 'publish' | 'discard' | 'restore', revision?: string) {
+    if (!editorReady || !editorial) return null;
+    if ((op === 'save' || op === 'publish') && formArea.current) {
+      const invalid = Array.from(formArea.current.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea')).find(input => !input.checkValidity());
+      if (invalid) { invalid.reportValidity(); notify('Periksa field yang ditandai sebelum menyimpan.'); return null; }
+    }
+    setBusy(true);
+    const mutate = async (operation: string, state: EditorialResponse, snapshot?: SectionSnapshot) => {
+      const response = await fetch('/api/admin/editor', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ section, op: operation, version: state.document.version, ...(snapshot ? { snapshot } : {}), ...(revision ? { revision } : {}) }) });
+      const result = await response.json() as EditorialResponse; if (!response.ok) throw new Error(result.error || 'Perubahan belum tersimpan.');
+      applySnapshot(result.document.draft ?? result.live); setEditorial(result); return result;
+    };
+    try {
+      const result = op === 'publish' ? await publishSectionChanges(editorial, editorSnapshot, mutate) : await mutate(op, editorial, op === 'save' ? editorSnapshot : undefined);
+      notify({ save: 'Draf tersimpan. Tamu belum melihat perubahan ini.', publish: 'Perubahan sudah tayang di website.', discard: 'Draf dibuang. Editor kembali ke versi website.', restore: 'Versi lama dipulihkan sebagai draf. Belum ditayangkan.' }[op]); return result;
+    } catch (error) { notify(error instanceof Error ? error.message : 'Perubahan belum tersimpan.'); return null; } finally { setBusy(false); }
   }
-  async function save(_url:string,_body:unknown){return Boolean(await editorialAction('save'));}
-  async function uploadArrivalPhoto(slot:string,file:File) {
-    setBusy(true);notify('Menyiapkan foto untuk web…');
-    try{const prepared=await prepareCmsPhoto(file);const form=new FormData();form.set('file',prepared);const response=await fetch(`/api/admin/editor/media/${slot}?section=${section}`,{method:'POST',body:form});const result=await response.json() as {key?:string;url?:string;error?:string};if(!response.ok||!result.key||!result.url)throw new Error(result.error||'Upload gagal.');setDraftMedia(current=>({...current,[slot]:result.key!}));setPhotoUrls(current=>({...current,[slot]:result.url!}));notify('Foto masuk editor. Simpan draf untuk melanjutkan nanti; publikasikan saat siap.');}catch(error){notify(error instanceof Error?error.message:'Upload gagal.');}finally{setBusy(false);}
+  async function uploadPhoto(slot: string, file: File) {
+    setBusy(true); notify('Menyiapkan foto untuk web…');
+    try {
+      const form = new FormData(); form.set('file', await prepareCmsPhoto(file));
+      const response = await fetch(`/api/admin/editor/media/${slot}?section=${section}`, { method: 'POST', body: form });
+      const result = await response.json() as { key?: string; url?: string; error?: string };
+      if (!response.ok || !result.key || !result.url) throw new Error(result.error || 'Upload gagal.');
+      setDraftMedia(current => ({ ...current, [slot]: result.key! })); setPhotoUrls(current => ({ ...current, [slot]: result.url! }));
+      notify('Foto siap di editor. Klik Tayangkan perubahan agar muncul di website.');
+    } catch (error) { notify(error instanceof Error ? error.message : 'Upload gagal.'); } finally { setBusy(false); }
   }
-  async function removeArrivalPhoto(slot:string){setDraftMedia(current=>({...current,[slot]:null}));setPhotoUrls(current=>{const next={...current};delete next[slot];return next;});notify('Foto dihapus dari editor. Tamu tetap melihat foto live hingga publikasi.');}
-  const update=(key:string,value:string)=>setData(current=>current?{...current,values:{...current.values,[key]:value}}:null);
-  const selected=data?.editorSections.find(item=>item.id===section);
-  const fields=selected?.fields.filter(f=>!query||`${f.label} ${data?.values[f.key]} ${data?.values[`id.${f.key}`]}`.toLocaleLowerCase('id').includes(query.toLocaleLowerCase('id')))??[];
-  const visible=fields.slice(page*20,page*20+20);
-  const dirtyKeys=selected?.fields.flatMap(f=>[f.key,`id.${f.key}`]).filter(key=>data?.values[key]!==savedValues[key])??[];
-  async function saveFields(_keys:string[]){await editorialAction('save');}
-  const updateBlock=(kind:keyof WebsiteBlocks,index:number,field:string,value:unknown)=>setBlocks(current=>current?{...current,[kind]:current[kind].map((r,i)=>i===index?{...r,[field]:value}:r)}:null);
-  const remove=(kind:keyof WebsiteBlocks,index:number)=>setBlocks(current=>current?{...current,[kind]:current[kind].filter((_,i)=>i!==index)}:null);
-  const move=(kind:keyof WebsiteBlocks,index:number,offset:number)=>setBlocks(current=>{if(!current)return null;const rows=[...current[kind]];const target=index+offset;if(target<0||target>=rows.length)return current;[rows[index],rows[target]]=[rows[target],rows[index]];return {...current,[kind]:rows};});
-  const add=(kind:keyof WebsiteBlocks)=>setBlocks(current=>{if(!current||current[kind].length>=24)return current;const id=`${kind}-${crypto.randomUUID().slice(0,8)}`;const item=kind==='photos'?{id,slot:`gallery-${crypto.randomUUID().slice(0,8)}`,caption:{en:'Caption to be added.',id:'Keterangan akan ditambahkan.'}}:{id,title:{en:'New title',id:'Judul baru'},body:{en:'',id:''},...(kind==='links'?{href:'/archive'}:{})};return {...current,[kind]:[...current[kind],item]};});
-  function bilingual(value:Localized,onChange:(value:Localized)=>void,label:string,max=2000){return <div className="cms-bilingual"><label>{label} · Indonesia<textarea value={value.id} maxLength={max} rows={3} onChange={e=>onChange({...value,id:e.target.value})}/></label><label>{label} · English<textarea value={value.en} maxLength={max} rows={3} onChange={e=>onChange({...value,en:e.target.value})}/></label></div>;}
-  const toolLabels:Record<string,string>={event:section==='seo'?'Judul & share':'Jadwal & lokasi',arrival:'Panduan datang & QR',story:'Bab cerita',faq:'Pertanyaan & jawaban',photos:'Foto & caption',links:'Tautan penutup',portraits:'Foto mempelai',gifts:'Daftar hadiah & rekening',entries:'Cerita arsip',comments:'Komentar foto',jukebox:'Playlist, audio & tombol'};
-  const separateManager=['gifts','entries','comments','jukebox'].includes(mode)||section==='jukebox';
-  return <section className="admin-panel admin-wide cms-content-manager"><header className="cms-section-heading"><div><h2>Konten website</h2><p>Semua kata, tombol dan konten, mengikuti urutan halaman.</p></div><span className="cms-muted">Draf → Pratinjau → Publikasi</span></header>
-    {!data||!blocks?<div>{loadError?<><p role="alert">{loadError}</p><button type="button" onClick={()=>{setLoadError('');setLoadAttempt(n=>n+1);}}>Coba muat ulang</button></>:<p role="status">Memuat konten…</p>}</div>:<div className="cms-editor-shell">
-    <nav className="cms-section-nav" aria-label="Section konten website">{data.editorSections.map(item=><button key={item.id} type="button" aria-current={section===item.id?'page':undefined} disabled={busy} onClick={()=>{if(publishingDirty){notify('Simpan draf sebelum berpindah section.');return;}if(section!==item.id){setEditorReady(false);setEditorial(null);setSection(item.id);}setMode('copy');onModeChange?.('copy');setPage(0);setQuery('');}}><span>{item.label}</span><small>{item.fields.length} teks</small></button>)}</nav>
-    <div className="cms-editor-content"><header className="cms-current-section"><h3>{selected?.label}</h3><p>{selected?.description}</p></header>
-    {separateManager?<p className="cms-muted">Daftar hadiah, cerita arsip, komentar foto, dan playlist memakai tombol simpan di pengelolanya masing-masing. Draf dan riwayat section berlaku untuk teks, tombol, dan konten di tab lainnya.</p>:editorial&&editorReady?<SectionPublishing key={section} state={editorial} snapshot={editorSnapshot} busy={busy} language={editLanguage} onAction={editorialAction} notify={notify} onReload={()=>{if(publishingDirty){notify('Simpan draf sebelum memuat ulang.');return;}setEditorAttempt(n=>n+1);}}/>:<div role={editorError?'alert':'status'}>{editorError?<><p>{editorError}</p><button type="button" onClick={()=>setEditorAttempt(n=>n+1)}>Muat ulang draf</button></>:'Memuat draf section…'}</div>}
-    <fieldset className="cms-editor-fields" disabled={busy||!editorReady}>
-    <div className="cms-subtabs" aria-label="Jenis konten section"><button type="button" className={mode==='copy'?'on':''} onClick={()=>{setMode('copy');onModeChange?.('copy');}}>Teks & tombol</button>{selected?.tools.map(tool=><button key={tool} type="button" className={mode===tool?'on':''} onClick={()=>{setMode(tool);onModeChange?.(tool);}}>{toolLabels[tool]}</button>)}</div>
-    {mode==='copy'&&<><div className="cms-copy-toolbar"><label>Cari di section ini<input type="search" value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}} placeholder="Cari kalimat atau tombol" /></label><div className="cms-language-tabs" role="group" aria-label="Bahasa konten"><button type="button" aria-pressed={editLanguage==='id'} onClick={()=>setEditLanguage('id')}>Indonesia</button><button type="button" aria-pressed={editLanguage==='en'} onClick={()=>setEditLanguage('en')}>English</button></div></div>
-      <p className="cms-muted">Teks kedua bahasa disimpan terpisah. Kosongkan field untuk kembali ke wording bawaan. {'{{days}}'} dan {'{{hashtag}}'} akan diisi otomatis pada field yang menggunakannya.</p>
-      <div className="cms-section-save"><span role="status">{dirtyKeys.length?`${dirtyKeys.length} teks belum disimpan`:'Teks editor sesuai draf / live'}</span><button type="button" disabled={busy||!dirtyKeys.length} onClick={()=>void saveFields(selected?.fields.map(f=>f.key)??[])}>Simpan draf section</button></div>
-      {visible.map(f=>{const key=editLanguage==='id'?`id.${f.key}`:f.key;return <article className="cms-copy-field" key={f.key}><div className="cms-field-heading"><h4>{f.label}</h4><span>{f.kind==='cta'?'Tombol / CTA':f.kind==='status'?'Status & petunjuk':'Teks'}</span></div><label className="cms-editor-label">{editLanguage==='id'?'Indonesia':'English'}<textarea rows={f.kind==='cta'?2:3} value={data.values[key]??''} maxLength={f.limit} onChange={e=>update(key,e.target.value)}/></label><div className="cms-field-footer"><small>{(data.values[key]??'').length} / {f.limit}</small><button disabled={busy||data.values[key]===savedValues[key]} type="button" onClick={()=>void saveFields([f.key])}>Simpan ke draf</button><button disabled={busy} type="button" onClick={()=>update(key,'')}>Pakai wording bawaan</button></div></article>;})}
-      {!visible.length&&<p>Tidak ada teks yang cocok. Konten terstruktur tersedia di tab section ini.</p>}
-      <div className="cms-actions"><button type="button" disabled={page===0} onClick={()=>setPage(p=>p-1)}>Sebelumnya</button><span>{page+1} / {Math.max(1,Math.ceil(fields.length/20))}</span><button type="button" disabled={(page+1)*20>=fields.length} onClick={()=>setPage(p=>p+1)}>Berikutnya</button></div>
-    </>}
-    {mode==='portraits'&&<div><p>Foto profil menerima JPG, PNG, WebP, atau AVIF hingga 50 MB. Foto disiapkan otomatis untuk web.</p><div className="cms-bilingual">{['bagas','iga'].map(who=><label key={who}>Foto {who==='bagas'?'Bagas':'Iga'}{photoUrls[who]&&<img className="cms-photo-preview" src={photoUrls[who]} alt={`Foto ${who}`}/>}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void uploadArrivalPhoto(who,file);}} disabled={busy}/></label>)}</div></div>}
-    {mode==='gifts'&&giftEditor}
-    {mode==='entries'&&archiveEditor}
-    {mode==='comments'&&commentsEditor}
-    {mode==='jukebox'&&<div><p>Atur urutan lagu, upload audio dan cover, serta ubah semua teks jukebox dalam dua bahasa.</p><button type="button" onClick={()=>onOpenArea?.('musik')}>Kelola jukebox</button></div>}
-    {mode==='arrival'&&<ArrivalEditor value={arrival} onChange={setArrival} busy={busy} media={photoUrls} onUpload={uploadArrivalPhoto} onRemovePhoto={removeArrivalPhoto} onSave={()=>void save('/api/admin/website',{arrival})} />}
-    {mode==='event'&&<form onSubmit={e=>{e.preventDefault();void save('/api/admin/website',{config});}}><div className="cms-bilingual">{Object.entries({firstName:'Nama pendek Bagas',secondName:'Nama pendek Iga',weddingDate:'Tanggal acara',akadTime:'Jam akad',receptionTime:'Jam resepsi',venueName:'Nama venue',venueCity:'Kota',venueAddress:'Alamat lengkap',mapsUrl:'Link Google Maps',metaTitle:'Judul website / SEO',metaDescription:'Deskripsi website / SEO',ogImage:'Gambar share / OG (URL)'}).filter(([key])=>section==='seo'?['metaTitle','metaDescription','ogImage'].includes(key):!['metaTitle','metaDescription','ogImage'].includes(key)).map(([key,label])=><label key={key}>{label}<input type={key==='weddingDate'?'date':key.endsWith('Time')?'time':key==='mapsUrl'?'url':'text'} required maxLength={key==='metaTitle'?180:500} value={String(config[key as keyof WebsiteConfig])} onChange={e=>setConfig(c=>({...c,[key]:e.target.value}))}/></label>)}{section!=='seo'&&<><label>Longitude<input type="number" step="any" min={-180} max={180} value={config.longitude} onChange={e=>setConfig(c=>({...c,longitude:Number(e.target.value)}))}/></label><label>Latitude<input type="number" step="any" min={-90} max={90} value={config.latitude} onChange={e=>setConfig(c=>({...c,latitude:Number(e.target.value)}))}/></label></>}</div>{section!=='seo'&&<><label className="check"><input type="checkbox" checked={config.profilesEnabled} onChange={e=>setConfig(c=>({...c,profilesEnabled:e.target.checked}))}/>Tampilkan profil mempelai</label><label className="check"><input type="checkbox" checked={config.trackingEnabled} onChange={e=>setConfig(c=>({...c,trackingEnabled:e.target.checked}))}/>Catat aktivitas link undangan</label></>}<button disabled={busy}>Simpan draf section</button></form>}
-    {(['story','faq','photos','links'] as const).filter(kind=>mode===kind).map(kind=><div key={kind}><p>{kind==='photos'?'Unggah foto untuk kartu Arsip cinta kami di homepage, lalu atur caption dan urutannya. Simpan draf, lalu publikasikan section saat siap.':'Tambah, hapus, atau ubah urutan. Maksimal 24 item. Perubahan tampil ke tamu setelah section dipublikasikan.'}</p>{blocks[kind].map((raw,index)=>{const r=raw as unknown as Record<string,unknown>;return <article className="cms-block" key={String(r.id)}><header className="cms-section-heading"><h3>{kind==='photos'?`Kartu foto ${index+1}`:`Item ${index+1}`}</h3><div className="cms-actions"><button type="button" disabled={index===0} onClick={()=>move(kind,index,-1)}>Naik</button><button type="button" disabled={index===blocks[kind].length-1} onClick={()=>move(kind,index,1)}>Turun</button><button type="button" onClick={()=>remove(kind,index)}>Hapus</button></div></header>{kind==='photos'?<>{photoUrls[String(r.slot)]&&<img className="cms-photo-preview" src={photoUrls[String(r.slot)]} alt={`Foto kartu ${index+1}`} />}<label>{photoUrls[String(r.slot)]?'Ganti foto':'Unggah foto'}<input type="file" aria-label={`Unggah foto kartu ${index+1}`} accept="image/jpeg,image/png,image/webp,image/avif" disabled={busy} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void uploadArrivalPhoto(String(r.slot),file);}}/></label><small>{PHOTO_UPLOAD_HELP}</small>{bilingual(r.caption as Localized,value=>updateBlock(kind,index,'caption',value),'Caption',500)}</>:<>{bilingual(r.title as Localized,value=>updateBlock(kind,index,'title',value),'Judul',200)}{bilingual(r.body as Localized,value=>updateBlock(kind,index,'body',value),'Isi')}{kind==='links'&&<label>Tujuan tautan<input value={String(r.href)} onChange={e=>updateBlock(kind,index,'href',e.target.value)} placeholder="/archive atau https://…"/></label>}</>}</article>;})}<div className="cms-actions"><button type="button" disabled={blocks[kind].length>=24||busy} onClick={()=>add(kind)}>Tambah {kind==='photos'?'kartu foto':'item'}</button><button type="button" disabled={busy} onClick={()=>void save('/api/admin/website',{blocks})}>Simpan draf susunan</button></div></div>)}
-    </fieldset></div></div>}
+  async function removePhoto(slot: string) { setDraftMedia(current => ({ ...current, [slot]: null })); setPhotoUrls(current => { const next = { ...current }; delete next[slot]; return next; }); }
+  const update = (key: string, value: string) => setData(current => current ? { ...current, values: { ...current.values, [key]: value } } : null);
+  const updateBlock = (kind: keyof WebsiteBlocks, index: number, field: string, value: unknown) => setBlocks(current => current ? { ...current, [kind]: current[kind].map((row, i) => i === index ? { ...row, [field]: value } : row) } : current);
+  const remove = (kind: keyof WebsiteBlocks, index: number) => setBlocks(current => current ? { ...current, [kind]: current[kind].filter((_, i) => i !== index) } : current);
+  const move = (kind: keyof WebsiteBlocks, index: number, offset: number) => setBlocks(current => {
+    if (!current) return current; const rows = [...current[kind]], target = index + offset; if (target < 0 || target >= rows.length) return current;
+    [rows[index], rows[target]] = [rows[target], rows[index]]; return { ...current, [kind]: rows };
+  });
+  const add = (kind: keyof WebsiteBlocks) => setBlocks(current => {
+    if (!current || current[kind].length >= 24) return current; const id = `${kind}-${crypto.randomUUID().slice(0, 8)}`;
+    const item = kind === 'photos' ? { id, slot: `gallery-${crypto.randomUUID().slice(0, 8)}`, caption: { en: '', id: '' } } : { id, title: { en: '', id: '' }, body: { en: '', id: '' }, ...(kind === 'links' ? { href: '/archive' } : {}) };
+    return { ...current, [kind]: [...current[kind], item] };
+  });
+  function localized(value: Localized, onChange: (value: Localized) => void, label: string, max = 2000) {
+    return <label className="cms-localized-field">{label}<textarea aria-label={`${label} · ${editLanguage === 'id' ? 'Indonesia' : 'English'}`} value={value[editLanguage]} maxLength={max} rows={3} onChange={event => onChange({ ...value, [editLanguage]: event.target.value })} /></label>;
+  }
+  function chooseSection(next: string) {
+    if (publishingDirty || externalDirty) { notify('Simpan perubahan atau draf sebelum pindah section.'); return; }
+    if (next !== section) { setEditorReady(false); setEditorial(null); setSection(next); }
+    const nextMode = defaultEditorMode(next); setMode(nextMode); onModeChange?.(nextMode); setQuery('');
+  }
+  function chooseMode(next: string) {
+    if (externalDirty) { notify('Simpan form yang sedang diedit sebelum berpindah tab.'); return; }
+    setMode(next); onModeChange?.(next);
+  }
+  const selected = data?.editorSections.find(item => item.id === section), fieldGroups = selected ? groupEditorFields(selected, query, data?.values) : [];
+  const direct = directSaveMode(mode), languageName = editLanguage === 'id' ? 'Indonesia' : 'English';
+  const localizedMode = ['copy', 'arrival', 'story', 'faq', 'photos', 'links'].includes(mode);
+  const tools = selected?.tools.flatMap(tool => tool === 'gifts' ? ['gifts', 'transfers'] : [tool]) ?? [];
+  return <section className="admin-panel admin-wide cms-content-manager cms-workspace-v3">
+    <header className="cms-section-heading"><div><h2>Edit website</h2><p>Pilih bagian undangan, ubah isinya, lalu lihat hasilnya.</p></div><a className="cms-button" href="/" target="_blank" rel="noreferrer">Buka website</a></header>
+    {!data || !blocks ? <div role={loadError ? 'alert' : 'status'}>{loadError ? <><p>{loadError}</p><button type="button" onClick={() => { setLoadError(''); setLoadAttempt(attempt => attempt + 1); }}>Muat ulang</button></> : 'Memuat editor…'}</div> : <div className="cms-editor-shell">
+      <nav className="cms-section-nav" aria-label="Bagian website">{data.editorSections.map(item => <button key={item.id} type="button" aria-current={section === item.id ? 'page' : undefined} disabled={busy} onClick={() => chooseSection(item.id)}><span>{item.label}</span><small>{sectionNavHint(item.id)}</small></button>)}</nav>
+      <div className="cms-editor-content">
+        <header className="cms-current-section"><div><h3>{selected?.label}</h3><p>{sectionHelp(section)}</p></div><a href={sectionWebsiteTarget(section)} target="_blank" rel="noreferrer">Lihat di website ↗</a></header>
+        {section === 'gift' && !giftsEnabled && <p className="cms-editor-conflict" role="status">Section Tanda kasih sedang dinonaktifkan. Isian tetap tersimpan, tetapi belum terlihat di website. <button type="button" onClick={() => onOpenArea?.('pengaturan')}>Buka pengaturan hadiah</button></p>}
+        {section === 'profil' && !config.profilesEnabled && <p className="cms-editor-conflict" role="status">Profil sedang disembunyikan. Aktifkan melalui Hari, kedatangan & FAQ → Jadwal & lokasi.</p>}
+        <div className="cms-subtabs" role="tablist" aria-label="Isi bagian website">
+          {section !== 'jukebox' && section !== 'seo' && <button type="button" role="tab" aria-selected={mode === 'copy'} className={mode === 'copy' ? 'on' : ''} onClick={() => chooseMode('copy')}>Teks & tombol</button>}
+          {tools.map(tool => <button key={tool} type="button" role="tab" aria-selected={mode === tool} className={mode === tool ? 'on' : ''} onClick={() => chooseMode(tool)}>{section === 'seo' && tool === 'event' ? 'Judul & gambar share' : toolLabels[tool]}</button>)}
+        </div>
+        {!direct && localizedMode && <div className="cms-editor-language"><div className="cms-language-tabs" role="group" aria-label="Bahasa yang diedit"><button type="button" aria-pressed={editLanguage === 'id'} onClick={() => setEditLanguage('id')}>Indonesia</button><button type="button" aria-pressed={editLanguage === 'en'} onClick={() => setEditLanguage('en')}>English</button></div><small>Yang diubah hanya versi {languageName}.</small></div>}
+        {mode === 'event' && <p className="cms-reset-help">{section === 'seo' ? 'Judul, deskripsi, dan gambar share ini digunakan untuk kedua bahasa.' : 'Tanggal, jadwal, nama pendek, dan lokasi berlaku untuk kedua bahasa.'}</p>}
+        {direct ? <p className="cms-direct-save-note">Tab ini memakai tombol simpan sendiri. Setelah disimpan, perubahan langsung diterapkan ke website.</p> : editorial && editorReady ? <SectionPublishing key={section} state={editorial} snapshot={editorSnapshot} busy={busy} language={editLanguage} onAction={editorialAction} notify={notify} onCancelEdits={() => { applySnapshot(editorial.document.draft ?? editorial.live); notify('Form kembali ke versi tersimpan.'); }} onReload={() => { if (publishingDirty) { notify('Simpan draf sebelum memuat ulang.'); return; } setEditorAttempt(attempt => attempt + 1); }} /> : <div role={editorError ? 'alert' : 'status'}>{editorError ? <><p>{editorError}</p><button type="button" onClick={() => setEditorAttempt(attempt => attempt + 1)}>Muat ulang editor</button></> : 'Memuat versi website dan draf…'}</div>}
+        {direct && externalDirty && <div role="status" className="cms-form-dirty"><span>Ada perubahan pada form yang belum disimpan.</span><button type="button" onClick={() => { setDirectEditorVersion(version => version + 1); onExternalDirtyChange?.(false); notify('Form kembali ke versi tersimpan.'); }}>Batalkan perubahan form</button></div>}
+        <fieldset key={direct ? `${mode}-${directEditorVersion}` : 'section-editor'} ref={formArea} className="cms-editor-fields" disabled={busy || (!direct && !editorReady)} onChange={event => {
+          if (!['gifts', 'transfers', 'entries'].includes(mode)) return;
+          if (event.target instanceof HTMLInputElement && event.target.type === 'file' && event.target.name !== 'photo') return;
+          onExternalDirtyChange?.(true);
+        }}>
+          {mode === 'copy' && <>
+            <label className="cms-section-search">Cari teks di bagian ini<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari judul, kalimat, atau tombol" /></label>
+            {!fieldGroups.length && <p>Tidak ada teks yang cocok. Foto, jadwal, dan daftar tersedia di tab masing-masing.</p>}
+            {fieldGroups.map(group => {
+              const content = <div className="cms-field-group-content">{group.fields.map(field => {
+                const key = editLanguage === 'id' ? `id.${field.key}` : field.key, value = data.values[key] ?? '', fallback = CONTENT_DEFAULTS[key] ?? field.value;
+                return <div className="cms-copy-field" key={field.key}><label><span className="cms-field-heading"><span>{editorFieldLabel(field)}</span>{value !== savedValues[key] && <small>Diubah</small>}</span><textarea aria-label={`${group.title} · ${editorFieldLabel(field)} · ${languageName}`} rows={field.kind === 'cta' ? 2 : 3} value={value} placeholder={fallback} maxLength={field.limit} onChange={event => update(key, event.target.value)} /></label><div className="cms-field-footer"><small>{value.length} / {field.limit}{!value && ' · Memakai teks bawaan'}</small><button type="button" disabled={busy || value === ''} onClick={() => update(key, '')}>Reset teks</button></div>{/\{\{[a-z]+\}\}/.test(fallback) && <small className="cms-token-help">Pertahankan {fallback.match(/\{\{[a-z]+\}\}/g)?.join(', ')}; nilainya diisi otomatis.</small>}</div>;
+              })}</div>;
+              return group.advanced ? <details className="cms-advanced-fields" key={group.title} open={query ? true : undefined}><summary>{group.title}<small>{group.fields.length} teks tambahan</small></summary><p>Label dan pesan untuk tombol, aksesibilitas, atau kondisi khusus. Tidak semuanya terlihat saat halaman baru dibuka.</p>{content}</details> : <section className="cms-field-group" key={group.title}><h4>{group.title}</h4>{content}</section>;
+            })}
+            <p className="cms-reset-help">Reset teks menggunakan wording bawaan pada bahasa yang sedang diedit. Bahasa lain tetap seperti sebelumnya.</p>
+          </>}
+          {mode === 'portraits' && <div className="cms-portrait-editors"><p>Animasi foto yang sekarang dipakai adalah bawaan undangan. Upload foto baru akan menggantikan animasi untuk mempelai tersebut. {PHOTO_UPLOAD_HELP}.</p><div className="cms-bilingual">{['bagas', 'iga'].map(who => <section className="cms-portrait-editor" key={who}><h4>{who === 'bagas' ? 'Bagas' : 'Iga'}</h4><img className="cms-photo-preview" src={photoUrls[who] || `/assets/profiles/${who}-portrait.webp`} alt={`Foto ${who}`} /><p>{photoUrls[who] ? 'Foto dari CMS' : 'Animasi bawaan undangan'}</p><label>{photoUrls[who] ? 'Ganti foto' : 'Upload foto pengganti'}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadPhoto(who, file); }} /></label>{photoUrls[who] && <button type="button" onClick={() => void removePhoto(who)}>Kembalikan animasi bawaan</button>}</section>)}</div></div>}
+          {mode === 'gifts' && giftEditor}{mode === 'transfers' && transferEditor}
+          {mode === 'entries' && <><p>Cerita tambahan tampil di halaman Arsip jika berstatus publik dan diterbitkan. Untuk kartu foto di homepage, gunakan tab Album foto.</p>{archiveEditor}</>}
+          {mode === 'comments' && commentsEditor}{mode === 'jukebox' && jukeboxEditor}
+          {mode === 'arrival' && <ArrivalEditor value={arrival} onChange={setArrival} busy={busy} language={editLanguage} media={photoUrls} onUpload={uploadPhoto} onRemovePhoto={removePhoto} />}
+          {mode === 'event' && <div className="cms-event-editor"><section className="cms-field-group"><h4>{section === 'seo' ? 'Tampilan saat link dibagikan' : 'Tanggal & jadwal'}</h4><div className="cms-bilingual">{Object.entries(section === 'seo' ? { metaTitle: 'Judul website', metaDescription: 'Deskripsi singkat', ogImage: 'Gambar share (URL)' } : { weddingDate: 'Tanggal acara', akadTime: 'Jam akad (WIB)', receptionTime: 'Jam resepsi (WIB)' }).map(([key, label]) => <label key={key}>{label}<input type={key === 'weddingDate' ? 'date' : key.endsWith('Time') ? 'time' : 'text'} required maxLength={key === 'metaTitle' ? 180 : 500} value={String(config[key as keyof WebsiteConfig])} onChange={event => setConfig(current => ({ ...current, [key]: event.target.value }))} /></label>)}</div></section>{section !== 'seo' && <><section className="cms-field-group"><h4>Tempat acara</h4><div className="cms-bilingual">{Object.entries({ venueName: 'Nama tempat', venueCity: 'Kota', venueAddress: 'Alamat lengkap', mapsUrl: 'Link Google Maps' }).map(([key, label]) => <label key={key}>{label}<input type={key === 'mapsUrl' ? 'url' : 'text'} required maxLength={500} value={String(config[key as keyof WebsiteConfig])} onChange={event => setConfig(current => ({ ...current, [key]: event.target.value }))} /></label>)}</div><details className="cms-advanced-fields"><summary>Posisi pin pada peta</summary><p>Koordinat menentukan pin pada peta interaktif; link Google Maps adalah tujuan tombol petunjuk arah.</p><div className="cms-bilingual"><label>Bujur (longitude)<input type="number" step="any" min={-180} max={180} required value={config.longitude} onChange={event => setConfig(current => ({ ...current, longitude: Number(event.target.value) }))} /></label><label>Lintang (latitude)<input type="number" step="any" min={-90} max={90} required value={config.latitude} onChange={event => setConfig(current => ({ ...current, latitude: Number(event.target.value) }))} /></label></div></details></section><section className="cms-field-group"><h4>Nama di pembuka undangan</h4><div className="cms-bilingual"><label>Nama pendek Iga<input required maxLength={50} value={config.secondName} onChange={event => setConfig(current => ({ ...current, secondName: event.target.value }))} /></label><label>Nama pendek Bagas<input required maxLength={50} value={config.firstName} onChange={event => setConfig(current => ({ ...current, firstName: event.target.value }))} /></label></div><label className="check"><input type="checkbox" checked={config.profilesEnabled} onChange={event => setConfig(current => ({ ...current, profilesEnabled: event.target.checked }))} />Tampilkan section profil mempelai</label><details className="cms-advanced-fields"><summary>Aktivitas undangan</summary><label className="check"><input type="checkbox" checked={config.trackingEnabled} onChange={event => setConfig(current => ({ ...current, trackingEnabled: event.target.checked }))} />Catat aktivitas link undangan</label></details></section></>}</div>}
+          {(['story', 'faq', 'photos', 'links'] as const).filter(kind => mode === kind).map(kind => <div className={`cms-collection-editor is-${kind}`} key={kind}><p>{kind === 'photos' ? 'Foto dan caption di sini adalah kartu di Arsip cinta kami pada homepage. Susunan website tetap mengikuti komposisi album yang sudah dipilih.' : 'Isi dan urutan di sini tampil setelah klik Tayangkan perubahan.'}</p>{blocks[kind].map((raw, index) => {
+            const row = raw as unknown as Record<string, unknown>;
+            return <article className="cms-block" key={String(row.id)}><header className="cms-section-heading"><h4>{itemLabels[kind]} {index + 1}</h4><div className="cms-actions"><button type="button" aria-label={`Naikkan ${itemLabels[kind].toLowerCase()} ${index + 1}`} disabled={index === 0} onClick={() => move(kind, index, -1)}>Naik</button><button type="button" aria-label={`Turunkan ${itemLabels[kind].toLowerCase()} ${index + 1}`} disabled={index === blocks[kind].length - 1} onClick={() => move(kind, index, 1)}>Turun</button><button type="button" aria-label={`Hapus ${itemLabels[kind].toLowerCase()} ${index + 1}`} onClick={() => remove(kind, index)}>Hapus</button></div></header>{kind === 'photos' ? <>{photoUrls[String(row.slot)] ? <img className="cms-photo-preview" src={photoUrls[String(row.slot)]} alt={`Foto ${index + 1}`} /> : <div className="cms-photo-empty">Belum ada foto</div>}<label>{photoUrls[String(row.slot)] ? 'Ganti foto' : 'Upload foto'}<input type="file" aria-label={`Upload foto ${index + 1}`} accept="image/jpeg,image/png,image/webp,image/avif" onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadPhoto(String(row.slot), file); }} /></label><small>{PHOTO_UPLOAD_HELP}</small>{localized(row.caption as Localized, value => updateBlock(kind, index, 'caption', value), `Caption foto ${index + 1}`, 500)}{photoUrls[String(row.slot)] && <button type="button" onClick={() => void removePhoto(String(row.slot))}>Hapus foto, pertahankan kartu</button>}</> : <>{localized(row.title as Localized, value => updateBlock(kind, index, 'title', value), `${kind === 'faq' ? 'Pertanyaan' : 'Judul'} ${index + 1}`, 200)}{localized(row.body as Localized, value => updateBlock(kind, index, 'body', value), `${kind === 'faq' ? 'Jawaban' : 'Isi'} ${index + 1}`)}{kind === 'links' && <label>Tujuan tautan<input required value={String(row.href)} onChange={event => updateBlock(kind, index, 'href', event.target.value)} placeholder="/archive atau https://…" /></label>}</>}</article>;
+          })}<div className="cms-actions"><button type="button" disabled={blocks[kind].length >= 24} onClick={() => add(kind)}>Tambah {itemLabels[kind].toLowerCase()}</button><small>{blocks[kind].length} dari maksimal 24 {itemLabels[kind].toLowerCase()}</small></div></div>)}
+        </fieldset>
+        {section === 'keepsake' && <button className="cms-personal-message-link" type="button" onClick={() => onOpenArea?.('tamu')}>Atur pesan khusus per tamu</button>}
+      </div>
+    </div>}
   </section>;
 }
