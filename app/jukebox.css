@@ -1,0 +1,84 @@
+/* Scoped, lightweight controls; existing invitation typography/art remains intact. */
+.jbx, .jbx * { box-sizing: border-box; }
+.jbx {
+  --jbx-paper: #fbf8f1; --jbx-ivory: #f4efe5; --jbx-rose: #c4878d;
+  --jbx-matcha: #69745b; --jbx-forest: #23382d; --jbx-foil: #b08b50;
+  position: fixed; z-index: 470; right: max(24px, env(safe-area-inset-right));
+  bottom: calc(24px + env(safe-area-inset-bottom)); width: 76px;
+  color: var(--jbx-forest); font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px; line-height: 1.4; isolation: isolate;
+}
+.jbx[hidden], .jbx [hidden] { display: none !important; }
+body:has(.v2-opening) .jbx { visibility: hidden; pointer-events: none; }
+.jbx :is(button, input) { font: inherit; color: inherit; }
+.jbx button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.jbx button:disabled { cursor: default; opacity: .4; }
+.jbx :focus-visible { outline: 2px solid var(--jbx-forest); outline-offset: 3px; }
+.jbx-mini { position: relative; width: 76px; height: 96px; }
+.jbx-expand { display: block; width: 76px; height: 96px; padding: 0; background: none; border: 0; }
+.jbx-object { display: block; width: 68px; height: 86px; margin: 5px 4px; }
+.jbx-mini-play { position: absolute; right: -5px; bottom: -2px; display: grid; place-items: center; width: 44px; height: 44px;
+  border: 1px solid var(--jbx-foil); border-radius: 50%; background: var(--jbx-paper); color: var(--jbx-forest); box-shadow: 0 2px 5px #23382d15; }
+.jbx-mini-play:hover { background: var(--jbx-ivory); }
+.jbx-hint { position: absolute; right: 86px; bottom: 12px; width: max-content; max-width: 170px; padding: 7px 10px;
+  border: 1px solid #b08b5050; background: var(--jbx-paper); font-size: 11px; line-height: 1.3; border-radius: 3px; }
+.jbx-lamp { transition: fill .2s; }
+.jbx.is-playing .jbx-lamp { fill: #fbf8f1; }
+.jbx.is-playing .jbx-line { animation: jbx-song-line 3s ease-in-out infinite alternate; transform-origin: center; }
+.jbx.is-playing .jbx-line-two { animation-delay: -1.2s; }
+@keyframes jbx-song-line { from { opacity: .55; transform: translateY(0); } to { opacity: 1; transform: translateY(1.5px); } }
+.jbx-panel { position: absolute; right: 0; bottom: 108px; width: 344px; max-height: min(496px, calc(100dvh - 152px)); display: flex; flex-direction: column;
+  padding: 18px 18px 6px; overflow: hidden; border: 1px solid #b08b5080; border-top: 3px solid var(--jbx-matcha); border-radius: 22px 22px 5px 5px;
+  background: var(--jbx-paper); box-shadow: 0 8px 24px #23382d16; animation: jbx-reveal .18s ease-out both; }
+@keyframes jbx-reveal { from { opacity: 0; transform: translateY(5px) scale(.985); } to { opacity: 1; transform: none; } }
+.jbx-heading { display: flex; gap: 8px; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+.jbx-heading h2 { margin: 0; font-family: "Newsreader", Baskerville, Georgia, serif; font-weight: 500; font-size: 26px; line-height: 1.1; letter-spacing: -.02em; }
+.jbx-heading p { margin: 5px 0 12px; max-width: 245px; font-size: 11px; color: #58624f; }
+.jbx-icon-button { width: 44px; min-width: 44px; height: 44px; display: grid; place-items: center; padding: 0; background: none; border: 0; border-radius: 50%; }
+.jbx-icon-button:hover { background: #69745b10; }
+.jbx-heading > button { margin: -10px -10px 0 0; }
+.jbx-now { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 12px; flex-shrink: 0; }
+.jbx-artwork { width: 48px; height: 58px; overflow: hidden; display: grid; place-items: center; border: 1px solid var(--jbx-foil); border-radius: 22px 22px 2px 2px; background: var(--jbx-matcha); color: var(--jbx-paper); }
+.jbx-artwork img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.jbx-artwork > span { font: 19px "Newsreader", Baskerville, Georgia, serif; }
+.jbx-artwork > span span { font-size: 12px; padding: 0 1px; font-style: italic; }
+.jbx-now small { display: block; color: #58624f; font-size: 10px; }
+.jbx-track-title { margin: 2px 0; font: 500 20px/1.16 "Newsreader", Baskerville, Georgia, serif; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.jbx-artist { margin: 0; font-size: 11px; color: #58624f; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.jbx-picked { display: inline-block; margin-top: 4px; color: #72574c; font-size: 10px; }
+.jbx-note { margin: 8px 0 0; font: 14px/1.35 "Newsreader", Baskerville, Georgia, serif; color: #58624f; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; flex-shrink: 0; }
+.jbx input[type="range"] { accent-color: var(--jbx-matcha); cursor: pointer; min-width: 0; height: 44px; margin: 0; }
+.jbx input[type="range"]:disabled { cursor: default; }
+.jbx-seek { margin-top: 1px; flex-shrink: 0; }
+.jbx-seek input { width: 100%; }
+.jbx-seek > div { display: flex; justify-content: space-between; margin-top: -8px; font-size: 10px; font-variant-numeric: tabular-nums; }
+.jbx-controls { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 3px 0 0; flex-shrink: 0; }
+.jbx-transport, .jbx-volume { display: flex; align-items: center; }
+.jbx .jbx-play-main { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid var(--jbx-forest); border-radius: 50%; background: var(--jbx-forest); color: var(--jbx-paper); }
+.jbx-volume input { width: 76px; }
+.jbx-status { margin: 2px 0 3px; min-height: 16px; font-size: 10px; color: #72574c; flex-shrink: 0; }
+.jbx-playlist { list-style: none; padding: 0; margin: 0; min-height: 60px; flex: 1 1 170px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #69745b70 transparent; border-top: 1px solid #b08b5045; }
+.jbx-playlist li { margin: 0; border-bottom: 1px solid #b08b502a; }
+.jbx-playlist button { display: grid; grid-template-columns: 22px minmax(0, 1fr) 20px; align-items: center; gap: 9px; width: 100%; min-height: 52px; border: 0; padding: 8px 3px; text-align: left; background: none; }
+.jbx-playlist button[aria-current="true"] { background: #69745b0c; color: var(--jbx-forest); }
+.jbx-playlist button:hover { background: #c4878d10; }
+.jbx-number { font-size: 10px; color: #74796b; font-variant-numeric: tabular-nums; }
+.jbx-song { min-width: 0; }
+.jbx-song strong { display: block; font-size: 12px; font-weight: 500; overflow-wrap: anywhere; }
+.jbx-song small { display: block; margin-top: 2px; font-size: 10px; color: #58624f; overflow-wrap: anywhere; }
+.jbx-track-marker svg { width: 14px; height: 14px; opacity: .5; }
+.jbx-playlist button[aria-current="true"] .jbx-track-marker svg { opacity: 1; }
+@media (max-width: 600px) {
+  .jbx { right: calc(17px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); }
+  .jbx-panel { position: fixed; right: calc(12px + env(safe-area-inset-right)); left: calc(12px + env(safe-area-inset-left)); bottom: calc(124px + env(safe-area-inset-bottom)); width: auto;
+    max-height: min(500px, calc(100dvh - 148px - env(safe-area-inset-bottom))); padding: 18px 18px 6px; border-radius: 24px 24px 6px 6px; }
+  .jbx-panel::before { content: ""; width: 30px; height: 2px; margin: -9px auto 12px; background: #69745b50; flex-shrink: 0; }
+  .jbx-hint { right: 80px; max-width: min(170px, calc(100vw - 130px)); }
+}
+@media (max-height: 620px) {
+  .jbx-panel { max-height: calc(100dvh - 140px); overflow-y: auto; }
+  .jbx-playlist { min-height: 92px; flex-shrink: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jbx *, .jbx *::before { animation: none !important; transition: none !important; }
+}

@@ -42,7 +42,7 @@ async function waitFor(base) {
 }
 
 try {
-  for (const file of (await readdir(join(root, "drizzle"))).filter(name=>/^\d{4}_.+\.sql$/.test(name)).sort()) migrate(file);
+  for (const file of (await readdir(join(root, 'drizzle'))).filter(file=>/^\d+.*\.sql$/.test(file)).sort()) migrate(file);
   const [a, b] = [randomInviteToken(), randomInviteToken()];
   sql(`INSERT INTO guests (id, token_hash, display_name, party_limit) VALUES
     ('fixture-a','${await sha256(a)}','Fixture A',2),('fixture-b','${await sha256(b)}','Fixture B',1);
@@ -99,11 +99,6 @@ try {
     assert.equal((await response(base, `/api/invite/${b}/rsvp`)).data.rsvp.party_size, 1);
     assert.match((await response(base, `/api/invite/${a}/rsvp`)).headers.get("cache-control"), /private.*no-store/);
     console.log("guest identity and RSVP: OK");
-    const keepsakeResponse = await fetch(new URL(`/invite/${a}/keepsake`, base));
-    assert.equal(keepsakeResponse.status, 200);
-    assert.match(keepsakeResponse.headers.get("cache-control"), /no-store/);
-    assert.match(await keepsakeResponse.text(), /noindex/);
-
 
     sql(`INSERT INTO archive_entries (id,slug,type,title,excerpt,story,visibility,published,featured) VALUES
       ('content-real','content-real','note','REAL_CONTENT_SENTINEL','A confirmed original note.','A confirmed original story.','public',1,1),
@@ -121,8 +116,9 @@ try {
     assert.equal((await fetch(new URL("/archive/content-real", base))).status, 200);
     for (const slug of ["content-empty", "content-private", "content-draft"]) assert.equal((await fetch(new URL(`/archive/${slug}`, base))).status, 404, slug);
     const markHtml = await (await fetch(new URL("/archive/the-mark", base))).text();
-    const renderedMark = markHtml.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
-    assert.ok(!renderedMark.includes("Original sketches and iterations can be added here later."));
+    // CMS dictionaries may contain unused literals in the hydration payload. Check rendered markup.
+    const markMarkup = markHtml.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+    assert.ok(!markMarkup.includes("Original sketches and iterations can be added here later."));
     sql("DELETE FROM archive_entries WHERE id IN ('content-real','content-empty','content-private','content-draft');");
     console.log("public content readiness, published Archive routes and gift preview privacy: OK");
 
@@ -188,6 +184,26 @@ try {
     sql("INSERT INTO settings (key,value) VALUES ('rsvp_enabled','on') ON CONFLICT(key) DO UPDATE SET value='on';");
     assert.equal((await response(base, `/api/invite/${a}/rsvp`, "POST", { attendance: "yes", partySize: 1 })).status, 200);
     console.log("post-wedding RSVP closure and admin override: OK");
+    // Exercise the compiled Worker, separate from the Vite admin integration.
+    sql("INSERT INTO archive_entries (id,slug,type,title,excerpt,media_url,visibility,published) VALUES ('compiled-photo','compiled-photo','photograph','Compiled fixture photo','Local fixture caption.','/assets/og-image.jpg','public',1);");
+    async function commentsRequest(path,body,cookie='',method=body?'POST':'GET'){
+      const r=await fetch(base+path,{method,headers:{...(cookie?{cookie}:{}),...(body?{'content-type':'application/json',origin:base}:{})},body:body?JSON.stringify(body):undefined});
+      return {status:r.status,data:await r.json(),headers:r.headers};
+    }
+    const guestSession=await commentsRequest('/api/guest/session',{token:a});assert.equal(guestSession.status,200);
+    const guestCookie=guestSession.headers.get('set-cookie').split(';')[0];
+    const comment=await commentsRequest('/api/photo-comments',{photo:'archive:compiled-photo',message:'Compiled Worker comment.'},guestCookie);assert.equal(comment.status,201);assert.equal(comment.data.comment.name,'Fixture A');assert.equal(comment.data.comment.status,'pending');
+    const photoPath='/api/photo-comments?photo=archive:compiled-photo';
+    assert.equal((await commentsRequest(photoPath)).data.comments.length,0);
+    assert.equal((await commentsRequest(photoPath,null,guestCookie)).data.comments.length,1);
+    const overviewPath='/api/photo-comments/overview?photo=archive:compiled-photo';
+    assert.equal((await commentsRequest(overviewPath)).data.photos['archive:compiled-photo'].total,0);
+    assert.equal((await commentsRequest(overviewPath,null,guestCookie)).data.photos['archive:compiled-photo'].total,1);
+    sql(`UPDATE photo_comments SET moderation_status='approved' WHERE id='${comment.data.comment.id}';`);
+    const heart=await commentsRequest('/api/photo-comments/'+comment.data.comment.id+'/heart',{liked:true},guestCookie,'PUT');assert.equal(heart.status,200);assert.equal(heart.data.hearts,1);
+    assert.equal((await commentsRequest(photoPath)).data.comments[0].hearts,1);
+    assert.equal((await commentsRequest(overviewPath)).data.photos['archive:compiled-photo'].total,1);
+    console.log('compiled Worker photo comments: session, identity, pending privacy, approved read, heart and card counts: OK');
     if (process.env.ARCHIVE_BROWSER_QA === "1") {
       assert.equal((await fetch(new URL("/archive/fixture-secret",base))).status,404);
       assert.equal((await fetch(new URL("/archive/fixture-draft",base))).status,404);

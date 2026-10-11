@@ -1,0 +1,65 @@
+.v2-world .gift-options-section { padding:clamp(2.25rem,4vw,3.5rem) max(1.25rem,calc((100vw - 72rem)/2)); }
+.v2-botanical-continuum > .gift-options-section::before { background:#21382c; }
+.v2-botanical-continuum > .gift-options-section::after { display:none; }
+.gift-options-folio { position:relative; z-index:3; isolation:isolate; overflow:hidden; padding:clamp(1.5rem,3vw,2.25rem); background:#f5f0e4 url('/atelier/assets/keepsake-paper.webp') center/38rem; color:#21382c; border:1px solid #bca878; }
+.gift-options-folio::before { content:''; position:absolute; inset:.5rem; border:1px solid #bca878; opacity:.6; pointer-events:none; z-index:-1; }
+.gift-options-flowers { position:absolute; inset:0; pointer-events:none; z-index:-1; overflow:hidden; }
+.gift-options-flowers .gift-options-flower-top { position:absolute; width:clamp(6rem,12vw,10rem); left:-2rem; top:-2.5rem; }
+.gift-options-flowers .gift-options-flower-bottom { position:absolute; width:clamp(6rem,12vw,10rem); right:-2rem; bottom:-2rem; }
+.gift-options-heading { text-align:center; max-width:42rem; margin:0 auto 1.35rem; }
+.gift-options-heading h2 { margin:0 0 .55rem; font:400 clamp(2.1rem,3.8vw,3.1rem)/1.12 var(--bx-serif); letter-spacing:-.025em; }
+.gift-options-heading p { margin:0 auto; max-width:48ch; font-size:.9rem; line-height:1.65; text-wrap:pretty; }
+.gift-options-tabs { display:flex; justify-content:center; gap:1.5rem; border-bottom:1px solid #21382c30; margin:0 auto 2rem; }
+.gift-options-tabs button { padding:.8rem .35rem; border:0; border-bottom:2px solid transparent; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+.gift-options-tabs button[aria-selected='true'] { border-bottom-color:#21382c; font-weight:600; }
+.gift-options-tabs button:focus-visible,.gift-transfer-action:focus-visible,.gift-options-catalogue:focus-visible { outline:2px solid #21382c; outline-offset:4px; }
+.gift-options-panel[hidden] { display:none; }
+.gift-options-panel:focus-visible { outline:2px solid #a28a50; outline-offset:6px; }
+.gift-options-panel .gift-collection-shelf { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.5rem; margin:0; }
+.gift-options-panel .gift-collection { display:block; min-width:0; min-height:0; width:100%; padding:0; border:0; background:none; box-shadow:none; }
+.gift-options-panel .gift-niche { height:clamp(9rem,18vw,15rem); }
+.gift-options-panel .gift-collection-caption { min-width:0; padding:1rem 0; }
+.gift-options-panel .gift-collection-caption h3 { margin:0 0 .5rem; font:400 1.65rem/1.2 var(--bx-serif); }
+.gift-options-panel .gift-collection-caption p { margin:0; font:.8rem/1.6 var(--bx-sans); }
+.gift-options-panel .gift-collection-action span { position:static; }
+.gift-options-panel .gift-collection-action { font-size:.78rem; }
+.gift-options-folio .gift-options-catalogue { display:flex; justify-content:center; align-items:center; gap:.6rem; width:fit-content; margin:1.5rem auto 0; padding:.9rem 1.2rem; background:#21382c; color:#f5f0e4; font-size:.85rem; text-decoration:none; }
+.gift-options-empty { text-align:center; margin:2rem auto; max-width:40ch; line-height:1.75; }
+.gift-transfer-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:2rem; }
+.gift-transfer-group { min-width:0; }
+.gift-transfer-method { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1rem; align-items:center; padding:1.4rem 0; border-bottom:1px solid #21382c30; min-width:0; }
+.gift-transfer-method h3 { margin:0 0 .3rem; font:400 1.7rem/1.2 var(--bx-serif); }
+.gift-transfer-recipient { margin:0; font-size:.8rem; line-height:1.5; overflow-wrap:anywhere; }
+.gift-transfer-destination { grid-column:1/-1; grid-row:2; }
+.gift-transfer-destination p { margin:0; line-height:1.5; font-size:.9rem; }
+.gift-transfer-destination span { display:block; font-size:.72rem; margin-bottom:.3rem; opacity:.75; }
+.gift-transfer-destination strong { display:block; font-size:1.1rem; font-weight:500; letter-spacing:.04em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; user-select:all; }
+.gift-transfers .gift-transfer-action,.gift-options-folio .gift-transfer-action { display:inline-flex; justify-content:center; align-items:center; gap:.5rem; padding:.7rem .85rem; min-height:44px; border:1px solid #21382c70; background:transparent; color:inherit; font:inherit; font-size:.85rem; text-decoration:none; cursor:pointer; text-align:center; max-width:13rem; overflow-wrap:anywhere; }
+.gift-transfer-legacy { margin:1rem 0; }
+.gift-transfer-legacy pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; line-height:1.75; }
+.gift-transfer-status { min-height:1.5em; margin:1rem 0 0; font-size:.8rem; }
+.gift-gallery-page .gift-transfers { margin:3rem 0; padding:1.5rem 2rem; color:#21382c; background:#f5f0e4; border:1px solid #bca878; }
+.admin-page .cms-transfer-settings form { display:block; }
+.cms-transfer-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; }
+.cms-transfer-fields fieldset { min-width:0; margin:0; padding:1.2rem; border:1px solid var(--bx-sand); }
+.cms-transfer-fields legend { padding:0 .4rem; font:400 1.4rem/1.2 var(--bx-serif); }
+.cms-transfer-fields label { margin:.75rem 0; }
+.cms-transfer-fields .check { display:flex; align-items:center; gap:.5rem; }
+@media(max-width:700px) {
+  .gift-options-panel .gift-collection-shelf { gap:.9rem; grid-template-columns:1fr; }
+  .gift-options-panel .gift-collection-link { display:grid; grid-template-columns:7rem minmax(0,1fr); align-items:center; gap:1.1rem; }
+  .gift-options-panel .gift-niche { height:8rem; }
+  .gift-options-panel .gift-collection-caption { padding:.5rem 0; }
+  .gift-options-panel .gift-collection-caption h3 { font-size:1.4rem; }
+  .gift-transfer-list,.cms-transfer-fields { grid-template-columns:1fr; }
+  .gift-options-folio { padding:1.5rem 1.15rem 1.25rem; }
+  .gift-options-tabs { gap:1rem; }
+  .gift-options-tabs button { font-size:.85rem; }
+  .gift-transfers .gift-transfer-action { max-width:10rem; }
+  .gift-gallery-page .gift-transfers { padding:1rem; }
+}
+@media(max-width:360px) {
+  .gift-transfer-method { grid-template-columns:1fr; }
+  .gift-transfers .gift-transfer-action { justify-self:start; max-width:100%; }
+  .gift-transfer-destination { grid-row:auto; }
+}

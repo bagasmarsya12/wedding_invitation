@@ -1,3 +1,5 @@
+import { isInvitationOrigin } from './invitation-origin.mjs';
+
 /** Pass codes are independent of invitation credentials and contain no name. */
 export const PASS_CODE = /^[a-f0-9]{32}$/;
 export function passCodeFromInput(value: string, origin: string): string | null {
@@ -5,7 +7,7 @@ export function passCodeFromInput(value: string, origin: string): string | null 
   if (PASS_CODE.test(trimmed)) return trimmed;
   try {
     const url = new URL(trimmed);
-    if (url.origin !== origin || url.search || url.hash) return null;
+    if (!isInvitationOrigin(url.origin, origin) || url.search || url.hash) return null;
     const match = /^\/check-in\/([a-f0-9]{32})\/?$/.exec(url.pathname);
     return match?.[1] ?? null;
   } catch { return null; }

@@ -61,7 +61,6 @@ export function PostcardWall({ ownIds, refresh = 0 }: { ownIds?: Set<string>; re
   const loadMore = useCallback(() => { if (cursor) void load(cursor); }, [cursor, load]);
 
   return <div className="postcard-wall-room">
-    <div className="postcard-wall-heading"><span><T>Postcards from our guests</T></span><small><T>Scroll to explore. Tap a card to read.</T></small></div>
     {!loaded && !error && <p className="mark-empty" role="status"><T>Loading the wall…</T></p>}
     {loaded && marks.length === 0 && <p className="mark-empty"><T>Nothing here yet — approved postcards will fill the wall.</T></p>}
     {marks.length > 0 && <div ref={scrollRef} className="v2-postcard-wall" role="region" tabIndex={0} aria-label={t("Scrollable postcard wall")} aria-busy={busy}>

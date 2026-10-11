@@ -8,5 +8,5 @@ export function invitationClock(now: Date, phase?: string, language = "en", wedd
   const countdown = language === "id"
     ? state === "past" ? "kami sudah menikah." : state === "today" ? "hari ini." : state === "tomorrow" ? "besok." : `${Math.max(days, 0)} hari lagi.`
     : state === "past" ? "we’re married." : state === "today" ? "today." : state === "tomorrow" ? "tomorrow." : `${Math.max(days, 0)} days away.`;
-  return { state, countdown };
+  return { state, countdown, days:Math.max(days,0) };
 }

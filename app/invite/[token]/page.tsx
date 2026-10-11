@@ -1,3 +1,4 @@
+import { guestKeepsakeNote } from '@/lib/guest-keepsake';
 import { notFound } from "next/navigation";
 import { WeddingExperience } from "@/app/wedding-experience";
 import { guestFromToken } from "@/lib/server";
@@ -11,5 +12,6 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const { token } = await params;
   const [guest, content] = await Promise.all([guestFromToken(token), loadHomepageContent()]);
   if (!guest) notFound();
-  return <WeddingExperience {...content} guestName={guest.display_name} token={token} partyLimit={guest.party_limit} />;
+  const keepsakeNote=await guestKeepsakeNote(guest.id);
+  return <WeddingExperience keepsakeNote={keepsakeNote} {...content} guestName={guest.display_name} token={token} partyLimit={guest.party_limit} />;
 }

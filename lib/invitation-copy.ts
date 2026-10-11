@@ -1,6 +1,25 @@
+import { ROMANTIC_ID_COPY } from './romantic-copy';
 // Authored interface copy only. Guest names, messages and personal archive entries
 // stay in their original language; no machine translation or external service.
 export const indonesian: Record<string, string> = {
+  "Our story": "Cerita kami",
+  "Send card": "Kirim Kartu",
+  "For Iga & Bagas": "Untuk Iga & Bagas",
+  "Iga & Bagas": "Iga & Bagas",
+  "Ways to send a gift": "Pilihan tanda kasih",
+  "Gift an object": "Hadiah barang",
+  "A little love": "Tanda kasih",
+  "Your presence is already a gift. If you would like to send a little love, we have left a few ways here.": "Datangmu sudah menjadi hadiah. Jika ingin menitipkan tanda kasih, kami menyediakan beberapa jalan kecil di sini.",
+  "A few wishes for our home will find their place here.": "Beberapa keinginan kecil untuk rumah kami akan kami titipkan di sini.",
+  "Opening the gift options…": "Membuka pilihan tanda kasih…",
+  "Gift options are temporarily unavailable. Please try again.": "Pilihan tanda kasih belum bisa dibuka. Coba sekali lagi, ya.",
+  "Your presence is already a gift.": "Datangmu sudah menjadi hadiah.",
+  "Open DANA": "Buka DANA",
+  "Copy phone number": "Salin nomor",
+  "Copy account number": "Salin rekening",
+  "Send a little love via DANA.": "Titipkan tanda kasih melalui DANA.",
+  "Phone number": "Nomor telepon",
+  "Account number": "Nomor rekening",
   "Same place, a very special day.": "Satu tempat, hari yang istimewa.",
   "The two of us, as observed by the other.": "Kami berdua, di mata satu sama lain.",
   "A little word from you.": "Sepatah kata darimu.",
@@ -375,6 +394,7 @@ export const indonesian: Record<string, string> = {
   "Next photograph": "Foto berikutnya",
   "Your guest pass": "Kartu akses tamumu",
   "Close guest pass": "Tutup kartu akses",
+  "Enlarge QR": "Perbesar QR",
   "Preparing your guest pass…": "Menyiapkan kartu aksesmu…",
   "Up to": "Maksimal",
   "guest": "tamu",
@@ -411,4 +431,10 @@ export const indonesian: Record<string, string> = {
   "Photograph 04 — caption to be added.": "Foto 04 — keterangan akan ditambahkan.",
   "Photograph 05 — caption to be added.": "Foto 05 — keterangan akan ditambahkan.",
   "Photograph 06 — caption to be added.": "Foto 06 — keterangan akan ditambahkan.",
+  "Photograph 07 — caption to be added.": "Foto 07 — keterangan akan ditambahkan.",
+  "Photograph 08 — caption to be added.": "Foto 08 — keterangan akan ditambahkan.",
+  "Photograph 09 — caption to be added.": "Foto 09 — keterangan akan ditambahkan.",
+  "Photograph 10 — caption to be added.": "Foto 10 — keterangan akan ditambahkan.",
 };
+
+Object.assign(indonesian, ROMANTIC_ID_COPY);

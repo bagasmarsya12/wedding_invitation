@@ -34,7 +34,7 @@ export function AdminLogin({ returnTo = "" }: { returnTo?: string }) {
 
   return (
     <main className="product-page admin-page">
-      <header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><span>Wedding Desk</span></nav></header>
+      <header className="product-header"><a href="/">Iga &amp; Bagas</a><nav><span>Wedding Desk</span></nav></header>
       <section className="admin-hero"><p>Private management surface</p><h1>Wedding <em>Desk</em></h1><p>Sign in to manage guests, RSVP, gifts, content, and moderation.</p></section>
       <div className="admin-grid">
         <section className="admin-panel admin-login">

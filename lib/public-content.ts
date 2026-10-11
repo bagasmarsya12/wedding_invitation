@@ -1,7 +1,7 @@
 /** Public pages show confirmed content; drafts stay available in configuration. */
 // Template profiles and photographs are approved for this invitation.
 export const PROFILE_ENABLED = true;
-export const PHOTO_SLOTS = ["gallery-01", "gallery-02", "gallery-03", "gallery-04", "gallery-05", "gallery-06"] as const;
+export const PHOTO_SLOTS = ["gallery-01", "gallery-02", "gallery-03", "gallery-04", "gallery-05", "gallery-06", "gallery-07", "gallery-08", "gallery-09", "gallery-10"] as const;
 export type LandingPhotos = { bagas: string | null; iga: string | null; gallery: (string | null)[] };
 export const EMPTY_PHOTOS: LandingPhotos = { bagas: null, iga: null, gallery: PHOTO_SLOTS.map(() => null) };
 
@@ -28,6 +28,9 @@ export type HomepageArchiveItem = { type: string; title: string; note: string; i
 export const THE_MARK_TEASER: HomepageArchiveItem = {
   type: "The mark", title: "A B embracing a bending I.",
   note: "The identity began with an old joke about a missing rib. The B holds the curved I without turning the story into a slogan.",
-  image: "/assets/bagas-iga-mark.webp", alt: "Bagas × Iga monogram", slug: "the-mark",
+  image: "/assets/bagas-iga-mark.webp", alt: "Iga & Bagas monogram", slug: "the-mark",
 };
 export type GiftCollectionPreview = { category: "bagas" | "iga" | "home"; count: number; image: string | null; title: string };
+
+/** Published gift presentation. No invitation identity, booking or purchase URL. */
+export type HomepageGift = { id: string; title: string; description: string | null; category: "bagas" | "iga" | "home"; imageUrl: string | null; priceLabel: string | null };

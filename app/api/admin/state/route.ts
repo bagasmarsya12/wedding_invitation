@@ -1,4 +1,5 @@
 import { loadWebsite } from "@/lib/website-server";
+import { GIFT_TRANSFER_SETTING, validateGiftTransfers } from '@/lib/gift-transfers';
 import { readGuestImport } from '@/lib/guest-import';
 import { sealInvitationToken, invitationVault } from '@/lib/invitation-vault';
 import { parseCsv, safeExternalUrl, safeMediaUrl, toCsv } from "@/lib/production";
@@ -25,14 +26,15 @@ export async function GET(request: Request) {
       return new Response(toCsv(rows), { headers: { ...privateHeaders, "content-type": "text/csv; charset=utf-8", "content-disposition": "attachment; filename=bagas-iga-rsvps.csv" } });
     }
     if (kind === "backup") {
-      const [guests, rsvps, gifts, reservations, marks, archive, settings, passes, checkins, giftMedia, visits] = await Promise.all([
+      const [guests, rsvps, gifts, reservations, marks, archive, settings, passes, checkins, giftMedia, visits, photoComments, photoHearts, photoSettings] = await Promise.all([
         db().prepare("SELECT * FROM guests").all(), db().prepare("SELECT * FROM rsvps").all(),
         db().prepare("SELECT * FROM gifts").all(), db().prepare("SELECT * FROM gift_reservations").all(),
         db().prepare("SELECT * FROM guest_marks").all(), db().prepare("SELECT * FROM archive_entries").all(), db().prepare("SELECT * FROM settings").all(),
         db().prepare("SELECT * FROM guest_passes").all(), db().prepare("SELECT * FROM guest_checkins").all(),
         db().prepare("SELECT * FROM gift_media").all(), db().prepare("SELECT * FROM page_visits").all(),
+        db().prepare("SELECT * FROM photo_comments").all(), db().prepare("SELECT * FROM photo_comment_hearts").all(), db().prepare("SELECT * FROM photo_comment_settings").all(),
       ]);
-      const data = { exportedAt: new Date().toISOString(), guests: guests.results, rsvps: rsvps.results, gifts: gifts.results, reservations: reservations.results, marks: marks.results, archive: archive.results, settings: settings.results, passes: passes.results, checkins: checkins.results, giftMedia: giftMedia.results, pageVisits: visits.results };
+      const data = { exportedAt: new Date().toISOString(), guests: guests.results, rsvps: rsvps.results, gifts: gifts.results, reservations: reservations.results, marks: marks.results, archive: archive.results, settings: settings.results, passes: passes.results, checkins: checkins.results, giftMedia: giftMedia.results, pageVisits: visits.results, photoComments: photoComments.results, photoCommentHearts: photoHearts.results, photoCommentSettings: photoSettings.results };
       return new Response(JSON.stringify(data), { headers: { ...privateHeaders, "content-type": "application/json; charset=utf-8", "content-disposition": "attachment; filename=bagas-iga-data-backup.json" } });
     }
     if (kind === "checkins") {
@@ -47,7 +49,7 @@ export async function GET(request: Request) {
     db().prepare("SELECT r.id, r.gift_id, r.guest_id, r.status, r.reserved_at, r.released_at, r.purchased_at, g.display_name AS guest_name, f.title AS gift_title FROM gift_reservations r JOIN guests g ON g.id = r.guest_id JOIN gifts f ON f.id = r.gift_id ORDER BY r.reserved_at DESC").all(),
     db().prepare("SELECT m.id, m.guest_id, m.author_name, m.message, m.drawing_key, m.visibility, m.moderation_status, m.created_at, g.display_name AS guest_name FROM guest_marks m JOIN guests g ON g.id=m.guest_id ORDER BY m.created_at DESC").all(),
     db().prepare("SELECT id, slug, type, title, excerpt, story, media_url, featured, featured_order, visibility, published, created_at FROM archive_entries ORDER BY created_at DESC").all(),
-    db().prepare("SELECT key, value, updated_at FROM settings WHERE key NOT LIKE 'admin.%' ORDER BY key").all(),
+    db().prepare("SELECT key, value, updated_at FROM settings WHERE key NOT LIKE 'admin.%' AND key NOT LIKE 'cms.editor.%' ORDER BY key").all(),
     db().prepare("SELECT c.*, g.display_name FROM guest_checkins c JOIN guests g ON g.id = c.guest_id ORDER BY c.checked_in_at DESC").all(),
   ]);
     return privateJson({ guests: guests.results, rsvps: rsvps.results, gifts: gifts.results, reservations: reservations.results, marks: marks.results, archive: archive.results, settings: settings.results, checkins: checkins.results });
@@ -139,8 +141,31 @@ export async function POST(request: Request) {
 
   if (op === 'mark_invitation_sent') {
     if (typeof payload.sent !== 'boolean') return apiError('Choose sent or not sent.');
-    const result = await db().prepare('UPDATE guests SET invitation_sent_at = ?, updated_at = ? WHERE id = ?').bind(payload.sent ? now : null,now,cleanText(payload.id,120)).run();
+    const result = await db().prepare('UPDATE guests SET invitation_sent_at = CASE WHEN ? THEN COALESCE(invitation_sent_at, ?) ELSE NULL END, updated_at = ? WHERE id = ?').bind(payload.sent ? 1 : 0,now,now,cleanText(payload.id,120)).run();
     return result.meta.changes ? privateJson({ok:true}) : apiError('Guest not found.',404);
+  }
+
+  if (op === 'update_guests_bulk') {
+    const ids = payload.ids;
+    if (!Array.isArray(ids) || !ids.length || ids.length > 1000 || ids.some(id => typeof id !== 'string' || !id.trim() || id !== id.trim() || id.length > 120) || new Set(ids).size !== ids.length)
+      return apiError('Pilih 1–1000 tamu yang berbeda.');
+    if (payload.field !== 'sent' && payload.field !== 'group') return apiError('Pilih status pengiriman atau kelompok tamu.');
+    if (payload.field === 'sent' && typeof payload.value !== 'boolean') return apiError('Pilih sudah dikirim atau belum dikirim.');
+    if (payload.field === 'group' && !validGuestGroup(payload.value)) return apiError('Pilih kelompok tamu yang tersedia.');
+    const current = await db().prepare('SELECT id FROM guests').all<{id:string}>();
+    const existing = new Set(current.results.map(row => row.id));
+    if (ids.some(id => !existing.has(id))) return apiError('Daftar tamu berubah. Muat ulang sebelum menerapkan perubahan.',409);
+    // Keep statements below the database's parameter limit; the batch is atomic.
+    const statements = [];
+    for (let offset = 0; offset < ids.length; offset += 50) {
+      const batch = ids.slice(offset,offset+50);
+      const placeholders = batch.map(() => '?').join(',');
+      statements.push(payload.field === 'sent'
+        ? db().prepare(`UPDATE guests SET invitation_sent_at = CASE WHEN ? THEN COALESCE(invitation_sent_at, ?) ELSE NULL END, updated_at = ? WHERE id IN (${placeholders})`).bind(payload.value ? 1 : 0,now,now,...batch)
+        : db().prepare(`UPDATE guests SET guest_group = ?, updated_at = ? WHERE id IN (${placeholders})`).bind(payload.value,now,...batch));
+    }
+    const results = await db().batch(statements);
+    return privateJson({ok:true,updated:results.reduce((count,result) => count+Number(result.meta.changes ?? 0),0)});
   }
 
   if (op === 'regenerate_token') {
@@ -170,9 +195,16 @@ export async function POST(request: Request) {
     if (!validGuestGroup(group)) return apiError('Choose a valid guest group.');
     if (!name || !["active", "revoked"].includes(status) || !Number.isInteger(partyLimit) || partyLimit < 1 || partyLimit > 20)
       return apiError("Guest name, status, or party limit is invalid.");
-    const result = await db().prepare("UPDATE guests SET display_name = ?, party_limit = ?, status = ?, guest_group = ?, updated_at = ? WHERE id = ?")
-      .bind(name, partyLimit, status, group, now, cleanText(payload.id, 120)).run();
-    return result.meta.changes ? privateJson({ ok: true }) : apiError("Guest not found.", 404);
+    const id=cleanText(payload.id,120);
+    if(!await db().prepare("SELECT id FROM guests WHERE id = ?").bind(id).first())return apiError("Guest not found.",404);
+    const statements=[db().prepare("UPDATE guests SET display_name = ?, party_limit = ?, status = ?, guest_group = ?, updated_at = ? WHERE id = ?").bind(name,partyLimit,status,group,now,id)];
+    if(payload.note1!==undefined||payload.note2!==undefined){
+      if([payload.note1??'',payload.note2??''].some(value=>typeof value!=='string'||value.length>120))return apiError('Pesan kartu maksimal 120 karakter per baris.');
+      const note1=cleanText(payload.note1,120),note2=cleanText(payload.note2,120),key=`guest.keepsake.${id}`;
+      statements.push(note1||note2?db().prepare("INSERT INTO settings (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,JSON.stringify({note1,note2})):db().prepare("DELETE FROM settings WHERE key = ?").bind(key));
+    }
+    await db().batch(statements);
+    return privateJson({ok:true});
   }
 
   if (op === "update_gift") {
@@ -234,10 +266,26 @@ export async function POST(request: Request) {
     return privateJson({ ok: true });
   }
 
+  if (op === 'set_lifecycle') {
+    const {phase,rsvp,gifts,marks} = payload;
+    if (typeof phase !== 'string' || !['auto','pre-wedding','wedding-day','post-wedding'].includes(phase) || [rsvp,gifts,marks].some(value => typeof value !== 'string' || !['auto','on','off'].includes(value)))
+      return apiError('Periksa fase acara dan pilihan fitur.');
+    const entries = [['site_phase',phase],['rsvp_enabled',rsvp],['gifts_enabled',gifts],['marks_enabled',marks]];
+    await db().batch(entries.map(([key,value]) => db().prepare('INSERT INTO settings (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at').bind(key,value,now)));
+    return privateJson({ok:true});
+  }
+
   if (op === "set_setting") {
     const key = cleanText(payload.key, 80);
-    if (!["site_phase", "shipping_instructions", "cash_gift_details", "rsvp_enabled", "gifts_enabled", "marks_enabled", "invitation_message_template"].includes(key)) return apiError("Unsupported setting.");
-    const value = cleanText(payload.value, 2000);
+    if (!["site_phase", "shipping_instructions", "cash_gift_details", "rsvp_enabled", "gifts_enabled", "marks_enabled", "invitation_message_template", GIFT_TRANSFER_SETTING].includes(key)) return apiError("Unsupported setting.");
+    let value = cleanText(payload.value, 2000);
+    if (key === GIFT_TRANSFER_SETTING) {
+      let parsed: unknown;
+      try { parsed = typeof payload.value === 'string' && payload.value.length <= 8000 ? JSON.parse(payload.value) : null; } catch { parsed = null; }
+      const methods = validateGiftTransfers(parsed);
+      if (!methods) return apiError('Periksa nama penerima, nomor rekening/telepon, link HTTPS DANA, dan teks tombol. Lengkapi setiap metode yang diaktifkan.');
+      value = JSON.stringify(methods);
+    }
     if (key === 'invitation_message_template' && (typeof payload.value !== 'string' || payload.value.trim().length > 2000)) return apiError('Message template must be at most 2000 characters.');
     if (key === 'invitation_message_template' && !validInvitationTemplate(value)) return apiError('Include {{nama}} and {{link}}. Optional placeholders: {{tanggal}} and {{lokasi}}. Maximum 2000 characters.');
     if (key === "site_phase" && !["auto", "pre-wedding", "wedding-day", "post-wedding"].includes(value)) return apiError("Site phase must be auto, pre-wedding, wedding-day, or post-wedding.");

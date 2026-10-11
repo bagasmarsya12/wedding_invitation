@@ -3,18 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { T, useLanguage } from "../language";
 import { ArchiveMedia } from "./archive-media";
+import { PhotoViewer } from "../photo-viewer";
+import { PhotoCommentCard, usePhotoCommentCards } from "../photo-comment-card";
 import { archiveMaterial, ARCHIVE_POSITION_KEY, parseArchivePosition } from "@/lib/archive-collection";
 
-export type ArchiveCard = { slug: string; type: string; title: string; excerpt: string | null; media_url: string | null; entry_date?: string | null; location?: string | null };
+export type ArchiveCard = { id?: string; slug: string; type: string; title: string; excerpt: string | null; media_url: string | null; entry_date?: string | null; location?: string | null };
 
 export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
   const { t } = useLanguage();
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<ArchiveCard | null>(null);
   const controls = useRef(new Map<string, HTMLButtonElement>());
   const workspace = useRef<HTMLDivElement>(null);
   const types = ["all", ...Array.from(new Set(entries.map(entry => entry.type)))];
   const visible = filter === "all" ? entries : entries.filter(entry => entry.type === filter);
+  const comments=usePhotoCommentCards(entries.filter(entry=>entry.id&&entry.media_url&&entry.type!=="audio").map(entry=>"archive:"+entry.id));
 
   useEffect(() => {
     let frame = 0, cancelled = false;
@@ -54,11 +58,18 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
         const title = entry.slug === "the-mark" ? t(entry.title) : entry.title;
         const kind = archiveMaterial(entry.type);
         const id = `collection-${encodeURIComponent(entry.slug)}`;
+        if(kind==="photo"&&entry.id&&entry.media_url)return <article className="collection-piece material-photo collection-photo-card" key={entry.slug} data-slug={entry.slug}>
+          <div className="collection-sheet">
+            <button type="button" className="collection-photo-open" onClick={()=>setPhoto(entry)} aria-label={`${t("Photograph viewer")}: ${title}`}><ArchiveMedia key={entry.media_url} src={entry.media_url} title={title} type={entry.type}/></button>
+            <a className="collection-photo-caption" href={`/archive/${encodeURIComponent(entry.slug)}`} onClick={remember}>{title}</a>
+            <PhotoCommentCard photoKey={"archive:"+entry.id} overview={comments.data} error={comments.error} onRead={()=>setPhoto(entry)}/>
+          </div>
+        </article>;
         return <article className={`collection-piece material-${kind}${open ? " is-open" : ""}`} key={entry.slug} data-slug={entry.slug}
           onKeyDown={event => { if (event.key === "Escape" && open) { event.stopPropagation(); close(entry.slug); } }}>
           <div className="collection-sheet">
             <header><span>{t(entry.type)}</span><span aria-hidden="true"><T>B × I</T></span></header>
-            <div className="collection-mount"><ArchiveMedia key={entry.media_url || "empty"} src={entry.media_url} title={title} type={entry.type} /></div>
+            <div className="collection-mount">{entry.id && entry.media_url && entry.type !== "audio" ? <button type="button" className="collection-photo-open" onClick={() => setPhoto(entry)} aria-label={`${t("Photograph viewer")}: ${title}`}><ArchiveMedia key={entry.media_url} src={entry.media_url} title={title} type={entry.type} /></button> : <ArchiveMedia key={entry.media_url || "empty"} src={entry.media_url} title={title} type={entry.type} />}</div>
             <h2 id={`${id}-title`}>{title}</h2>
             <button type="button" className="collection-open" aria-expanded={open} aria-controls={`${id}-context`} aria-label={`${t(open ? "Put it back" : "Take a closer look")}: ${title}`}
               ref={node => { if (node) controls.current.set(entry.slug, node); else controls.current.delete(entry.slug); }}
@@ -72,11 +83,13 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
                 <a className="collection-story-link" href={`/archive/${encodeURIComponent(entry.slug)}`} onClick={remember}><T>Open this story</T><span aria-hidden="true">↗</span></a>
               </div></div>
             </div>
+            {entry.id&&entry.media_url&&entry.type!=="audio"&&<PhotoCommentCard photoKey={"archive:"+entry.id} overview={comments.data} error={comments.error} onRead={()=>setPhoto(entry)}/>}
           </div>
         </article>;
       })}
     </div>
     {visible.length === 0 && <p className="collection-empty"><T>Nothing in this collection yet.</T></p>}
     <p className="collection-colophon"><T>Only what we really kept.</T></p>
+    <PhotoViewer photo={photo?.id && photo.media_url ? { key: `archive:${photo.id}`, src: photo.media_url, caption: photo.title } : null} onClose={() => setPhoto(null)} />
   </div>;
 }

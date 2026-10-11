@@ -4,8 +4,9 @@
 import { ArrowRight } from "lucide-react";
 import { ArchiveTable, type ArchiveItem } from "./archive-table";
 import { SelectedMoments } from "./selected-moments";
-import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
+import { KeepsakeMonogram } from "./keepsake-botanicals";
 import { T } from "./language";
+import { AtelierFloralFrame } from "./atelier-flowers";
 
 /** Photographs and collected stories share one invitation chapter. */
 export function ArchiveCollection({ items, photos }: { items: ArchiveItem[]; photos: (string | null)[] }) {
@@ -20,7 +21,7 @@ export function ArchiveCollection({ items, photos }: { items: ArchiveItem[]; pho
       <footer className="memory-footer">
         <a className="v2-text-link" href="/archive"><T>Open the archive </T><ArrowRight size={19} aria-hidden="true" /></a>
       </footer>
-      <KeepsakeBotanicals />
+      <AtelierFloralFrame className="memory-floral-frame" />
     </div>
   </section>;
 }

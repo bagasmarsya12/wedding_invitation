@@ -85,14 +85,13 @@
 @keyframes v2-recipient-away { to{opacity:0;transform:translate(-50%,-56%) scale(.98)} }
 @keyframes v2-surroundings-away { 0%,28%{opacity:1} 100%{opacity:0;filter:blur(3px)} }
 
-/* Invitation spine */
-.v2-spine { position: fixed; z-index: 300; top: 0; left: 0; display: grid; width: 100%; min-height: 4.15rem; grid-template-columns: 1fr auto 1fr auto; gap: 1.5rem; align-items: center; padding: 0 clamp(1rem,3vw,2.8rem); border-bottom: 1px solid rgba(41,39,33,.2); color: var(--v2-charcoal); background: rgba(247,243,234,.84); backdrop-filter: blur(15px); transition: color .6s ease, background .6s ease; }
-.v2-spine-mark { font-family: var(--v2-serif); font-size: 1.05rem; letter-spacing: .1em; text-decoration: none; }
-.v2-spine-mark i { color: var(--v2-rose); font-style: normal; }
-.v2-spine-date, .v2-spine-rsvp { font-size: .64rem; letter-spacing: .16em; text-transform: uppercase; }
-.v2-spine-rsvp { justify-self: end; color: var(--v2-olive); }
-.v2-spine > button { min-width: 3.2rem; border: 0; padding: .65rem 0; cursor: pointer; background: transparent; font-size: .67rem; letter-spacing: .12em; text-transform: uppercase; }
-.v2-info-drawer { position: absolute; top: 100%; right: 0; display: grid; width: min(100vw,30rem); grid-template-columns: 1fr; gap: 1.5rem; padding: 2rem; border-left: 1px solid rgba(41,39,33,.2); border-bottom: 1px solid rgba(41,39,33,.2); background: rgba(251,248,241,.97); box-shadow: -12px 20px 35px rgba(30,27,22,.12); transform: translateY(-110%); visibility: hidden; opacity: 0; transition: transform .45s cubic-bezier(.22,1,.36,1),opacity .25s ease,visibility 0s .45s; }
+/* Only the useful controls float above the invitation. */
+.v2-spine { position: fixed; z-index: 300; top: max(1rem,env(safe-area-inset-top)); right: max(1rem,env(safe-area-inset-right)); display: flex; width: max-content; min-height: 3.25rem; gap: .625rem; align-items: center; padding: .2rem .65rem .2rem .4rem; border: 1px solid #d8bc7a66; border-radius: 2rem; color: var(--v2-paper); background: #21382c; }
+.v2-spine > button { min-width: 3.25rem; min-height: 44px; border: 0; border-left: 1px solid #d8bc7a55; padding: .5rem .3rem .5rem .8rem; cursor: pointer; background: transparent; font-size: .875rem; line-height: 1.2; }
+.v2-spine .language-switch button { opacity: .75; }
+.v2-spine .language-switch button[aria-pressed="true"] { opacity: 1; text-decoration-color: #d8bc7a; }
+.v2-spine :focus-visible { outline-color: #d8bc7a; outline-offset: 2px; border-radius: .25rem; }
+.v2-info-drawer { position: absolute; top: calc(100% + .65rem); right: 0; display: grid; width: min(calc(100vw - 2rem),30rem); max-height: calc(100svh - 6rem - env(safe-area-inset-top)); overflow-y: auto; overscroll-behavior: contain; grid-template-columns: 1fr; gap: 1.5rem; padding: 2rem; border: 1px solid #aab496; border-radius: .4rem; color: var(--v2-charcoal); background: var(--v2-paper); transform: translateY(-.5rem); visibility: hidden; opacity: 0; transition: transform .25s cubic-bezier(.22,1,.36,1),opacity .2s ease,visibility 0s .25s; }
 .v2-spine.is-open .v2-info-drawer { transform: translateY(0); visibility: visible; opacity: 1; transition-delay: 0s; }
 .v2-info-drawer > div { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(41,39,33,.26); }
 .v2-info-drawer > div p { display: flex; flex-direction: column; margin: 0; padding: 1rem 0; }
@@ -101,9 +100,9 @@
 .v2-info-drawer span { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
 .v2-info-place { display: flex; flex-direction: column; margin: 0; }
 .v2-info-place strong { font-family: var(--v2-serif); font-size: 1.25rem; font-weight: 400; }
+.v2-info-rsvp { margin: 0; color: var(--v2-olive); }
 .v2-info-drawer nav { display: flex; gap: 1.5rem; }
 .v2-info-drawer nav a { font-size: .71rem; letter-spacing: .09em; text-underline-offset: .3rem; text-transform: uppercase; }
-.v2-world[data-light="night"] .v2-spine { color: var(--v2-paper); border-color: rgba(255,255,255,.16); background: rgba(20,36,29,.78); }
 
 /* The Day */
 .v2-day { display: grid; min-height: 100svh; grid-template-columns: minmax(0,1fr) minmax(22rem,.95fr); align-items: center; padding: clamp(7rem,11vh,10rem) clamp(1.3rem,6vw,6.5rem) clamp(4rem,7vh,6rem); overflow: hidden; background: var(--v2-ivory); }
@@ -404,8 +403,6 @@
   .v2-opening-skip { right: 1rem; bottom: 1.2rem; transform: none; }
   .v2-recipient-copy { top: 43%; width: 72%; }
   .v2-wax-seal { top: 79%; }
-  .v2-spine { grid-template-columns: 1fr auto auto; gap: 1rem; min-height: 3.8rem; }
-  .v2-spine-rsvp { display: none; }.v2-spine-date { justify-self: end; }.v2-info-drawer { width: 100vw; }
   .v2-day { min-height: 100svh; padding: 6.8rem 1.25rem 3.8rem; align-items: start; }
   .v2-day-garden::before { right: -31%; bottom: -8%; width: 103vw; height: 54%; }
   .day-combretum { top: auto; right: -39%; bottom: 19%; width: 108vw; }.day-tendril { right: 30%; width: 37vw; }.day-melastoma { right: -1%; bottom: -4%; width: 36vw; }
@@ -464,7 +461,6 @@
   .v2-recipient-copy small { font-size: .67rem; }.v2-recipient-copy strong{font-size:clamp(1.55rem,8vw,2.3rem)}.v2-recipient-copy span{font-size:.48rem}.v2-recipient-copy i{margin:.7rem 0 .5rem}
   .v2-wax-seal { width: 2.8rem; }
   .v2-opening-folio span:first-child { font-size: .82rem; }.v2-opening-folio span:last-child{font-size:.56rem}
-  .v2-spine { padding:0 .9rem }.v2-spine-mark{font-size:.92rem}.v2-spine-date{font-size:.57rem}
   .v2-day-identity h1 { font-size: clamp(3.2rem,14vw,4.2rem); }
   .v2-day-garden::before{height:52%;right:-42%}.day-combretum{right:-48%;bottom:17%}
   .v2-destination-head h2 { font-size: clamp(2.35rem,9vw,2.8rem); }
@@ -485,7 +481,6 @@
   .v2-opening-stage { width: 98vw; }
   .v2-opening-folio { padding:0 .75rem}.v2-opening-folio span:last-child{display:none}
   .v2-recipient-copy strong{font-size:1.5rem}.v2-wax-seal{width:2.5rem}
-  .v2-spine-date{display:none}.v2-spine{grid-template-columns:1fr auto}
   .v2-info-drawer{padding:1.25rem}
   .v2-day{padding-inline:.85rem}.v2-day-identity h1{font-size:3rem}
   .v2-details,.v2-profiles,.v2-archive,.v2-rsvp,.v2-useful,.v2-gifts,.v2-mark{padding-left:.9rem;padding-right:.9rem}
@@ -578,7 +573,7 @@
 }
 
 /* The video reference: lush gardens surrounding the reading surface. */
-.v2-garden-background { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.v2-garden-background { position: absolute; z-index: 1; inset: 0 0 auto; overflow: hidden; pointer-events: none; will-change: transform; }
 .v2-garden-background canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
 .has-garden-renderer > .v2-scene:not(.v2-beyond)::after,
 .has-garden-renderer .v2-background-bloom,

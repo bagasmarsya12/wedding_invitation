@@ -9,7 +9,7 @@ export const normalizeName=value=>Array.from(String(value).normalize('NFC').repl
 export const normalizeMessage=value=>Array.from(String(value).normalize('NFC').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,'').trim()).slice(0,600).join('')||DEFAULT_MESSAGE;
 export async function loadDesignAssets(){
  await Promise.all([document.fonts.load('400 48px Newsreader'),document.fonts.load('400 24px Instrument')]);
- const [flowers,paper,mark]=await Promise.all(['./assets/keepsake-florals.png','./assets/keepsake-paper.webp','./assets/keepsake-mark.webp'].map(load));
+ const [flowers,paper,mark]=await Promise.all(['./assets/keepsake-florals.webp','./assets/keepsake-paper.webp','./assets/keepsake-mark.webp'].map(load));
  return {flowers,paper,mark};
 }
 // Word wrapping and pagination share the same layout for preview and exports.

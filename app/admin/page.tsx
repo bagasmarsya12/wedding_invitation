@@ -18,6 +18,6 @@ export default async function AdminPage() {
     return <AdminLogin />;
   }
   return (
-    <main className="product-page admin-page"><header className="product-header"><a href="/">Bagas <i>×</i> Iga</a><nav><span>{admin.displayName}</span>{adminMethod(admin) === "password" ? <LogoutButton /> : <a href="/signout-with-chatgpt?return_to=/">Sign out</a>}</nav></header><section className="admin-hero"><p>Private management surface</p><h1>Wedding <em>Desk</em></h1><p>Guest access, RSVP, archive, gifts, moderation, and lifecycle in one place.</p></section><AdminClient /></main>
+    <main className="product-page admin-page"><header className="product-header"><a href="/">Iga &amp; Bagas</a><nav><span>{admin.displayName}</span>{adminMethod(admin) === "password" ? <LogoutButton /> : <a href="/signout-with-chatgpt?return_to=/">Keluar</a>}</nav></header><section className="admin-hero"><p>Ruang pengelolaan pribadi</p><h1>Wedding <em>Desk</em></h1><p>Tamu, konten per section, RSVP, hadiah, dan kenangan dalam satu tempat.</p></section><AdminClient /></main>
   );
 }

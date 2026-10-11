@@ -1,139 +1,97 @@
-'use client';
-import { Fragment, useDeferredValue, useEffect, useRef, useState } from 'react';
+"use client";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_INVITATION_MESSAGE, GUEST_GROUPS } from '@/lib/invitation-message';
 import { rowText as text, type AdminAction, type AdminRow } from './admin-types';
-import {GuestKeepsakeEditor} from './guest-keepsake-editor';
+import {formatAdminTime} from '@/lib/admin-time';
 
-type Props = {guests:AdminRow[];rsvps:AdminRow[];settings:AdminRow[];knownLinks:Record<string,string>;action:AdminAction;regenerate:(id:string)=>Promise<void>;rememberLink:(id:string,url:string)=>void;notify:(message:string)=>void;exportGuests:()=>void};
-export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate,rememberLink,notify,exportGuests}:Props) {
-  const [search,setSearch] = useState('');
-  const deferredSearch = useDeferredValue(search.trim().toLowerCase());
-  const [group,setGroup] = useState('all');
-  const [attendance,setAttendance] = useState('all');
-  const [sent,setSent] = useState('all');
-  const [access,setAccess] = useState('all');
-  const [sharingId,setSharingId] = useState('');
-  const [keepsakeId,setKeepsakeId] = useState('');
-  const [link,setLink] = useState('');
-  const [message,setMessage] = useState('');
-  const [shareError,setShareError] = useState('');
-  const [busy,setBusy] = useState(false);
-  const [copyingId,setCopyingId] = useState('');
-  const [copiedId,setCopiedId] = useState('');
-  const [expandedId,setExpandedId] = useState('');
-  const copyInProgress = useRef(false);
-  const dialog = useRef<HTMLDialogElement>(null);
-  const template = text(settings.find(row=>row.key === 'invitation_message_template')?.value) || DEFAULT_INVITATION_MESSAGE;
-  const rsvpByGuest = new Map(rsvps.map(row=>[text(row.guest_id),text(row.attendance)]));
-  const filtered = guests.filter(row=> {
-    const response = rsvpByGuest.get(text(row.id)) || 'pending';
-    return (!deferredSearch || `${text(row.display_name)} ${text(row.email)}`.toLowerCase().includes(deferredSearch)) &&
-      (group === 'all' || row.guest_group === group) && (attendance === 'all' || response === attendance) &&
-      (sent === 'all' || Boolean(row.invitation_sent_at) === (sent === 'sent')) && (access === 'all' || row.status === access);
-  });
-  const selected = guests.find(row=>row.id === sharingId);
-  useEffect(()=> { if (sharingId) dialog.current?.showModal(); },[sharingId]);
-  const closeShare = () => { dialog.current?.close(); setSharingId(''); setMessage(''); setShareError(''); };
-  const prepare = async () => {
-    setBusy(true); setMessage(''); setShareError('');
-    try {
-      const response = await fetch('/api/admin/state',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({op:'prepare_invitation',id:sharingId,inviteUrl:link})});
-      const result = await response.json() as {message?:string;inviteUrl?:string;error?:string};
-      if (!response.ok || !result.message || !result.inviteUrl) throw new Error(result.error || 'Message could not be prepared.');
-      setMessage(result.message); rememberLink(sharingId,result.inviteUrl);
-    } catch(error) { setShareError(error instanceof Error ? error.message : 'Message could not be prepared.'); }
-    finally { setBusy(false); }
-  };
-  const copyMessage = async () => {
-    try { await navigator.clipboard.writeText(message); setShareError(''); notify('Pesan WA tersalin. Tempel ke WhatsApp untuk mengirim.'); }
-    catch { setShareError('Pesan belum bisa disalin otomatis. Pilih dan salin teks pesan di bawah.'); }
-  };
-  const openShare = async (row:AdminRow) => {
-    const id=text(row.id);
-    setMessage('');setShareError('');setLink(knownLinks[id]||'');setSharingId(id);
-    if(!knownLinks[id]&&row.has_saved_link){
-      try{
-        const response=await fetch(`/api/admin/invitations?id=${encodeURIComponent(id)}`,{cache:'no-store'});
-        const result=await response.json() as {inviteUrl:string;error?:string};
-        if(!response.ok)throw new Error(result.error);
-        setLink(result.inviteUrl);rememberLink(id,result.inviteUrl);
-      }catch(error){setShareError(error instanceof Error?error.message:'Link belum tersedia.');}
-    }
-  };
-  const copyInvitation = async (row:AdminRow) => {
-    if(copyInProgress.current)return;
-    const id=text(row.id);
-    copyInProgress.current=true;setBusy(true);setCopyingId(id);setCopiedId('');
-    const prepared=fetch(`/api/admin/invitations?id=${encodeURIComponent(id)}`,{cache:'no-store'}).then(async response=>{
-      const result=await response.json() as {guestId:string;inviteUrl:string;message:string;error?:string};
-      if(!response.ok)throw new Error(result.error||'Pesan belum bisa disiapkan. Coba lagi.');
-      if(result.guestId!==id||!result.inviteUrl||!result.message)throw new Error('Pesan tamu belum bisa diverifikasi. Muat ulang daftar tamu.');
-      rememberLink(id,result.inviteUrl);
-      return result;
-    });
+type Props={guests:AdminRow[];rsvps:AdminRow[];settings:AdminRow[];knownLinks:Record<string,string>;action:AdminAction;regenerate:(id:string)=>Promise<void>;rememberLink:(id:string,url:string)=>void;notify:(message:string)=>void;exportGuests:()=>void};
+type Modal={id:string;kind:'share'|'edit'|'qr'};
+export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate,rememberLink,notify,exportGuests}:Props){
+  const [search,setSearch]=useState(''),[group,setGroup]=useState('all'),[attendance,setAttendance]=useState('all'),[sent,setSent]=useState('all'),[access,setAccess]=useState('all');
+  const [page,setPage]=useState(0),[pageSize,setPageSize]=useState(25),[sort,setSort]=useState('name');
+  const query=useDeferredValue(search.trim().toLocaleLowerCase('id'));
+  const [modal,setModal]=useState<Modal|null>(null),[link,setLink]=useState(''),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  const [qr,setQr]=useState<{qrData:string;code:string}|null>(null);
+  const [chosen,setChosen]=useState<Set<string>>(()=>new Set()),[bulkField,setBulkField]=useState<'sent'|'group'>('sent'),[bulkSent,setBulkSent]=useState('sent'),[bulkGroup,setBulkGroup]=useState('unassigned');
+  const allCheckbox=useRef<HTMLInputElement>(null);
+  const dialog=useRef<HTMLDialogElement>(null);
+  const template=text(settings.find(r=>r.key==='invitation_message_template')?.value)||DEFAULT_INVITATION_MESSAGE;
+  const responses=useMemo(()=>new Map(rsvps.map(r=>[text(r.guest_id),r])),[rsvps]);
+  const filtered=useMemo(()=>guests.filter(row=>{
+    const reply=text(responses.get(text(row.id))?.attendance)||'pending';
+    return (!query||`${text(row.display_name)} ${text(row.email)}`.toLocaleLowerCase('id').includes(query))&&(group==='all'||row.guest_group===group)&&(attendance==='all'||reply===attendance)&&(sent==='all'||Boolean(row.invitation_sent_at)===(sent==='sent'))&&(access==='all'||row.status===access);
+  }).sort((a,b)=>sort==='latest'?text(b.created_at).localeCompare(text(a.created_at)):text(a.display_name).localeCompare(text(b.display_name),'id')),[guests,responses,query,group,attendance,sent,access,sort]);
+  const pages=Math.max(1,Math.ceil(filtered.length/pageSize)),currentPage=Math.min(page,pages-1),visible=filtered.slice(currentPage*pageSize,(currentPage+1)*pageSize);
+  const selectedIds=filtered.map(row=>text(row.id)).filter(id=>chosen.has(id));
+  const visibleSelected=visible.filter(row=>chosen.has(text(row.id))).length;
+  useEffect(()=>{if(allCheckbox.current)allCheckbox.current.indeterminate=visibleSelected>0&&visibleSelected<visible.length;},[visibleSelected,visible.length]);
+  function selectOne(id:string){setChosen(current=>{const next=new Set(current);if(next.has(id))next.delete(id);else next.add(id);return next;});}
+  function selectPage(){setChosen(current=>{const next=new Set(current);for(const row of visible){if(visibleSelected===visible.length)next.delete(text(row.id));else next.add(text(row.id));}return next;});}
+  async function markSent(row:AdminRow){setBusy(true);try{const result=await action('mark_invitation_sent',{id:text(row.id),sent:!row.invitation_sent_at});if(result)notify(`Status pengiriman ${text(row.display_name)} diperbarui.`);}finally{setBusy(false);}}
+  async function applyBulk(){if(!selectedIds.length)return;setBusy(true);try{const result=await action('update_guests_bulk',{ids:selectedIds,field:bulkField,value:bulkField==='sent'?bulkSent==='sent':bulkGroup});if(result){setChosen(new Set());notify(`${result.updated??selectedIds.length} tamu diperbarui.`);}}finally{setBusy(false);}}
+  const selected=guests.find(r=>r.id===modal?.id);
+  useEffect(()=>{if(modal)dialog.current?.showModal();},[modal]);
+  const close=()=>{dialog.current?.close();setModal(null);setMessage('');setError('');setQr(null);};
+  function reset(){setSearch('');setGroup('all');setAttendance('all');setSent('all');setAccess('all');setPage(0);setChosen(new Set());}
+  async function savedLink(row:AdminRow){
+    const id=text(row.id);if(knownLinks[id])return knownLinks[id];
+    if(!row.has_saved_link)throw new Error('Link lama belum tersimpan. Tempel link yang pernah dibagikan lewat menu Edit / pesan.');
+    const response=await fetch(`/api/admin/invitations?id=${encodeURIComponent(id)}`,{cache:'no-store'}),result=await response.json() as {inviteUrl?:string;error?:string};
+    if(!response.ok||!result.inviteUrl)throw new Error(result.error||'Link belum bisa dimuat.');rememberLink(id,result.inviteUrl);return result.inviteUrl;
+  }
+  async function prepare(id:string,url:string){
+    const response=await fetch('/api/admin/state',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({op:'prepare_invitation',id,inviteUrl:url})}),result=await response.json() as {message?:string;inviteUrl?:string;error?:string};
+    if(!response.ok||!result.message||!result.inviteUrl)throw new Error(result.error||'Pesan belum bisa disiapkan.');rememberLink(id,result.inviteUrl);setLink(result.inviteUrl);setMessage(result.message);return result.message;
+  }
+  async function share(row:AdminRow,kind:'copy'|'link'|'qr'){
+    setBusy(true);setError('');setMessage('');setQr(null);let url='';
     try{
-      // Keep Safari's user activation, then use the plain text path as well:
-      // embedded browsers can expose write() without supporting promised data.
-      let deferredWrite:Promise<void>|undefined;
-      if(navigator.clipboard?.write&&typeof ClipboardItem!=='undefined'){
-        deferredWrite=navigator.clipboard.write([new ClipboardItem({'text/plain':prepared.then(result=>new Blob([result.message],{type:'text/plain'}))})]);
-        void deferredWrite.catch(()=>{});
-      }
-      const result=await prepared;
-      try{
-        await navigator.clipboard.writeText(result.message);
-      }catch(error){
-        if(!deferredWrite)throw error;
-        await deferredWrite;
-      }
-      if(deferredWrite)await deferredWrite.catch(()=>{});
-      setCopiedId(id);notify(`Pesan WA untuk ${text(row.display_name)} tersalin. Tempel ke WhatsApp untuk mengirim.`);
-    }catch{
-      try{
-        const result=await prepared;
-        setLink(result.inviteUrl);setMessage(result.message);setShareError('Pesan belum bisa disalin otomatis. Klik Salin pesan atau pilih teks di bawah.');setSharingId(id);
-      }catch(error){
-        setLink('');setMessage('');setShareError(error instanceof Error?error.message:'Pesan belum bisa disiapkan. Coba lagi.');setSharingId(id);
-      }
-    }finally{copyInProgress.current=false;setBusy(false);setCopyingId('');}
-  };
+      url=await savedLink(row);setLink(url);
+      if(kind==='qr'){
+        setModal({id:text(row.id),kind:'qr'});const token=new URL(url).pathname.split('/').at(-1)!;
+        const response=await fetch(`/api/invite/${encodeURIComponent(token)}/pass`,{cache:'no-store'}),result=await response.json() as {qrData:string;code:string;error?:string};
+        if(!response.ok||!result.qrData)throw new Error(result.error||'QR belum bisa dimuat.');setQr(result);
+      }else{const value=kind==='copy'?await prepare(text(row.id),url):url;await navigator.clipboard.writeText(value);notify(kind==='copy'?`Pesan WA untuk ${text(row.display_name)} tersalin.`:'Link undangan tersalin.');}
+    }catch(e){setError(e instanceof Error?e.message:'Aksi belum berhasil.');setLink(url);setModal({id:text(row.id),kind:'share'});}
+    finally{setBusy(false);}
+  }
+  const note=selected?text(settings.find(r=>r.key===`guest.keepsake.${selected.id}`)?.value):'';
+  let personal:{note1?:string;note2?:string}={};try{const parsed=JSON.parse(note||'{}');if(parsed&&typeof parsed==='object')personal=parsed;}catch{/* Old records keep the default greeting. */}
   return <>
     <section className="admin-panel admin-wide guest-directory">
-      <header className="cms-section-heading"><div><h2>Daftar tamu</h2><p>{guests.length} undangan · {guests.filter(row=>row.invitation_sent_at).length} ditandai sudah dikirim</p><p>Salin pesan WA untuk mendapatkan template dengan nama dan link personal tamu.</p></div><button type="button" onClick={exportGuests}>Ekspor tamu CSV</button></header>
+      <header className="cms-section-heading"><div><h2>Daftar tamu</h2><p>{guests.length} undangan · {guests.filter(r=>r.invitation_sent_at).length} ditandai sudah dikirim</p></div><button type="button" onClick={exportGuests}>Unduh CSV tamu</button></header>
       <div className="guest-filters">
-        <label>Cari tamu<input type="search" placeholder="Nama atau email" value={search} onChange={event=>setSearch(event.target.value)} /></label>
-        <label>Kelompok<select value={group} onChange={event=>setGroup(event.target.value)}><option value="all">Semua kelompok</option>{GUEST_GROUPS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></label>
-        <label>RSVP<select value={attendance} onChange={event=>setAttendance(event.target.value)}><option value="all">Semua jawaban</option><option value="pending">Belum balas</option><option value="yes">Hadir</option><option value="no">Tidak hadir</option></select></label>
-        <label>Pengiriman<select value={sent} onChange={event=>setSent(event.target.value)}><option value="all">Semua undangan</option><option value="sent">Sudah dikirim</option><option value="not-sent">Belum ditandai</option></select></label>
-        <label>Akses<select value={access} onChange={event=>setAccess(event.target.value)}><option value="all">Semua akses</option><option value="active">Aktif</option><option value="revoked">Dicabut</option></select></label>
+        <label>Cari tamu<input type="search" placeholder="Nama atau email" value={search} onChange={e=>{setSearch(e.target.value);setPage(0);setChosen(new Set());}} /></label>
+        <label>Kelompok<select value={group} onChange={e=>{setGroup(e.target.value);setPage(0);setChosen(new Set());}}><option value="all">Semua kelompok</option>{GUEST_GROUPS.map(g=><option key={g.key} value={g.key}>{g.label}</option>)}</select></label>
+        <label>RSVP<select value={attendance} onChange={e=>{setAttendance(e.target.value);setPage(0);setChosen(new Set());}}><option value="all">Semua jawaban</option><option value="pending">Belum menjawab</option><option value="yes">Hadir</option><option value="no">Berhalangan</option></select></label>
+        <label>Pengiriman<select value={sent} onChange={e=>{setSent(e.target.value);setPage(0);setChosen(new Set());}}><option value="all">Semua undangan</option><option value="sent">Sudah dikirim</option><option value="not-sent">Belum dikirim</option></select></label>
+        <label>Akses<select value={access} onChange={e=>{setAccess(e.target.value);setPage(0);setChosen(new Set());}}><option value="all">Semua akses</option><option value="active">Aktif</option><option value="revoked">Dicabut</option></select></label>
       </div>
-      <div className="cms-filter-result"><p role="status">Menampilkan {filtered.length} dari {guests.length} undangan</p><button type="button" onClick={()=> {setSearch('');setGroup('all');setAttendance('all');setSent('all');setAccess('all');}}>Hapus filter</button></div>
-      <div className="cms-scroll-table cms-guest-table" tabIndex={0} role="region" aria-label="Tabel tamu, geser untuk melihat semua kolom">
-        <table><caption className="sr-only">Daftar tamu dan pesan undangan personal</caption><thead><tr><th scope="col">Nama</th><th scope="col">Kelompok</th><th scope="col">Kuota</th><th scope="col">RSVP</th><th scope="col">Dikirim</th><th scope="col">Aksi</th></tr></thead><tbody>
-        {!filtered.length && <tr><td colSpan={6}>Tidak ada tamu sesuai filter. Ubah filter atau tambahkan tamu.</td></tr>}
-        {filtered.map(row=> {
-          const id = text(row.id); const response = rsvpByGuest.get(id) || 'pending';
-          return <Fragment key={id}><tr>
-            <th scope="row"><strong>{text(row.display_name)}</strong><small>{row.status==='active'?'Aktif':'Akses dicabut'}{!row.has_saved_link&&!knownLinks[id]&&row.status==='active'?' · Link belum tersimpan':''}</small></th>
-            <td>{GUEST_GROUPS.find(item=>item.key===row.guest_group)?.label||'Belum diatur'}</td><td>{text(row.party_limit)} orang</td>
-            <td><span className={`cms-badge is-${response}`}>{response==='yes'?'Hadir':response==='no'?'Tidak hadir':'Belum balas'}</span></td><td>{row.invitation_sent_at?'Sudah dikirim':'Belum ditandai'}</td>
-            <td><div className="cms-guest-row-actions"><button type="button" className="cms-copy-wa" disabled={row.status!=='active'||busy} onClick={()=>void copyInvitation(row)} aria-label={`Salin pesan WA untuk ${text(row.display_name)}`}>{copyingId===id?'Menyalin…':copiedId===id?'Tersalin':'Salin pesan WA'}</button><button type="button" aria-expanded={expandedId===id} aria-controls={`guest-details-${id}`} onClick={()=>setExpandedId(expandedId===id?'':id)}>Detail</button></div></td>
-          </tr>{expandedId===id&&<tr id={`guest-details-${id}`} className="cms-guest-detail"><td colSpan={6}><div className="cms-guest-detail-body">
-            <h3>Detail {text(row.display_name)}</h3>
-            {Boolean(row.invitation_sent_at)&&<p className="cms-muted">Ditandai dikirim: {text(row.invitation_sent_at)}</p>}
-            <div className="cms-actions"><button type="button" disabled={row.status!=='active'||busy} onClick={()=>void openShare(row)}>Detail pesan & link</button><button type="button" disabled={busy} onClick={async()=> {setBusy(true);try{await action('mark_invitation_sent',{id,sent:!row.invitation_sent_at});}finally{setBusy(false);}}}>{row.invitation_sent_at?'Tandai belum dikirim':'Tandai sudah dikirim'}</button><button type="button" disabled={row.status!=='active'||busy} onClick={()=>setKeepsakeId(id)}>Tulis pesan keepsake</button></div>
-            <form onSubmit={async event=> {event.preventDefault(); const data = Object.fromEntries(new FormData(event.currentTarget));setBusy(true);try{await action('update_guest',{...data,id});}finally{setBusy(false);}}}>
-              <label>Nama<input name="displayName" defaultValue={text(row.display_name)} maxLength={120} required /></label><label>Kuota<input name="partyLimit" type="number" min="1" max="20" defaultValue={text(row.party_limit)} required /></label>
-              <label>Kelompok<select name="guestGroup" defaultValue={text(row.guest_group) || 'unassigned'}>{GUEST_GROUPS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></label>
-              <label>Akses<select name="status" defaultValue={text(row.status)}><option value="active">Aktif</option><option value="revoked">Dicabut</option></select></label><button disabled={busy}>Simpan tamu</button></form>
-              <button type="button" disabled={busy || row.status !== 'active'} onClick={async()=> {if (!confirm('Replace this invitation link? The old link and pass stop working. Save and send the new link.')) return;setBusy(true);try{await regenerate(id);}finally{setBusy(false);}}}>Regenerate link</button>
-            </div></td></tr>}</Fragment>;
-        })}
-        </tbody></table>
+      <div className="cms-filter-result"><p role="status">{filtered.length} dari {guests.length} undangan</p><div className="guest-table-tools"><label>Urutan<select value={sort} onChange={e=>{setSort(e.target.value);setPage(0);}}><option value="name">Nama A–Z</option><option value="latest">Terbaru</option></select></label><button type="button" onClick={reset}>Hapus filter</button></div></div>
+      {selectedIds.length>0&&<div className="cms-bulk-toolbar" aria-label="Aksi tamu terpilih"><div className="cms-bulk-selection"><strong role="status">{selectedIds.length} tamu dipilih</strong>{selectedIds.length<filtered.length&&filtered.length<=1000&&<button type="button" disabled={busy} onClick={()=>setChosen(new Set(filtered.map(row=>text(row.id))))}>Pilih seluruh hasil ({filtered.length})</button>}<button type="button" disabled={busy} onClick={()=>setChosen(new Set())}>Hapus pilihan</button></div><label>Ubah massal<select value={bulkField} disabled={busy} onChange={event=>setBulkField(event.target.value as 'sent'|'group')}><option value="sent">Status pengiriman</option><option value="group">Kelompok tamu</option></select></label>{bulkField==='sent'?<label>Status baru<select value={bulkSent} disabled={busy} onChange={event=>setBulkSent(event.target.value)}><option value="sent">Sudah dikirim</option><option value="not-sent">Belum dikirim</option></select></label>:<label>Kelompok baru<select value={bulkGroup} disabled={busy} onChange={event=>setBulkGroup(event.target.value)}>{GUEST_GROUPS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></label>}<button type="button" disabled={busy||selectedIds.length>1000} onClick={()=>void applyBulk()}>{busy?'Menyimpan…':`Terapkan ke ${selectedIds.length} tamu`}</button><small>Hanya tamu yang dipilih diubah. Tandai sudah dikirim setelah pesan benar-benar kamu kirim.</small></div>}
+      <div className="cms-scroll-table guest-table-scroll" tabIndex={0} role="region" aria-label="Tabel tamu dan aksi undangan">
+        <table className="guest-table"><caption className="sr-only">Daftar tamu, status RSVP, pengiriman dan aksi undangan personal</caption><thead><tr><th scope="col" className="cms-selection-cell"><input ref={allCheckbox} type="checkbox" checked={visible.length>0&&visibleSelected===visible.length} disabled={busy||!visible.length} onChange={selectPage} aria-label="Pilih semua tamu di halaman ini"/></th>{['No.','Nama tamu','Kelompok','Kuota','RSVP','Pengiriman','Akses','Aksi'].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead>
+        <tbody>{visible.map((row,index)=>{const id=text(row.id),reply=responses.get(id),response=text(reply?.attendance)||'pending';return <tr key={id}>
+          <td className="cms-selection-cell"><input type="checkbox" checked={chosen.has(id)} disabled={busy} onChange={()=>selectOne(id)} aria-label={`Pilih ${text(row.display_name)}`}/></td><td>{currentPage*pageSize+index+1}</td><th scope="row"><strong>{text(row.display_name)}</strong>{Boolean(row.email)&&<small>{text(row.email)}</small>}</th>
+          <td>{GUEST_GROUPS.find(g=>g.key===row.guest_group)?.label||'Belum diatur'}</td><td>{text(row.party_limit)} orang</td>
+          <td><span className={`cms-badge is-${response}`}>{response==='yes'?'Hadir':response==='no'?'Berhalangan':'Belum menjawab'}</span>{response==='yes'&&<small>{text(reply?.party_size)} orang</small>}</td>
+          <td><button className="cms-sent-toggle" type="button" aria-pressed={Boolean(row.invitation_sent_at)} aria-label={`Tandai ${text(row.display_name)} ${row.invitation_sent_at?'belum':'sudah'} dikirim`} disabled={busy} onClick={()=>void markSent(row)}>{row.invitation_sent_at?'Sudah dikirim ✓':'Tandai sudah dikirim'}</button>{Boolean(row.invitation_sent_at)&&<small>{formatAdminTime(row.invitation_sent_at)}</small>}</td><td>{row.status==='active'?'Aktif':'Dicabut'}</td>
+          <td><div className="guest-row-actions"><button className="guest-primary" type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'copy')} aria-label={`Salin pesan WA untuk ${text(row.display_name)}`}>Salin pesan WA</button><button type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'link')} aria-label={`Salin link ${text(row.display_name)}`}>Link</button><button type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'qr')} aria-label={`Lihat QR ${text(row.display_name)}`}>QR</button><button type="button" disabled={busy} onClick={()=>{setError('');setModal({id,kind:'edit'});}} aria-label={`Edit tamu ${text(row.display_name)}`}>Edit</button></div></td>
+        </tr>;})}{!visible.length&&<tr><td colSpan={9}>Tidak ada tamu yang cocok. Hapus filter atau tambahkan tamu.</td></tr>}</tbody></table>
       </div>
+      <div className="guest-pagination"><label>Baris per halaman<select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(0);}}>{[25,50,100].map(n=><option value={n} key={n}>{n}</option>)}</select></label><span>{filtered.length?currentPage*pageSize+1:0}–{Math.min((currentPage+1)*pageSize,filtered.length)} dari {filtered.length}</span><div><button type="button" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}>Sebelumnya</button><span>{currentPage+1} / {pages}</span><button type="button" disabled={currentPage+1>=pages} onClick={()=>setPage(currentPage+1)}>Berikutnya</button></div></div>
+      <p className="cms-muted">Salin pesan WA memakai template dan link personal tamu. Setelah mengirim pesan, tandai langsung di kolom Pengiriman atau pilih beberapa tamu untuk menandainya bersama.</p>
     </section>
-    <section className="admin-panel admin-wide cms-message-template"><details><summary>Template pesan WhatsApp</summary><p>Gunakan {'{{nama}}'} dan {'{{link}}'} di dalam template. Opsional: {'{{tanggal}}'} dan {'{{lokasi}}'}.</p><form onSubmit={event=> {event.preventDefault();void action('set_setting',{key:'invitation_message_template',value:new FormData(event.currentTarget).get('value')});}}><label>Pesan<textarea key={template} name="value" defaultValue={template} rows={10} maxLength={2000} required /></label><button>Simpan template pesan</button></form><p className="cms-muted">Setelah pesan dikirim di WhatsApp, tandai undangan sebagai sudah dikirim melalui Detail.</p></details></section>
-    {sharingId && selected && <dialog ref={dialog} className="cms-share-dialog" onCancel={event=> {event.preventDefault();closeShare();}} aria-labelledby="share-title"><div className="cms-section-heading"><h2 id="share-title">Pesan untuk {text(selected.display_name)}</h2><button type="button" onClick={closeShare} aria-label="Tutup pesan">×</button></div><p>Link personal tamu terisi otomatis. Untuk undangan lama, tempelkan link yang sudah kamu kirim.</p><label>Link undangan personal<input autoFocus type="url" value={link} placeholder="Tempel link undangan milik tamu ini" onChange={event=> {setLink(event.target.value);setMessage('');setShareError('');}} /></label><button type="button" disabled={busy || !link.trim()} onClick={()=>void prepare()}>{busy ? 'Menyiapkan…' : 'Siapkan pesan'}</button>{shareError && <p role="alert">{shareError}</p>}{message && <><label>Pesan untuk WhatsApp<textarea readOnly rows={10} value={message} /></label><div className="cms-actions"><button type="button" onClick={()=>void copyMessage()}>Salin pesan</button><a className="cms-button" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(message)}`}>Buka WhatsApp</a></div><p className="cms-muted">Pilih penerima dan kirim di WhatsApp. Setelah itu, tandai undangan sebagai sudah dikirim melalui Detail.</p></>}</dialog>}
-    {keepsakeId && <GuestKeepsakeEditor key={keepsakeId} guestId={keepsakeId} name={text(guests.find(row=>row.id===keepsakeId)?.display_name)} knownLink={knownLinks[keepsakeId]||''} rememberLink={rememberLink} notify={notify} onClose={()=>setKeepsakeId('')} />}
+    <details className="admin-panel admin-wide cms-message-template"><summary>Template pesan WhatsApp</summary><p>Gunakan {'{{nama}}'} dan {'{{link}}'}. Opsional: {'{{tanggal}}'} dan {'{{lokasi}}'}.</p><form onSubmit={e=>{e.preventDefault();void action('set_setting',{key:'invitation_message_template',value:new FormData(e.currentTarget).get('value')});}}><label>Pesan<textarea key={template} name="value" defaultValue={template} rows={10} maxLength={2000} required /></label><button>Simpan template pesan</button></form></details>
+    {modal&&selected&&<dialog ref={dialog} className="cms-share-dialog" onCancel={e=>{e.preventDefault();close();}} aria-labelledby="guest-dialog-title"><header className="cms-section-heading"><h2 id="guest-dialog-title">{modal.kind==='qr'?'QR masuk':modal.kind==='edit'?'Edit tamu':'Pesan undangan'} · {text(selected.display_name)}</h2><button type="button" onClick={close} aria-label="Tutup detail tamu">×</button></header>
+      {error&&<p role="alert">{error}</p>}
+      {modal.kind==='edit'&&<form onSubmit={async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(e.currentTarget));setBusy(true);try{const result=await action('update_guest',{...values,id:modal.id});if(result)close();}finally{setBusy(false);}}}>
+        <label>Nama tamu<input name="displayName" defaultValue={text(selected.display_name)} maxLength={120} required /></label><label>Kuota orang<input name="partyLimit" type="number" min={1} max={20} defaultValue={text(selected.party_limit)} required /></label><label>Kelompok<select name="guestGroup" defaultValue={text(selected.guest_group)||'unassigned'}>{GUEST_GROUPS.map(g=><option key={g.key} value={g.key}>{g.label}</option>)}</select></label><label>Akses<select name="status" defaultValue={text(selected.status)}><option value="active">Aktif</option><option value="revoked">Dicabut</option></select></label>
+        <fieldset><legend>Pesan personal di kartu kenangan</legend><p>Kosongkan keduanya untuk memakai ucapan bawaan dari section Kartu kenangan.</p><label>Baris pertama<input name="note1" maxLength={120} defaultValue={personal.note1||''} /></label><label>Baris kedua<input name="note2" maxLength={120} defaultValue={personal.note2||''} /></label></fieldset><button disabled={busy}>Simpan tamu</button>
+        <div className="cms-actions"><button type="button" disabled={busy} onClick={async()=>{setBusy(true);try{const result=await action('mark_invitation_sent',{id:modal.id,sent:!selected.invitation_sent_at});if(result)close();}finally{setBusy(false);}}}>{selected.invitation_sent_at?'Tandai belum dikirim':'Tandai sudah dikirim'}</button><button type="button" disabled={busy||selected.status!=='active'} onClick={()=>{setLink(knownLinks[modal.id]||'');setMessage('');setModal({...modal,kind:'share'});}}>Pesan / link lama</button><button type="button" disabled={busy||selected.status!=='active'} onClick={async()=>{if(!confirm('Ganti link undangan ini? Link dan QR lama akan berhenti berlaku.'))return;setBusy(true);try{await regenerate(modal.id);close();}finally{setBusy(false);}}}>Ganti link</button></div>
+      </form>}
+      {modal.kind==='share'&&<><p>Link tersimpan akan terisi otomatis. Jika link lama belum tersimpan, tempel link yang pernah dibagikan untuk memverifikasinya.</p><label>Link undangan personal<input type="url" value={link} onChange={e=>{setLink(e.target.value);setMessage('');setError('');}} /></label><button type="button" disabled={busy||!link.trim()} onClick={async()=>{setBusy(true);try{await prepare(modal.id,link);setError('');}catch(e){setError(e instanceof Error?e.message:'Pesan belum bisa disiapkan.');}finally{setBusy(false);}}}>Siapkan pesan</button>{message&&<><label>Pesan WA<textarea readOnly value={message} rows={10}/></label><div className="cms-actions"><button type="button" onClick={async()=>{try{await navigator.clipboard.writeText(message);notify('Pesan tersalin.');}catch{setError('Pilih dan salin pesan secara manual.');}}}>Salin pesan</button><a className="cms-button" href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Buka draf WhatsApp</a></div></>}</>}
+      {modal.kind==='qr'&&(qr?<><img className="cms-guest-qr" src={qr.qrData} alt={`QR masuk ${text(selected.display_name)}`}/><code>{qr.code}</code><p>Petugas penerima tamu memindai QR ini saat kedatangan.</p><a className="cms-button" href={qr.qrData} download={`qr-${text(selected.id)}.svg`}>Unduh QR</a></>:<p role="status">Menyiapkan QR…</p>)}
+    </dialog>}
   </>;
 }

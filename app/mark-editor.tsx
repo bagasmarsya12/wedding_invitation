@@ -192,11 +192,9 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
       <p className="mark-hint"><T>Click the paper and write — or switch to Draw and sketch over it.</T></p>
       <div className="style-swatches" role="group" aria-label={t("Card style")}>
         {MARK_STYLES.map(value => <button type="button" key={value} className={style === value ? "is-on" : ""} onClick={() => setStyle(value)} title={t(STYLE_LABELS[value])} aria-label={t(STYLE_LABELS[value])} aria-pressed={style === value} style={{ background: STYLE_SWATCH[value] }} />)}
-        <span className="caption"><T>Card style — click to try</T></span>
       </div>
       <div className="font-picker" role="group" aria-label={t("Card font")}>
         {MARK_FONTS.map(value => <button type="button" key={value} className={`font-option pc-font-${value}${font === value ? " is-on" : ""}`} onClick={() => setFont(value)} title={t(FONT_LABELS[value])} aria-label={t(FONT_LABELS[value])} aria-pressed={font === value}><span className="font-preview"><T>Aa</T></span></button>)}
-        <span className="caption"><T>Card font — click to try</T></span>
       </div>
       </>}
       {reply && !reply.marksEnabled && <p className="reply-postcards-closed"><T>Postcards are closed for now. The wall remains open.</T></p>}
@@ -206,11 +204,10 @@ export function MarkEditor({ token, guestName, defaultStyle = DEFAULT_MARK_STYLE
       </div>
       {reply?.footer}
       <p className="product-status" role="status">{t(status)}</p>
-      {token && <>
+      {token && (marks === null || marks.length > 0) && <>
       <div className="mystrip">
         <h3><T>Your postcards</T></h3>
         {marks === null && <p className="mark-empty"><T>Loading your postcards…</T></p>}
-        {marks?.length === 0 && <p className="mark-empty"><T>Nothing here yet — your card will appear beside this note once you keep it.</T></p>}
         {marks && marks.length > 0 && <div className="strip-row">
           {marks.map(mark => <button type="button" key={mark.id} className={`strip-card${editing?.id === mark.id ? " is-editing" : ""}`} onClick={() => beginEdit(mark)}>
             <MiniCard mark={{ id: mark.id, author_name: "", message: mark.message, drawingUrl: mark.drawing, style: mark.style, font: mark.font, created_at: mark.createdAt }} index={0} />

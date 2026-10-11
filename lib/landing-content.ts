@@ -1,8 +1,22 @@
+import { normalizeCoupleWording } from './couple-wording';
+import { resolveContentAliases } from './content-aliases';
 import { db } from "@/lib/server";
 import { cache } from 'react';
 import { CONTENT_DEFAULTS, CONTENT_SECTIONS, type ContentMap } from "@/lib/content-defaults";
 
 export type ResolvedContent = { values: ContentMap; overrides: ContentMap };
+
+export function resolveLandingContent(stored:ContentMap):ResolvedContent {
+  const values:ContentMap={...CONTENT_DEFAULTS},overrides:ContentMap={};
+  for(const [key,value]of Object.entries(stored))if(key in values&&value){
+    values[key]=value;
+    const fallback=CONTENT_DEFAULTS[key];
+    if(key.startsWith('copy.')||key.startsWith('id.copy.'))overrides[`${key.startsWith('id.')?'id:':''}copy:${CONTENT_DEFAULTS[key.startsWith('id.')?key.slice(3):key]}`]=value;
+    if(fallback!==undefined)overrides[key.startsWith('id.')?`id:${CONTENT_DEFAULTS[key.slice(3)]}`:fallback]=value;
+  }
+  resolveContentAliases(values,stored);
+  return {values:Object.fromEntries(Object.entries(values).map(([k,v])=>[k,normalizeCoupleWording(v)])),overrides:Object.fromEntries(Object.entries(overrides).map(([k,v])=>[k,normalizeCoupleWording(v)]))};
+}
 
 /**
  * Load landing copy from the `settings` table (keys "content.<section>.<field>").
@@ -11,7 +25,7 @@ export type ResolvedContent = { values: ContentMap; overrides: ContentMap };
  */
 export const loadLandingContent = cache(async (): Promise<ResolvedContent> => {
   const values: ContentMap = { ...CONTENT_DEFAULTS };
-  const overrides: ContentMap = {};
+  const overrides: ContentMap = {}, stored:ContentMap = {};
   try {
     const prefix = "content.";
     const rows = await db()
@@ -21,7 +35,7 @@ export const loadLandingContent = cache(async (): Promise<ResolvedContent> => {
     for (const row of rows.results ?? []) {
       const key = row.key.startsWith(prefix) ? row.key.slice(prefix.length) : row.key;
       if (key in values) {
-        values[key] = row.value;
+        values[key] = row.value;stored[key]=row.value;
         // Text-keyed mirror for the <T> override lookup (default literal → stored value).
         const fallback = CONTENT_DEFAULTS[key];
         if(key.startsWith('copy.')||key.startsWith('id.copy.')) overrides[`${key.startsWith('id.')?'id:':''}copy:${CONTENT_DEFAULTS[key.startsWith('id.')?key.slice(3):key]}`]=row.value;
@@ -31,7 +45,8 @@ export const loadLandingContent = cache(async (): Promise<ResolvedContent> => {
   } catch {
     // Database unavailable: serve the static defaults rather than breaking the page.
   }
-  return { values, overrides };
+  resolveContentAliases(values,stored);
+  return { values: Object.fromEntries(Object.entries(values).map(([key,value])=>[key,normalizeCoupleWording(value)])), overrides: Object.fromEntries(Object.entries(overrides).map(([key,value])=>[key,normalizeCoupleWording(value)])) };
 });
 
 export function knownContentKeys(): string[] {

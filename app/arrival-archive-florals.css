@@ -1,0 +1,66 @@
+/* Original Atelier flowers, composed around the two reading surfaces. */
+.arrival-floral-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.arrival-floral-frame .atelier-floral-sprig { position: absolute; height: auto; }
+.arrival-floral-frame .arrival-bouquet {
+  width: clamp(23rem, 31vw, 30rem);
+  top: -1.75rem;
+  right: -3.5rem;
+  transform: scaleX(-1);
+}
+.arrival-floral-frame .arrival-trailing-orchids {
+  width: clamp(13rem, 18vw, 18rem);
+  bottom: -6rem;
+  left: -9rem;
+}
+.arrival-heading { max-width: min(43rem, 66%); }
+
+.memory-book > .memory-floral-frame {
+  z-index: 2;
+  border-radius: inherit;
+}
+.memory-floral-frame .atelier-corner-top-left {
+  width: clamp(20rem, 30vw, 27rem);
+  top: -4rem;
+  left: -5rem;
+}
+.memory-floral-frame .atelier-corner-top-right {
+  width: clamp(15rem, 22vw, 20rem);
+  top: -2rem;
+  right: -3rem;
+}
+.memory-floral-frame .atelier-corner-bottom-left {
+  width: clamp(14rem, 21vw, 19rem);
+  bottom: -8rem;
+  left: -5rem;
+}
+.memory-floral-frame .atelier-corner-bottom-right {
+  width: clamp(22rem, 34vw, 30rem);
+  bottom: -9rem;
+  right: -7rem;
+}
+
+@media (max-width: 1000px) and (min-width: 621px) {
+  .arrival-floral-frame .arrival-bouquet { width: 23rem; right: -7rem; top: -2rem; }
+  .arrival-heading { max-width: 72%; }
+  .memory-floral-frame .atelier-corner-top-left { width: 21rem; left: -7rem; }
+  .memory-floral-frame .atelier-corner-top-right { width: 16rem; right: -5rem; }
+  .v2-world .v2-memory-folio .v2-archive-heading { padding-top: 2rem; }
+}
+
+@media (max-width: 620px) {
+  .v2-botanical-continuum > .arrival-guide { padding-top: 17rem; }
+  .arrival-heading { max-width: none; }
+  .arrival-floral-frame .arrival-bouquet { width: 19.5rem; top: -3rem; right: -4rem; }
+  .arrival-floral-frame .arrival-trailing-orchids { width: 12rem; left: -9.5rem; bottom: -4.5rem; }
+  .v2-world .v2-memory-folio .v2-archive-heading { padding-top: 3.25rem; }
+  .memory-floral-frame .atelier-corner-top-left { width: 15rem; left: -6rem; top: -3rem; }
+  .memory-floral-frame .atelier-corner-top-right { width: 11rem; right: -2rem; top: -.5rem; }
+  .memory-floral-frame .atelier-corner-bottom-left { width: 11rem; left: -5.5rem; bottom: -6rem; }
+  .memory-floral-frame .atelier-corner-bottom-right { width: 16rem; right: -4.5rem; bottom: -5rem; }
+}

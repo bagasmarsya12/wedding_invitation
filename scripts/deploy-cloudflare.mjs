@@ -15,8 +15,12 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { verifyReleaseBuild } from "./release-guard.mjs";
 
 const REPO = fileURLToPath(new URL("..", import.meta.url));
+// Validate before writing deployment config or running any remote operation.
+const proof = verifyReleaseBuild(REPO);
+console.log(`approved release verified: ${proof.edition}`);
 const ids = JSON.parse(readFileSync(new URL("../deploy/cloudflare.json", import.meta.url), "utf8"));
 
 const baseConfig = `${REPO}dist/server/wrangler.json`;
@@ -31,6 +35,11 @@ config.name = ids.worker_name;
 config.account_id = ids.account_id;
 config.d1_databases = [{ binding: "DB", database_name: ids.database_name, database_id: ids.database_id }];
 config.r2_buckets = [{ binding: "BUCKET", bucket_name: ids.bucket_name }];
+if (ids.custom_domains?.length) {
+  config.routes = ids.custom_domains.map(domain => ({ pattern: domain, custom_domain: true }));
+  // Preserve previously shared invitations and QR passes on the original host.
+  config.workers_dev = true;
+}
 const deployConfig = `${REPO}dist/server/wrangler.deploy.json`;
 writeFileSync(deployConfig, JSON.stringify(config));
 console.log(`deploy config ready: ${ids.worker_name} → ${ids.worker_url}`);
@@ -38,7 +47,7 @@ console.log(`deploy config ready: ${ids.worker_name} → ${ids.worker_url}`);
 const run = args => execFileSync("npx", ["wrangler", ...args], { cwd: REPO, stdio: "inherit" });
 const wranglerConfig = ["--config", "dist/server/wrangler.deploy.json"];
 
-const migrations = ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql", "0005_guest_passes.sql", "0006_cms_operations.sql", "0007_staff_mode.sql", "0008_cms_workspace.sql"];
+const migrations = ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql", "0005_guest_passes.sql", "0006_cms_operations.sql", "0007_staff_mode.sql", "0008_cms_workspace.sql", "0009_photo_comments.sql"];
 const migrationIndex = process.argv.indexOf("--migration");
 const selectedMigration = migrationIndex >= 0 ? process.argv[migrationIndex + 1] : null;
 if (migrationIndex >= 0 && !migrations.includes(selectedMigration)) throw new Error("Choose a known drizzle migration filename.");

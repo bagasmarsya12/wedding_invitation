@@ -14,7 +14,7 @@ export default async function GiftPage({ params, searchParams }: { params: Promi
   const guest = await guestFromToken(token);
   if (!guest) notFound();
   return <main className="product-page gift-page gift-gallery-page">
-    <header className="product-header"><a href={`/invite/${token}`}><T>Bagas</T> <i>×</i><T>Iga</T></a><nav><a href={`/invite/${token}`}><T>Invitation</T></a><a href={`/invite/${token}/mark`}><T>Leave a Mark</T></a></nav><LanguageSwitch /></header>
+    <header className="product-header"><a href={`/invite/${token}`}><T>Iga & Bagas</T></a><nav><a href={`/invite/${token}`}><T>Invitation</T></a><a href={`/invite/${token}/mark`}><T>Leave a Mark</T></a></nav><LanguageSwitch /></header>
     <section className="catalogue-hero" aria-labelledby="gift-page-title">
       <div className="gift-hero-light" aria-hidden="true" />
       <div className="gift-hero-copy"><p><T>A few things we’re saving room for</T></p><h1 id="gift-page-title"><T>Gifts</T></h1></div>

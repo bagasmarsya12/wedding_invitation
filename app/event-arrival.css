@@ -1,0 +1,127 @@
+/* One compact event spread: existing Atelier art, schedule, map and practical answers. */
+.v2-world .v2-details.v2-event-arrival { min-height: 0; padding: clamp(3rem, 5vw, 4.5rem) clamp(1rem, 3.2vw, 3rem); }
+.v2-event-arrival .v2-destination-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 1.25rem 2rem; min-height: 0; max-width: 74rem; padding: clamp(1.5rem, 3vw, 2.5rem); }
+.v2-event-arrival .v2-destination-paper-edge { display: none; }
+.v2-event-arrival .v2-destination-head { position: relative; inset: auto; grid-column: 1; grid-row: 1; width: auto; padding: 0; order: 0; }
+.v2-world .v2-event-arrival .v2-destination-head > p:first-child { margin-bottom: .65rem; }
+.v2-world .v2-event-arrival .v2-destination-head h2 { max-width: 20ch; font-size: clamp(2rem, 3.3vw, 3rem); }
+.v2-world .v2-event-arrival .v2-destination-intro { margin-top: .7rem; max-width: 43ch; font-size: .875rem; line-height: 1.6; }
+.v2-world .v2-event-arrival .v2-destination-card { position: relative; inset: auto; grid-column: 1; grid-row: 2; width: 100%; max-width: none; margin: 0; padding: 1.25rem 1.4rem; border-radius: .3rem; box-shadow: .2rem .35rem .7rem #332b2012; }
+.v2-world .v2-event-arrival .v2-destination-date { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: .5rem; font-size: 1.8rem; padding-bottom: .8rem; }
+.v2-world .v2-event-arrival .v2-destination-events { padding-block: .85rem; }
+/* Both calendar actions share a baseline when event descriptions wrap. */
+.v2-world .v2-event-arrival .v2-destination-events article > div { align-self: stretch; display: flex; flex-direction: column; }
+.v2-world .v2-event-arrival .v2-destination-events .v2-calendar { margin-top: auto; padding-top: .65rem; }
+.v2-world .v2-event-arrival .v2-destination-events time { font-size: 2rem; }
+.v2-world .v2-event-arrival .v2-destination-events h3 { margin-top: .35rem; font-size: 1rem; }
+.v2-world .v2-event-arrival .v2-destination-events article > div > p { font: .75rem/1.4 var(--v2-sans); }
+.v2-world .v2-event-arrival .v2-destination-venue { display: block; padding-top: .85rem; }
+.v2-world .v2-event-arrival .v2-destination-venue address { margin: .45rem 0 .8rem; max-width: none; font: .8125rem/1.6 var(--v2-sans); }
+.v2-event-arrival .v2-destination-map-shell { position: relative; inset: auto; grid-column: 2; grid-row: 1 / 3; width: 100%; height: auto; min-height: 22rem; }
+.v2-event-arrival .v2-destination-map-frame { border: 1px solid #62734c44; box-shadow: none; border-radius: 50% 50% .3rem .3rem / 24% 24% .3rem .3rem; }
+.v2-event-arrival .v2-destination-map-controls { top: auto; bottom: 2.75rem; right: .75rem; }
+.v2-event-arrival .arrival-compact { grid-column: 1 / -1; position: relative; z-index: 6; min-width: 0; margin-top: .5rem; scroll-margin-top: 5rem; }
+.arrival-compact [hidden] { display: none !important; }
+.arrival-legacy-anchor { position: absolute; top: 0; left: 0; scroll-margin-top: 5rem; }
+.arrival-compact-tabs { display: flex; gap: 1.6rem; border-bottom: 1px solid #62734c55; }
+.arrival-compact-tabs button { min-height: 48px; padding: .6rem .15rem; border: 0; border-bottom: 2px solid transparent; background: none; color: #596250; font: 500 .875rem/1.4 var(--v2-sans); cursor: pointer; }
+.arrival-compact-tabs button[aria-selected="true"] { border-bottom-color: #69745b; color: #21382c; }
+.arrival-compact-list { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.arrival-compact-item { min-width: 0; border-bottom: 1px solid #62734c33; }
+.arrival-compact-item[open] { grid-column: 1 / -1; }
+.arrival-compact-item summary { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0; list-style: none; cursor: pointer; font: 500 .9375rem/1.5 var(--v2-sans); }
+.arrival-compact-item summary::-webkit-details-marker { display: none; }
+.arrival-compact-item summary > span { flex-shrink: 0; font: 1.4rem/1 var(--v2-serif); }
+.arrival-compact-item[open] summary > span { transform: rotate(45deg); }
+.arrival-compact-answer { padding: 0 0 1.15rem; max-width: 65rem; font: .875rem/1.75 var(--v2-sans); overflow-wrap: anywhere; }
+.arrival-compact-answer > p { margin: 0 0 .75rem; max-width: 72ch; white-space: pre-line; }
+.arrival-compact-answer .arrival-compact-example { font-size: .75rem; color: #72574c; }
+.arrival-compact-steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: .9rem; list-style: none; padding: .5rem 0 0; margin: 0; }
+.arrival-compact-steps li { display: flex; gap: .85rem; min-width: 0; }
+.arrival-compact-steps li > span { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border: 1px solid #b08b5080; border-radius: 50%; font-size: .75rem; }
+.arrival-compact-steps h3 { margin: 0 0 .35rem; font: 500 1rem/1.4 var(--v2-serif); }
+.arrival-compact-steps p { margin: 0; white-space: pre-line; }
+.arrival-compact-map { max-width: 28rem; margin: 1.5rem 0 0; }
+.arrival-compact-map img { display: block; width: 100%; height: auto; }
+.arrival-compact-map figcaption { margin: .6rem 0 0; font-size: .75rem; }
+.arrival-compact-help { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-top: .7rem; }
+.arrival-compact-help p { margin: 0; font: .8125rem/1.5 var(--v2-sans); }
+.arrival-compact-help a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font: .8125rem/1.4 var(--v2-sans); color: inherit; }
+.arrival-compact :is(button, summary, a):focus-visible { outline: 2px solid #a35167; outline-offset: 3px; }
+.v2-event-arrival #guest-pass { grid-column: 1 / -1; min-width: 0; position: relative; z-index: 6; scroll-margin-top: 5rem; }
+.guest-pass-inline .guest-pass-paper { display: grid; grid-template-columns: minmax(0, 1fr) 14rem; column-gap: 2rem; row-gap: .8rem; align-items: center; padding: 1.4rem 1.5rem; border: 1px solid #62734c66; background: #eeeadd99; text-align: left; }
+.guest-pass-inline .guest-pass-copy { min-width: 0; }
+.v2-world .guest-pass-inline h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .45rem; font: 500 .8125rem/1.5 var(--v2-sans); }
+.guest-pass-inline h4 { margin: 0 0 .45rem; font: 400 clamp(1.5rem, 2vw, 2rem)/1.2 var(--v2-serif); overflow-wrap: anywhere; }
+.guest-pass-inline .guest-pass-paper p { margin: .35rem 0; max-width: 65ch; }
+.guest-pass-inline .guest-pass-help { color: #4f5d47; }
+.guest-pass-inline .guest-pass-qr-wrap { grid-column: 2; grid-row: 1 / 3; min-width: 0; text-align: center; }
+.guest-pass-inline .pass-qr { width: 100%; max-width: none; margin: 0; }
+.guest-pass-inline .guest-pass-qr-wrap code { margin: .5rem 0 0; font: .5625rem/1.5 ui-monospace, monospace; letter-spacing: 0; }
+.guest-pass-inline .guest-pass-qr-placeholder { display: block; aspect-ratio: 1; border: 1px solid #62734c33; background: #ffffff99; }
+.guest-pass-inline .guest-pass-actions { grid-column: 1; justify-content: flex-start; gap: .6rem; }
+.guest-pass-inline button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 44px; padding: .6rem .85rem; border: 1px solid #62734c77; background: transparent; color: #21382c; font: .8125rem/1.5 var(--v2-sans); cursor: pointer; }
+.guest-pass-inline .guest-pass-save { background: #69745b; color: #fffdf6; }
+.guest-pass-inline button:disabled { opacity: .65; cursor: wait; }
+.guest-pass-inline button:focus-visible { outline: 2px solid #a35167; outline-offset: 3px; }
+.guest-pass-inline .guest-pass-status { grid-column: 1 / -1; margin: .7rem 0 0; font: .8125rem/1.5 var(--v2-sans); }
+.pass-garden { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.pass-garden .pass-flower-top { width: 6rem; left: -2.2rem; top: -2rem; }
+.pass-garden .pass-flower-bottom { width: 7.5rem; right: -2.9rem; bottom: -2.3rem; }
+.guest-pass-inline .guest-pass-qr-open { position: relative; isolation: isolate; display: flex; flex-direction: column; gap: .45rem; width: 100%; padding: .85rem; overflow: hidden; border: 1px solid #bda979; border-radius: .25rem; background: #21382c; color: #f6f0e3; box-shadow: inset 0 0 0 4px #bda97933; cursor: zoom-in; }
+.guest-pass-qr-open > :not(.pass-garden) { position: relative; z-index: 1; }
+.guest-pass-inline .guest-pass-qr-open .pass-qr { z-index: 2; aspect-ratio: 1; object-fit: contain; }
+.pass-preview-name { max-width: 100%; padding: .1rem .3rem; background: #21382cee; font: 400 .9375rem/1.3 var(--v2-serif); overflow-wrap: anywhere; }
+.pass-preview-date { padding-inline: .2rem; background: #21382cee; font: .6875rem/1.4 var(--v2-sans); }
+.pass-preview-open { display: flex; align-items: center; justify-content: center; gap: .4rem; max-width: 100%; padding: .15rem .4rem; background: #21382cee; font: .6875rem/1.4 var(--v2-sans); }
+.guest-pass-inline .guest-pass-qr-open:hover { border-color: #e2cb95; }
+.guest-pass-floral-dialog { width: min(30rem, calc(100vw - 1.25rem)); padding: 1rem; border-color: #bda97999; border-radius: .4rem; background: #21382c; }
+.guest-pass-floral-dialog[open] { animation: pass-dialog-in 220ms ease-out both; }
+.guest-pass-floral-dialog > header { margin-bottom: .85rem; text-align: left; }
+.guest-pass-floral-dialog h2 { font: 500 1.35rem/1.3 var(--v2-serif); }
+.guest-pass-floral-dialog > header button { width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.5rem; }
+.guest-pass-floral-dialog .guest-pass-paper { padding: 1.3rem 1.5rem; border-color: #bda979; background: #f6f0e3 url('/atelier/assets/keepsake-paper.webp') center/640px; }
+.guest-pass-floral-dialog .guest-pass-paper > :not(.pass-garden) { position: relative; z-index: 1; }
+.guest-pass-floral-dialog .pass-flower-top { width: 8.5rem; left: -2.5rem; top: -2.7rem; }
+.guest-pass-floral-dialog .pass-flower-bottom { width: 10rem; right: -3.2rem; bottom: -3.5rem; }
+.guest-pass-floral-dialog .guest-pass-paper .pass-couple { margin: 0; font: 400 1.5rem/1.3 var(--v2-serif); }
+.guest-pass-floral-dialog .pass-date { margin-top: .3rem; font-size: .75rem; }
+.guest-pass-floral-dialog .guest-pass-paper h3 { margin: 1rem auto .45rem; max-width: 22ch; font: 400 2rem/1.2 var(--v2-serif); }
+.guest-pass-floral-dialog .guest-pass-paper .pass-qr { z-index: 2; width: min(100%, 16rem); margin: .85rem auto 1rem; }
+.guest-pass-floral-dialog .pass-venue { max-width: 28ch; margin-inline: auto; }
+.guest-pass-floral-dialog .guest-pass-paper code { margin: .65rem auto 0; font: .625rem/1.5 ui-monospace, monospace; letter-spacing: 0; }
+.guest-pass-floral-dialog .guest-pass-help { margin: .85rem 0; color: #e2e3d4; text-align: left; }
+.guest-pass-floral-dialog .guest-pass-actions button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; border-color: #bda97999; }
+.guest-pass-floral-dialog .guest-pass-actions .guest-pass-save { background: #f6f0e3; color: #21382c; }
+.guest-pass-floral-dialog .guest-pass-status { font: .8125rem/1.5 var(--v2-sans); }
+@keyframes pass-dialog-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .guest-pass-floral-dialog[open] { animation: none; } }
+@media (max-width: 850px) {
+  .v2-event-arrival .v2-destination-page { gap: 1.2rem; padding: 1.5rem; }
+  .v2-world .v2-event-arrival .v2-destination-head h2 { font-size: 2rem; }
+  .v2-world .v2-event-arrival .v2-destination-card { padding: 1rem; }
+}
+@media (max-width: 620px) {
+  .v2-world .v2-details.v2-event-arrival { padding: 2.5rem .75rem; }
+  .v2-event-arrival .v2-destination-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.1rem; padding: 1.25rem 1rem; overflow: hidden; }
+  .v2-world .v2-event-arrival .v2-destination-head h2 { max-width: 20ch; font-size: clamp(1.8rem, 7.5vw, 2.25rem); }
+  .v2-world .v2-event-arrival .v2-destination-intro { font-size: .8125rem; }
+  .v2-world .v2-event-arrival .v2-destination-card { padding: 1rem; width: 100%; }
+  .v2-world .v2-event-arrival .v2-destination-date { font-size: 1.55rem; }
+  .v2-world .v2-event-arrival .v2-destination-events time { font-size: 1.8rem; }
+  .v2-event-arrival .v2-calendar > summary > svg:first-child { display: none; }
+  .v2-event-arrival .v2-destination-map-shell { grid-column: 1; grid-row: 3; height: 11rem; min-height: 0; }
+  .v2-event-arrival .v2-destination-map-frame { border-radius: .3rem; }
+  .v2-event-arrival .v2-destination-map-controls { top: .5rem; right: .5rem; bottom: auto; }
+  .v2-event-arrival .arrival-compact { margin-top: 0; }
+  .arrival-compact-list, .arrival-compact-steps { grid-template-columns: minmax(0, 1fr); }
+  .arrival-compact-item summary { min-height: 52px; font-size: .875rem; }
+  .arrival-compact-answer { font-size: .8125rem; }
+  .arrival-compact-help { align-items: flex-start; flex-direction: column; gap: .4rem; }
+  .guest-pass-inline .guest-pass-paper { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 1.25rem 1rem; }
+  .guest-pass-inline .guest-pass-qr-wrap { grid-column: 1; grid-row: auto; width: min(100%, 14rem); margin-inline: auto; }
+  .guest-pass-inline .guest-pass-actions { justify-content: center; }
+  .guest-pass-floral-dialog .guest-pass-paper { padding: 1.2rem 1rem; }
+  .guest-pass-floral-dialog .guest-pass-paper h3 { font-size: 1.75rem; }
+  .guest-pass-floral-dialog .guest-pass-paper .pass-qr { width: min(100%, 14rem); }
+}

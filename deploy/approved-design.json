@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "edition": "atelier-mirrored-album-2026-10-09",
+  "approval": "User explicitly requested four additional homepage photo cards after photo 6, with four small cards on the left and photo 6 large on the right, plus CMS upload slots and deployment. The mirrored album layout was inspected in the local browser. Only the approved archive layout stylesheet hash changes; all illustration files, floral compositions, monogram, envelope animation and ten-second keepsake exports retain their previous hashes.",
+  "files": [
+    {
+      "path": "app/archive-collection.css",
+      "sha256": "34159eb20307d586c16e910348b801097533814f094b912e69bb2ca92d5d76c4"
+    },
+    {
+      "path": "app/arrival-archive-florals.css",
+      "sha256": "24072dadadc42a3455680bc491f358a1b9999d86a40b0f384943970dfdaa9659"
+    },
+    {
+      "path": "app/atelier-floral-accents.css",
+      "sha256": "75f75020fd81651657e36b408b69a2ae51229c9ebb1fe4cbda283ddeef0e3d20"
+    },
+    {
+      "path": "app/atelier-flowers.tsx",
+      "sha256": "f8791f7fce3d220a944ebd9adea832d4fecf3caa91dd7ebdf7bdd8559662384a"
+    },
+    {
+      "path": "app/envelope-atelier.css",
+      "sha256": "0dbd98d9f26d679bd58bef14b5f0ce6780ff170a057424c66621669f7d36db80"
+    },
+    {
+      "path": "app/guest-companion.css",
+      "sha256": "02c83e4752918fb9c2ae238f13f209ad6131e8d8d540edbd9efea5b75403c30d"
+    },
+    {
+      "path": "lib/keepsake-design.ts",
+      "sha256": "e45fe5d5468aa70d356bf16ee714ea2adec7e352879f12e49adb94baf2bd5cf0"
+    },
+    {
+      "path": "lib/wedding-keepsake.ts",
+      "sha256": "71fb461b8d1de58a4a3db2951cb5923132121d1bd909cb18759eb77f7ca370bc"
+    },
+    {
+      "path": "public/assets/15-paper-fiber-texture.webp",
+      "sha256": "abacb4236ba06937a7c06934751d3475635e77778bf5773003ed744603307fac"
+    },
+    {
+      "path": "public/assets/apple-touch-icon.png",
+      "sha256": "88e4f788c78dac2f274d426accf0c7a60f0a90bc9d8ed7872ba8284ec6b54b46"
+    },
+    {
+      "path": "public/assets/authored/destination-canopy-shadow.svg",
+      "sha256": "21272fb4cbde723149d1c159ff269873ab21ddeead084ff2632dca337e02edd1"
+    },
+    {
+      "path": "public/assets/bagas-iga-mark.jpg",
+      "sha256": "2689d5128ee8558bb33dd926fb1883ff8ce2a2c8ddbf2a1ce6085b7e2c58b7e1"
+    },
+    {
+      "path": "public/assets/bagas-iga-mark.webp",
+      "sha256": "39fa38432cad292a96275a6885de0c16769af2b40b3dc7b6e9dc193fd2459b90"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/canopy-branch.webp",
+      "sha256": "fe21188c0580093a826b68c5c8874fdb33489f25e4f6a18dd8b51fbe98929729"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/climber-left.webp",
+      "sha256": "6c8d5d3bb8007dfdb76fd2a3bd5cc28cda31a8e27d7d495b61448bd3f5b06f97"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/climber-right.webp",
+      "sha256": "9a0bd3fb715a27d82b1e3362dd4e0ffe7e98715bc8a3956eda06cacd19288297"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/flower-cascade.webp",
+      "sha256": "ce2f5b9e2d5276cbe535e59c82df15a43e62b1931e1a21868a3de2a33ba61b23"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/flower-cluster.webp",
+      "sha256": "0d7a12248081fabc7402e7f1d85940650aa7ab43b2df6d52cb7f8b3795bfec5b"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/flower-spray.webp",
+      "sha256": "d78310ff60068737412e153eb07c5d5cd5e1e44d0fb516d06734d40d45dbac6d"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/flower-tip-pink.webp",
+      "sha256": "56436bad08b5214e30488795efa6e9240f981417e958e00e8f5ea1fe43a0ba00"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/flower-tip.webp",
+      "sha256": "6c7633f08b2c14092cf08583af977c7c84d60e511c4830ca1e69953096a986f0"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/leaf-pair.webp",
+      "sha256": "528427142c38939324b63f0f7e24493514773b444658e5040dd50d7f159ed407"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/leaf-sprig.webp",
+      "sha256": "6349eeb680acecfb2bcc2c8eb9c7cf57ef9c9abd5cd82dd5cd3f88dba2c409a9"
+    },
+    {
+      "path": "public/assets/botanicals/combretum/tendril.webp",
+      "sha256": "c9b96a683955b1b642a353a75be4af40d7c2dcdbede4458d4139cdcc0d5c61fc"
+    },
+    {
+      "path": "public/assets/botanicals/dendrobium/branch-short.webp",
+      "sha256": "b8793ec8fee77799d38351314899d4b660cedbc9ac4aff963c69d3b2eeb09b9e"
+    },
+    {
+      "path": "public/assets/botanicals/melastoma/branch-short.webp",
+      "sha256": "d9d9bd3e9365329467ed18f5be469a76dfe79a0459aafb86a76e2f7685638f0e"
+    },
+    {
+      "path": "public/assets/botanicals/melastoma/full-stem.webp",
+      "sha256": "6dc87e192ae99f83b8b26cc9c49779534b500da14bf8afe0f4ad11dfa2c69088"
+    },
+    {
+      "path": "public/assets/botanicals/nephrolepis/frond-arched-01.webp",
+      "sha256": "4a6ee9d01f76dccc0e2be0425975152504de37fe39d45a09441b044e073fbf92"
+    },
+    {
+      "path": "public/assets/botanicals/nephrolepis/frond-short-02.webp",
+      "sha256": "92bd450dbb253c070c51d6b34899ca0542167d48e30ce286604dd6501da48034"
+    },
+    {
+      "path": "public/assets/botanicals/syzygium/branch-long.webp",
+      "sha256": "9bab730169f03584bff2b55a4fe46e8d1646acb51efaa8568d93049b532103e8"
+    },
+    {
+      "path": "public/assets/botanicals/syzygium/branch-short.webp",
+      "sha256": "31819949a2811abea2c2c20588b96469e966d0e4c5f84a44e91186a1942914a8"
+    },
+    {
+      "path": "public/assets/favicon.png",
+      "sha256": "8f2d41d6ca1828fa24bfe434dc65676a0cc1dcecbeb5f8a66db878e365baf20c"
+    },
+    {
+      "path": "public/assets/og-image.jpg",
+      "sha256": "685731ced0d228aa1ecef977920c9ffb18c846f494198e68edf6309e008294c2"
+    },
+    {
+      "path": "public/atelier/assets/keepsake-florals.png",
+      "sha256": "ec6e421b1c3ec3d6e0f963798b1dfca500919b1d8ba600f2484c0b913ea9b494"
+    },
+    {
+      "path": "public/atelier/assets/keepsake-mark.webp",
+      "sha256": "39fa38432cad292a96275a6885de0c16769af2b40b3dc7b6e9dc193fd2459b90"
+    },
+    {
+      "path": "public/atelier/assets/keepsake-paper.webp",
+      "sha256": "abacb4236ba06937a7c06934751d3475635e77778bf5773003ed744603307fac"
+    },
+    {
+      "path": "public/atelier/envelope-scene.js",
+      "sha256": "807f995dcde4f33201d98ce2656c1bc66900dcd69cc4fa3998ba04437eba51e1"
+    },
+    {
+      "path": "public/atelier/guest-view.js",
+      "sha256": "f46fb369a94d206ca7fe38456c108ac1924ea50e1bc503f0346a25ae7e2610f0"
+    },
+    {
+      "path": "public/atelier/keepsake-content.js",
+      "sha256": "ef8eaa1d596d13af47b6e96a1e2b22d079152f746fc18921bdc8d36b878c32ea"
+    },
+    {
+      "path": "public/atelier/keepsake-design.js",
+      "sha256": "f3220fe8d5224b36f5b45375a4512c3adbb0f6c832d7f2952b27eb29d038fb3f"
+    },
+    {
+      "path": "public/atelier/keepsake-renderer.js",
+      "sha256": "121a7cf64889004c1f2eb437084b863bb76887d6ad847b355e7f4b0ca0db8d73"
+    },
+    {
+      "path": "public/atelier/story-export.js",
+      "sha256": "667fc6b0a91e78b1411777cb9bf9d3bd8faa15272d7b1fa84c811855344720d2"
+    },
+    {
+      "path": "public/atelier/vendor/MEDIABUNNY-LICENSE.txt",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+    },
+    {
+      "path": "public/atelier/vendor/THREE-LICENSE.txt",
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+    },
+    {
+      "path": "public/atelier/vendor/mediabunny.mjs",
+      "sha256": "652fbe9226e55cb0c0784aaba6b4b73fea4fc0df498f62050cdc617a4bd97ca2"
+    },
+    {
+      "path": "public/atelier/vendor/three.core.js",
+      "sha256": "9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6"
+    },
+    {
+      "path": "public/atelier/vendor/three.module.js",
+      "sha256": "9052042d676cb0fdc1ddfefe193053f34b7ac0513a616fdac4535d49987812ea"
+    },
+    {
+      "path": "public/fonts/SOURCES.json",
+      "sha256": "85202c1797d61c67241831f5c9763f3616b4823f9e3c3bb50f6578267efbbf4a"
+    },
+    {
+      "path": "public/fonts/instrument-sans-OFL.txt",
+      "sha256": "9e27a72ed30eb49a08678f6a5d6ed98ec7ba5368f541637ee0683ec9134ef966"
+    },
+    {
+      "path": "public/fonts/instrument-sans-latin-variable.woff2",
+      "sha256": "6219bc4bfdfc5d9b2201dcdf046218b122a758f932e25ed5f168f929b7ca2311"
+    },
+    {
+      "path": "public/fonts/newsreader-OFL.txt",
+      "sha256": "fdfad38143ec470553cae82a1e45320bdd1b9ec70415d37bd0171051d8a4ded8"
+    },
+    {
+      "path": "public/fonts/newsreader-latin-variable.woff2",
+      "sha256": "01817351be3edfc1714fe6d60ddea6a22a169a5ebd033b50c7f9495e5d9c386a"
+    },
+    {
+      "path": "public/atelier/story-cinema.js",
+      "sha256": "14306f996d72093c108738e0afe5dc839fc9389188e75c545f2ca2b93c5cc1ef"
+    },
+    {
+      "path": "public/atelier/assets/keepsake-florals.webp",
+      "sha256": "f0db9ef2821ca8111cc87da430969273de4d1ca0407dbc1aaa6847907fc85258"
+    }
+  ]
+}

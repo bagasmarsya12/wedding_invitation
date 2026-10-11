@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex, primaryKey, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 
 const timestamps = {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -134,6 +134,19 @@ export const settings = sqliteTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const photoComments = sqliteTable('photo_comments', {
+  id:text('id').primaryKey(),photoKey:text('photo_key').notNull(),
+  parentId:text('parent_id').references(():AnySQLiteColumn=>photoComments.id),
+  guestId:text('guest_id').references(()=>guests.id),authorKind:text('author_kind').notNull(),authorName:text('author_name').notNull(),
+  message:text('message').notNull(),moderationStatus:text('moderation_status').notNull().default('pending'),removedAt:text('removed_at'),createdAt:text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+},table=>[index('photo_comments_thread_idx').on(table.photoKey,table.parentId,table.moderationStatus,table.createdAt,table.id),index('photo_comments_moderation_idx').on(table.moderationStatus,table.createdAt,table.id)]);
+export const photoCommentHearts=sqliteTable('photo_comment_hearts',{
+  commentId:text('comment_id').notNull().references(()=>photoComments.id,{onDelete:'cascade'}),guestId:text('guest_id').notNull().references(()=>guests.id),createdAt:text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+},table=>[primaryKey({columns:[table.commentId,table.guestId]})]);
+export const photoCommentSettings=sqliteTable('photo_comment_settings',{
+  photoKey:text('photo_key').primaryKey(),enabled:integer('enabled',{mode:'boolean'}).notNull().default(true),updatedAt:text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const mutationLimits = sqliteTable("mutation_limits", {

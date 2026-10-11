@@ -2,9 +2,11 @@ import * as THREE from "three";
 import { gardenPortalProfile, makeGardenPortal } from "./garden-portal";
 import { heroCameraDistance } from "./hero-passage";
 import { gardenWindow } from "./garden-window";
+import { createGardenPreparation, gardenFrameDue, gardenPixelRatio } from "./garden-performance";
 
 // Botanical forms are curved meshes, not enlarged raster cutouts. Units are CSS pixels.
-// A single canvas serves the chapters; only the visible chapter groups are drawn.
+// A page-positioned canvas serves nearby chapters. Native scrolling carries its
+// overscan surface with the text even between animation frames.
 type Kind = "leaf" | "petal" | "stem" | "heart" | "bud" | "grass";
 type Species = "combretum" | "orchid" | "cosmos" | "wisteria" | "fern";
 type Instance = { matrix: THREE.Matrix4; color: THREE.Color; anchor: number[] };
@@ -91,6 +93,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
   renderer.toneMappingExposure = 1.12;
   renderer.autoClear = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  canvas.dataset.gardenParallelShaders = String(renderer.extensions.has("KHR_parallel_shader_compile"));
 
   const scene = new THREE.Scene();
   const sky = new THREE.HemisphereLight(0xfff8e4, 0x3c5140, 2.7);
@@ -146,7 +149,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
     uniform float uGardenHero;
     uniform vec2 uGardenPointer;
   `;
-  const leafDepth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+  const leafDepth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, side: THREE.DoubleSide });
   leafDepth.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>\n${gardenVertexUniforms}`)
@@ -201,6 +204,9 @@ export function mountGarden(host: HTMLDivElement): () => void {
     return mat;
   }
   const materials = Object.fromEntries(KINDS.map(kind => [kind, material(kind)])) as Record<Kind, THREE.MeshStandardMaterial>;
+  // Hero shadows and normal rooms use different programs. Separate material
+  // properties keep the hero draw from replacing a room's pending compile status.
+  const heroMaterials = Object.fromEntries(KINDS.map(kind => [kind, material(kind)])) as Record<Kind, THREE.MeshStandardMaterial>;
   const geometries: Record<Kind, THREE.BufferGeometry> = {
     leaf: blade(false), petal: blade(true), stem: new THREE.CylinderGeometry(1, 1, 1, 5),
     heart: new THREE.SphereGeometry(1, 8, 6), bud: new THREE.SphereGeometry(1, 8, 8),
@@ -211,11 +217,16 @@ export function mountGarden(host: HTMLDivElement): () => void {
     flower: ["#fff8e5", "#f4d4cc", "#d9869b", "#b63662", "#e7abb5", "#f5eee0"],
   };
   let chapters: Chapter[] = [], frame = 0, resizeFrame = 0, width = 1, height = 1, disposed = false;
+  let surfaceHeight = 1, margin = 0, parentTop = 0, parentBottom = 0;
   let lastDraw = 0, dirty = true, contextUnavailable = false;
   const animationOrigin = performance.now();
   let sceneryScroll = window.scrollY, lastTick = performance.now(), activeUntil = 0;
   let ambientTimer = 0;
-  let cancelHydration: (() => void) | null = null;
+  let preparationCount = 0, preparationMax = 0;
+  let renderMax = 0, compileMax = 0;
+  const readyGroups = new WeakSet<THREE.Group>();
+  let warming: Promise<unknown> | null = null;
+  let warmingGroup: THREE.Group | null = null;
   const pointerTarget = new THREE.Vector2();
 
   function makeChapter(element: HTMLElement, index: number) {
@@ -238,7 +249,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
     let anchor = [0, 0, 0, 0];
     let heroLayer = .5;
     function add(kind: Kind, p: THREE.Vector3, q: THREE.Quaternion, s: THREE.Vector3, color: string) {
-      // Keep architectural foliage and light; flowers use the shared Atelier illustration.
+      // The restored Atelier illustration supplies the flowers; preserve architectural foliage and light.
       if (kind === "petal" || kind === "heart" || kind === "bud") return;
       if (hero) {
         const z = anchor[3] * h * .24 - h * .12;
@@ -442,6 +453,9 @@ export function mountGarden(host: HTMLDivElement): () => void {
       shrub(left, h - 90, 1, mobile ? 1.22 : 1.46, "fern", { branches: 2, reach: .78, rises: [38, 102] });
       shrub(left, h - 42, 1, 1.1, "combretum", { branches: 2, reach: .74, rises: [36, 86], spread: .76, bloomScale: 1.17, buds: 2 });
       shrub(right, h - 32, -1, .85, "orchid", { branches: 2, reach: .68, rises: [38, 92], spread: .72, buds: 2 });
+    } else if (element.id === "arrival-guide") {
+      // This quiet paper chapter is framed by the approved Atelier illustration.
+      // Keep procedural foliage out of its floral border and reading area.
     } else if (element.id === "archive") {
       shrub(left, 48, 1, 1.28, "fern", { branches: 2, reach: .65, rises: [36, -10] });
       shrub(right, 32, -1, mobile ? 1.12 : 1.3, "orchid", { branches: 2, reach: .58, rises: [12, -25], spread: .64, bloomScale: 1.16, buds: 2 });
@@ -477,7 +491,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
       if (h > 1300) shrub(index % 2 ? right : left, h * .39, index % 2 ? -1 : 1, .9);
       if (element.id === "beyond") { shrub(left, h * .42, 1, 1.12); shrub(right, h * .32, -1, 1.08); }
     }
-    if (!["the-day", "beyond", "details", "profiles", "archive", "useful-bits", "gifts", "leave-a-mark"].includes(element.id)) {
+    if (!["the-day", "beyond", "details", "profiles", "archive", "arrival-guide", "useful-bits", "gifts", "leave-a-mark"].includes(element.id)) {
       const side = index % 2 ? -1 : 1;
       meadow(side * w * .42, h + 12, w * .38, mobile ? 24 : 48, habitat === "orchid" ? "orchid" : "cosmos");
       // A second species gives each room a different silhouette, not simply a new tint.
@@ -487,7 +501,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
       const instances = pool[kind];
       if (!instances.length) return;
       const geometry = geometries[kind].clone();
-      const mesh = new THREE.InstancedMesh(geometry, materials[kind], instances.length);
+      const mesh = new THREE.InstancedMesh(geometry, hero ? heroMaterials[kind] : materials[kind], instances.length);
       const anchors = new Float32Array(instances.length * 4);
       instances.forEach((item, i) => { mesh.setMatrixAt(i, item.matrix); mesh.setColorAt(i, item.color); anchors.set(item.anchor, i * 4); });
       geometry.setAttribute("gardenAnchor", new THREE.InstancedBufferAttribute(anchors, 4));
@@ -500,7 +514,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
   }
 
   function measureSafe(element: HTMLElement) {
-    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading, .v2-gifts-heading > p, .v2-person > div, .v2-profile-portrait, .v2-rsvp-copy, .reply-studio, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy, .v2-destination-head, .v2-destination-card, .v2-destination-map-controls";
+    const selectors = "h1, h2, .v2-day-copy, :scope > header > p, .v2-archive-heading, .v2-gifts-heading > p, .v2-person > div, .v2-profile-portrait, .v2-rsvp-copy, .reply-studio, .v2-useful-list, .v2-gifts-heading > span, .v2-gift-shelf h3, .v2-gift-shelf p, .v2-text-link, .v2-mark-copy, .v2-beyond-copy, .v2-destination-head, .v2-destination-card, .v2-destination-map-controls,  .arrival-heading, .arrival-map-paper, .arrival-route-copy, .arrival-landmarks, .arrival-notes, .arrival-help";
     const safe = Array.from(element.querySelectorAll<HTMLElement>(selectors)).slice(0, 12).map(node => {
       const box = node.getBoundingClientRect();
       return { left: box.left, top: box.top + window.scrollY, width: box.width, height: box.height };
@@ -510,7 +524,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
 
   function clearChapter(chapter: Chapter) {
     if (!chapter.group) return;
-    chapter.group.traverse(object => {
+    const group = chapter.group;
+    const releaseGroup = () => group.traverse(object => {
       if (object instanceof THREE.InstancedMesh) { object.geometry.dispose(); object.dispose(); }
       else if (object instanceof THREE.Mesh && object.userData.ownsMaterial) {
         object.geometry.dispose();
@@ -518,8 +533,11 @@ export function mountGarden(host: HTMLDivElement): () => void {
         owned.forEach(material => material.dispose());
       }
     });
-    scene.remove(chapter.group);
+    scene.remove(group);
+    readyGroups.delete(group);
     chapter.group = null;
+    if (warming && warmingGroup === group) void warming.finally(releaseGroup);
+    else releaseGroup();
   }
 
   function clearChapters() {
@@ -530,50 +548,118 @@ export function mountGarden(host: HTMLDivElement): () => void {
   }
   function hydrateChapter(chapter: Chapter) {
     if (chapter.group || disposed) return chapter;
+    const started = performance.now();
     const index = chapters.indexOf(chapter);
     const hydrated = makeChapter(chapter.element, index < 0 ? 0 : index);
     Object.assign(chapter, hydrated);
+    preparationCount++;
+    preparationMax = Math.max(preparationMax, performance.now() - started);
+    canvas.dataset.gardenPreparations = String(preparationCount);
+    canvas.dataset.gardenPreparationMaxMs = preparationMax.toFixed(1);
     return chapter;
   }
-  function scheduleHydration() {
-    cancelHydration?.(); cancelHydration = null;
-    if (disposed || document.hidden || contextUnavailable) return;
-    // Keep nearby rooms warm, not the entire document. Seeds and mesh detail
-    // remain identical when a distant chapter is revisited.
-    for (const chapter of chapters) {
-      if (!gardenWindow(chapter.top, chapter.height, window.scrollY, height).retain) clearChapter(chapter);
-    }
-    canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
-    const next = chapters.filter(chapter => !chapter.group && gardenWindow(chapter.top, chapter.height, window.scrollY, height).prepare)
-      .sort((a, b) => Math.abs(a.top - window.scrollY) - Math.abs(b.top - window.scrollY))[0];
-    if (!next) return;
+  const preparation = createGardenPreparation((callback, timeout) => {
     const win = window as Window & {
       requestIdleCallback?: (callback: (deadline: IdleDeadline) => void, options?: IdleRequestOptions) => number;
       cancelIdleCallback?: (handle: number) => void;
     };
     if (win.requestIdleCallback) {
-      const handle = win.requestIdleCallback(deadline => {
-        cancelHydration = null;
-        if (!deadline.didTimeout && deadline.timeRemaining() < 5) { scheduleHydration(); return; }
-        hydrateChapter(next); dirty = true; schedule(); scheduleHydration();
-      }, { timeout: 1200 });
-      cancelHydration = () => win.cancelIdleCallback?.(handle);
-      return;
+      const handle = win.requestIdleCallback(callback, { timeout });
+      return () => win.cancelIdleCallback?.(handle);
     }
-    const handle = window.setTimeout(() => {
-      cancelHydration = null;
-      hydrateChapter(next); dirty = true; schedule(); scheduleHydration();
-    }, 180);
-    cancelHydration = () => window.clearTimeout(handle);
+    const handle = window.setTimeout(() => callback({ didTimeout: true, timeRemaining: () => 0 }), 80);
+    return () => window.clearTimeout(handle);
+  }, () => {
+    if (disposed || document.hidden || contextUnavailable) return false;
+    if (warming) return false;
+    // This invitation has a bounded set of rooms. Keep their small instance
+    // buffers after preparation: discarding them forces GPU allocation again
+    // when guests scroll back. Nearby rooms always prepare first.
+    canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
+    const next = chapters.filter(chapter => !chapter.group)
+      .sort((a, b) => Number(gardenWindow(b.top, b.height, window.scrollY, height).prepare) - Number(gardenWindow(a.top, a.height, window.scrollY, height).prepare)
+        || Math.abs(a.top - window.scrollY) - Math.abs(b.top - window.scrollY))[0];
+    if (!next) return false;
+    hydrateChapter(next); dirty = true; schedule();
+    if (!next.group) return false;
+    const group = next.group;
+    // Normal-room programs compile in parallel ahead of the viewport. Never wait
+    // for a newly linked shader in a scroll render frame.
+    const previousShadows = renderer.shadowMap.enabled, previousSunShadow = sun.castShadow;
+    const hero = next.element.id === "the-day";
+    renderer.shadowMap.enabled = hero; sun.castShadow = hero;
+    warmingGroup = group;
+    const compileStarted = performance.now();
+    const programs = [renderer.compileAsync(group, hero ? heroCamera : camera, scene)];
+    if (hero) {
+      // Precompile the custom rooted leaf shadow as well as the visible materials.
+      const leaves = group.children.find(object => object instanceof THREE.InstancedMesh && object.castShadow) as THREE.InstancedMesh | undefined;
+      if (leaves) {
+        const depthProbe = new THREE.InstancedMesh(leaves.geometry, leafDepth, leaves.count);
+        depthProbe.instanceColor = leaves.instanceColor;
+        depthProbe.instanceMatrix = leaves.instanceMatrix;
+        programs.push(renderer.compileAsync(depthProbe, heroCamera, scene));
+      }
+    }
+    warming = Promise.all(programs).then(() => new Promise<void>(resolve => {
+      const warm = () => {
+        if (disposed || contextUnavailable || next.group !== group) { resolve(); return; }
+        const previousViewport = renderer.getViewport(new THREE.Vector4());
+        const previousScissor = renderer.getScissor(new THREE.Vector4());
+        const previousScissorTest = renderer.getScissorTest();
+        const previousShadows = renderer.shadowMap.enabled, previousSunShadow = sun.castShadow;
+        renderer.shadowMap.enabled = hero; sun.castShadow = hero;
+        // Use the real canvas target: offscreen targets select different tone
+        // mapping / color-space programs and would leave the visible draw cold.
+        renderer.setViewport(0, 0, 1, 1); renderer.setScissorTest(true); renderer.setScissor(0, 0, 1, 1);
+        const culling: [THREE.Object3D, boolean][] = [];
+        group.traverse(object => { culling.push([object, object.frustumCulled]); object.frustumCulled = false; });
+        group.visible = true;
+        // Link readiness alone does not initialize uniform locations, VAOs,
+        // instance buffers or the hero's shadow target. Warm their real draw too.
+        try { renderer.render(scene, hero ? heroCamera : camera); }
+        catch { /* Preserve the static floral fallback if the driver is unavailable. */ }
+        finally {
+          group.visible = false;
+          culling.forEach(([object, value]) => { object.frustumCulled = value; });
+          renderer.setViewport(previousViewport);
+          renderer.setScissor(previousScissor); renderer.setScissorTest(previousScissorTest);
+          renderer.shadowMap.enabled = previousShadows; sun.castShadow = previousSunShadow;
+          resolve();
+        }
+      };
+      const win = window as Window & { requestIdleCallback?: (callback: () => void, options?: IdleRequestOptions) => number };
+      if (win.requestIdleCallback) win.requestIdleCallback(warm, { timeout: 1200 });
+      else window.setTimeout(warm, 80);
+    })).then(() => {
+      if (!disposed && next.group === group) {
+        readyGroups.add(group); dirty = true; schedule();
+      }
+    }).catch(() => {
+      // A driver without asynchronous compilation can still use the same scene.
+      if (!disposed && next.group === group) { readyGroups.add(group); dirty = true; schedule(); }
+    }).finally(() => { warming = null; warmingGroup = null; scheduleHydration(); });
+    compileMax = Math.max(compileMax, performance.now() - compileStarted);
+    canvas.dataset.gardenCompileMaxMs = compileMax.toFixed(1);
+    renderer.shadowMap.enabled = previousShadows; sun.castShadow = previousSunShadow;
+    return false;
+  });
+  function scheduleHydration() {
+    if (!disposed && !document.hidden && !contextUnavailable) preparation.request();
   }
   function measure() {
     if (disposed) return;
+    preparation.cancel();
     width = document.documentElement.clientWidth; height = window.innerHeight;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, coarse.matches ? 1.5 : 2));
-    renderer.setSize(width, height);
+    margin = Math.round(height * .5); surfaceHeight = height + margin * 2;
+    const parentBounds = parent!.getBoundingClientRect();
+    parentTop = parentBounds.top + window.scrollY; parentBottom = parentTop + parentBounds.height;
+    host.style.height = `${surfaceHeight}px`;
+    renderer.setPixelRatio(gardenPixelRatio(width, surfaceHeight, devicePixelRatio, coarse.matches || width < 721));
+    renderer.setSize(width, surfaceHeight);
     renderer.getDrawingBufferSize(uniforms.uGardenViewport.value);
-    camera.left = -width / 2; camera.right = width / 2; camera.top = height / 2; camera.bottom = -height / 2; camera.updateProjectionMatrix();
-    chapters = Array.from(parent!.querySelectorAll<HTMLElement>(":scope > .v2-scene")).map((element, index) => {
+    camera.left = -width / 2; camera.right = width / 2; camera.top = surfaceHeight / 2; camera.bottom = -surfaceHeight / 2; camera.updateProjectionMatrix();
+    chapters = Array.from(parent!.querySelectorAll<HTMLElement>(":scope > .v2-scene")).map(element => {
       const previous = chapters.find(chapter => chapter.element === element);
       const rect = element.getBoundingClientRect();
       // Mobile browser chrome and content movement must not regenerate an entire garden.
@@ -581,10 +667,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
         return { ...previous, top: rect.top + window.scrollY, safe: measureSafe(element) };
       }
       if (previous) clearChapter(previous);
-      const nearViewport = gardenWindow(rect.top + window.scrollY, rect.height, window.scrollY, height).prepare;
-      return nearViewport
-        ? makeChapter(element, index)
-        : { element, group: null, top: rect.top + window.scrollY, width: rect.width, height: rect.height, safe: measureSafe(element) };
+      // Build one nearby chapter per idle slot, never inside a resize or scroll frame.
+      return { element, group: null, top: rect.top + window.scrollY, width: rect.width, height: rect.height, safe: measureSafe(element) };
     });
     dirty = true; activeUntil = performance.now() + 650; schedule(); scheduleHydration();
   }
@@ -592,27 +676,34 @@ export function mountGarden(host: HTMLDivElement): () => void {
     frame = 0;
     if (disposed || document.hidden || contextUnavailable) return;
     const scroll = window.scrollY;
+    // Keep the overscan layer inside the document at the closing section, so it
+    // cannot create extra scroll height and an endlessly moving page bottom.
+    const surfaceTop = Math.min(scroll - margin, Math.max(parentTop, parentBottom - surfaceHeight));
     canvas.dataset.gardenMotion = String(uniforms.uGardenMotion.value);
     const dt = Math.min(64, now - lastTick); lastTick = now;
     sceneryScroll = media.matches ? scroll : sceneryScroll + (scroll - sceneryScroll) * (1 - Math.exp(-dt / 145));
     const travelling = Math.abs(scroll - sceneryScroll) > .15;
-    const visible = chapters.filter(chapter => chapter.top < scroll + height && chapter.top + chapter.height > scroll);
+    const visible = chapters.filter(chapter => chapter.top < surfaceTop + surfaceHeight && chapter.top + chapter.height > surfaceTop);
     const active = travelling || now < activeUntil;
     const heroVisible = visible.some(chapter => chapter.element.id === "the-day");
     const ambientCadence = heroVisible ? 1000 / (coarse.matches ? 24 : 30) : 1000 / 12;
-    const cadence = active ? 1000 / 60 : ambientCadence;
-    if (dirty || travelling || now - lastDraw > cadence) {
+    // Native scrolling carries the cached surface at the screen's refresh rate;
+    // the slow botanical sway needs only 30 draws/s and leaves time for assets.
+    const cadence = active ? 1000 / 30 : ambientCadence;
+    if (gardenFrameDue(now, lastDraw, cadence)) {
+      host.style.transform = `translate3d(0,${surfaceTop - parentTop}px,0)`;
+      canvas.dataset.gardenSurfaceTop = String(surfaceTop);
+      canvas.dataset.gardenScrollMode = "native-page-overscan";
       renderer.setScissorTest(false); renderer.clear(); renderer.setScissorTest(true);
       let visibleInstances = 0, renderCalls = 0, renderTriangles = 0;
       uniforms.uGardenTime.value = (now - animationOrigin) / 1000;
       uniforms.uGardenPointer.value.lerp(pointerTarget, 1 - Math.exp(-Math.min(now - lastDraw, 64) / 150));
       for (const chapter of visible) {
-        hydrateChapter(chapter);
-        if (!chapter.group) continue;
-        const top = chapter.top - scroll;
-        const start = Math.max(0, top), end = Math.min(height, top + chapter.height);
-        renderer.setScissor(0, height - end, width, end - start);
-        chapter.group.position.y = height / 2 - top;
+        if (!chapter.group || !readyGroups.has(chapter.group)) continue;
+        const top = chapter.top - surfaceTop;
+        const start = Math.max(0, top), end = Math.min(surfaceHeight, top + chapter.height);
+        renderer.setScissor(0, surfaceHeight - end, width, end - start);
+        chapter.group.position.y = surfaceHeight / 2 - top;
         chapter.group.visible = true;
         uniforms.uGardenNight.value = chapter.element.id === "beyond" ? 1 : 0;
         const hero = chapter.element.id === "the-day";
@@ -625,7 +716,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
           // Translating a perspective group in a screen-centered camera causes
           // each depth plane to travel at a different vertical scroll velocity.
           chapter.group.position.y = 0;
-          renderer.setViewport(0, height - top - chapter.height, width, chapter.height);
+          renderer.setViewport(0, surfaceHeight - top - chapter.height, width, chapter.height);
           heroCamera.aspect = width / chapter.height;
           heroCamera.fov = 45;
           heroCamera.position.set(0, -chapter.height / 2, distance);
@@ -640,7 +731,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
           Object.assign(sun.shadow.camera, { left: -width, right: width, top: chapter.height, bottom: -chapter.height, near: 1, far: distance * 4 });
           sun.shadow.camera.updateProjectionMatrix();
         } else {
-          renderer.setViewport(0, 0, width, height);
+          renderer.setViewport(0, 0, width, surfaceHeight);
           sky.intensity = 2.7; sun.intensity = 1.6; fill.intensity = .65;
           sun.position.set(-250, 450, 800); sun.target.position.set(0, 0, 0); sun.target.updateMatrixWorld();
         }
@@ -649,26 +740,33 @@ export function mountGarden(host: HTMLDivElement): () => void {
           : chapter.element.id === "profiles" ? 0
           : THREE.MathUtils.clamp((sceneryScroll + height / 2 - chapter.top - chapter.height / 2) / (height + chapter.height) * 2, -1, 1);
         uniforms.uGardenSafeCount.value = chapter.safe.length;
-        chapter.safe.forEach((box, i) => uniforms.uGardenSafe.value[i].set(box.left / width, (box.top - scroll) / height, (box.left + box.width) / width, (box.top + box.height - scroll) / height));
+        chapter.safe.forEach((box, i) => uniforms.uGardenSafe.value[i].set(box.left / width, (box.top - surfaceTop) / surfaceHeight, (box.left + box.width) / width, (box.top + box.height - surfaceTop) / surfaceHeight));
+        const renderStarted = performance.now();
         renderer.render(scene, hero ? heroCamera : camera);
+        const renderDuration = performance.now() - renderStarted;
+        if (renderDuration > renderMax) {
+          renderMax = renderDuration;
+          canvas.dataset.gardenRenderMaxMs = renderMax.toFixed(1);
+          canvas.dataset.gardenSlowRoom = chapter.element.id;
+        }
         renderCalls += renderer.info.render.calls;
         renderTriangles += renderer.info.render.triangles;
         for (const object of chapter.group.children) {
           if (object instanceof THREE.InstancedMesh) visibleInstances += object.count;
         }
         if (hero) {
-          const grass = chapter.group.children.find(object => object instanceof THREE.InstancedMesh && object.material === materials.grass) as THREE.InstancedMesh | undefined;
+          const grass = chapter.group.children.find(object => object instanceof THREE.InstancedMesh && object.material === heroMaterials.grass) as THREE.InstancedMesh | undefined;
           if (grass) {
             grass.getMatrixAt(0, rootMatrix);
             rootProbe.setFromMatrixPosition(rootMatrix).applyMatrix4(grass.matrixWorld).project(heroCamera);
             // Read-only QA probe: the real projection/viewport, not a declared anchor.
             renderer.getViewport(viewportProbe);
-            canvas.dataset.heroRootPageY = (scroll + height - viewportProbe.y - (rootProbe.y + 1) * viewportProbe.w / 2).toFixed(3);
+            canvas.dataset.heroRootPageY = (surfaceTop + surfaceHeight - viewportProbe.y - (rootProbe.y + 1) * viewportProbe.w / 2).toFixed(3);
           }
         }
         chapter.group.visible = false;
       }
-      parent!.classList.add("has-garden-renderer");
+      if (renderCalls) parent!.classList.add("has-garden-renderer");
       canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
       // Read-only review evidence: counts for this viewport, including hero shadows.
       canvas.dataset.gardenInstances = String(visibleInstances);
@@ -676,7 +774,7 @@ export function mountGarden(host: HTMLDivElement): () => void {
       canvas.dataset.gardenTriangles = String(renderTriangles);
       dirty = false; lastDraw = now;
     }
-    if (!media.matches && visible.length) schedule(active ? 0 : ambientCadence);
+    if (dirty || (!media.matches && visible.length)) schedule(dirty || active ? 0 : ambientCadence);
   }
   function schedule(delay = 0) {
     if (frame || disposed || document.hidden || contextUnavailable) return;
@@ -695,8 +793,8 @@ export function mountGarden(host: HTMLDivElement): () => void {
     pointerTarget.set((event.clientX / width - .5) * 12, (.5 - event.clientY / height) * 9);
     activeUntil = performance.now() + 240; dirty = true; schedule();
   }
-  function visibility() { if (document.hidden) { cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); cancelHydration?.(); cancelHydration = null; frame = 0; ambientTimer = 0; } else { lastTick = performance.now(); sceneryScroll = window.scrollY; scroll(); scheduleHydration(); } }
-  function contextLost(event: Event) { event.preventDefault(); contextUnavailable = true; parent!.classList.remove("has-garden-renderer"); cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); cancelHydration?.(); cancelHydration = null; frame = 0; ambientTimer = 0; }
+  function visibility() { if (document.hidden) { cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); preparation.cancel(); frame = 0; ambientTimer = 0; } else { lastTick = performance.now(); sceneryScroll = window.scrollY; scroll(); scheduleHydration(); } }
+  function contextLost(event: Event) { event.preventDefault(); contextUnavailable = true; parent!.classList.remove("has-garden-renderer"); cancelAnimationFrame(frame); window.clearTimeout(ambientTimer); preparation.cancel(); frame = 0; ambientTimer = 0; }
   function contextRestored() { contextUnavailable = false; measure(); }
   canvas.addEventListener("webglcontextlost", contextLost);
   canvas.addEventListener("webglcontextrestored", contextRestored);
@@ -708,12 +806,18 @@ export function mountGarden(host: HTMLDivElement): () => void {
   parent.querySelectorAll(":scope > .v2-scene").forEach(element => observer.observe(element));
   measure();
   return () => {
-    disposed = true; cancelAnimationFrame(frame); cancelAnimationFrame(resizeFrame); window.clearTimeout(ambientTimer); cancelHydration?.(); observer.disconnect();
+    disposed = true; cancelAnimationFrame(frame); cancelAnimationFrame(resizeFrame); window.clearTimeout(ambientTimer); preparation.cancel(); observer.disconnect();
     removeEventListener("scroll", scroll); removeEventListener("resize", resize); document.removeEventListener("visibilitychange", visibility); media.removeEventListener("change", motion);
     removeEventListener("pointermove", pointer);
     removeEventListener("wedding-language-change", resize);
     canvas.removeEventListener("webglcontextlost", contextLost); canvas.removeEventListener("webglcontextrestored", contextRestored);
-    clearChapters(); leafDepth.dispose(); KINDS.forEach(kind => { geometries[kind].dispose(); materials[kind].dispose(); });
-    sun.shadow.dispose(); renderer.dispose(); canvas.remove(); parent.classList.remove("has-garden-renderer");
+    canvas.remove(); parent.classList.remove("has-garden-renderer");
+    host.style.removeProperty("transform"); host.style.removeProperty("height");
+    const release = () => {
+      clearChapters(); leafDepth.dispose(); KINDS.forEach(kind => { geometries[kind].dispose(); materials[kind].dispose(); heroMaterials[kind].dispose(); });
+      sun.shadow.dispose(); renderer.dispose();
+    };
+    // Keep material properties alive until the driver's parallel compile has settled.
+    if (warming) void warming.finally(release); else release();
   };
 }

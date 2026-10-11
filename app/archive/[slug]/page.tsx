@@ -22,8 +22,8 @@ export default async function ArchiveEntryPage({ params }: { params: Promise<{ s
       </ArchiveStory>
     );
   }
-  const entry = await db().prepare("SELECT slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE slug = ? AND published = 1 AND visibility = 'public' LIMIT 1")
-    .bind(slug).first<{ slug: string; type: string; title: string; excerpt: string | null; story: string | null; media_url: string | null; entry_date: string | null; location: string | null }>();
+  const entry = await db().prepare("SELECT id, slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE slug = ? AND published = 1 AND visibility = 'public' LIMIT 1")
+    .bind(slug).first<{ id: string; slug: string; type: string; title: string; excerpt: string | null; story: string | null; media_url: string | null; entry_date: string | null; location: string | null }>();
   if (!entry || !hasPublicContent(entry.title) || !(hasPublicContent(entry.story) || hasPublicContent(entry.excerpt))) notFound();
   return (
     <ArchiveStory entry={{ ...entry, excerpt: hasPublicContent(entry.excerpt) ? entry.excerpt : null }}>

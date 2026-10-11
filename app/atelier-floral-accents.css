@@ -1,4 +1,10 @@
 /* Shared floral vocabulary for the invitation's architecture and paper surfaces. */
+.atelier-card-fallback { width:100%; display:grid; place-items:center; }
+.atelier-card-surface { position:absolute; inset:0; visibility:hidden; }
+.atelier-card-surface.is-ready { visibility:visible; }
+.atelier-card-surface canvas { width:100%; height:100%; }
+.k-stage:has(.atelier-card-surface.is-ready) .atelier-card-fallback { opacity:0; }
+.k-stage:has(.atelier-card-surface.is-ready)::after { display:none; }
 .v2-botanical-continuum .v2-day-garden { z-index:2; }
 .has-garden-renderer .day-tendril.atelier-floral-sprig,
 .has-garden-renderer .day-melastoma.atelier-floral-sprig,

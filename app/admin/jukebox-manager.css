@@ -1,0 +1,28 @@
+.cms-jukebox .cms-jukebox-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 2rem; margin: 1.25rem 0; }
+.cms-jukebox .cms-jukebox-settings > label { max-width: 22rem; }
+.cms-jukebox .cms-jukebox-settings input[type="range"] { width: 12rem; accent-color: #69745b; }
+.cms-jukebox-table-wrap { width: 100%; overflow-x: auto; }
+.cms-jukebox-table { width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; }
+.cms-jukebox-table caption { text-align: left; padding: .75rem 0; font-size: .9rem; }
+.cms-jukebox-table :is(th, td) { padding: .75rem; vertical-align: middle; border-bottom: 1px solid #69745b35; }
+.cms-jukebox-table th { font-size: .8rem; font-weight: 600; background: #69745b0b; }
+.cms-jukebox-table td { font-size: .875rem; }
+.cms-jukebox-table td:first-child { width: 5rem; font-variant-numeric: tabular-nums; }
+.cms-jukebox-table td:nth-child(2) { min-width: 200px; max-width: 300px; overflow-wrap: anywhere; }
+.cms-jukebox-table td small { display: block; font-size: .75rem; color: #69745b; margin-top: .2rem; }
+.cms-jukebox-table td strong { font-weight: 500; }
+.cms-jukebox-table td input[type="checkbox"] { width: 22px; height: 22px; accent-color: #69745b; }
+.cms-jukebox-table .is-editing { background: #c4878d0c; }
+.cms-jukebox-actions { display: flex; gap: .4rem; white-space: nowrap; }
+.cms-jukebox .cms-jukebox-actions button { min-width: 44px; min-height: 44px; padding: .4rem .6rem; font-size: .75rem; }
+.cms-jukebox-editor { border-top: 1px solid #69745b45; margin-top: 1.5rem; padding-top: 1.5rem; }
+.cms-jukebox-editor fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.cms-jukebox-editor label { display: grid; gap: .5rem; font-size: .85rem; }
+.cms-jukebox-preview { margin: 1rem 0; }
+.cms-jukebox-preview audio { display: block; width: min(100%, 400px); }
+.cms-jukebox-preview small { display: block; overflow-wrap: anywhere; margin: .5rem 0; font-size: .75rem; }
+.cms-jukebox-cover { display: flex; align-items: center; gap: 1rem; margin: 1rem 0; }
+.cms-jukebox-cover img { object-fit: cover; }
+.cms-jukebox-copy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 1.25rem 0; }
+.cms-jukebox-copy label { display: grid; gap: .5rem; font-size: .85rem; }
+@media (max-width: 700px) { .cms-jukebox-copy { grid-template-columns: 1fr; } }

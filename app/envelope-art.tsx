@@ -2,20 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./language";
+import { OPENING_DURATION_MS, OPENING_HANDOFF_SECONDS, fallbackLetterRect, type LiftedLetter, type PaperRect } from '@/lib/envelope-passage';
 
-type Scene = { canvas: HTMLCanvasElement; resize: (w:number,h:number)=>void; draw: (p:{time:number;opening:boolean;x:number;y:number})=>void; dispose:()=>void };
+type Scene = { canvas: HTMLCanvasElement; resize: (w:number,h:number)=>void; draw: (p:{time:number;opening:boolean;x:number;y:number})=>void; letterBounds:()=>PaperRect; dispose:()=>void };
 
-export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string; opening:boolean; reduced:boolean }) {
-  const { tField, t } = useLanguage();
+export function EnvelopeArt({ recipient, opening, reduced, onLifted }: { recipient:string; opening:boolean; reduced:boolean; onLifted:(letter:LiftedLetter)=>void }) {
+  const { tField, t, website } = useLanguage();
   const host = useRef<HTMLSpanElement>(null);
   const motion = useRef({ opening, reduced, started:null as number|null });
+  const lifted=useRef(false),letterPreview=useRef(''),onLift=useRef(onLifted);
   const [foil, setFoil] = useState(false);
   const [preview, setPreview] = useState({front:"",letter:""});
   const label=tField("keepsake.forLabel"),generic=tField("keepsake.genericRecipient");
-  const frontNote=t("We’re getting married.");
-  const signature=tField("keepsake.love"),names=tField("keepsake.signatureNames");
+  const frontNote=t("For our very special guest");
+  const signature=tField("keepsake.love"),names=`${website.secondName} & ${website.firstName}`;
 
-  useEffect(()=>{motion.current={opening,reduced,started:opening?(motion.current.started??performance.now()):null};},[opening,reduced]);
+  useEffect(()=>{onLift.current=onLifted;},[onLifted]);
+  useEffect(()=>{motion.current={opening,reduced,started:opening?(motion.current.started??performance.now()):null};if(!opening)lifted.current=false;},[opening,reduced]);
   useEffect(()=>{
     const el=host.current;if(!el)return;
     let stopped=false,scene:Scene|undefined,frame=0,last=0,time=0;
@@ -25,7 +28,13 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
       const current=motion.current;
       time=current.started===null?0:(now-current.started)/1000;
       scene?.draw({time,opening:current.opening,x:pointer.x,y:pointer.y});last=now;
-      if(current.opening&&time<3.65)frame=requestAnimationFrame(render);
+      if(current.opening&&!lifted.current&&time>=OPENING_HANDOFF_SECONDS){
+        lifted.current=true;const stage=el.getBoundingClientRect();
+        const local=scene?.letterBounds();
+        const rect=local?{...local,left:local.left+stage.left,top:local.top+stage.top}:el.querySelector<HTMLElement>('.atelier-letter')?.getBoundingClientRect()??fallbackLetterRect(stage);
+        onLift.current({rect,preview:letterPreview.current,elapsed:time});
+      }
+      if(current.opening&&time<OPENING_DURATION_MS/1000+.05)frame=requestAnimationFrame(render);
     };
     const wake=()=>{if(!frame&&!stopped)frame=requestAnimationFrame(render);};
     const move=(event:PointerEvent)=>{if(motion.current.reduced)return;const r=el.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width*2-1;pointer.y=(event.clientY-r.top)/r.height*2-1;wake();};
@@ -36,11 +45,11 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
     el.addEventListener('pointermove',move);el.addEventListener('pointerleave',leave);document.addEventListener('visibilitychange',visibility);
     const prepare=async()=>{
       try{
-        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/envelope-scene.js?v=8';
+        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/envelope-scene.js?v=9';
         const [composition,renderer]=await Promise.all([import(/* @vite-ignore */ designPath),import(/* @vite-ignore */ scenePath)]);
         const assets=await composition.loadDesignAssets();if(stopped)return;
         const design=renderer.composeEnvelope(assets,{recipient,forLabel:label,genericRecipient:generic,frontNote,signature,names});
-        setPreview({front:design.front.preview,letter:design.letter.preview});
+        letterPreview.current=design.letter.preview;setPreview({front:design.front.preview,letter:design.letter.preview});
         try{
           scene=new renderer.EnvelopeScene(design,{reduced:motion.current.reduced});
           scene!.canvas.setAttribute('aria-hidden','true');el.appendChild(scene!.canvas);
@@ -55,9 +64,9 @@ export function EnvelopeArt({ recipient, opening, reduced }: { recipient:string;
 
   return <span ref={host} className={`atelier-envelope-art ${foil?'has-foil':''}`} aria-hidden="true">
     <span className="atelier-envelope-fallback">
-      <span className="atelier-letter">{preview.letter ? <img src={preview.letter} alt="" /> : <><img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" /><span className="atelier-fallback-name">{recipient||generic}</span></>}</span>
-      <span className="atelier-pocket">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
-      <span className="atelier-flap">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.png" alt="" />}</span>
+      <span className="atelier-letter">{preview.letter ? <img src={preview.letter} alt="" /> : <><img className="atelier-print" src="/atelier/assets/keepsake-florals.webp" alt="" /><span className="atelier-fallback-name">{recipient||generic}</span></>}</span>
+      <span className="atelier-pocket">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.webp" alt="" />}</span>
+      <span className="atelier-flap">{preview.front ? <img src={preview.front} alt="" /> : <img className="atelier-print" src="/atelier/assets/keepsake-florals.webp" alt="" />}</span>
       <span className="atelier-seal"><img src="/atelier/assets/keepsake-mark.webp" alt="" /></span>
     </span>
   </span>;

@@ -68,6 +68,9 @@ export async function createWeddingKeepsake(data: KeepsakeData, face: KeepsakeFa
     ctx.direction = /[\u0590-\u08ff]/.test(value) ? "rtl" : "ltr";
     lines.forEach((line, index) => text(line, 450, first + index * leading, size, serif, color));
     ctx.direction = "ltr";
+    const lastBaseline = first + (lines.length - 1) * leading;
+    const descent = ctx.measureText(lines.at(-1) || value).actualBoundingBoxDescent;
+    return { bottom: lastBaseline + Math.max(0, descent || size * .2) };
   }
 
   ctx.fillStyle = face === "front" ? "#21382c" : "#122b20";
@@ -82,29 +85,52 @@ export async function createWeddingKeepsake(data: KeepsakeData, face: KeepsakeFa
     arch(0); ctx.strokeStyle = "#d3c5a6"; ctx.stroke();
     arch(18); ctx.strokeStyle = "#62734c55"; ctx.stroke();
     ctx.drawImage(images.mark, 390, 240, 120, 120);
-    text(copy.firstName, 450, 489, 104); text("×", 450, 543, 40, sans, "#a96c78"); text(copy.secondName, 450, 642, 104);
+    text(copy.firstName, 450, 489, 104); text("&", 450, 555, 48, serif, "#a96c78"); text(copy.secondName, 450, 642, 104);
     text(copy.stamp, 450, 753, 34, serif, "#49533d");
-    text(copy.venue, 450, 803, 30, serif, "#49533d");
+    text(copy.hashtag, 450, 803, 27, sans, "#85682f");
     text(copy.forLabel, 450, 885, 25, serif, "#49533d", true);
     recipient(data.name || copy.genericRecipient, 941, data.name.length > 90 ? 20 : data.name.length > 55 ? 23 : 32, "#49533d");
   } else {
     ctx.strokeStyle = "#aab49666"; ctx.strokeRect(45, 60, 810, 1080);
     ctx.strokeStyle = "#aab49633"; ctx.strokeRect(61, 82, 778, 1036);
     text(copy.forLabel, 450, 286, 33, serif, "#c5cba9", true);
-    recipient(data.name || copy.genericRecipient, 416, data.name.length > 90 ? 27 : data.name.length > 55 ? 36 : data.name.length > 30 ? 45 : 63, "#f6f0e3");
-    ctx.strokeStyle = "#aab49688"; ctx.beginPath(); ctx.moveTo(412, 584); ctx.lineTo(488, 584); ctx.stroke();
-    text(copy.note[0], 450, 655, 43, serif, "#f6f0e3"); text(copy.note[1], 450, 710, 43, serif, "#f6f0e3");
+    const guest = recipient(data.name || copy.genericRecipient, 416, data.name.length > 90 ? 27 : data.name.length > 55 ? 36 : data.name.length > 30 ? 45 : 63, "#f6f0e3");
+    const ruleY = guest.bottom + 34;
+    ctx.strokeStyle = "#aab49688"; ctx.beginPath(); ctx.moveTo(412, ruleY); ctx.lineTo(488, ruleY); ctx.stroke();
+    // Owner-written messages stay inside the existing letter area, including long words.
+    const wrapNote = (size: number) => {
+      ctx.font = `${size}px ${serif}`;
+      const lines: string[] = [];
+      for (const paragraph of copy.note) {
+        let line = "";
+        for (const word of paragraph.split(/\s+/)) {
+          if (ctx.measureText(line ? `${line} ${word}` : word).width <= 530) { line = line ? `${line} ${word}` : word; continue; }
+          if (line) lines.push(line);
+          line = "";
+          for (const glyph of Array.from(word)) {
+            if (line && ctx.measureText(line + glyph).width > 530) { lines.push(line); line = glyph; }
+            else line += glyph;
+          }
+        }
+        if (line) lines.push(line);
+      }
+      return lines;
+    };
+    let noteSize = 43, noteLines = wrapNote(noteSize);
+    while (noteLines.length * noteSize * 1.28 > 174 && noteSize > 16) { noteSize -= 1; noteLines = wrapNote(noteSize); }
+    // The message follows the actual name height instead of a distant fixed center.
+    const firstNoteY = ruleY + noteSize + 22;
+    noteLines.forEach((line, index) => text(line, 450, firstNoteY + index * noteSize * 1.28, noteSize, serif, "#f6f0e3"));
     text(copy.love, 450, 803, 27, serif, "#c5cba9", true);
     text(copy.names, 450, 865, 52, serif, "#f6f0e3");
-    text(copy.day, 450, 945, 22, sans, "#c5cba9"); text(copy.venue, 450, 978, 22, sans, "#c5cba9");
+    text(copy.stamp, 450, 945, 34, serif, "#c5cba9"); text(copy.hashtag, 450, 984, 23, sans, "#d8bc7a");
   }
   for (const plant of KEEPSAKE_PLANTS[face]) {
     const image = images[plant.art];
-    const width = Math.min(plant.width, image.naturalWidth), height = width * image.naturalHeight / image.naturalWidth;
+    const width = plant.width, height = plant.height ?? width * image.naturalHeight / image.naturalWidth;
     ctx.save(); ctx.translate(plant.x + width / 2, plant.y + height / 2); ctx.rotate(plant.rotation * Math.PI / 180);
     ctx.drawImage(image, -width / 2, -height / 2, width, height); ctx.restore();
   }
-  text(copy.edition, 450, 42, 16, sans, "#c5cba9");
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Keepsake export unavailable")), "image/png");
   });

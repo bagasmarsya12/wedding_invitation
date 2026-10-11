@@ -1,9 +1,9 @@
 const clean=(value,max=2000)=>Array.from(String(value??'').normalize('NFC').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,'')).slice(0,max).join('');
 export const DEFAULT_CONTENT={
  language:'id',recipient:'',
- card:{forLabel:'Untuk',genericRecipient:'kamu',frontNote:'Sedikit dari hari kami,\nuntuk kamu simpan.',message:'Sedikit dari hari kami,\nuntuk kamu simpan.',signatureGreeting:'Dengan sayang,',signatureNames:'Iga dan Bagas'},
+ card:{forLabel:'Untuk',genericRecipient:'kamu',frontNote:'Sedikit dari hari kami,\nuntuk kamu simpan.',message:'Sedikit dari hari kami,\nuntuk kamu simpan.',signatureGreeting:'Dengan sayang,',signatureNames:'Iga & Bagas'},
  ui:{
-  pageTitle:'Keepsake — Iga dan Bagas',loading:'Menyiapkan kartumu…',downloadsAria:'Unduh kartu',progressAria:'Menyiapkan video',
+  pageTitle:'Keepsake — Iga & Bagas',loading:'Menyiapkan kartumu…',downloadsAria:'Unduh kartu',progressAria:'Menyiapkan video',
   hintFront:'Ketuk kartu untuk membaca pesan.',hintBack:'Ketuk kartu untuk kembali ke depan.',hintNext:'Ketuk kartu untuk melanjutkan pesan.',
   downloadFront:'Unduh gambar depan',downloadBack:'Unduh gambar belakang',downloadBackPage:'Unduh gambar belakang · {page}/{pages}',
   downloadVideo:'Unduh video',downloadVideoReady:'Unduh video MP4',cancel:'Batalkan',

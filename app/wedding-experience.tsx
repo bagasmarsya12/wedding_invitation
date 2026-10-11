@@ -4,7 +4,6 @@
 import { ArrowRight, Sun, Sunset } from "lucide-react";
 import {
   createContext,
-  type AnimationEvent,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
@@ -18,23 +17,29 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
 import { ReplyStudio } from "./reply-studio";
 import { InvitationClosing } from "./invitation-closing";
-import { GiftShelf } from "./gift-shelf";
+import { GiftSection } from "./gift-section";
 import { ArchiveCollection } from "./archive-collection";
+import { GuestArchiveSession } from "./guest-archive-session";
 import { defaultStyleForEdition } from "@/lib/mark-styles";
 import { T, LanguageSwitch, useLanguage } from "./language";
-import { PROFILE_ENABLED, BEYOND_DESTINATIONS, THE_MARK_TEASER, type HomepageArchiveItem, type GiftCollectionPreview } from "@/lib/public-content";
+import { PROFILE_ENABLED, BEYOND_DESTINATIONS, THE_MARK_TEASER, type HomepageArchiveItem, type GiftCollectionPreview, type HomepageGift } from "@/lib/public-content";
 import { weddingDisplay } from "@/lib/website-content";
 import { invitationClock } from "@/lib/invitation-clock";
 import { WEDDING_EVENTS, WEDDING_VENUE } from "@/lib/wedding-calendar";
 import { CalendarActions } from "./calendar-actions";
-import { LandingPhoto } from "./landing-photo";
+import { ProfilePortrait, useProfileMotion } from "./profile-portraits";
 import { GuestPass } from "./guest-pass";
+import { ArrivalGuide } from "./arrival-guide";
 import { EnvelopeArt } from "./envelope-art";
+import { EnvelopePassage } from './envelope-passage';
+import { OPENING_FAILSAFE_MS, type LiftedLetter } from '@/lib/envelope-passage';
 import { AtelierFloralAccent, AtelierFloralFrame, type AtelierCorner } from "./atelier-flowers";
+import { useGuestRsvp } from "./use-guest-rsvp";
+import { EMPTY_ARRIVAL_PHOTOS, type ArrivalPhotos } from "@/lib/arrival-content";
 import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
 import { EMPTY_PHOTOS, type LandingPhotos } from "@/lib/public-content";
 
-type Props = { guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; photos?: LandingPhotos };
+type Props = { keepsakeNote?:{note1:string;note2:string}; guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; giftItems?: HomepageGift[]; photos?: LandingPhotos; arrivalPhotos?:ArrivalPhotos };
 type MotionPreferences = { reduced: boolean; precise: boolean };
 
 const MotionContext = createContext<MotionPreferences>({ reduced: false, precise: false });
@@ -44,7 +49,7 @@ const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
 type SiteState = { phase?: string; rsvpEnabled?: boolean; giftsEnabled?: boolean; marksEnabled?: boolean };
 const DEFAULT_ARCHIVE: HomepageArchiveItem[] = [];
-const EMPTY_GIFTS: GiftCollectionPreview[] = [];
+const EMPTY_GIFTS: HomepageGift[] = [];
 
 function MotionProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<MotionPreferences>({ reduced: false, precise: false });
@@ -66,7 +71,7 @@ function MotionProvider({ children }: { children: ReactNode }) {
 }
 
 function useExperienceClock() {
-  const { language, website } = useLanguage();
+  const { language, website, tField } = useLanguage();
   const [siteState, setSiteState] = useState<SiteState | null>(null);
   const [now, setNow] = useState(() => new Date());
 
@@ -82,12 +87,13 @@ function useExperienceClock() {
   return useMemo(() => {
     return {
       ...invitationClock(now, siteState?.phase, language, website.weddingDate),
+      countdown: (()=>{const clock=invitationClock(now,siteState?.phase,language,website.weddingDate);return tField(`countdown.${clock.state==='countdown'?'days':clock.state}`).replaceAll('{{days}}',String(clock.days));})(),
       ready: siteState !== null,
       rsvpEnabled: siteState?.rsvpEnabled === true,
       giftsEnabled: siteState?.giftsEnabled === true,
       marksEnabled: siteState?.marksEnabled === true,
     };
-  }, [now, siteState, language, website.weddingDate]);
+  }, [now, siteState, language, website.weddingDate,tField]);
 }
 
 function hashEdition(token: string) {
@@ -102,10 +108,9 @@ function BotanicalImage({src,className}:{src:string;className:string;eager?:bool
 }
 
 function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnabled }: { open: boolean; onToggle: () => void; confirmed: boolean; profilesEnabled: boolean; giftsEnabled: boolean }) {
-  const { t, website, language } = useLanguage();
+  const { t, website, language, arrival } = useLanguage();
   const display=weddingDisplay(website,language);
   const MAPS_URL=website.mapsUrl;
-  const VENUE_CENTER: [number,number]=[website.longitude,website.latitude];
   function navigateChapter(event: ReactMouseEvent<HTMLAnchorElement>) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     onToggle();
@@ -119,9 +124,6 @@ function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnab
   }
   return (
     <header className={`v2-spine ${open ? "is-open" : ""}`}>
-      <a className="v2-spine-mark" href="#the-day" aria-label={t("Return to invitation")}><T>B</T> <i>×</i><T>I</T></a>
-      <span className="v2-spine-date">{display.stamp}</span>
-      {confirmed ? <span className="v2-spine-rsvp"><T>You’re on the list</T></span> : <span className="v2-spine-rsvp" aria-hidden="true" />}
       <LanguageSwitch />
       <button type="button" onClick={onToggle} aria-expanded={open} aria-controls="invitation-info">
         {t(open ? "Close" : "Info")}
@@ -131,8 +133,10 @@ function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnab
           <p><time>{website.akadTime}</time><span><T>Akad</T></span></p>
           <p><time>{website.receptionTime}</time><span><T>Reception</T></span></p>
         </div>
+        {confirmed && <p className="v2-info-rsvp" role="status"><T>You’re on the list</T></p>}
         <p className="v2-info-place"><strong>{display.venue}</strong><span>{website.venueAddress}</span></p>
         <nav aria-label={t("Practical wedding links")}>
+          <a href="#the-day" onClick={navigateChapter}><T>Return to invitation</T></a>
           <a href="#details" onClick={navigateChapter}><T>Details</T></a>
           {profilesEnabled && <a href="#profiles" onClick={navigateChapter}><T>People</T></a>}
           <a href="#archive" onClick={navigateChapter}><T>Archive</T></a>
@@ -243,7 +247,7 @@ function DestinationMap() {
         observer?.disconnect();
         void initialize();
       }
-    }, { rootMargin: "240px" });
+    }, { rootMargin: "1600px 0px" });
     observer.observe(container);
 
     return () => {
@@ -302,7 +306,7 @@ function DestinationMap() {
   );
 }
 
-function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHIVE, giftCollections = EMPTY_GIFTS, photos = EMPTY_PHOTOS }: Props) {
+function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1, archiveItems = DEFAULT_ARCHIVE, giftItems = EMPTY_GIFTS, photos = EMPTY_PHOTOS, arrivalPhotos = EMPTY_ARRIVAL_PHOTOS }: Props) {
   const { t, content, tField, language, website, blocks } = useLanguage();
   const display=weddingDisplay(website,language);
   const MAPS_URL=website.mapsUrl;
@@ -315,13 +319,16 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
   const [entered, setEntered] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [opening, setOpening] = useState(false);
+  const [liftedLetter,setLiftedLetter]=useState<LiftedLetter|null>(null);
+  const [cinematicEntry,setCinematicEntry]=useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [rsvpSaved, setRsvpSaved] = useState(false);
+  const rsvp = useGuestRsvp({ token, partyLimit, active: entered, rsvpEnabled: clock.rsvpEnabled });
   const edition = useMemo(() => hashEdition(token), [token]);
   const displayName = guestName.trim();
   const hasGuestName = Boolean(displayName);
   const profilesEnabled = website.profilesEnabled;
-  const giftsEnabled = giftCollections.length > 0 && clock.giftsEnabled;
+  const { sectionRef: profilesRef, bagasRef: bagasVideoRef, igaRef: igaVideoRef } = useProfileMotion(entered && profilesEnabled && !reduced, photos.bagas, photos.iga);
+  const giftsEnabled = clock.giftsEnabled;
   const usefulBits = blocks.faq;
   const destinations = blocks.links;
 
@@ -381,7 +388,7 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       if (infoOpen) setInfoOpen(false);
-      else if (!entered) setEntered(true);
+      else if (!entered) {setEntered(true);setOpening(false);setLiftedLetter(null);}
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
@@ -389,51 +396,52 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
 
   function openInvitation() {
     if (opening) return;
+    scrollTo({top:0,behavior:'instant'});
     if (reduced) setEntered(true);
-    else setOpening(true);
+    else {setCinematicEntry(true);setOpening(true);}
   }
+
+  function finishOpening() {setEntered(true);setOpening(false);setLiftedLetter(null);}
 
   useEffect(() => {
     if (!opening) return;
-    // CSS completion has a timer backup so a disabled animation cannot trap a guest.
-    const timer=window.setTimeout(()=>{setEntered(true);setOpening(false);},3800);
-    return()=>window.clearTimeout(timer);
-  },[opening]);
-
-  function finishOpening(event: AnimationEvent<HTMLDivElement>) {
-    if (event.target !== event.currentTarget || event.animationName !== "v2-stage-journey") return;
-    setEntered(true);
-    setOpening(false);
-  }
+    // Missing graphics/animation events cannot trap the guest behind the opening.
+    const timer = window.setTimeout(() => { setEntered(true); setOpening(false);setLiftedLetter(null); }, OPENING_FAILSAFE_MS);
+    return () => window.clearTimeout(timer);
+  }, [opening]);
 
   const editionStyle = { "--edition": edition } as CSSProperties;
 
   return (
-    <div className={`v2-world edition-${edition} ${entered ? "has-entered" : "is-locked"} ${opening ? "is-opening" : ""}`} data-light="day" ref={rootRef} style={editionStyle}>
-      <a className="v2-skip-link" href="#the-day" onClick={() => setEntered(true)}><T>Skip to the invitation</T></a>
+    <div className={`v2-world edition-${edition} ${entered ? "has-entered" : "is-locked"} ${opening ? "is-opening" : ""} ${cinematicEntry?'has-opening-passage':''}`} data-light="day" ref={rootRef} style={editionStyle}>
+      <GuestArchiveSession token={token} />
+      <link rel="preload" as="image" href="/atelier/assets/keepsake-florals.webp" fetchPriority="high" />
+      <a className="v2-skip-link" href="#the-day" onClick={finishOpening}><T>Skip to the invitation</T></a>
 
       {!entered && (
         <section className={`v2-opening ${opening ? "is-opening" : ""}`} role="dialog" aria-modal="true" aria-labelledby="opening-recipient">
+          <div className="envelope-passage-backdrop" aria-hidden="true" />
           <div className="v2-opening-light" aria-hidden="true" />
           <AtelierFloralFrame className="atelier-opening-garden" />
           <header className="v2-opening-folio"><span>{display.names}</span><span>{display.stamp}</span><LanguageSwitch /></header>
-          <div className="v2-opening-stage" onAnimationEnd={finishOpening}>
+          <div className="v2-opening-stage">
             <button className="v2-envelope" type="button" onClick={openInvitation} disabled={opening} aria-label={`${t("Open the invitation")}${hasGuestName ? ` — ${displayName}` : ""}`}>
-              <EnvelopeArt recipient={displayName} opening={opening} reduced={reduced} />
+              <EnvelopeArt recipient={displayName} opening={opening} reduced={reduced} onLifted={setLiftedLetter} />
               <span id="opening-recipient" className="atelier-opening-recipient">{hasGuestName?displayName:t("For our very special guest")}</span>
               <span className="atelier-open-label">{t("Open the invitation")}<ArrowRight size={16} strokeWidth={1.3} aria-hidden="true" /></span>
             </button>
           </div>
-          <button className="v2-opening-skip" type="button" onClick={() => setEntered(true)}><T>Skip opening</T></button>
+          {opening&&liftedLetter&&<EnvelopePassage letter={liftedLetter} onComplete={finishOpening} />}
+          <button className="v2-opening-skip" type="button" onClick={finishOpening}><T>Skip opening</T></button>
           <p className="v2-opening-date">{display.date} · {display.venue}<br /><T>Akad</T> {website.akadTime} · <T>Reception</T> {website.receptionTime} <T>WIB</T></p>
         </section>
       )}
 
-      {entered && <InvitationSpine open={infoOpen} onToggle={() => setInfoOpen(value => !value)} confirmed={rsvpSaved} profilesEnabled={profilesEnabled} giftsEnabled={giftsEnabled} />}
+      {entered && <InvitationSpine open={infoOpen} onToggle={() => setInfoOpen(value => !value)} confirmed={rsvp.saved?.attendance === 'yes'} profilesEnabled={profilesEnabled} giftsEnabled={giftsEnabled} />}
 
       <main className="v2-main" aria-hidden={hydrated && !entered} inert={hydrated && !entered}>
         <div className="v2-botanical-continuum">
-        <GardenBackground active={entered} />
+        <GardenBackground active={entered || opening} />
         <section className={`v2-day v2-grand-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
@@ -446,26 +454,25 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
           <div className="v2-garden-steps" aria-hidden="true"><i /><i /><i /></div>
           <div className="v2-hero-exit" aria-hidden="true" />
           <div className="v2-day-copy">
-            <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Bagas × Iga monogram" />
+            <img className="v2-day-mark" src="/assets/bagas-iga-mark.webp" alt="Iga & Bagas monogram" />
             <p className="v2-grand-prelude"><T>We’re getting married.</T></p>
             <div className="v2-day-identity">
-              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1} aria-label={display.names}><span>{website.firstName}</span>{" "}<i aria-hidden="true">×</i>{" "}<span>{website.secondName}</span></h1>
+              <h1 id="day-title" ref={dayTitleRef} tabIndex={-1} aria-label={display.names}><span>{website.secondName}</span>{" "}<i aria-hidden="true">&amp;</i>{" "}<span>{website.firstName}</span></h1>
               <p className="v2-grand-note"><T>Our favourite people. One very good reason to gather.</T></p>
               <time dateTime={website.weddingDate}><span>{display.day}</span>{display.date}</time>
-              <p className="v2-grand-venue">{display.venue}<span>{t("Akad")} {website.akadTime} · {t("Reception")} {website.receptionTime} WIB</span></p>
+              <p className="v2-grand-venue">{display.venue}<span>{t("Akad")} {website.akadTime} · {t("Reception")} {website.receptionTime} <T>WIB</T></span></p>
             </div>
             <p className="v2-day-countdown" suppressHydrationWarning><T>{clock.state === "past" ? "And just like that," : "The day we’ve been dreaming of is"}</T><span>{clock.countdown}</span></p>
           </div>
           <a className="v2-scroll-cue" href="#details"><span><T>Continue</T></span><i /></a>
         </section>
 
-        <section className="v2-details v2-destination-scene v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
+        <section className="v2-details v2-destination-scene v2-event-arrival v2-scene" id="details" data-light="afternoon" aria-labelledby="details-title">
           <div className="v2-destination-backdrop" aria-hidden="true">
             <div className="v2-destination-light" />
           </div>
           <div className="v2-destination-page">
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-back" />
-            <DestinationMap />
             <div className="v2-destination-paper-edge" aria-hidden="true" />
             <header className="v2-destination-head">
               <p><T>The details</T></p>
@@ -491,30 +498,30 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
                 </div>
                 <address>{website.venueAddress}</address>
                 <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label={t("Open directions to Pandiga Cimahi in Google Maps")}><T>Open directions </T><ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
-                {token && <div id="guest-pass"><GuestPass token={token} /></div>}
               </div>
             </div>
+            <DestinationMap />
+            {token && <div id="guest-pass"><GuestPass key={token} token={token} /></div>}
+            <ArrivalGuide photos={arrivalPhotos} guestName={displayName} faq={usefulBits} />
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
           </div>
           <BotanicalImage src="/assets/botanicals/combretum/flower-tip.webp" className="v2-world-emergence" />
         </section>
 
-        {profilesEnabled && <section className="v2-profiles v2-profile-folio v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title">
+        {profilesEnabled && <section className="v2-profiles v2-profile-folio v2-scene" id="profiles" data-light="warm" aria-labelledby="profiles-title" ref={profilesRef}>
           <header>
-            <p><T>For those who know one of us better.</T></p>
             <h2 id="profiles-title" tabIndex={-1}><T field="profil.head" /></h2>
           </header>
           <article className="v2-person v2-person-bagas" aria-labelledby="profile-bagas-title">
             <figure className="v2-profile-portrait">
               <div className="v2-profile-print">
-                <LandingPhoto key={photos.bagas || "bagas-placeholder"} className="v2-profile-window" src={photos.bagas} alt="Bagas Marsya Pratama Nugraha" initial="B" />
+                <ProfilePortrait person="bagas" src={photos.bagas} name="Bagas Marsya Pratama Nugraha" videoRef={bagasVideoRef} />
               </div>
               <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="v2-portrait-orchid" />
               <KeepsakeBotanicals arrangement="portrait" />
-              <figcaption><T>Bagas, as himself.</T></figcaption>
             </figure>
             <div className="v2-profile-copy">
-              <p><T>As observed by Iga</T></p><h3 id="profile-bagas-title">{website.firstName}</h3><small>{tField("profil.nama1")}</small>
+              <h3 id="profile-bagas-title">{tField("profil.nama1")}</h3>
               <dl>
                 <div><dt><T>Family</T></dt><dd><T field="profil.b_family" /></dd></div>
                 <div><dt><T>Known for</T></dt><dd><T field="profil.b_known" /></dd></div>
@@ -527,14 +534,13 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
           <article className="v2-person v2-person-iga" aria-labelledby="profile-iga-title">
             <figure className="v2-profile-portrait">
               <div className="v2-profile-print">
-                <LandingPhoto key={photos.iga || "iga-placeholder"} className="v2-profile-window" src={photos.iga} alt="Iga Noviyanti Rohman" initial="I" />
+                <ProfilePortrait person="iga" src={photos.iga} name="Iga Noviyanti Rohman" videoRef={igaVideoRef} />
               </div>
               <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="v2-portrait-melastoma" />
               <KeepsakeBotanicals arrangement="portrait" />
-              <figcaption><T>Iga, as herself.</T></figcaption>
             </figure>
             <div className="v2-profile-copy">
-              <p><T>As observed by Bagas</T></p><h3 id="profile-iga-title">{website.secondName}</h3><small>{tField("profil.i_nama")}</small>
+              <h3 id="profile-iga-title">{tField("profil.i_nama")}</h3>
               <dl>
                 <div><dt><T>Family</T></dt><dd><T field="profil.i_family" /></dd></div>
                 <div><dt><T>Known for</T></dt><dd><T field="profil.i_known" /></dd></div>
@@ -548,7 +554,7 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
         <section className="v2-our-story v2-scene ks-story" id="our-story" data-light="quiet" aria-labelledby="our-story-title">
           <div className="ks-folio ks-story-folio">
             <div className="ks-paper">
-              <header><KeepsakeMonogram /><p><T>A little of our story</T></p><h2 id="our-story-title"><T field="story.head" /></h2></header>
+              <header><KeepsakeMonogram /><p><T>Our story</T></p><h2 id="our-story-title"><T field="story.head" /></h2></header>
               <ol>{blocks.story.map((item,index) => <li key={item.id}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span><h3>{item.title[language]}</h3><p>{item.body[language]}</p></li>)}</ol>
             </div>
             <KeepsakeBotanicals />
@@ -557,31 +563,11 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
 
         <ArchiveCollection items={archiveItems} photos={photos.gallery} />
 
-        {usefulBits.length > 0 && <section className="v2-useful v2-scene ks-guide" id="useful-bits" data-light="quiet" aria-labelledby="useful-title">
-          <div className="ks-folio ks-guide-folio">
-            <div className="ks-paper">
-              <header><KeepsakeMonogram /><p><T>The useful bits</T></p><h2 id="useful-title"><T>The questions someone was going to ask anyway.</T></h2></header>
-              <div className="v2-useful-list">
-                {usefulBits.map(item => <details key={item.id}><summary><span>{item.title[language]}</span><small><T>Read more</T></small></summary><p>{item.body[language]}</p></details>)}
-              </div>
-            </div>
-            <KeepsakeBotanicals />
-          </div>
-        </section>}
-
-        {giftsEnabled && <section className="v2-gifts v2-scene v2-gift-gallery" id="gifts" data-light="late" aria-labelledby="gifts-title">
-          <BotanicalImage src="/assets/botanicals/melastoma/branch-short.webp" className="v2-background-bloom v2-background-bloom-gifts" />
-          <BotanicalImage src="/assets/botanicals/combretum/flower-spray.webp" className="v2-background-bloom v2-background-bloom-gifts-secondary" />
-          <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="v2-near-field v2-near-gifts" />
-          <div className="v2-gifts-heading"><p><T>A few things</T></p><h2 id="gifts-title" tabIndex={-1}><T>We’re saving room for.</T></h2><span><T field="gift.desc" /></span></div>
-          <GiftShelf href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"} collections={giftCollections} />
-          <a className="v2-text-link" href={token ? `/invite/${encodeURIComponent(token)}/gifts` : "/gifts"}><T>Open the gift catalogue </T><span aria-hidden="true">↗</span></a>
-          <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="gifts-syzygium" />
-        </section>}
+        {giftsEnabled && <GiftSection token={token} guestName={displayName} gifts={giftItems} />}
 
         <section className="v2-mark v2-scene has-studio v2-reply-scene ks-reply" id="leave-a-mark" data-light="dusk" aria-labelledby="mark-title">
-          <div className="ks-reply-heading"><div className="v2-mark-copy"><KeepsakeMonogram /><p><T field="mark.head" /></p><h2 id="mark-title" tabIndex={-1}><T field="mark.sub" /></h2><span><T field="mark.desc" /></span></div><KeepsakeBotanicals arrangement="reply" /></div>
-          {entered && <div className="v2-mark-studio" id="rsvp" tabIndex={-1} role="group" aria-labelledby="mark-title"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} rsvpEnabled={clock.rsvpEnabled} marksEnabled={clock.marksEnabled} onAttendanceSaved={setRsvpSaved} /></div>}
+          <div className="ks-reply-heading"><div className="v2-mark-copy"><p><T field="mark.head" /></p><h2 id="mark-title" tabIndex={-1}><T field="mark.sub" /></h2><span><T field="mark.desc" /></span></div><KeepsakeBotanicals arrangement="reply" /></div>
+          {entered && <div className="v2-mark-studio" id="rsvp" tabIndex={-1} role="group" aria-labelledby="mark-title"><ReplyStudio token={token} guestName={displayName} defaultStyle={defaultStyleForEdition(edition)} ready={clock.ready} marksEnabled={clock.marksEnabled} rsvp={rsvp} partyLimit={partyLimit} /></div>}
           <BotanicalImage src="/assets/botanicals/melastoma/full-stem.webp" className="mark-melastoma" />
         </section>
 
@@ -606,7 +592,7 @@ function WeddingWorld({ guestName = "", token = "", archiveItems = DEFAULT_ARCHI
         </div>
       </main>
 
-      <InvitationClosing entered={entered} edition={edition} past={clock.state === "past"} guestName={displayName} token={token} onReopen={() => { setEntered(false); setOpening(false); scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); }} />
+      <InvitationClosing keepsakeNote={keepsakeNote} entered={entered} edition={edition} past={clock.state === "past"} guestName={displayName} onReopen={() => { scrollTo({top:0,behavior:'instant'});setEntered(false);setOpening(false);setLiftedLetter(null);setCinematicEntry(false); }} />
     </div>
   );
 }

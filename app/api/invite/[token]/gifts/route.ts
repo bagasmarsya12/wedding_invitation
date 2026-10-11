@@ -1,4 +1,5 @@
 import { allowMutation, apiError, db, featureEnabled, guestFromToken, logFailure, privateJson, randomId, readJsonBody, sameOriginMutation } from "@/lib/server";
+import { loadGuestGiftOptions } from '@/lib/gift-transfers-server';
 
 type GiftRow = { id: string; title: string; description: string | null; recipient_category: string; image_url: string | null; price_label: string | null; purchase_url: string | null; status: string; reserved_by_guest_id: string | null; reserved_by_name: string | null; shipping_required: number };
 
@@ -27,11 +28,10 @@ export async function GET(_: Request, { params }: { params: Promise<{ token: str
   try {
     const guest = await guestFromToken((await params).token);
     if (!guest) return apiError("Invitation not found.", 404);
-    const [cash, gifts, shipping, enabled] = await Promise.all([
-      db().prepare("SELECT value FROM settings WHERE key = 'cash_gift_details' LIMIT 1").first<{ value: string }>(),
-      listGifts(guest.id), shippingFor(guest.id), featureEnabled("gifts"),
+    const [options, gifts, shipping] = await Promise.all([
+      loadGuestGiftOptions(), listGifts(guest.id), shippingFor(guest.id),
     ]);
-    return privateJson({ gifts, guestName: guest.display_name, cashGiftDetails: cash?.value ?? null, shippingInstructions: shipping, enabled });
+    return privateJson({ gifts, guestName: guest.display_name, cashGiftDetails: options.legacyDetails, transferMethods: options.methods, shippingInstructions: shipping, enabled: options.enabled });
   } catch (error) { logFailure("gifts_read", error); return apiError("Gifts are temporarily unavailable. Please try again.", 503); }
 }
 

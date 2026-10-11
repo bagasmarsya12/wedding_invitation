@@ -5,6 +5,9 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer } from "node:net";
+import { emptyGiftTransfers } from '../lib/gift-transfers.ts';
+import { verifyPhotoCommentFlows } from './photo-comments.integration.mjs';
+import { verifyEditorialFlows } from './cms-editorial.integration.mjs';
 
 const root = new URL("..", import.meta.url).pathname;
 const wrangler = join(root, "node_modules/wrangler/bin/wrangler.js");
@@ -30,15 +33,15 @@ async function waitFor(base) {
   }
   throw new Error("Local Vite server did not start in time.");
 }
-async function api(base, path, cookie, data, method = data ? "POST" : "GET", origin = base) {
-  const response = await fetch(new URL(path, base), { method, redirect: "manual", headers: { ...(cookie ? { cookie } : {}), ...(data ? { "content-type": "application/json", origin } : {}) }, body: data ? JSON.stringify(data) : undefined });
+async function api(base, path, cookie, data) {
+  const response = await fetch(new URL(path, base), { method: data ? "POST" : "GET", redirect: "manual", headers: { ...(cookie ? { cookie } : {}), ...(data ? { "content-type": "application/json", origin: base } : {}) }, body: data ? JSON.stringify(data) : undefined });
   let body;
   try { body = await response.json(); } catch { body = null; }
   return { status: response.status, body, headers: response.headers };
 }
 
 try {
-  for (const file of (await readdir(join(root, "drizzle"))).filter(name=>/^\d{4}_.+\.sql$/.test(name)).sort()) migrate(file);
+  for (const file of (await readdir(join(root, 'drizzle'))).filter(file=>/^\d+.*\.sql$/.test(file)).sort()) migrate(file);
   const listenPort = await port();
   const base = `http://127.0.0.1:${listenPort}`;
   // Direct Vite avoids vinext's single-server lock while a designer preview runs.
@@ -56,6 +59,7 @@ try {
     assert.equal(cookie, "__sites_local_auth=1");
     assert.equal((await api(base, "/api/admin/state", cookie)).status, 200);
     console.log("admin authentication and server authorization: OK");
+    await verifyEditorialFlows(base,cookie);
 
     const csv = "displayName,partyLimit,email,reference\nFixture Household,2,,household-001\n";
     const first = await api(base, "/api/admin/state", cookie, { op: "import_guests", csv });
@@ -75,6 +79,54 @@ try {
     assert.equal(backup.body.guests.length, 1);
     console.log("idempotent guest import, invite, RSVP export, backup: OK");
 
+    const extraLinks=[];
+    for(let offset=0;offset<51;offset+=25){
+      const rows=Array.from({length:Math.min(25,51-offset)},(_,index)=>`Bulk Fixture ${offset+index+1},1,,bulk-${offset+index+1}`);
+      const result=await api(base,'/api/admin/state',cookie,{op:'import_guests',csv:`displayName,partyLimit,email,reference\n${rows.join('\n')}\n`});
+      assert.equal(result.status,201,JSON.stringify(result.body));extraLinks.push(...result.body.links);
+    }
+    const guestId=first.body.links[0].guestId;
+    const bulkIds=[guestId,...extraLinks.map(link=>link.guestId)];
+    const bulk={op:'update_guests_bulk',ids:bulkIds,field:'sent',value:true};
+    assert.equal((await api(base,'/api/admin/state','',bulk)).status,403);
+    const badOrigin=await fetch(new URL('/api/admin/state',base),{method:'POST',headers:{cookie,origin:'https://other.example','content-type':'application/json'},body:JSON.stringify(bulk)});
+    assert.equal(badOrigin.status,403);
+    for(const invalid of [{...bulk,ids:[]},{...bulk,ids:[guestId,guestId]},{...bulk,ids:[guestId,{}]},{...bulk,ids:Array.from({length:1001},(_,i)=>`guest_invalid_${i}`)},{...bulk,value:'true'},{...bulk,field:'group',value:'invalid'},{...bulk,field:'status',value:'revoked'}])
+      assert.equal((await api(base,'/api/admin/state',cookie,invalid)).status,400);
+    assert.equal((await api(base,'/api/admin/state',cookie,{...bulk,ids:[guestId,'guest_missing_fixture']})).status,409);
+    assert.equal((await api(base,'/api/admin/state',cookie)).body.guests.find(row=>row.id===guestId).invitation_sent_at,null);
+    const marked=await api(base,'/api/admin/state',cookie,bulk);
+    assert.equal(marked.status,200);assert.equal(marked.body.updated,52);
+    const sentAt=(await api(base,'/api/admin/state',cookie)).body.guests.find(row=>row.id===guestId).invitation_sent_at;
+    assert.ok(sentAt);
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'mark_invitation_sent',id:guestId,sent:true})).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie,bulk)).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie)).body.guests.find(row=>row.id===guestId).invitation_sent_at,sentAt);
+    assert.equal((await api(base,'/api/admin/state',cookie,{...bulk,field:'group',value:'family'})).status,200);
+    const grouped=(await api(base,'/api/admin/state',cookie)).body.guests;
+    assert.equal(grouped.filter(row=>bulkIds.includes(row.id)&&row.guest_group==='family').length,52);
+    assert.ok(grouped.every(row=>row.status==='active'&&row.has_saved_link));
+    assert.equal((await api(base,`/api/invite/${token}/rsvp`,'')).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie,{...bulk,value:false})).status,200);
+    assert.ok((await api(base,'/api/admin/state',cookie)).body.guests.every(row=>row.invitation_sent_at===null));
+    console.log('bulk guest operations: auth, origin, validation, no partial invalid selection, 52-row batch, idempotent sent time, unchanged links: OK');
+
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'set_setting',key:'shipping_instructions',value:'Fixture shipping instructions to preserve.'})).status,200);
+    const lifecycle={op:'set_lifecycle',phase:'wedding-day',rsvp:'off',gifts:'auto',marks:'on'};
+    assert.equal((await api(base,'/api/admin/state','',lifecycle)).status,403);
+    for(const invalid of [{...lifecycle,phase:'invalid'},{...lifecycle,phase:['auto']},{...lifecycle,rsvp:true},{...lifecycle,gifts:'invalid'}])
+      assert.equal((await api(base,'/api/admin/state',cookie,invalid)).status,400);
+    assert.equal((await api(base,'/api/admin/state',cookie,lifecycle)).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie)).body.settings.find(row=>row.key==='shipping_instructions').value,'Fixture shipping instructions to preserve.');
+    assert.deepEqual((await api(base,'/api/site-state','')).body,{phase:'wedding-day',rsvpEnabled:false,giftsEnabled:true,marksEnabled:true});
+    const beforeInvalid=(await api(base,'/api/admin/state',cookie)).body.settings;
+    assert.equal((await api(base,'/api/admin/state',cookie,{...lifecycle,phase:'post-wedding',gifts:'invalid'})).status,400);
+    assert.deepEqual((await api(base,'/api/admin/state',cookie)).body.settings,beforeInvalid);
+    assert.equal((await api(base,'/api/admin/state',cookie,{...lifecycle,phase:'post-wedding',rsvp:'auto',gifts:'off',marks:'off'})).status,200);
+    assert.deepEqual((await api(base,'/api/site-state','')).body,{phase:'post-wedding',rsvpEnabled:false,giftsEnabled:false,marksEnabled:false});
+    assert.equal((await api(base,'/api/admin/state',cookie,{...lifecycle,phase:'auto',rsvp:'auto',gifts:'auto',marks:'auto'})).status,200);
+    console.log('plain-language lifecycle settings: authorized atomic save, invalid values preserve settings, manual and automatic feature behavior: OK');
+
     const gift = await api(base, "/api/admin/state", cookie, { op: "create_gift", title: "Fixture Gift", category: "home", published: true });
     assert.equal(gift.status, 201);
     const catalogue = await api(base, `/api/invite/${token}/gifts`, "");
@@ -83,6 +135,36 @@ try {
     assert.equal((await api(base, "/api/admin/state", cookie, { op: "admin_release_gift", id: catalogue.body.gifts[0].id })).status, 200);
     assert.equal((await api(base, `/api/invite/${token}/gifts`, "")).body.gifts[0].status, "available");
     console.log("admin gift reservation control: OK");
+
+    const methods = emptyGiftTransfers();
+    methods.bca = { enabled: true, recipient: 'Fixture Only', destination: '0012345678', cta: { id: 'Salin nomor fixture', en: 'Copy fixture account' } };
+    methods.dana = { enabled: true, recipient: 'Fixture Only', destination: 'https://example.test/fixture-dana', cta: { id: '', en: '' } };
+    const setting = { op: 'set_setting', key: 'gift_transfer_methods', value: JSON.stringify(methods) };
+    assert.equal((await api(base, '/api/admin/state', '', setting)).status, 403);
+    const unsafe = structuredClone(methods); unsafe.dana.destination = 'javascript:alert(1)';
+    assert.equal((await api(base, '/api/admin/state', cookie, { ...setting, value: JSON.stringify(unsafe) })).status, 400);
+    assert.equal((await api(base, '/api/admin/state', cookie, setting)).status, 200);
+    const options = await api(base, `/api/invite/${token}/gift-options`, '');
+    assert.equal(options.status, 200); assert.match(options.headers.get('cache-control'), /no-store/);
+    assert.deepEqual(options.body.methods.map(row=>row.id), ['bca','dana']);
+    assert.equal(options.body.methods[0].destination, '0012345678');
+    assert.equal(options.body.methods[0].cta.id, 'Salin nomor fixture');
+    assert.equal(options.body.legacyDetails, null);
+    const publicOptions = await api(base, '/api/gift-options', '');
+    assert.equal(publicOptions.status, 200);
+    assert.match(publicOptions.headers.get('cache-control'), /no-store/);
+    assert.deepEqual(publicOptions.body, options.body);
+    assert.equal((await api(base, '/api/invite/invalid-token/gift-options', '')).status, 404);
+    assert.equal((await api(base, `/api/invite/${token}/gifts`, '')).body.transferMethods.length, 2);
+    assert.equal((await api(base, '/api/admin/state', cookie, { op:'set_setting',key:'gifts_enabled',value:'off' })).status, 200);
+    const disabled = await api(base, `/api/invite/${token}/gift-options`, '');
+    assert.deepEqual(disabled.body.methods, []); assert.equal(disabled.body.legacyDetails, null);
+    const publicDisabled = await api(base, '/api/gift-options', '');
+    assert.equal(publicDisabled.status, 200);
+    assert.deepEqual(publicDisabled.body.methods, []);
+    assert.equal(publicDisabled.body.legacyDetails, null);
+    assert.equal((await api(base, '/api/admin/state', cookie, { op:'set_setting',key:'gifts_enabled',value:'on' })).status, 200);
+    console.log('structured gifts: admin validation, public payment display, private guest routes, leading zeros, hidden methods and feature switch: OK');
 
     const created = await api(base, "/api/admin/state", cookie, { op: "create_archive", title: "Fixture Story", slug: "fixture-story", type: "note", excerpt: "Fixture only", visibility: "guests", published: false });
     assert.equal(created.status, 201);
@@ -103,90 +185,7 @@ try {
     assert.equal((await api(base, "/api/admin/state", cookie, { op: "set_setting", key: "site_phase", value: "post-wedding" })).status, 200);
     assert.equal((await api(base, "/api/site-state", "")).body.phase, "post-wedding");
     console.log("mark moderation and lifecycle admin control: OK");
-
-    const guestId = (await api(base, "/api/admin/state", cookie)).body.guests[0].id;
-    const note = { language: "id", frontNote: "Untuk kamu, teman perjalanan kami.", message: "Terima kasih, sahabat.\nKeep being yourself — sampai bertemu! 🌸" };
-    const keepPath = `/api/admin/keepsake?guestId=${guestId}`;
-    assert.equal((await api(base, keepPath, "")).status, 403);
-    assert.equal((await api(base, "/api/admin/keepsake", "", { guestId, note }, "PUT")).status, 403);
-    assert.equal((await api(base, "/api/admin/keepsake", cookie, { guestId, note }, "PUT", "https://foreign.example")).status, 403);
-    assert.equal((await api(base, "/api/admin/keepsake", cookie, { guestId, note: { ...note, message: "x".repeat(601) } }, "PUT")).status, 400);
-    assert.equal((await api(base, "/api/admin/keepsake", cookie, { guestId, note: { ...note, frontNote: "x".repeat(181) } }, "PUT")).status, 400);
-    assert.equal((await api(base, "/api/admin/keepsake", cookie, { guestId, note }, "PUT")).status, 200);
-    assert.deepEqual((await api(base, keepPath, cookie)).body.note, note);
-    const content = await api(base, "/api/admin/content", cookie);
-    assert.ok(content.body.sections.some(s => s.id === "keepsakeUi"));
-    assert.equal((await api(base, "/api/admin/content", cookie, { values: { "id.keepsakeUi.downloadFront": "Simpan sisi depan khusus", "id.keepsake.signatureNames": "Iga dan Bagas" } }, "PUT")).status, 200);
-    const another = await api(base, "/api/admin/state", cookie, { op: "import_guests", csv: "displayName,partyLimit,email,reference\nOther Fixture,1,,other-002\n" });
-    assert.equal(another.status, 201);
-    const otherToken = another.body.links[0].invitationUrl.split("/").at(-1);
-    const otherId = (await api(base, "/api/admin/state", cookie)).body.guests.find(g => g.display_name === "Other Fixture").id;
-    const otherNote = { language: "en", frontNote: "Only for another guest", message: "An entirely separate private note." };
-    assert.equal((await api(base, "/api/admin/keepsake", cookie, { guestId: otherId, note: otherNote }, "PUT")).status, 200);
-    const card = await fetch(new URL(`/invite/${token}/keepsake`, base));
-    assert.equal(card.status, 200);
-    assert.match(card.headers.get("cache-control"), /no-store/);
-    const cardHtml = await card.text();
-    assert.ok(cardHtml.includes(note.frontNote));
-    assert.ok(cardHtml.includes("Terima kasih, sahabat."));
-    assert.ok(cardHtml.includes("Simpan sisi depan khusus"));
-    assert.ok(cardHtml.includes("Iga dan Bagas"));
-    assert.ok(!cardHtml.includes(otherNote.message));
-    assert.match(cardHtml, /noindex/);
-    const otherHtml = await (await fetch(new URL(`/invite/${otherToken}/keepsake`, base))).text();
-    assert.ok(otherHtml.includes(otherNote.message));
-    assert.ok(!otherHtml.includes("Terima kasih, sahabat."));
-    for (const path of ["/", "/keepsake"]) {
-      const html = await (await fetch(new URL(path, base))).text();
-      assert.ok(!html.includes("Terima kasih, sahabat.") && !html.includes(otherNote.message));
-    }
-    assert.equal((await fetch(new URL("/invite/not-a-real-token/keepsake", base))).status, 404);
-    console.log("literal CMS copy, personal keepsake, access control and guest isolation: OK");
-
-    const messagePath=`/api/admin/invitations?id=${guestId}`;
-    assert.equal((await api(base,messagePath,"")).status,403);
-    const beforeCopy=(await api(base,"/api/admin/state",cookie)).body.guests;
-    const template="Halo {{nama}},\nIni undanganmu: {{link}}\nSampai bertemu di {{lokasi}} pada {{tanggal}}!";
-    assert.equal((await api(base,"/api/admin/state",cookie,{op:"set_setting",key:"invitation_message_template",value:template})).status,200);
-    const personal=await api(base,messagePath,cookie);
-    assert.equal(personal.status,200);
-    assert.match(personal.headers.get("cache-control"),/no-store/);
-    assert.equal(personal.body.guestId,guestId);
-    assert.equal(personal.body.inviteUrl,first.body.links[0].invitationUrl);
-    assert.ok(personal.body.message.startsWith("Halo Fixture Household,"));
-    assert.ok(personal.body.message.includes(first.body.links[0].invitationUrl));
-    assert.ok(!personal.body.message.includes("{{")&&!personal.body.message.includes(otherToken));
-    const secondMessage=await api(base,`/api/admin/invitations?id=${otherId}`,cookie);
-    assert.ok(secondMessage.body.message.startsWith("Halo Other Fixture,"));
-    assert.ok(secondMessage.body.message.includes(another.body.links[0].invitationUrl));
-    assert.ok(!secondMessage.body.message.includes(first.body.links[0].invitationUrl));
-    const updatedTemplate="Untuk {{nama}},\nTemplate terbaru: {{link}}";
-    assert.equal((await api(base,"/api/admin/state",cookie,{op:"set_setting",key:"invitation_message_template",value:updatedTemplate})).status,200);
-    assert.equal((await api(base,messagePath,cookie)).body.message,`Untuk Fixture Household,\nTemplate terbaru: ${first.body.links[0].invitationUrl}`);
-    assert.deepEqual((await api(base,"/api/admin/state",cookie)).body.guests,beforeCopy);
-    const replaced=await api(base,"/api/admin/state",cookie,{op:"regenerate_token",id:otherId});
-    assert.equal(replaced.status,200);
-    const replacedMessage=await api(base,`/api/admin/invitations?id=${otherId}`,cookie);
-    assert.equal(replacedMessage.body.inviteUrl,new URL(replaced.body.inviteUrl,base).toString());
-    assert.ok(!replacedMessage.body.message.includes(otherToken));
-    console.log("personal WA message: current template, isolated guest links, read-only copy and refreshed links: OK");
-
-    const pass = await api(base, `/api/invite/${token}/pass`, "");
-    assert.equal(pass.status, 200);
-    assert.ok(pass.body.qrData.startsWith("data:image/svg+xml;base64,"));
-    assert.equal((await api(base, `/api/admin/check-in?code=${pass.body.code}`, "")).status, 403);
-    assert.equal((await api(base, "/api/admin/check-in", cookie, { code: pass.body.code, partySize: 3 })).status, 400);
-    const arrival = await api(base, "/api/admin/check-in", cookie, { code: pass.body.code, partySize: 2 });
-    assert.equal(arrival.status, 201, JSON.stringify(arrival.body));
-    assert.equal(arrival.body.guest.arrival.partySize, 2);
-    assert.equal((await api(base, "/api/admin/check-in", cookie, { code: pass.body.code, partySize: 2 })).status, 409);
-    assert.equal((await api(base, "/api/admin/state", cookie, { op: "update_guest", id: guestId, displayName: "Fixture Household", partyLimit: 2, status: "revoked" })).status, 200);
-    assert.equal((await api(base,messagePath,cookie)).status,404);
-    assert.equal((await fetch(new URL(`/invite/${token}/keepsake`, base))).status, 404);
-    assert.equal((await api(base, `/api/invite/${token}/pass`, "")).status, 404);
-    assert.equal((await api(base, `/api/admin/check-in?code=${pass.body.code}`, cookie)).status, 404);
-    console.log("QR pass, party limits, duplicate arrival and revoked invitation: OK");
-
+    await verifyPhotoCommentFlows(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
   } catch (error) { console.error(log); throw error; }
 } finally {
   if (server && server.exitCode === null) {

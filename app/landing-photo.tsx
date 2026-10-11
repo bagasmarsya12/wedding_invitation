@@ -9,7 +9,7 @@ export function LandingPhoto({ src, alt, initial = "", className = "" }: { src: 
     {src && !failed ? <img src={src} alt={alt} loading="lazy" decoding="async" onError={() => setFailed(true)} /> : <>
       {initial && <span className="v2-portrait-initial" aria-hidden="true">{initial}</span>}
       <span className="landing-photo-aperture" aria-hidden="true" />
-      <span className="landing-photo-label"><T>{failed ? "Image unavailable." : "Photograph to come."}</T></span>
+      {failed && <span className="landing-photo-label"><T>Image unavailable.</T></span>}
     </>}
   </div>;
 }

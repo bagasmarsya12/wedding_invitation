@@ -11,7 +11,7 @@ export function PasswordPanel() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (password !== repeat) {
-      setStatus("Passwords do not match.");
+      setStatus("Kedua kata sandi belum sama.");
       return;
     }
     setBusy(true);
@@ -23,27 +23,27 @@ export function PasswordPanel() {
       });
       const payload = await response.json().catch(() => null) as { error?: string } | null;
       if (response.ok) {
-        setStatus("Password saved. Email + password sign-in is active for this address.");
+        setStatus("Kata sandi tersimpan. Kamu bisa masuk memakai email admin dan kata sandi ini.");
         setPassword("");
         setRepeat("");
       } else {
-        setStatus(payload?.error ?? "Could not save the password.");
+        setStatus(payload?.error ?? "Kata sandi belum tersimpan. Coba kembali.");
       }
     } catch {
-      setStatus("Network error. Try again.");
+      setStatus("Koneksi bermasalah. Coba kembali.");
     }
     setBusy(false);
   }
 
   return (
     <section className="admin-panel">
-      <header><p>Admin access</p><h2>Email &amp; password login</h2></header>
-      <p>Set or rotate the password for your admin email. Sessions already signed in stay valid.</p>
+      <header><p>Akses admin</p><h2>Masuk dengan email & kata sandi</h2></header>
+      <p>Atur kata sandi untuk email adminmu. Sesi yang sudah masuk tetap berlaku.</p>
       <form onSubmit={submit}>
-        <label>New password<input type="password" value={password} autoComplete="new-password" minLength={12} maxLength={512} onChange={event => setPassword(event.target.value)} required /></label>
-        <label>Repeat password<input type="password" value={repeat} autoComplete="new-password" onChange={event => setRepeat(event.target.value)} required /></label>
+        <label>Kata sandi baru<input type="password" value={password} autoComplete="new-password" minLength={12} maxLength={512} onChange={event => setPassword(event.target.value)} required /></label>
+        <label>Ulangi kata sandi<input type="password" value={repeat} autoComplete="new-password" onChange={event => setRepeat(event.target.value)} required /></label>
         {status ? <p className="product-status" role="status">{status}</p> : null}
-        <button disabled={busy}>{busy ? "Saving…" : "Save password"}</button>
+        <button disabled={busy}>{busy ? "Menyimpan…" : "Simpan kata sandi"}</button>
       </form>
     </section>
   );

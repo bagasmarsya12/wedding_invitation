@@ -15,7 +15,7 @@ export const WEBSITE_DEFAULTS: WebsiteConfig = {
   firstName: 'Bagas', secondName: 'Iga', weddingDate: '2026-11-01', akadTime: '14:00', receptionTime: '18:00',
   venueName: 'Pandiga', venueCity: 'Cimahi', venueAddress: 'Jl. Sirnarasa No.11, Cibabat, Kec. Cimahi Utara, Kota Cimahi, Jawa Barat 40513',
   mapsUrl: 'https://maps.app.goo.gl/JFL3wrzj7qsBXbz56', longitude: 107.5554364, latitude: -6.8755807,
-  metaTitle: 'Bagas × Iga — 1 November 2026', metaDescription: 'Undangan pernikahan Bagas Marsya Pratama Nugraha dan Iga Noviyanti Rohman di Pandiga, Cimahi.',
+  metaTitle: 'Iga & Bagas — 1 November 2026', metaDescription: 'Undangan pernikahan Iga & Bagas di Pandiga, Cimahi.',
   ogImage: '/assets/og-image.jpg', profilesEnabled: true, trackingEnabled: true,
 };
 export function localize(value: string): Localized { return { en: value, id: indonesian[value.trim()] ?? value }; }
@@ -24,7 +24,7 @@ export function defaultWebsiteBlocks(values: ContentMap = CONTENT_DEFAULTS): Web
   return {
     story: [1,2,3].map(i => ({ id: `story-${i}`, title: copy(`story.title${i}`), body: copy(`story.body${i}`) })),
     faq: ['dress','alamat','parkir','anak','kontak'].map(key => ({ id: key, title: copy(`useful.${key} t`), body: copy(`useful.${key} d`) })),
-    photos: Array.from({length:6},(_,i)=>({id:`photo-${i+1}`,slot:`gallery-${String(i+1).padStart(2,'0')}`,caption:copy(`gallery.caption${i+1}`)})),
+    photos: Array.from({length:10},(_,i)=>({id:`photo-${i+1}`,slot:`gallery-${String(i+1).padStart(2,'0')}`,caption:copy(`gallery.caption${i+1}`)})),
     links: [{id:'archive',title:localize('The Archive'),body:localize('Things we kept.'),href:'/archive'}],
   };
 }
@@ -32,7 +32,7 @@ export function weddingDisplay(config: WebsiteConfig, language: 'en'|'id') {
   const date = new Date(`${config.weddingDate}T12:00:00+07:00`);
   const locale = language === 'id' ? 'id-ID' : 'en-GB';
   return {
-    names: `${config.firstName} × ${config.secondName}`,
+    names: `${config.secondName} & ${config.firstName}`,
     date: new Intl.DateTimeFormat(locale,{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Jakarta'}).format(date),
     day: new Intl.DateTimeFormat(locale,{weekday:'long',timeZone:'Asia/Jakarta'}).format(date),
     stamp: config.weddingDate.split('-').reverse().join(' · '), venue: `${config.venueName}, ${config.venueCity}`,

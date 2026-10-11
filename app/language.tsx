@@ -2,8 +2,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { indonesian } from "../lib/invitation-copy";
+import { normalizeCoupleWording } from '@/lib/couple-wording';
 import { copyKey } from '@/lib/copy-registry';
 import { defaultWebsiteBlocks, WEBSITE_DEFAULTS, type WebsiteBlocks, type WebsiteConfig } from '@/lib/website-content';
+import { ARRIVAL_DEFAULTS, type ArrivalContent } from '@/lib/arrival-content';
 
 type Language = "en" | "id";
 
@@ -21,29 +23,32 @@ type LanguageContextValue = {
   content: Record<string, string>;
   website: WebsiteConfig;
   blocks: WebsiteBlocks;
+  arrival: ArrivalContent;
 };
 const EMPTY: Record<string, string> = {};
 const LanguageContext = createContext<LanguageContextValue>({
-  language: "en" as Language,
+  language: "id" as Language,
   setLanguage: () => {},
   t: (text: string) => text,
   tField: () => "",
   content: EMPTY,
   website: WEBSITE_DEFAULTS,
   blocks: defaultWebsiteBlocks(),
+  arrival: ARRIVAL_DEFAULTS,
 });
 const KEY = "bagas-iga:language:v1";
 
-export function LanguageProvider({ children, content, overrides: suppliedOverrides, website=WEBSITE_DEFAULTS, blocks=defaultWebsiteBlocks() }: { children: ReactNode; content?: Record<string, string>; overrides?: Record<string, string>; website?:WebsiteConfig; blocks?:WebsiteBlocks }) {
-  const [language, setLanguage] = useState<Language>("en");
+export function LanguageProvider({ children, content, overrides: suppliedOverrides, website=WEBSITE_DEFAULTS, blocks=defaultWebsiteBlocks(), arrival=ARRIVAL_DEFAULTS,initialLanguage='id',persistLanguage=true }: { children: ReactNode; content?: Record<string, string>; overrides?: Record<string, string>; website?:WebsiteConfig; blocks?:WebsiteBlocks; arrival?:ArrivalContent;initialLanguage?:Language;persistLanguage?:boolean }) {
+  const [language, setLanguage] = useState<Language>(initialLanguage);
   const overrides = suppliedOverrides && Object.keys(suppliedOverrides).length > 0 ? suppliedOverrides : EMPTY;
   const fields = content ?? EMPTY;
   useEffect(() => {
+    if(!persistLanguage)return;
     // Read after hydration so the server and first client render agree.
     queueMicrotask(() => {
-      try { if (localStorage.getItem(KEY) === "id") setLanguage("id"); } catch { /* Storage is optional. */ }
+      try { const stored=localStorage.getItem(KEY); if (stored === "id" || stored === "en") setLanguage(stored); } catch { /* Storage is optional. */ }
     });
-  }, []);
+  }, [persistLanguage]);
   useEffect(() => {
     document.documentElement.lang = language;
     // Measure translated text only after React has committed it.
@@ -52,19 +57,19 @@ export function LanguageProvider({ children, content, overrides: suppliedOverrid
   }, [language]);
   const choose = useCallback((value: Language) => {
     setLanguage(value);
-    try { localStorage.setItem(KEY, value); } catch { /* Private browsing still works. */ }
-  }, []);
+    if(persistLanguage)try { localStorage.setItem(KEY, value); } catch { /* Private browsing still works. */ }
+  }, [persistLanguage]);
   const t = useCallback((text: string) => {
     const original=text.trim(), key=copyKey(original);
     const translated=language==='id';
     const value=overrides[`${translated?'id:':''}copy:${original}`] ?? overrides[translated ? `id:${original}` : original] ?? fields[translated ? `id.${key}` : key] ?? (translated ? indonesian[original] : undefined) ?? original;
-    return text.replace(original,value);
+    return normalizeCoupleWording(text.replace(original,value));
   }, [language, overrides, fields]);
   // Fields are already resolved by key. Avoid matching another field's identical default text.
   const tField = useCallback((key: string) => {
-    return fields[language==='id' ? `id.${key}` : key] ?? fields[key] ?? '';
+    return normalizeCoupleWording(fields[language==='id' ? `id.${key}` : key] ?? fields[key] ?? '');
   }, [language, fields]);
-  const value = useMemo(() => ({ language, setLanguage: choose, t, tField, content: fields,website,blocks }), [language, choose, t, tField, fields,website,blocks]);
+  const value = useMemo(() => ({ language, setLanguage: choose, t, tField, content: fields,website,blocks,arrival }), [language, choose, t, tField, fields,website,blocks,arrival]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 

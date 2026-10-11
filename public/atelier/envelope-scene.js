@@ -3,10 +3,10 @@ import {vertex,fragment} from './keepsake-renderer.js?v=7';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 const ease=t=>{t=clamp(t);return t*t*t*(t*(t*6-15)+10);};
-export const ENVELOPE_DURATION=3.6;
+export const ENVELOPE_DURATION=3;
 export function envelopePose(t=0){
- const hinge=ease((t-.22)/1.0),pull=ease((t-1.15)/1.45),exit=ease((t-2.78)/.82);
- return {hinge,flapZ:.155-.38*ease((hinge-.76)/.24),seal:1-ease(t/.42),envelopeY:-.40*pull,cardY:2.45*pull,cardZ:.065,cardTilt:.025*Math.sin(pull*Math.PI),sweep:-.45+.65*ease(t/2.75),opacity:1-exit};
+ const hinge=ease((t-.1)/.78),pull=ease((t-.55)/.85),exit=ease((t-1.4)/.25);
+ return {hinge,flapZ:.155-.38*ease((hinge-.76)/.24),seal:1-ease(t/.3),envelopeY:-.8*pull,cardY:1.68*pull,cardZ:.065+.135*ease((pull-.4)/.6),cardTilt:.025*Math.sin(pull*Math.PI),sweep:-.45+.65*ease(t/1.4),opacity:1-exit};
 }
 const FONT='Newsreader, Baskerville, Georgia, serif';
 function surface(){const c=document.createElement('canvas');c.width=1500;c.height=940;return c;}
@@ -85,6 +85,14 @@ export class EnvelopeScene{
  foil(face){const art=this.texture(face.art),fx=new THREE.CanvasTexture(face.fx);this.maps.push(fx);const m=new THREE.ShaderMaterial({uniforms:{uArt:{value:art},uFx:{value:fx},uSweep:{value:.1},uOpacity:{value:1}},vertexShader:vertex,fragmentShader:fragment,transparent:true,side:THREE.FrontSide});this.materials.push(m);return m;}
  mesh(geometry,material){this.geometries.push(geometry);material.userData.baseOpacity=material.opacity;if(!this.materials.includes(material))this.materials.push(material);return new THREE.Mesh(geometry,material);}
  resize(width,height){this.renderer.setSize(width,height,false);const aspect=width/height,h=Math.max(6.6,6.7/aspect);this.camera.aspect=aspect;this.camera.position.set(0,.35,h/(2*Math.tan(Math.PI/12)));this.camera.updateProjectionMatrix();}
+ letterBounds(){
+  this.card.updateWorldMatrix(true,false);this.camera.updateMatrixWorld();
+  const width=this.canvas.clientWidth,height=this.canvas.clientHeight;
+  const points=[[-2.665,-1.67],[2.665,-1.67],[-2.665,1.67],[2.665,1.67]].map(([x,y])=>new THREE.Vector3(x,y,0).applyMatrix4(this.card.matrixWorld).project(this.camera));
+  const xs=points.map(p=>(p.x+1)*width/2),ys=points.map(p=>(1-p.y)*height/2);
+  const left=Math.min(...xs),top=Math.min(...ys);
+  return {left,top,width:Math.max(...xs)-left,height:Math.max(...ys)-top};
+ }
  draw({time=0,opening=false,x=0,y=0}={}){
   const p=opening?envelopePose(time):{hinge:0,flapZ:.155,seal:1,envelopeY:0,cardY:0,cardZ:.065,cardTilt:0,sweep:this.reduced?.1:.1+x*.25,opacity:1};
   this.root.rotation.set(this.reduced||opening?0:-y*.012,this.reduced||opening?0:x*.025,0);

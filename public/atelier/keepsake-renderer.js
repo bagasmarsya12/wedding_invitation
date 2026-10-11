@@ -35,6 +35,11 @@ const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const cinematic=t=>{t=clamp(t);return t*t*t*(t*(t*6-15)+10);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const MESSAGE_START=8;
+// Stronger studio reflections are confined to Story export. The live card and
+// envelope keep the approved original shader and printed flower colors.
+const storyFragment=fragment.replace('metal*=.94+grain*.12;',`metal*=.98+grain*.13;
+ metal+=vec3(1.0,.95,.76)*(pow(ribbon,3.0)*.34+rim*.25);
+ metal+=vec3(1.0,.87,.52)*step(.97,grain)*pow(ribbon,2.0)*.20;`);
 export function storyPageDurations(design){return design.backs.map(face=>Math.max(7,Math.ceil(face.lines.join(' ').length/22+2)));}
 export function storyDuration(design){return MESSAGE_START+storyPageDurations(design).reduce((a,b)=>a+b,0);}
 export function openingPose(t){
@@ -73,6 +78,24 @@ export class CardRenderer{
   this.scene.add(new THREE.HemisphereLight('#fff1d5','#14251d',2.1));
   const key=new THREE.DirectionalLight('#fff3d8',3.5);key.position.set(-4,6,8);this.scene.add(key);
   const rim=new THREE.DirectionalLight('#dfb96a',1.6);rim.position.set(5,-1,3);this.scene.add(rim);
+  this.glints=[];
+  if(story){
+   const flare=document.createElement('canvas');flare.width=128;flare.height=128;const f=flare.getContext('2d');
+   const glow=f.createRadialGradient(64,64,0,64,64,62);glow.addColorStop(0,'#fff8ddcc');glow.addColorStop(.18,'#ffe5a25a');glow.addColorStop(1,'#ffe5a200');f.fillStyle=glow;f.fillRect(0,0,128,128);
+   f.fillStyle='#fff9e8';f.beginPath();f.moveTo(64,5);f.quadraticCurveTo(69,58,110,64);f.quadraticCurveTo(69,70,64,123);f.quadraticCurveTo(59,70,18,64);f.quadraticCurveTo(59,58,64,5);f.fill();
+   const map=new THREE.CanvasTexture(flare);map.colorSpace=THREE.SRGBColorSpace;this.textures.push(map);
+   for(const [face,back] of [[design.front,false],[design.backs[0],true]]){
+    const pixels=face.fx.getContext('2d').getImageData(0,0,face.fx.width,face.fx.height).data;
+    let index=0;
+    for(let py=95;py<face.fx.height-55;py+=73)for(let px=45;px<face.fx.width-35;px+=67){
+     if(pixels[(py*face.fx.width+px)*4]<120 || (px*13+py*7)%5>1)continue;
+     const material=new THREE.MeshBasicMaterial({map,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
+     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.09,.09),material);
+     mesh.position.set((px/face.fx.width-.5)*3,(.5-py/face.fx.height)*4,back?-.046:.046);if(back){mesh.position.x*=-1;mesh.rotation.y=Math.PI;}
+     this.root.add(mesh);this.glints.push({mesh,back,band:px/face.fx.width*.9+py/face.fx.height*.5-.70,phase:index++*1.73});
+    }
+   }
+  }
   const c=document.createElement('canvas');c.width=512;c.height=512;const ctx=c.getContext('2d');ctx.filter='blur(38px)';ctx.fillStyle='#000';ctx.fillRect(100,75,312,362);
   const map=new THREE.CanvasTexture(c);this.textures.push(map);
   this.shadow=new THREE.Mesh(new THREE.PlaneGeometry(3.5,4.6),new THREE.MeshBasicMaterial({map,transparent:true,opacity:.12,depthWrite:false}));this.shadow.position.set(.04,-.05,-2.05);this.scene.add(this.shadow);
@@ -81,7 +104,7 @@ export class CardRenderer{
  material(face){
   const art=new THREE.CanvasTexture(face.art);art.colorSpace=THREE.SRGBColorSpace;const fx=new THREE.CanvasTexture(face.fx);
   [art,fx].forEach(t=>{t.anisotropy=this.renderer.capabilities.getMaxAnisotropy();this.textures.push(t);});
-  const mat=new THREE.ShaderMaterial({uniforms:{uArt:{value:art},uFx:{value:fx},uSweep:{value:0},uOpacity:{value:1}},vertexShader:vertex,fragmentShader:fragment,side:THREE.FrontSide,transparent:true});
+  const mat=new THREE.ShaderMaterial({uniforms:{uArt:{value:art},uFx:{value:fx},uSweep:{value:0},uOpacity:{value:1}},vertexShader:vertex,fragmentShader:this.story?storyFragment:fragment,side:THREE.FrontSide,transparent:true});
   this.materials.push(mat);return mat;
  }
  setPage(page){
@@ -93,7 +116,7 @@ export class CardRenderer{
   this.renderer.setSize(width,height,false);const aspect=width/height,h=this.story?6.4:Math.max(4.8,3.5/aspect);
   this.camera.aspect=aspect;this.camera.position.z=h/(2*Math.tan(Math.PI/12));this.camera.updateProjectionMatrix();
  }
- draw({flip=0,page=0,x=0,y=0,z=0,sweep=0,scale=1,panX=0,panY=0,opacity=1,bloom=0,floralDrift=0}={}){
+ draw({flip=0,page=0,x=0,y=0,z=0,sweep=0,scale=1,panX=0,panY=0,opacity=1,bloom=0,floralDrift=0,ambience=0}={}){
   this.setPage(page);this.root.rotation.set(x,flip*Math.PI+y,z);this.root.scale.setScalar(scale);this.root.position.set(panX,panY,0);
   // A face-on shadow must not stay wide and dark when the card is edge-on.
   const projection=Math.abs(Math.cos(flip*Math.PI+y)*Math.cos(x));
@@ -101,6 +124,10 @@ export class CardRenderer{
   this.shadow.material.opacity=.12*Math.pow(projection,1.5)*opacity;
   this.shadow.visible=projection>.035&&opacity>.001;
   this.edge.material.opacity=opacity;this.trimMaterial.opacity=opacity;
+  this.glints.forEach(({mesh,back,band,phase})=>{
+   const shine=Math.exp(-Math.pow((sweep-band)*5.5,2))*Math.pow(Math.max(0,Math.sin(ambience*1.4+phase)),6);
+   mesh.visible=(back?flip>.65:flip<.35)&&shine>.01;mesh.material.opacity=shine*.78*opacity;mesh.scale.setScalar(.65+shine*.65);
+  });
   this.accents.forEach((mesh,i)=>{const side=i?-1:1;mesh.visible=bloom>.001;mesh.material.opacity=bloom*.78;mesh.position.set(-side*(1.17+floralDrift*.12),side*(1.66+floralDrift*.12),-.85);mesh.rotation.z=side*(.07+floralDrift*.05);mesh.scale.setScalar(.95+floralDrift*.09);});
   this.materials.forEach(m=>{m.uniforms.uSweep.value=sweep;m.uniforms.uOpacity.value=opacity;});this.renderer.render(this.scene,this.camera);return this.canvas;
  }
@@ -108,6 +135,7 @@ export class CardRenderer{
   this.textures.forEach(t=>t.dispose());this.materials.forEach(m=>m.dispose());this.root.children.forEach(m=>m.geometry?.dispose());
   this.edge.material.dispose();this.trimMaterial.dispose();this.shadow.geometry.dispose();this.shadow.material.dispose();this.renderer.dispose();this.canvas.remove();
   this.accents.forEach(m=>{m.geometry.dispose();m.material.dispose();});
+  this.glints.forEach(({mesh})=>mesh.material.dispose());
  }
 }
 export function drawFlat(ctx,design,pose,width,height){

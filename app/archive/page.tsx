@@ -19,12 +19,12 @@ const mark: ArchiveCard = {
 export default async function ArchivePage() {
   let custom: ArchiveCard[] = [];
   try {
-    const result = await db().prepare("SELECT slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE published = 1 AND visibility = 'public' ORDER BY COALESCE(featured_order, 999), created_at").all<ArchiveCard & { story: string | null }>();
+    const result = await db().prepare("SELECT id, slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE published = 1 AND visibility = 'public' ORDER BY COALESCE(featured_order, 999), created_at").all<ArchiveCard & { story: string | null }>();
     custom = result.results.filter(entry => entry.slug !== "the-mark" && hasPublicContent(entry.title) && (hasPublicContent(entry.story) || hasPublicContent(entry.excerpt))).map(entry => ({ ...entry, excerpt: hasPublicContent(entry.excerpt) ? entry.excerpt : null }));
   } catch { /* The built-in story remains available during an empty database state. */ }
   return (
     <main className="product-page archive-page archive-room">
-      <header className="product-header"><a href="/"><T>Bagas</T> <i>×</i><T>Iga</T></a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
+      <header className="product-header"><a href="/"><T>Iga & Bagas</T></a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
       <section className="collection-hero" aria-labelledby="collection-title">
         <div className="collection-window-shadow" aria-hidden="true" />
         <div className="collection-hero-title"><p><T>Things worth keeping</T></p><h1 id="collection-title"><T>The Archive</T></h1></div>

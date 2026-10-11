@@ -1,88 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DeferredMarkEditor } from "./deferred-mark-editor";
-import { T } from "./language";
+import { T, useLanguage } from "./language";
+import type { GuestRsvpController } from "./use-guest-rsvp";
 import type { MarkStyle } from "@/lib/mark-styles";
 
-type Attendance = "" | "yes" | "no";
 type Props = {
   token: string; guestName: string; defaultStyle: MarkStyle;
-  ready: boolean; rsvpEnabled: boolean; marksEnabled: boolean;
-  onAttendanceSaved: (attending: boolean) => void;
+  ready: boolean; marksEnabled: boolean; rsvp: GuestRsvpController; partyLimit: number;
 };
 
-/** One reply surface, two independent private/public persistence paths. */
-export function ReplyStudio({ token, guestName, defaultStyle, ready, rsvpEnabled, marksEnabled, onAttendanceSaved }: Props) {
-  const [attendance, setAttendance] = useState<Attendance>("");
-  const [saved, setSaved] = useState<Attendance>("");
-  const [loaded, setLoaded] = useState(!token);
-  const [inviteEnabled, setInviteEnabled] = useState(true);
-  const [status, setStatus] = useState("");
-  const [revision, setRevision] = useState(0);
-  const canReply = rsvpEnabled && inviteEnabled;
+/** Postcard and attendance remain independent; RSVP state is shared with the folio. */
+export function ReplyStudio({ token, guestName, defaultStyle, ready, marksEnabled, rsvp, partyLimit }: Props) {
+  const { tField } = useLanguage();
+  const [previewStatus, setPreviewStatus] = useState('');
   const preview = !token;
-
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, { cache: "no-store" })
-      .then(async response => {
-        const data = await response.json() as { error?: string; enabled: boolean; rsvp: { attendance: string } | null };
-        if (!response.ok) throw new Error(data.error || "Your answer could not be loaded. Try again.");
-        return data;
-      })
-      .then(data => {
-        if (cancelled) return;
-        const value = data.rsvp?.attendance;
-        const answer = value === "yes" || value === "no" ? value : "";
-        setAttendance(answer); setSaved(answer); setInviteEnabled(data.enabled !== false); setLoaded(true); setStatus("");
-        onAttendanceSaved(answer === "yes");
-      })
-      .catch(() => { if (!cancelled) setStatus("Your answer could not be loaded. Try again."); });
-    return () => { cancelled = true; };
-  }, [token, revision, onAttendanceSaved]);
-
+  const canReply = rsvp.enabled;
   async function saveAttendance() {
-    if (!canReply) return true; // Postcards can remain open after the RSVP deadline.
-    if (!attendance || !loaded) return false;
-    if (preview) { setStatus("Preview only — open your personal invitation to save your reply."); return true; }
-    if (saved === attendance) { setStatus("Your answer is already saved."); return true; }
-    setStatus("Saving your answer…");
-    try {
-      const response = await fetch(`/api/invite/${encodeURIComponent(token)}/rsvp`, {
-        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ attendance }),
-      });
-      const data = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(data.error || "Your answer could not be saved. Please try again.");
-      setSaved(attendance); onAttendanceSaved(attendance === "yes");
-      setStatus(attendance === "yes" ? "Your answer is saved. See you there." : "Your answer is saved. Thank you for letting us know.");
-      return true;
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Your answer could not be saved. Please try again.");
-      return false;
-    }
+    if (!canReply) return true;
+    if (preview) { setPreviewStatus("Preview only — open your personal invitation to save your reply."); return true; }
+    return rsvp.save();
   }
-
   return <DeferredMarkEditor token={token} guestName={guestName} defaultStyle={defaultStyle} reply={{
     preview, allowEmpty: canReply, marksEnabled: ready && marksEnabled,
-    canSubmit: ready && (canReply ? loaded && Boolean(attendance) : marksEnabled),
+    canSubmit: ready && !rsvp.busy && (canReply ? rsvp.loaded && Boolean(rsvp.attendance) : marksEnabled),
     saveAttendance,
-    submitLabel: preview ? "Preview my reply" : canReply ? "Save my reply" : "Send my postcard",
+    submitLabel: preview ? "Preview my reply" : "Send card",
     controls: <div className="reply-attendance">
       <p className="reply-recipient"><T>A reply from </T><strong>{guestName || <T>our favourite people</T>}</strong></p>
-      <fieldset disabled={!ready || !loaded || !canReply}>
+      <fieldset disabled={!ready || !rsvp.loaded || !canReply || rsvp.busy}>
         <legend><T>Will you be there?</T></legend>
-        <label className={attendance === "yes" ? "is-selected" : ""}><input type="radio" name="attendance" value="yes" checked={attendance === "yes"} onChange={() => setAttendance("yes")} /><span><T>I’ll be there.</T></span></label>
-        <label className={attendance === "no" ? "is-selected" : ""}><input type="radio" name="attendance" value="no" checked={attendance === "no"} onChange={() => setAttendance("no")} /><span><T>I can’t make it.</T></span></label>
+        <label className={rsvp.attendance === "yes" ? "is-selected" : ""}><input type="radio" name="attendance" value="yes" checked={rsvp.attendance === "yes"} onChange={() => rsvp.setAttendance("yes")} /><span><T>I’ll be there.</T></span></label>
+        <label className={rsvp.attendance === "no" ? "is-selected" : ""}><input type="radio" name="attendance" value="no" checked={rsvp.attendance === "no"} onChange={() => rsvp.setAttendance("no")} /><span><T>I can’t make it.</T></span></label>
+        {rsvp.attendance === 'yes' && <label className="guest-party-label"><T field="guest.party" /><select value={rsvp.partySize} onChange={event => rsvp.setPartySize(Number(event.target.value))}>{Array.from({ length: partyLimit }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} {tField(index ? 'guest.people' : 'guest.person')}</option>)}</select></label>}
       </fieldset>
-      <p className="reply-privacy"><T>Your attendance stays private. A postcard is optional.</T></p>
       {ready && !canReply && <p className="reply-closed"><T>RSVP is closed. Thank you for being part of our day.</T></p>}
-      {!loaded && status && <button type="button" className="reply-retry" onClick={() => { setStatus(""); setRevision(value => value + 1); }}><T>Try loading my answer again</T></button>}
-      {!loaded && !status && <p className="reply-loading"><T>Loading your answer…</T></p>}
-      {saved && <div className="reply-received" data-attendance={saved}><span aria-hidden="true">✓</span><span><T>Reply received</T><small><T>{saved === "yes" ? "I’ll be there." : "I can’t make it."}</T></small></span></div>}
-      {saved && attendance !== saved && <p className="reply-unsaved"><T>Your changed answer has not been saved yet.</T></p>}
+      {!rsvp.loaded && rsvp.message === 'loadError' && <button type="button" className="reply-retry" onClick={rsvp.reload}><T>Try loading my answer again</T></button>}
+      {!rsvp.loaded && rsvp.message !== 'loadError' && <p className="reply-loading"><T>Loading your answer…</T></p>}
+      {rsvp.saved && <div className="reply-received" data-attendance={rsvp.saved.attendance}><span aria-hidden="true">✓</span><span><T>Reply received</T><small><T>{rsvp.saved.attendance === "yes" ? "I’ll be there." : "I can’t make it."}</T>{rsvp.saved.attendance === 'yes' && <> · {rsvp.saved.partySize} <T field="guest.people" /></>}</small></span></div>}
+      {rsvp.saved && rsvp.dirty && <p className="reply-unsaved"><T>Your changed answer has not been saved yet.</T></p>}
     </div>,
-    footer: <p className="reply-status" role="status"><T>{status}</T></p>,
+    footer: <p className="reply-status" role="status">{previewStatus ? <T>{previewStatus}</T> : rsvp.message ? <T field={`guest.${rsvp.message}`} /> : null}</p>,
   }} />;
 }

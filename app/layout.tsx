@@ -22,16 +22,24 @@ import "./keepsake-sections.css";
 import "./editorial-typography.css";
 import "./archive-collection.css";
 import "./admin/cms-workspace.css";
+import "./guest-companion.css";
 import "./envelope-atelier.css";
-import "./atelier-keepsake.css";
 import "./atelier-floral-accents.css";
+import "./arrival-archive-florals.css";
+import "./event-arrival.css";
+import "./jukebox.css";
+import "./admin/jukebox-manager.css";
+import "./gift-section.css";
+import "./invitation-audit.css";
+import "./photo-comments.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { LanguageProvider } from "./language";
 import { VisitTracker } from "./visit-tracker";
 import { loadWebsite } from "@/lib/website-server";
 import { loadLandingContent } from "@/lib/landing-content";
+import { loadJukebox } from "@/lib/jukebox-server";
+import { Jukebox } from "./jukebox";
 
-const title = "Bagas × Iga — 1 November 2026";
 
 // Share crawlers (WhatsApp, Instagram) require an absolute og:image URL.
 // Resolve against the configured site URL, falling back to the live request host
@@ -78,9 +86,9 @@ export default async function RootLayout({
 }>) {
   // CMS overrides for landing copy: stored values win, empty DB falls back to
   // the authored literals inside <T>. Fails soft when the DB is unavailable.
-  const [{ values, overrides },{config,blocks}] = await Promise.all([loadLandingContent(),loadWebsite()]);
+  const [{ values, overrides },{config,blocks,arrival},jukebox] = await Promise.all([loadLandingContent(),loadWebsite(),loadJukebox()]);
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <head>
         <link rel="preload" href="/fonts/newsreader-latin-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/instrument-sans-latin-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
@@ -90,7 +98,7 @@ export default async function RootLayout({
         <noscript>
           <style>{".v2-opening { display: none !important; } .v2-world.is-locked .v2-main, .v2-world.is-locked .v2-footer { visibility: visible !important; opacity: 1 !important; }"}</style>
         </noscript>
-        <LanguageProvider content={values} overrides={overrides} website={config} blocks={blocks}><VisitTracker enabled={config.trackingEnabled} />{children}</LanguageProvider>
+        <LanguageProvider content={values} overrides={overrides} website={config} blocks={blocks} arrival={arrival}><VisitTracker enabled={config.trackingEnabled} />{children}<Jukebox config={jukebox} /></LanguageProvider>
       </body>
     </html>
   );

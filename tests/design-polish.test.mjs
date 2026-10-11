@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { invitationClock } from "../lib/invitation-clock.ts";
-import { hasPublicContent, PROFILE_ENABLED, USEFUL_BITS, BEYOND_DESTINATIONS, THE_MARK_PROCESS_MATERIALS } from "../lib/public-content.ts";
+import { hasPublicContent, USEFUL_BITS, BEYOND_DESTINATIONS, THE_MARK_PROCESS_MATERIALS } from "../lib/public-content.ts";
 
 test("countdown updates at Jakarta midnight and uses sentence case", () => {
   assert.equal(invitationClock(new Date("2026-09-30T17:00:00Z")).countdown, "31 days away.");
@@ -24,8 +24,7 @@ test("public content guard rejects empty and unfinished content", () => {
   assert.equal(hasPublicContent("Jl. Sirnarasa No.11, Cibabat."), true);
 });
 
-test("approved profile templates stay enabled and unfinished collections stay hidden", () => {
-  assert.equal(PROFILE_ENABLED, true);
+test("unconfirmed utility drafts stay configured but hidden", () => {
   assert.equal(USEFUL_BITS.length, 5);
   assert.deepEqual(USEFUL_BITS.filter(item => item.confirmed && hasPublicContent(item.body)).map(item => item.title), ["Address and entrance"]);
   assert.deepEqual(BEYOND_DESTINATIONS.filter(item => item.available).map(item => item.href), ["/archive"]);

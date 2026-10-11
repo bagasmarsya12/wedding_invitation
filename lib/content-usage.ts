@@ -1,5 +1,7 @@
 // Live public copy fields. Event settings and repeatable collections have their own editors.
+import { PHOTO_COMMENT_KEYS } from './photo-comment-copy';
 export const ACTIVE_CONTENT_KEYS = [
+  ...PHOTO_COMMENT_KEYS,
   "archive.desc",
   "archive.head",
   "beyond.arch t",
@@ -15,7 +17,7 @@ export const ACTIVE_CONTENT_KEYS = [
   "gift.cta",
   "gift.desc",
   "gift.head",
-  "gift.sub",
+  "gift.kosong",
   "hero.env greet",
   "hero.env skip",
   "hero.hero date",
@@ -28,7 +30,6 @@ export const ACTIVE_CONTENT_KEYS = [
   "keepsake.genericRecipient",
   "keepsake.hint",
   "keepsake.love",
-  "keepsake.signatureNames",
   "keepsake.note1",
   "keepsake.note2",
   "keepsake.return",

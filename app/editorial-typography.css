@@ -43,9 +43,6 @@
   font-size: .8125rem;
   letter-spacing: .025em;
 }
-.v2-world .v2-spine { gap: var(--ed-space-6); padding-inline: var(--ed-gutter); }
-.v2-world .v2-spine-mark { font-size: 1.125rem; letter-spacing: .035em; }
-.v2-world .v2-spine-date { font-size: .75rem; letter-spacing: .06em; }
 .v2-world .v2-spine > button { min-height: 44px; font-size: var(--ed-small); letter-spacing: .02em; text-transform: none; }
 .v2-world .v2-info-drawer { gap: var(--ed-space-6); padding: var(--ed-space-8); }
 .v2-world .v2-info-drawer :is(span, nav a) { font-size: var(--ed-small); letter-spacing: .02em; text-transform: none; line-height: 1.6; }
@@ -150,7 +147,7 @@
 .v2-world .v2-profile-folio > header { column-gap: var(--ed-space-12); margin-bottom: var(--ed-space-16); }
 .v2-world .v2-profile-folio > header > p { max-width: 25ch; font-size: 1rem; }
 .v2-world .v2-profile-folio .v2-profile-copy > p { font-size: var(--ed-small); margin-bottom: var(--ed-space-4); }
-.v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(4.5rem, 7.5vw, 7.5rem); line-height: 1.12; letter-spacing: -.025em; font-weight: 400; }
+.v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(3rem, 5vw, 4.6rem); line-height: 1.08; letter-spacing: -.04em; font-weight: 400; }
 .v2-world .v2-profile-folio .v2-profile-copy > small { margin: var(--ed-space-4) 0 var(--ed-space-8); font-size: var(--ed-small); line-height: 1.6; letter-spacing: 0; }
 .v2-world .v2-profile-folio .v2-person dl > div { gap: var(--ed-space-6); padding-block: var(--ed-space-6); }
 .v2-world .v2-profile-folio .v2-person dt { font-size: var(--ed-small); line-height: 1.6; }
@@ -264,7 +261,6 @@
 }
 @media (max-width: 620px) {
   .v2-world, .product-page:not(.admin-page) { --ed-heading: clamp(2.25rem, 9.6vw, 3.25rem); }
-  .v2-world .v2-spine { padding-inline: 1.25rem; gap: .75rem; }
   .v2-world .v2-recipient-copy { width: 76%; }
   .v2-world .v2-recipient-copy strong { font-size: clamp(1.5rem, 6vw, 2.2rem); }
   .v2-world .v2-recipient-copy small, .v2-world .v2-recipient-copy > span { font-size: .6875rem; }
@@ -281,7 +277,7 @@
   .v2-world .v2-destination-events p { font-size: var(--ed-small); }
   .v2-world .v2-destination-date { font-size: clamp(1.4rem, 6vw, 1.75rem); }
   .v2-world .v2-profile-folio > header { margin-bottom: var(--ed-space-12); }
-  .v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(4rem, 17vw, 5.5rem); }
+  .v2-world .v2-profile-folio .v2-profile-copy > h3 { font-size: clamp(2.35rem, 8.7vw, 3.15rem); }
   .v2-world .v2-profile-folio .v2-person dl > div { grid-template-columns: 1fr; gap: var(--ed-space-2); padding-block: var(--ed-space-4); }
   .v2-world .v2-profile-folio .v2-person dt { font-size: var(--ed-small); }
   .v2-world .ks-story .ks-paper { padding: 4.5rem 1.5rem 6rem; }

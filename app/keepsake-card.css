@@ -44,3 +44,16 @@
   .v2-keepsake-personal .v2-keepsake-intro { margin-bottom:1.25rem; }
 }
 @media(max-width:360px) { .v2-keepsake-name-form { grid-template-columns:minmax(0,1fr); } }
+
+/* Story exports are prepared only after the guest requests them. */
+.keepsake-story-downloads { margin-top:1.75rem; padding-top:1.5rem; border-top:1px solid #aab49655; }
+.keepsake-story-downloads h4 { margin:0 0 .5rem; font:400 1.3rem/1.25 var(--v2-serif); color:#f6f0e3; }
+.keepsake-story-downloads p { font:.78rem/1.65 var(--v2-sans); color:#c5cba9; }
+.keepsake-story-actions { display:grid; gap:.6rem; margin-top:1rem; }
+.keepsake-story-actions button { cursor:pointer; text-align:left; background:transparent; }
+.keepsake-story-actions button:disabled { opacity:.5; cursor:wait; }
+.keepsake-story-actions :is(button,a):focus-visible,.keepsake-story-progress button:focus-visible { outline:2px solid #d8bc7a; outline-offset:4px; }
+.keepsake-story-progress progress { width:100%; height:5px; accent-color:#d8bc7a; }
+.keepsake-story-progress button { display:inline-flex; gap:.4rem; align-items:center; min-height:44px; padding:.5rem .75rem; color:#f6f0e3; background:transparent; border:1px solid #aab49666; cursor:pointer; }
+.keepsake-story-preview { display:block; width:min(100%,13rem); height:auto; aspect-ratio:9/16; margin-top:1rem; background:#122b20; border:1px solid #aab49644; }
+.keepsake-story-image-preview { display:inline-block; min-height:44px; margin-top:.5rem; color:#d8bc7a; font:.8rem/2.75rem var(--v2-sans); }

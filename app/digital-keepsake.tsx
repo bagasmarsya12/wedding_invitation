@@ -3,12 +3,13 @@
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { Download, RotateCw } from "lucide-react";
 import { KEEPSAKE_SCENE_CSS, keepsakeMarkup, keepsakeText, normalizeKeepsakeName, type KeepsakeFace, type KeepsakeCopy } from "@/lib/keepsake-design";
-import { WEDDING_EVENTS, WEDDING_VENUE } from "@/lib/wedding-calendar";
 import { T, useLanguage } from "./language";
+import { AtelierCardArt } from "./atelier-card-art";
+import { KeepsakeStoryDownloads } from "./keepsake-story-downloads";
 
 type DownloadAsset = { key: string; url: string; failed: boolean };
 
-export default function DigitalKeepsake({ guestName, edition }: { guestName: string; edition: number }) {
+export default function DigitalKeepsake({ guestName, edition, keepsakeNote }: { guestName: string; edition: number; keepsakeNote?:{note1:string;note2:string} }) {
   const { language, t, tField,website } = useLanguage();
   const [name, setName] = useState(() => normalizeKeepsakeName(guestName));
   const [draft, setDraft] = useState(() => normalizeKeepsakeName(guestName));
@@ -20,7 +21,7 @@ export default function DigitalKeepsake({ guestName, edition }: { guestName: str
   const inputId = useId();
   const scene = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
-  const data = useMemo(() => ({ language, name, edition,website,copy:Object.fromEntries((['forLabel', 'genericRecipient', 'note1', 'note2', 'love', 'editionLabel', 'turn', 'return', 'front', 'back', 'hint'] as const).map(key=>[key,tField(`keepsake.${key}`)])) as KeepsakeCopy }), [language, name, edition,website,tField]);
+  const data = useMemo(() => ({ language, name, edition,website,copy:{...Object.fromEntries((['forLabel', 'genericRecipient', 'note1', 'note2', 'love', 'editionLabel', 'turn', 'return', 'front', 'back', 'hint', 'hashtag'] as const).map(key=>[key,tField(`keepsake.${key}`)])) as KeepsakeCopy,...keepsakeNote} }), [language, name, edition,website,tField,keepsakeNote]);
   const digitalKey = JSON.stringify([data, attempt]);
   const imageKey = JSON.stringify([data, face, attempt]);
   const digitalUrl = digitalAsset?.key === digitalKey ? digitalAsset.url : "";
@@ -87,7 +88,10 @@ export default function DigitalKeepsake({ guestName, edition }: { guestName: str
   return <div className="v2-keepsake-layout">
     <style>{KEEPSAKE_SCENE_CSS}</style>
     <div ref={scene} className="k-scene" data-face={face}>
-      <div className="k-stage" onPointerMove={tilt} onPointerLeave={resetTilt} dangerouslySetInnerHTML={innerMarkup} />
+      <div className="k-stage" onPointerMove={tilt} onPointerLeave={resetTilt}>
+        <div className="atelier-card-fallback" dangerouslySetInnerHTML={innerMarkup} />
+        <AtelierCardArt data={data} face={face} />
+      </div>
       <div className="k-controls"><button type="button" aria-pressed={face === "back"} onClick={() => { resetTilt(); setFace(face === "front" ? "back" : "front"); }}><RotateCw size={15} strokeWidth={1.4} aria-hidden="true" />{face === "front" ? copy.turn : copy.return}</button></div>
       <p className="k-hint" role="status">{face === "front" ? copy.front : copy.back}</p>
     </div>
@@ -102,13 +106,14 @@ export default function DigitalKeepsake({ guestName, edition }: { guestName: str
         <span className="v2-keepsake-status" role="status">{updated && <T>Card updated.</T>}</span>
       </form>
       <div className="v2-keepsake-save-area">
-        {digitalUrl ? <a className="v2-keepsake-save digital-save" href={digitalUrl} download={`bagas-iga-digital-keepsake-${language}.html`}><Download size={15} strokeWidth={1.4} aria-hidden="true" /><T>Save digital keepsake</T></a> : <p role="status"><T>{digitalFailed ? "The digital file could not be prepared." : "Preparing your digital keepsake…"}</T></p>}
+        {digitalUrl ? <a className="v2-keepsake-save digital-save" href={digitalUrl} download={`iga-bagas-digital-keepsake-${language}.html`}><Download size={15} strokeWidth={1.4} aria-hidden="true" /><T>Save digital keepsake</T></a> : <p role="status"><T>{digitalFailed ? "The digital file could not be prepared." : "Preparing your digital keepsake…"}</T></p>}
         <p className="v2-keepsake-file-help"><T>Both sides, kept together. Open the file in a browser, even offline.</T></p>
-        {imageUrl && <a className="v2-keepsake-save image-save" href={imageUrl} download={`bagas-iga-keepsake-${face}-${language}.png`}><Download size={14} strokeWidth={1.4} aria-hidden="true" /><T>{face === "front" ? "Save front as image" : "Save back as image"}</T></a>}
+        {imageUrl && <a className="v2-keepsake-save image-save" href={imageUrl} download={`iga-bagas-keepsake-${face}-${language}.png`}><Download size={14} strokeWidth={1.4} aria-hidden="true" /><T>{face === "front" ? "Save front as image" : "Save back as image"}</T></a>}
         {imageFailed && <p role="status"><T>The image could not be prepared.</T></p>}
         {(digitalFailed || imageFailed) && <button className="v2-keepsake-retry" type="button" onClick={() => setAttempt(value => value + 1)}><T>Try again</T></button>}
       </div>
-      <p className="v2-keepsake-event-note">{copy.day}<br />{copy.venue}<br /><span>{WEDDING_EVENTS.akad.label[language]} {website.akadTime} · {WEDDING_EVENTS.reception.label[language]} {website.receptionTime}<T>WIB</T></span></p>
+      <KeepsakeStoryDownloads data={data} face={face} />
+      <p className="v2-keepsake-event-note">{copy.names}<br />{copy.day}<br /><span>{copy.hashtag}</span></p>
     </div>
   </div>;
 }

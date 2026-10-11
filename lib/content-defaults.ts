@@ -1,9 +1,11 @@
 // AUTO-GENERATED from sketches/admin-cms-v2 mockup (12 sections / 96 fields).
 // Defaults are the current landing literals; empty DB override = fallback.
 
+import { EXTRA_CONTENT_SECTIONS, EXTRA_CONTENT_TRANSLATIONS } from './cms-extra-content';
 import { indonesian } from './invitation-copy';
 import { copyKey, PUBLIC_COPY } from './copy-registry';
-import { KEEPSAKE_UI_EN, KEEPSAKE_UI_ID } from './keepsake-copy';
+import { GUEST_CONTENT_SECTIONS, GUEST_CONTENT_TRANSLATIONS } from './guest-content';
+import { PHOTO_COMMENT_COPY } from './photo-comment-copy';
 export type ContentField = { key: string; label: string; value: string };
 export type ContentSection = { id: string; label: string; photo?: boolean; fields: ContentField[] };
 export type ContentMap = Record<string, string>;
@@ -15,12 +17,12 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     {"key": "note1", "label": "Ucapan baris pertama", "value": "A little of our day,"},
     {"key": "note2", "label": "Ucapan baris kedua", "value": "kept for you."},
     {"key": "love", "label": "Penutup ucapan", "value": "With love,"},
-    {"key": "signatureNames", "label": "Nama pada tanda tangan", "value": "Iga dan Bagas"},
     {"key": "editionLabel", "label": "Label edisi", "value": "Guest edition"},
     {"key": "turn", "label": "Tombol balik", "value": "Turn it over"},
     {"key": "return", "label": "Tombol depan", "value": "Return to the front"},
     {"key": "front", "label": "Label depan", "value": "Front of the card"},
     {"key": "back", "label": "Label belakang", "value": "Back of the card"},
+    {"key": "hashtag", "label": "Hashtag pernikahan", "value": "#IganyaBagas"},
     {"key": "hint", "label": "Petunjuk", "value": "Two sides of the same day."}
   ]},
   { id: "hero", label: "Opening & Envelope", fields: [
@@ -78,10 +80,10 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     { key: "title3", label: "Judul bagian 3", value: "The day ahead" },
     { key: "body3", label: "Cerita bagian 3", value: "A few words about this next chapter will live here." },
   ] },
-  { id: "gallery", label: "Selected Moments (6 foto)", fields: [
+  { id: "gallery", label: "Selected Moments (10 foto)", fields: [
     { key: "head", label: "Heading galeri", value: "Selected moments." },
     { key: "sub", label: "Pengantar galeri", value: "A few frames from our life together." },
-    ...Array.from({ length: 6 }, (_, index) => ({ key: `caption${index + 1}`, label: `Caption foto ${index + 1}`, value: `Photograph ${String(index + 1).padStart(2, "0")} — caption to be added.` })),
+    ...Array.from({ length: 10 }, (_, index) => ({ key: `caption${index + 1}`, label: `Caption foto ${index + 1}`, value: `Photograph ${String(index + 1).padStart(2, "0")} — caption to be added.` })),
   ] },
   { id: "archive", label: "Archive", fields: [
     { key: "head", label: "Heading", value: "The Archive" },
@@ -116,10 +118,10 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     { key: "kontak d", label: "Kontak — isi", value: "A contact person will be added closer to the date." },
   ] },
   { id: "gift", label: "Gifts (heading & deskripsi)", fields: [
-    { key: "head", label: "Heading", value: "A few things" },
+    { key: "head", label: "Heading", value: "A little love" },
     { key: "sub", label: "Sub", value: "We’re saving room for." },
-    { key: "desc", label: "Deskripsi", value: "The catalogue opens from your private invitation. Each booking is saved under your name." },
-    { key: "kosong", label: "Teks saat katalog kosong", value: "Curated objects will be added here." },
+    { key: "desc", label: "Deskripsi", value: "Your presence is already a gift. If you would like to send a little love, we have left a few ways here." },
+    { key: "kosong", label: "Teks saat katalog kosong", value: "A few wishes for our home will find their place here." },
     { key: "cta", label: "Tombol", value: "Open the gift catalogue" },
   ] },
   { id: "mark", label: "Leave a mark", fields: [
@@ -161,10 +163,15 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
   ] },
 ];
 
-export const CONTENT_SECTIONS: ContentSection[] = [...BASE_CONTENT_SECTIONS, {id:'keepsakeUi',label:'Keepsake — semua tombol & status',fields:Object.entries(KEEPSAKE_UI_EN).map(([key,value])=>({key,label:key,value}))}, {id:'copy',label:'Semua kata-kata & interface',fields:PUBLIC_COPY.map(value=>({key:copyKey(value).slice(5),label:value,value}))}];
+export const CONTENT_SECTIONS: ContentSection[] = [...BASE_CONTENT_SECTIONS, ...GUEST_CONTENT_SECTIONS, ...EXTRA_CONTENT_SECTIONS, {id:'photoComments',label:'Komentar foto',fields:PHOTO_COMMENT_COPY.map(([key,label,value])=>({key,label,value}))}, {id:'copy',label:'Semua kata-kata & interface',fields:PUBLIC_COPY.map(value=>({key:copyKey(value).slice(5),label:value,value}))}];
 const english: ContentMap = Object.fromEntries(CONTENT_SECTIONS.flatMap(section => section.fields.map(field => [section.id + '.' + field.key, field.value])));
-export const CONTENT_DEFAULTS: ContentMap = {...english,...Object.fromEntries(Object.entries(english).map(([key,value])=>['id.'+key,indonesian[value.trim()] ?? value])),...Object.fromEntries(Object.entries(KEEPSAKE_UI_ID).map(([key,value])=>['id.keepsakeUi.'+key,value])),...{'id.keepsake.forLabel': 'Untuk', 'id.keepsake.genericRecipient': 'kamu', 'id.keepsake.note1': 'Sedikit dari hari kami,', 'id.keepsake.note2': 'untuk kamu simpan.', 'id.keepsake.love': 'Dengan sayang,', 'id.keepsake.editionLabel': 'Edisi tamu', 'id.keepsake.turn': 'Balik kartunya', 'id.keepsake.return': 'Kembali ke depan', 'id.keepsake.front': 'Sisi depan kartu', 'id.keepsake.back': 'Sisi belakang kartu', 'id.keepsake.hint': 'Dua sisi dari hari yang sama.'}};
+export const CONTENT_DEFAULTS: ContentMap = {...english,...Object.fromEntries(Object.entries(english).map(([key,value])=>['id.'+key,indonesian[value.trim()] ?? value])),...{'id.keepsake.forLabel': 'Untuk', 'id.keepsake.genericRecipient': 'kamu', 'id.keepsake.note1': 'Satu hari yang indah,', 'id.keepsake.note2': 'lebih indah karena kamu.', 'id.keepsake.love': 'Dengan sayang,', 'id.keepsake.editionLabel': 'Edisi tamu', 'id.keepsake.turn': 'Balik kartunya', 'id.keepsake.return': 'Kembali ke depan', 'id.keepsake.front': 'Sisi depan kartu', 'id.keepsake.back': 'Sisi belakang kartu', 'id.keepsake.hint': 'Dua sisi dari hari yang sama.'}};
+
+Object.assign(CONTENT_DEFAULTS, GUEST_CONTENT_TRANSLATIONS, { 'id.mark.head':'Sepatah kata darimu', 'id.mark.sub':'Yang singkat pun bisa tinggal lama.', 'id.mark.desc':'Kabari kami tentang kehadiranmu. Titipkan juga sepatah kata, coretan kecil, atau doa—kami suka kenangan yang datang dengan tulisan tangan.' });
 
 export function contentKey(sectionId: string, fieldKey: string): string {
   return sectionId + "." + fieldKey;
 }
+
+Object.assign(CONTENT_DEFAULTS, EXTRA_CONTENT_TRANSLATIONS);
+Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,,value])=>['id.photoComments.'+key,value])));
