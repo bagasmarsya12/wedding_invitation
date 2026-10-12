@@ -1,4 +1,5 @@
 import { isRichTextField, richTextPlain, validRichText, validPlainText } from './rich-text';
+import { isCmsPhotoKey } from './cms-photo-upload';
 import { upgradeProfileLabelCopy } from './profile-labels';
 import { contentEditorSections } from './content-editor-sections';
 import { CONTENT_DEFAULTS } from './content-defaults';
@@ -35,7 +36,7 @@ export function validateSectionSnapshot(id:string,input:unknown,base:{config:Web
   if(id==='details'&&!arrival||id!=='details'&&input.arrival!==undefined)return null;
   const media:Record<string,string|null>={},slots=new Set(sectionMediaSlots(id,blocks));
   for(const [slot,value]of Object.entries(input.media)) {
-    if(!slots.has(slot)||value!==null&&(typeof value!=='string'||!new RegExp(`^content/(?:${slot}\\.(?:jpg|png|webp|avif)|revisions/${slot}/[a-z0-9-]+\\.(?:jpg|png|webp|avif))$`).test(value)))return null;
+    if(!slots.has(slot)||value!==null&&(typeof value!=='string'||!isCmsPhotoKey(slot,value)))return null;
     media[slot]=value as string|null;
   }
   for(const slot of slots)if(!(slot in media))media[slot]=null;

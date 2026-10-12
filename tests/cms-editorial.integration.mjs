@@ -91,6 +91,36 @@ export async function verifyEditorialFlows(base,cookie){
   response=await act('profil',profile,'publish');assert.equal(response.status,200);profile=response.data;
   const publicPhoto=await fetch(base+'/api/admin/media/bagas');assert.equal(publicPhoto.status,200);assert.deepEqual(Buffer.from(await publicPhoto.arrayBuffer()),png);
   const secondPhoto=await upload();assert.equal(secondPhoto.status,200);assert.notEqual(secondPhoto.data.key,firstPhoto.data.key);assert.equal((await request(firstPhoto.data.url)).status,200,'Older image object remains recoverable');
+  // GIF bytes remain animated through private upload, draft, publish and recovery.
+  const gif=Buffer.from('R0lGODlhBAADAIEAACFDMQAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQIEgAAACwAAAAABAADAAAICAABCBxIUGBAACH5BAgqAAAALAAAAAAEAAMAgeiqwAAAAAAAAAAAAAgIAAEIHEhQYEAAIfkECEgAAAAsAAAAAAQAAwCBuphYAAAAAAAAAAAACAgAAQgcSFBgQAA7','base64');
+  let album=(await read('archive')).data;const gifSlot=album.live.blocks.photos[0].slot,publicGifPath=`/api/admin/media/${gifSlot}`;
+  async function uploadGif(section,slot,bytes=gif,{auth=true,origin=base,type='image/gif'}={}){
+    const form=new FormData();form.set('file',new Blob([bytes],{type}),'animated.gif');
+    const r=await fetch(`${base}/api/admin/editor/media/${slot}?section=${section}`,{method:'POST',headers:{...(auth?{cookie}:{}),origin},body:form});const text=await r.text();let data;try{data=JSON.parse(text);}catch{data=null;}return {status:r.status,data};
+  }
+  assert.equal((await uploadGif('archive',gifSlot,gif,{auth:false})).status,403);
+  assert.equal((await uploadGif('archive',gifSlot,gif,{origin:'https://other.example'})).status,403);
+  assert.equal((await uploadGif('profil','bagas')).status,400);
+  assert.equal((await uploadGif('archive',gifSlot,Buffer.from('not a GIF'))).status,400);
+  assert.equal((await uploadGif('archive',gifSlot,Buffer.alloc(20*1024*1024+1))).status,413);
+  assert.equal((await uploadGif('archive',gifSlot,Buffer.alloc(5*1024*1024+1),{type:'image/png'})).status,413,'Still photos retain their server upload limit');
+  const maximumGif=Buffer.alloc(20*1024*1024);gif.copy(maximumGif);
+  assert.equal((await uploadGif('archive',gifSlot,maximumGif)).status,200,'The full advertised GIF limit passes the multipart preflight');
+  const gifUpload=await uploadGif('archive',gifSlot);assert.equal(gifUpload.status,200);assert.match(gifUpload.data.key,/\.gif$/);
+  assert.equal((await request(gifUpload.data.url,null,{auth:false})).status,403);
+  const privateGif=await fetch(base+gifUpload.data.url,{headers:{cookie}});assert.equal(privateGif.status,200);assert.equal(privateGif.headers.get('content-type'),'image/gif');assert.deepEqual(Buffer.from(await privateGif.arrayBuffer()),gif);
+  const albumOriginal=structuredClone(album.live),albumDraft=structuredClone(album.live);albumDraft.media[gifSlot]=gifUpload.data.key;
+  response=await act('archive',album,'save',{snapshot:albumDraft});assert.equal(response.status,200,response.text);album=response.data;
+  assert.equal((await read('archive')).data.document.draft.media[gifSlot],gifUpload.data.key);
+  assert.equal((await request(publicGifPath,null,{auth:false})).status,404);
+  assert.equal((await request('/admin/content-preview?section=archive')).status,200);
+  response=await act('archive',album,'publish');assert.equal(response.status,200,response.text);album=response.data;
+  const publicGif=await fetch(base+publicGifPath);assert.equal(publicGif.status,200);assert.equal(publicGif.headers.get('content-type'),'image/gif');assert.deepEqual(Buffer.from(await publicGif.arrayBuffer()),gif);
+  assert.ok((await request('/')).text.includes(publicGifPath),'GIF reaches the homepage album');
+  const albumBaseline=album.document.history.find(r=>r.kind==='baseline');
+  response=await act('archive',album,'restore',{revision:albumBaseline.id});assert.equal(response.status,200);album=response.data;assert.deepEqual(album.document.draft,albumOriginal);
+  response=await act('archive',album,'publish');assert.equal(response.status,200);assert.equal((await request(publicGifPath,null,{auth:false})).status,404);assert.equal((await request(gifUpload.data.url)).status,200,'Original GIF remains recoverable');
+  console.log('Archive GIF upload: unchanged animation bytes, scoped formats/limits, draft privacy, publish to the album and restore: OK');
   // Histories are bounded, while the current live version is preserved for recovery.
   for(let i=0;i<33;i++){const edit=structuredClone(hero.document.draft??hero.live);edit.copy[key]=`Retention fixture ${i}`;response=await act('hero',hero,'save',{snapshot:edit});assert.equal(response.status,200,response.text);hero=response.data;}
   assert.equal(hero.document.history.length,30);assert.ok(hero.document.history.some(r=>r.id===hero.document.publishedId));

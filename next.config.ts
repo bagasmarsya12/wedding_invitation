@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Vinext inspects multipart API uploads through the server-action preflight too.
+  // Allow a 20 MB archive GIF plus multipart overhead; each API still enforces its own limits.
+  experimental: { serverActions: { bodySizeLimit: '21mb' } },
   async headers() {
     const security = [
       { key: "X-Content-Type-Options", value: "nosniff" },
