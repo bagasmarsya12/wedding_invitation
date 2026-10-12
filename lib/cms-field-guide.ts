@@ -5,7 +5,7 @@ import { copyKey } from './copy-registry';
 const retiredControls = new Set([
   'profil.kicker', 'profil.b_cap', 'profil.i_cap', 'footer.edisi',
   'footer.amplop', 'guest.party',
-  ...['A reply from', 'our favourite people', 'Reply received', 'View the envelope again'].map(copyKey),
+  ...['A reply from', 'our favourite people', 'Reply received', 'View the envelope again', 'Open purchase link', 'Object photograph', 'to be added'].map(copyKey),
   'useful.head', 'useful.sub', 'guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending',
   ...['For those who know one of us better.', 'Bagas, as himself.', 'Iga, as herself.', 'As observed by Iga', 'As observed by Bagas'].map(copyKey),
 ]);
@@ -86,7 +86,7 @@ export const sectionHelp = (section: string) => ({
   story: 'Bab cerita tampil berurutan di homepage. Judul section diatur melalui Teks & tombol.',
   archive: 'Album foto adalah kartu-kartu di Arsip cinta kami. Cerita tambahan memiliki halaman sendiri di Arsip.',
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
-  gift: 'Hadiah barang serta rekening dan e-wallet tampil di Tanda kasih. Masing-masing memiliki tab sendiri.',
+  gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tersedia lewat undangan personal. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',
   footer: 'Kalimat dan tautan di akhir undangan. Hashtag mengikuti Kartu kenangan.',
   jukebox: 'Playlist dan kata-kata jukebox diatur bersama. Lagu tampil setelah audio diunggah dan lagu diaktifkan.',

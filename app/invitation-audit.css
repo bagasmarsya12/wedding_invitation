@@ -18,22 +18,19 @@
 .ks-reply.v2-mark.has-studio .v2-mark-copy h2 { grid-column:1; grid-row:2; }
 .ks-reply.v2-mark.has-studio .v2-mark-copy > span { grid-column:2; grid-row:2; align-self:start; padding-top:.35rem; max-width:38ch; }
 
-/* Small object photographs keep six gifts and the transfer list easy to scan. */
+/* A compact wishlist keeps the needed objects and their reasons together. */
 .gift-options-subtitle { margin:0 0 1rem; font:400 clamp(1.35rem,2.1vw,1.6rem)/1.2 var(--bx-serif); }
-.gift-options-items .gift-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.35rem 1.5rem; margin:0; align-items:start; }
-.gift-options-items .gift-card { min-width:0; background:none; border:0; padding:0; }
-.gift-options-items .gift-image { position:relative; display:grid; place-items:center; height:clamp(7rem,10vw,8.5rem); aspect-ratio:auto; margin:0; padding:.7rem; background:#e8e5d8; border:1px solid #bca87866; border-radius:1px; box-shadow:none; overflow:hidden; }
-.gift-options-items .gift-image::before,.gift-options-items .gift-image::after,.gift-options-items .gift-display-light,.gift-options-items .gift-display-plinth { display:none; }
-.gift-options-items .gift-image img { position:absolute; inset:0; padding:.7rem; width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; transform:none; filter:none; margin:0; }
-.gift-options-items .gift-card-caption { padding:.75rem 0 0; }
+.gift-options-items .gift-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:0; align-items:stretch; }
+.gift-options-items .gift-card.is-text-only { min-width:0; background:#f7f2e766; border:1px solid #21382c26; padding:1.15rem; }
+.gift-options-items .gift-card-caption { display:flex; flex-direction:column; height:100%; padding:0; }
 .gift-options-items .gift-card-caption > .gift-recipient { margin:0 0 .3rem; font:.74rem/1.5 var(--bx-sans); letter-spacing:.025em; color:#637147; }
 .gift-options-items .gift-card-caption h4 { margin:0 0 .35rem; font:400 clamp(1.16rem,1.7vw,1.4rem)/1.25 var(--bx-serif); letter-spacing:-.02em; overflow-wrap:anywhere; }
 .gift-options-items .gift-card-caption > .gift-reason { font:.875rem/1.55 var(--bx-sans); margin:0; overflow-wrap:anywhere; }
 .gift-options-items .gift-availability { margin:0 0 .2rem; font:.72rem/1.4 var(--bx-sans); }
-.gift-options-items .gift-actions { margin-top:.65rem; }
-.gift-options-items .gift-actions button,.gift-options-items .gift-actions a { padding:.5rem .65rem; font-size:.8rem; line-height:1.4; min-height:44px; text-transform:none; letter-spacing:0; }
+.gift-options-items .gift-actions { margin-top:auto; padding-top:.85rem; }
+.gift-options-items .gift-actions button { padding:.5rem .75rem; font-size:.8rem; line-height:1.4; min-height:44px; text-transform:none; letter-spacing:0; }
+.gift-options-items .gift-actions button:first-child:not(:disabled) { background:#21382c; color:#f7f2e7; border-color:#21382c; }
 .gift-options-items { margin-top:1.75rem; padding-top:1.35rem; border-top:1px solid #21382c40; }
-.gift-options-items .gift-photo-placeholder { padding:.5rem; font-size:.75rem; line-height:1.45; }
 
 /* The recipient gets a full row, including longer account-holder names. */
 .gift-options-folio .gift-transfer-method { grid-template-columns:minmax(0,1fr) auto; gap:.4rem 1rem; padding:.9rem 0; }
@@ -62,14 +59,10 @@
   .v2-world .ks-story .atelier-botanicals.ks-botanicals-folio .ks-plant-3 { --atelier-width:4rem; left:-14%; bottom:-4%; }
   .v2-world .ks-story .atelier-botanicals.ks-botanicals-folio .ks-plant-4 { --atelier-width:8rem; right:-20%; bottom:-5%; }
   .gift-options-items .gift-grid { grid-template-columns:1fr; gap:1rem; }
-  .gift-options-items .gift-card { display:grid; grid-template-columns:5.25rem minmax(0,1fr); gap:.85rem; align-items:start; padding-bottom:1rem; border-bottom:1px solid #21382c20; }
-  .gift-options-items .gift-card:last-child { padding-bottom:0; border-bottom:0; }
-  .gift-options-items .gift-image { width:5.25rem; height:6rem; padding:.4rem; }
-  .gift-options-items .gift-image img { padding:.4rem; }
+  .gift-options-items .gift-card.is-text-only { padding:1rem; }
   .gift-options-items .gift-card-caption { padding:0; }
   .gift-options-items .gift-card-caption h4 { font-size:1.1rem; }
   .gift-options-items .gift-card-caption > .gift-reason { font-size:.85rem; }
-  .gift-options-items .gift-photo-placeholder { padding:.2rem; font-size:.7rem; }
   .gift-options-items { margin-top:1.5rem; }
   .v2-closing-colophon { grid-template-columns:1fr; justify-items:center; text-align:center; }
   .v2-closing-colophon > .v2-closing-hashtag,.v2-closing-colophon > small { grid-column:1; justify-self:center; }

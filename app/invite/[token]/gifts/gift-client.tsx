@@ -1,22 +1,14 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 import { T, useLanguage } from "../../../language";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { GIFT_COLLECTIONS, type GiftCollection } from "@/lib/gift-collections";
 import { GiftTransfers } from '../../../gift-transfers';
 import type { GuestGiftTransfer } from '@/lib/gift-transfers';
 
-type Gift = { id: string; title: string; description: string | null; category: string; imageUrl: string | null; priceLabel: string | null; status: string; reservedByYou: boolean; reservedByName: string | null; purchaseUrl: string | null; shippingRequired: boolean };
+type Gift = { id: string; title: string; description: string | null; category: string; priceLabel: string | null; status: string; reservedByYou: boolean; reservedByName: string | null; shippingRequired: boolean };
 type Result = { error?: string; gifts?: Gift[]; guestName?: string; cashGiftDetails?: string | null; transferMethods?: GuestGiftTransfer[]; shippingInstructions?: string | null; enabled?: boolean };
 type Action = "reserve" | "release" | "purchased";
 const CATEGORY_LABELS: Record<string, string> = { bagas: "For Bagas", iga: "For Iga", home: "For Our Home" };
-export function GiftObject({ gift }: { gift: Pick<Gift, "id" | "title" | "category" | "imageUrl"> }) {
-  const [failed, setFailed] = useState(false);
-  return <div className={`gift-image gift-display-${gift.category}`}><span className="gift-display-light" aria-hidden="true" />
-    {gift.imageUrl && !failed ? <img src={gift.imageUrl} alt={gift.title} loading="lazy" decoding="async" onError={() => setFailed(true)} onLoad={event => { const image = event.currentTarget; image.style.setProperty("--gift-native-width", `${image.naturalWidth / Math.max(1, devicePixelRatio || 1)}px`); }} /> : <span className="gift-photo-placeholder"><T>{failed ? "Image unavailable." : "Object photograph"}</T>{!failed && <><br /><T>to be added</T></>}</span>}
-    <span className="gift-display-plinth" aria-hidden="true" /></div>;
-}
-
 export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inline = false }: { token: string; guestName: string; initialCategory?: GiftCollection; inline?: boolean }) {
   const { t } = useLanguage();
   const [gifts, setGifts] = useState<Gift[]>([]), [identity, setIdentity] = useState(guestName);
@@ -90,11 +82,10 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
       {load === "loading" && <div className="gift-loading"><p role="status"><T>Opening the collection…</T></p><div aria-hidden="true"><span /><span /><span /></div></div>}
       {load === "error" && <div className="gift-load-error"><button type="button" className="paper-button" onClick={reload}><T>Try again</T></button></div>}
       {load === "ready" && <div className="gift-grid">{visible.length === 0 && (inline ? <p className="gift-options-empty"><T field="gift.kosong" /></p> : <div className={`empty-catalogue gift-empty-${category}`}><span>{t(CATEGORY_LABELS[category])}</span><h2><T>A little space, for now.</T></h2><p><T>No items have been added to this category yet.</T></p><div className="gift-empty-niche" aria-hidden="true" /></div>)}
-        {visible.map(gift => <article className={`gift-card gift-card-${gift.category} ${gift.status !== "available" && !gift.reservedByYou ? "is-booked" : ""}`} key={gift.id}>
-          <GiftObject key={gift.imageUrl || gift.id} gift={gift} /><div className="gift-card-caption"><p className={`gift-availability is-${gift.status}`}><span aria-hidden="true" />{gift.status === "available" ? t("available") : <span className="gift-reserved-name">{t(gift.status === "purchased" ? "Purchased by" : "Booked by")} {bookedName(gift)}</span>}</p>{inline && <p className="gift-recipient"><T>{gift.category === "home" ? "For Iga & Bagas" : CATEGORY_LABELS[gift.category]}</T></p>}{inline ? <h4>{gift.title}</h4> : <h2>{gift.title}</h2>}<p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
+        {visible.map(gift => <article className={`gift-card is-text-only gift-card-${gift.category} ${gift.status !== "available" && !gift.reservedByYou ? "is-booked" : ""}`} key={gift.id}>
+          <div className="gift-card-caption"><p className={`gift-availability is-${gift.status}`}><span aria-hidden="true" />{gift.status === "available" ? t("available") : <span className="gift-reserved-name">{t(gift.status === "purchased" ? "Purchased by" : "Booked by")} {bookedName(gift)}</span>}</p>{inline && <p className="gift-recipient"><T>{gift.category === "home" ? "For Iga & Bagas" : CATEGORY_LABELS[gift.category]}</T></p>}{inline ? <h4>{gift.title}</h4> : <h2>{gift.title}</h2>}<p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
           <div className="gift-actions">{gift.status === "available" && <button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "reserve")}><T>Book this gift</T></button>}
             {gift.reservedByYou && gift.status === "reserved" && <><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "release")}><T>Cancel booking</T></button><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "purchased")}><T>I’ve bought it</T></button></>}
-            {gift.reservedByYou && gift.purchaseUrl && <a href={gift.purchaseUrl} target="_blank" rel="noreferrer"><T>Open purchase link</T></a>}
             {!gift.reservedByYou && gift.status !== "available" && <button type="button" disabled aria-label={`${t("Booked by")} ${gift.reservedByName || t("another guest")}`}><T>Already booked</T></button>}
           </div></div></article>)}
       </div>}

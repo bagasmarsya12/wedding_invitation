@@ -48,8 +48,11 @@
 .gift-gallery-page .catalogue-tabs button::after { position:absolute; bottom:-1px; left:15%; right:15%; height:2px; content:""; background:#62734c; opacity:0; transform:scaleX(.65); transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s ease; }
 .gift-gallery-page .catalogue-tabs button.is-active::after { opacity:1; transform:none; }
 .gift-gallery-page .product-status { min-height:1.4rem; margin:0 0 1.4rem; font:.85rem/1.6 var(--bx-sans); color:#596949; }
-.gift-gallery-page .gift-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1.5rem,4vw,4rem); align-items:start; }
+.gift-gallery-page .gift-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.25rem; align-items:stretch; }
 .gift-gallery-page .gift-card { padding:0 0 1.75rem; border:0; min-width:0; }
+.gift-gallery-page .gift-card.is-text-only { padding:1.5rem; border:1px solid #21382c26; background:#f7f2e766; }
+.gift-gallery-page .is-text-only .gift-card-caption { display:flex; flex-direction:column; height:100%; }
+.gift-gallery-page .is-text-only .gift-actions { margin-top:auto; padding-top:1rem; }
 /* A bounded track prevents tall source photos from expanding the display's grid. */
 .gift-gallery-page .gift-image { position:relative; grid-template-rows:minmax(0,1fr); height:clamp(17rem,26vw,25rem); aspect-ratio:auto; padding:1.5rem 1.5rem 2.3rem; margin:0 0 1.4rem; border:1px solid #a3a58c80; border-radius:44% 44% 2px 2px / 28% 28% 2px 2px; background:linear-gradient(115deg,#bac6a9,#e4e8d9 67%,#f6f2e7); box-shadow:inset 5px 8px 18px #39443825,0 3px 0 #c9cbbb,0 7px 12px #353e2d14; }
 .gift-gallery-page .gift-display-iga { border-radius:48% 48% 2px 2px / 35% 35% 2px 2px; background:linear-gradient(115deg,#c6a7a2,#eee0d8 68%,#f6f2e7); }
