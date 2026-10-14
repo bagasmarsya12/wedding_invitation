@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "edition": "atelier-mirrored-album-2026-10-09",
-  "approval": "User explicitly requested four additional homepage photo cards after photo 6, with four small cards on the left and photo 6 large on the right, plus CMS upload slots and deployment. The mirrored album layout was inspected in the local browser. Only the approved archive layout stylesheet hash changes; all illustration files, floral compositions, monogram, envelope animation and ten-second keepsake exports retain their previous hashes.",
+  "edition": "atelier-extended-gif-album-2026-10-14",
+  "approval": "User explicitly requested adding all seven supplied GIFs to Arsip cinta kami and authorized arranging them alongside existing content. The first ten photos, captions, IDs and media remain unchanged. Additional album pages were inspected at desktop and 390px mobile widths, keeping whole GIFs, existing photo popup and comment actions. Only the intentionally extended archive stylesheet hash changes; all illustrations, floral compositions, identity, envelope animation and keepsake export files retain their previous hashes.",
   "files": [
     {
       "path": "app/archive-collection.css",
-      "sha256": "34159eb20307d586c16e910348b801097533814f094b912e69bb2ca92d5d76c4"
+      "sha256": "1758d48527f1bf44a361eeded06d833d982ceeff179c40fe1495b7f3339df836"
     },
     {
       "path": "app/arrival-archive-florals.css",
