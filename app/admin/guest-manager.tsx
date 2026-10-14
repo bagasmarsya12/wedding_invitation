@@ -7,7 +7,7 @@ import {formatAdminTime} from '@/lib/admin-time';
 type Props={guests:AdminRow[];rsvps:AdminRow[];settings:AdminRow[];knownLinks:Record<string,string>;action:AdminAction;regenerate:(id:string)=>Promise<void>;rememberLink:(id:string,url:string)=>void;notify:(message:string)=>void;exportGuests:()=>void};
 type Modal={id:string;kind:'share'|'edit'|'qr'};
 export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate,rememberLink,notify,exportGuests}:Props){
-  const [search,setSearch]=useState(''),[group,setGroup]=useState('all'),[attendance,setAttendance]=useState('all'),[sent,setSent]=useState('all'),[access,setAccess]=useState('all');
+  const [search,setSearch]=useState(''),[group,setGroup]=useState('all'),[attendance,setAttendance]=useState('all'),[sent,setSent]=useState('all'),[access,setAccess]=useState('active');
   const [page,setPage]=useState(0),[pageSize,setPageSize]=useState(25),[sort,setSort]=useState('name');
   const query=useDeferredValue(search.trim().toLocaleLowerCase('id'));
   const [modal,setModal]=useState<Modal|null>(null),[link,setLink]=useState(''),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -32,7 +32,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
   const selected=guests.find(r=>r.id===modal?.id);
   useEffect(()=>{if(modal)dialog.current?.showModal();},[modal]);
   const close=()=>{dialog.current?.close();setModal(null);setMessage('');setError('');setQr(null);};
-  function reset(){setSearch('');setGroup('all');setAttendance('all');setSent('all');setAccess('all');setPage(0);setChosen(new Set());}
+  function reset(){setSearch('');setGroup('all');setAttendance('all');setSent('all');setAccess('active');setPage(0);setChosen(new Set());}
   async function savedLink(row:AdminRow){
     const id=text(row.id);if(knownLinks[id])return knownLinks[id];
     if(!row.has_saved_link)throw new Error('Link lama belum tersimpan. Tempel link yang pernah dibagikan lewat menu Edit / pesan.');
@@ -59,7 +59,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
   let personal:{note1?:string;note2?:string}={};try{const parsed=JSON.parse(note||'{}');if(parsed&&typeof parsed==='object')personal=parsed;}catch{/* Old records keep the default greeting. */}
   return <>
     <section className="admin-panel admin-wide guest-directory">
-      <header className="cms-section-heading"><div><h2>Daftar tamu</h2><p>{guests.length} undangan · {guests.filter(r=>r.invitation_sent_at).length} ditandai sudah dikirim</p></div><button type="button" onClick={exportGuests}>Unduh CSV tamu</button></header>
+      <header className="cms-section-heading"><div><h2>Daftar tamu</h2><p>{guests.filter(r=>r.status==='active').length} undangan aktif · {guests.filter(r=>r.status==='active'&&r.invitation_sent_at).length} ditandai sudah dikirim</p></div><button type="button" onClick={exportGuests}>Unduh CSV tamu</button></header>
       <div className="guest-filters">
         <label>Cari tamu<input type="search" placeholder="Nama atau email" value={search} onChange={e=>{setSearch(e.target.value);setPage(0);setChosen(new Set());}} /></label>
         <label>Kelompok<select value={group} onChange={e=>{setGroup(e.target.value);setPage(0);setChosen(new Set());}}><option value="all">Semua kelompok</option>{GUEST_GROUPS.map(g=><option key={g.key} value={g.key}>{g.label}</option>)}</select></label>

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "edition": "atelier-extended-gif-album-2026-10-14",
-  "approval": "User explicitly requested adding all seven supplied GIFs to Arsip cinta kami and authorized arranging them alongside existing content. The first ten photos, captions, IDs and media remain unchanged. Additional album pages were inspected at desktop and 390px mobile widths, keeping whole GIFs, existing photo popup and comment actions. Only the intentionally extended archive stylesheet hash changes; all illustrations, floral compositions, identity, envelope animation and keepsake export files retain their previous hashes.",
+  "edition": "atelier-recipient-overlay-2026-10-14",
+  "approval": "User approved placing the recipient name above the floral accents. Exported front cards were visually inspected with short and long names. Only the name layer order in the canvas renderer and offline CSS changes; all artwork, floral geometry, foil, motion, font choices and card layout retain their previous approved form.",
   "files": [
     {
       "path": "app/archive-collection.css",
@@ -29,11 +29,11 @@
     },
     {
       "path": "lib/keepsake-design.ts",
-      "sha256": "e45fe5d5468aa70d356bf16ee714ea2adec7e352879f12e49adb94baf2bd5cf0"
+      "sha256": "edb83d96bada7f341cecb3dbea744bc960b264bf1ec79436991911d2797f61f3"
     },
     {
       "path": "lib/wedding-keepsake.ts",
-      "sha256": "71fb461b8d1de58a4a3db2951cb5923132121d1bd909cb18759eb77f7ca370bc"
+      "sha256": "cde0fbf85fdf3cecfe91ba6af0db12bec107d2e27f9526f2f592b9a733898d23"
     },
     {
       "path": "public/assets/15-paper-fiber-texture.webp",

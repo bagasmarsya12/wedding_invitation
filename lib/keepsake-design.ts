@@ -109,7 +109,7 @@ export const KEEPSAKE_SCENE_CSS = `
 .k-date,.k-back-date{font:400 3.78cqw/1.4 var(--k-serif)}
 .k-date{position:absolute;z-index:1;top:60%;left:22%;width:56%;color:#49533d}
 .k-face .k-hashtag{position:absolute;z-index:1;top:65%;left:22%;width:56%;margin:0;font:400 2.8cqw/1.4 var(--k-sans);color:#85682f}
-.k-recipient{position:absolute;z-index:1;top:72%;left:20%;width:60%;color:#49533d}.k-recipient>span{display:block;margin-bottom:.4em;font:italic 2.8cqw/1.3 var(--k-serif)}
+.k-recipient{position:absolute;z-index:4;top:72%;left:20%;width:60%;color:#49533d}.k-recipient>span{display:block;margin-bottom:.4em;font:italic 2.8cqw/1.3 var(--k-serif)}
 .k-recipient strong{display:block;font:400 3.6cqw/1.3 var(--k-serif);overflow-wrap:anywhere}.k-recipient.k-long-name strong{font-size:2.6cqw}.k-recipient.k-very-long-name strong{font-size:2.2cqw}
 .k-plant{position:absolute;z-index:2;display:block;height:auto;max-width:none;pointer-events:none;user-select:none}
 .k-sheen{position:absolute;z-index:3;inset:0;pointer-events:none;background:radial-gradient(ellipse at var(--k-light-x,25%) var(--k-light-y,20%),#fff8d713,transparent 60%)}

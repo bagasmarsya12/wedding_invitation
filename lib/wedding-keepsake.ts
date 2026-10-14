@@ -88,8 +88,6 @@ export async function createWeddingKeepsake(data: KeepsakeData, face: KeepsakeFa
     text(copy.firstName, 450, 489, 104); text("&", 450, 555, 48, serif, "#a96c78"); text(copy.secondName, 450, 642, 104);
     text(copy.stamp, 450, 753, 34, serif, "#49533d");
     text(copy.hashtag, 450, 803, 27, sans, "#85682f");
-    text(copy.forLabel, 450, 885, 25, serif, "#49533d", true);
-    recipient(data.name || copy.genericRecipient, 941, data.name.length > 90 ? 20 : data.name.length > 55 ? 23 : 32, "#49533d");
   } else {
     ctx.strokeStyle = "#aab49666"; ctx.strokeRect(45, 60, 810, 1080);
     ctx.strokeStyle = "#aab49633"; ctx.strokeRect(61, 82, 778, 1036);
@@ -130,6 +128,12 @@ export async function createWeddingKeepsake(data: KeepsakeData, face: KeepsakeFa
     const width = plant.width, height = plant.height ?? width * image.naturalHeight / image.naturalWidth;
     ctx.save(); ctx.translate(plant.x + width / 2, plant.y + height / 2); ctx.rotate(plant.rotation * Math.PI / 180);
     ctx.drawImage(image, -width / 2, -height / 2, width, height); ctx.restore();
+  }
+  // Personal names share the printed floral area, so paint them on top.
+  // This order also feeds the live foil surface and both Story exports.
+  if (face === "front") {
+    text(copy.forLabel, 450, 885, 25, serif, "#49533d", true);
+    recipient(data.name || copy.genericRecipient, 941, data.name.length > 90 ? 20 : data.name.length > 55 ? 23 : 32, "#49533d");
   }
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Keepsake export unavailable")), "image/png");
