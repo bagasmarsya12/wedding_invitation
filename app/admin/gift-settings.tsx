@@ -6,12 +6,12 @@ import { GIFT_TRANSFER_IDS, GIFT_TRANSFER_LABELS, GIFT_TRANSFER_SETTING, readGif
 function TransferSettings({ value, action }: { value: string; action: AdminAction }) {
   const initial = readGiftTransfers(value);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
-  return <section className="admin-panel admin-wide cms-transfer-settings"><h3>Rekening & e-wallet</h3><p>Aktifkan metode yang ingin ditampilkan di Tanda kasih. Nomor rekening dan GoPay bisa disalin; DANA memakai tombol buka link.</p>
+  return <section className="admin-panel admin-wide cms-transfer-settings"><h3>Rekening & e-wallet</h3><p>Aktifkan metode yang ingin ditampilkan di Tanda kasih. Nomor rekening dan GoPay bisa disalin. DANA dapat menampilkan nomor telepon bersama tombol buka link.</p>
     <form onSubmit={async event => {
       event.preventDefault(); const data = new FormData(event.currentTarget);
-      const input = Object.fromEntries(GIFT_TRANSFER_IDS.map(id => [id, { enabled: data.get(`${id}.enabled`) === 'on', recipient: data.get(`${id}.recipient`), destination: data.get(`${id}.destination`), cta: { id: data.get(`${id}.cta.id`), en: data.get(`${id}.cta.en`) } }]));
+      const input = Object.fromEntries(GIFT_TRANSFER_IDS.map(id => [id, { enabled: data.get(`${id}.enabled`) === 'on', recipient: data.get(`${id}.recipient`), destination: data.get(`${id}.destination`), ...(id === 'dana' ? { phone: data.get('dana.phone') ?? '' } : {}), cta: { id: data.get(`${id}.cta.id`), en: data.get(`${id}.cta.en`) } }]));
       const valid = validateGiftTransfers(input);
-      if (!valid) { setMessage('Lengkapi nama penerima dan nomor/link setiap metode yang diaktifkan. Rekening hanya angka, GoPay nomor telepon, DANA link HTTPS.'); return; }
+      if (!valid) { setMessage('Lengkapi nama penerima dan nomor/link setiap metode yang diaktifkan. Rekening hanya angka; nomor GoPay dan DANA harus valid. Link DANA menggunakan HTTPS.'); return; }
       setBusy(true); setMessage('');
       try { const result = await action('set_setting', { key: GIFT_TRANSFER_SETTING, value: JSON.stringify(valid) }); setMessage(result ? 'Pilihan tanda kasih tersimpan.' : 'Belum tersimpan. Periksa pesan di atas lalu coba lagi.'); }
       finally { setBusy(false); }
@@ -19,6 +19,7 @@ function TransferSettings({ value, action }: { value: string; action: AdminActio
       <label className="check"><input type="checkbox" name={`${id}.enabled`} defaultChecked={initial[id].enabled} /> Tampilkan {GIFT_TRANSFER_LABELS[id]}</label>
       <label>Nama penerima {GIFT_TRANSFER_LABELS[id]}<input name={`${id}.recipient`} defaultValue={initial[id].recipient} maxLength={120} autoComplete="off" /></label>
       <label>{id === 'dana' ? 'Link DANA' : id === 'gopay' ? 'Nomor GoPay' : `Nomor rekening ${GIFT_TRANSFER_LABELS[id]}`}<input name={`${id}.destination`} defaultValue={initial[id].destination} maxLength={id === 'dana' ? 1000 : 40} type={id === 'dana' ? 'url' : 'text'} inputMode={id === 'dana' ? 'url' : id === 'gopay' ? 'tel' : 'numeric'} autoComplete="off" placeholder={id === 'dana' ? 'https://…' : undefined} /></label>
+      {id === 'dana' && <label>Nomor DANA (opsional)<input name="dana.phone" defaultValue={initial.dana.phone ?? ''} maxLength={40} type="tel" inputMode="tel" autoComplete="off" /><span className="cms-muted">Tampil di bawah nama penerima. Tombol Buka DANA tetap memakai link di atas.</span></label>}
       <details className="cms-advanced-fields"><summary>Teks tombol {GIFT_TRANSFER_LABELS[id]}</summary><label>Indonesia<input name={`${id}.cta.id`} defaultValue={initial[id].cta.id} maxLength={100} placeholder={id === 'dana' ? 'Buka DANA' : id === 'gopay' ? 'Salin nomor' : 'Salin rekening'} /></label>
       <label>English<input name={`${id}.cta.en`} defaultValue={initial[id].cta.en} maxLength={100} placeholder={id === 'dana' ? 'Open DANA' : id === 'gopay' ? 'Copy phone number' : 'Copy account number'} /></label></details>
     </fieldset>)}</div><p className="cms-muted">Kosongkan teks tombol untuk memakai wording dari CMS → Tanda kasih. Metode nonaktif tidak tampil kepada tamu. Menyimpan form ini menggantikan tampilan detail rekening lama, tanpa menghapus isinya.</p><p role="status">{message}</p><button disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan pilihan tanda kasih'}</button></form>

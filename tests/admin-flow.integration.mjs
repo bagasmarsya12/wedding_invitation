@@ -138,7 +138,7 @@ try {
 
     const methods = emptyGiftTransfers();
     methods.bca = { enabled: true, recipient: 'Fixture Only', destination: '0012345678', cta: { id: 'Salin nomor fixture', en: 'Copy fixture account' } };
-    methods.dana = { enabled: true, recipient: 'Fixture Only', destination: 'https://example.test/fixture-dana', cta: { id: '', en: '' } };
+    methods.dana = { enabled: true, recipient: 'Fixture Only', destination: 'https://example.test/fixture-dana', phone:'081395746085', cta: { id: '', en: '' } };
     const setting = { op: 'set_setting', key: 'gift_transfer_methods', value: JSON.stringify(methods) };
     assert.equal((await api(base, '/api/admin/state', '', setting)).status, 403);
     const unsafe = structuredClone(methods); unsafe.dana.destination = 'javascript:alert(1)';
@@ -149,6 +149,8 @@ try {
     assert.deepEqual(options.body.methods.map(row=>row.id), ['bca','dana']);
     assert.equal(options.body.methods[0].destination, '0012345678');
     assert.equal(options.body.methods[0].cta.id, 'Salin nomor fixture');
+    assert.equal(options.body.methods[1].phone, '081395746085');
+    assert.equal(options.body.methods[1].destination, 'https://example.test/fixture-dana');
     assert.equal(options.body.legacyDetails, null);
     const publicOptions = await api(base, '/api/gift-options', '');
     assert.equal(publicOptions.status, 200);

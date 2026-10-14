@@ -21,7 +21,7 @@ export function GiftTransfers({ methods, legacyDetails = null }: { methods: Gues
       const cta = method.cta[language] || t(method.id === 'dana' ? 'Open DANA' : method.id === 'gopay' ? 'Copy phone number' : 'Copy account number');
       return <article className={`gift-transfer-method gift-transfer-${method.id}`} key={method.id}>
         <div><h3>{method.label}</h3><p className="gift-transfer-recipient">{method.recipient}</p></div>
-        <div className="gift-transfer-destination">{method.id === 'dana' ? <p><T>Send a little love via DANA.</T></p> : <p><span><T>{method.id === 'gopay' ? 'Phone number' : 'Account number'}</T></span><strong dir="ltr">{method.destination}</strong></p>}</div>
+        <div className="gift-transfer-destination">{method.id === 'dana' && !method.phone ? <p><T>Send a little love via DANA.</T></p> : <p><span><T>{method.id === 'gopay' || method.id === 'dana' ? 'Phone number' : 'Account number'}</T></span><strong dir="ltr">{method.id === 'dana' ? method.phone : method.destination}</strong></p>}</div>
         {method.id === 'dana' ? <a className="gift-transfer-action" href={method.destination} target="_blank" rel="noopener noreferrer">{cta}<ArrowUpRight size={15} aria-hidden="true" /></a> : <button className="gift-transfer-action" type="button" onClick={() => void copy(method.destination, method.id)}>{copied === method.id ? t('Copied.') : cta}<Copy size={14} aria-hidden="true" /></button>}
       </article>;
     })}</div>)}</div>

@@ -2,7 +2,7 @@ import type { Localized } from './website-content';
 
 export const GIFT_TRANSFER_IDS = ['bca', 'mandiri', 'dana', 'gopay'] as const;
 export type GiftTransferId = typeof GIFT_TRANSFER_IDS[number];
-export type GiftTransferMethod = { enabled: boolean; recipient: string; destination: string; cta: Localized };
+export type GiftTransferMethod = { enabled: boolean; recipient: string; destination: string; phone?: string; cta: Localized };
 export type GiftTransferConfig = Record<GiftTransferId, GiftTransferMethod>;
 export type GuestGiftTransfer = GiftTransferMethod & { id: GiftTransferId; label: string };
 export const GIFT_TRANSFER_LABELS: Record<GiftTransferId, string> = { bca: 'BCA', mandiri: 'Mandiri', dana: 'DANA', gopay: 'GoPay' };
@@ -31,7 +31,13 @@ export function validateGiftTransfers(input: unknown): GiftTransferConfig | null
     if (!cta || typeof cta !== 'object' || Array.isArray(cta) || !['id', 'en'].every(lang => typeof cta[lang] === 'string' && (cta[lang] as string).length <= 100)) return null;
     const recipient = row.recipient.trim(), destination = row.destination.trim();
     if ((destination && !validDestination(id, destination)) || (row.enabled && (!recipient || !destination))) return null;
-    result[id] = { enabled: row.enabled, recipient, destination, cta: { en: (cta.en as string).trim(), id: (cta.id as string).trim() } };
+    let phone = '';
+    if (id === 'dana' && row.phone !== undefined) {
+      if (typeof row.phone !== 'string' || row.phone.length > 40) return null;
+      phone = row.phone.trim();
+      if (phone && !validDestination('gopay', phone)) return null;
+    }
+    result[id] = { enabled: row.enabled, recipient, destination, ...(phone ? { phone } : {}), cta: { en: (cta.en as string).trim(), id: (cta.id as string).trim() } };
   }
   return result;
 }
