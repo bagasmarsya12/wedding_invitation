@@ -45,7 +45,7 @@ export function EnvelopeArt({ recipient, opening, reduced, onLifted }: { recipie
     el.addEventListener('pointermove',move);el.addEventListener('pointerleave',leave);document.addEventListener('visibilitychange',visibility);
     const prepare=async()=>{
       try{
-        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/envelope-scene.js?v=9';
+        const designPath='/atelier/keepsake-design.js?v=7',scenePath='/atelier/runtime/envelope-v1.js';
         const [composition,renderer]=await Promise.all([import(/* @vite-ignore */ designPath),import(/* @vite-ignore */ scenePath)]);
         const assets=await composition.loadDesignAssets();if(stopped)return;
         const design=renderer.composeEnvelope(assets,{recipient,forLabel:label,genericRecipient:generic,frontNote,signature,names});

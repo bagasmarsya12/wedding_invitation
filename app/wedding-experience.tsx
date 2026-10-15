@@ -152,7 +152,7 @@ function InvitationSpine({ open, onToggle, confirmed, profilesEnabled, giftsEnab
   );
 }
 
-function DestinationMap() {
+function DestinationMap({ active }: { active: boolean }) {
   const { t, website, language } = useLanguage();
   const display=weddingDisplay(website,language);
   const MAPS_URL=website.mapsUrl;
@@ -164,14 +164,17 @@ function DestinationMap() {
 
   useEffect(() => {
     const container = mapContainerRef.current;
-    if (!container) return;
+    if (!active || !container) return;
     let cancelled = false;
     let observer: IntersectionObserver | null = null;
     let mapLoaded = false;
 
     const initialize = async () => {
       try {
-        const { default: maplibregl } = await import("maplibre-gl");
+        const [{ default: maplibregl }] = await Promise.all([
+          import("maplibre-gl"),
+          import("maplibre-gl/dist/maplibre-gl.css"),
+        ]);
         if (cancelled) return;
         const map = new maplibregl.Map({
           container,
@@ -249,7 +252,7 @@ function DestinationMap() {
         observer?.disconnect();
         void initialize();
       }
-    }, { rootMargin: "1600px 0px" });
+    }, { rootMargin: "250px 0px" });
     observer.observe(container);
 
     return () => {
@@ -258,7 +261,7 @@ function DestinationMap() {
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [reduced, website.longitude, website.latitude, website.venueName]);
+  }, [active, reduced, website.longitude, website.latitude, website.venueName]);
 
   const zoomMap = (delta: number) => {
     const map = mapRef.current;
@@ -443,7 +446,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
 
       <main className="v2-main" aria-hidden={hydrated && !entered} inert={hydrated && !entered}>
         <div className="v2-botanical-continuum">
-        <GardenBackground active={entered || opening} />
+        <GardenBackground active={entered} />
         <section className={`v2-day v2-grand-day v2-scene state-${clock.state}`} id="the-day" data-light="day" aria-labelledby="day-title">
           <div className="v2-day-garden" aria-hidden="true">
             <div className="v2-day-light" />
@@ -502,7 +505,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
                 <a href={MAPS_URL} target="_blank" rel="noreferrer" aria-label={t("Open directions to Pandiga Cimahi in Google Maps")}><T>Open directions </T><ArrowRight aria-hidden="true" size={17} strokeWidth={1.5} /></a>
               </div>
             </div>
-            <DestinationMap />
+            <DestinationMap active={entered} />
             {token && <div id="guest-pass"><GuestPass key={token} token={token} /></div>}
             <ArrivalGuide photos={arrivalPhotos} guestName={displayName} faq={usefulBits} />
             <BotanicalImage src="/assets/botanicals/syzygium/branch-long.webp" className="details-syzygium details-syzygium-front" />
@@ -561,7 +564,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
           </div>
         </section>
 
-        <ArchiveCollection items={archiveItems} photos={photos.gallery} />
+        <ArchiveCollection items={archiveItems} photos={photos.gallery} active={entered} />
 
         {giftsEnabled && <GiftSection token={token} guestName={displayName} gifts={giftItems} />}
 

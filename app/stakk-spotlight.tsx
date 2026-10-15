@@ -16,9 +16,9 @@ function StakkPreview() {
     const update = () => {
       if (!visible || document.hidden || reduced.matches) { element.pause(); return; }
       // The animation only downloads when its card reaches the viewport.
-      if (!element.getAttribute('src')) element.src = '/assets/stakk-preview.mp4';
+      if (!element.getAttribute('src')) element.src = '/assets/stakk-preview-v2.mp4';
       element.play().catch(error => {
-        if (!disposed && visible && !document.hidden && !reduced.matches && error?.name !== 'AbortError') setFallback(true);
+        if (!disposed && visible && !document.hidden && !reduced.matches && error?.name !== 'AbortError' && error?.name !== 'NotAllowedError') setFallback(true);
       });
     };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); }, { threshold: .05 });
@@ -32,10 +32,8 @@ function StakkPreview() {
     };
   }, [fallback]);
 
-  return fallback ? <picture>
-    <source media="(prefers-reduced-motion: reduce)" srcSet="/assets/stakk-preview.jpg" />
-    <img src="/assets/stakk-preview.gif" alt="" width="800" height="920" loading="lazy" decoding="async" />
-  </picture> : <video ref={video} poster="/assets/stakk-preview.jpg" width="800" height="920" muted playsInline loop preload="none" onError={() => setFallback(true)} />;
+  return fallback ? <img src="/assets/stakk-preview-v2.webp" alt="" width="800" height="920" loading="lazy" decoding="async" />
+    : <video ref={video} poster="/assets/stakk-preview-v2.webp" width="800" height="920" muted playsInline loop preload="none" onError={() => setFallback(true)} />;
 }
 
 /** A lightweight doorway to the separate camera experience. */

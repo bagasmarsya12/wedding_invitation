@@ -14,20 +14,6 @@ function loadGarden() {
 export function GardenBackground({ active }: { active: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    // Fetch and parse the module while the envelope is open, without starting another WebGL scene.
-    const win = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: IdleRequestOptions) => number;
-      cancelIdleCallback?: (handle: number) => void;
-    };
-    const warm = () => { void loadGarden().catch(() => {}); };
-    if (win.requestIdleCallback) {
-      const handle = win.requestIdleCallback(warm, { timeout: 1800 });
-      return () => win.cancelIdleCallback?.(handle);
-    }
-    const handle = window.setTimeout(warm, 600);
-    return () => window.clearTimeout(handle);
-  }, []);
-  useEffect(() => {
     if (!active || !host.current?.parentElement) return;
     return mountGardenJourney(host.current.parentElement);
   }, [active]);

@@ -572,13 +572,11 @@ export function mountGarden(host: HTMLDivElement): () => void {
   }, () => {
     if (disposed || document.hidden || contextUnavailable) return false;
     if (warming) return false;
-    // This invitation has a bounded set of rooms. Keep their small instance
-    // buffers after preparation: discarding them forces GPU allocation again
-    // when guests scroll back. Nearby rooms always prepare first.
+    // Prepare only rooms near the viewport. Retain rooms already visited so
+    // scrolling back does not allocate their GPU buffers again.
     canvas.dataset.gardenChapters = String(chapters.filter(chapter => chapter.group).length);
-    const next = chapters.filter(chapter => !chapter.group)
-      .sort((a, b) => Number(gardenWindow(b.top, b.height, window.scrollY, height).prepare) - Number(gardenWindow(a.top, a.height, window.scrollY, height).prepare)
-        || Math.abs(a.top - window.scrollY) - Math.abs(b.top - window.scrollY))[0];
+    const next = chapters.filter(chapter => !chapter.group && gardenWindow(chapter.top, chapter.height, window.scrollY, height).prepare)
+      .sort((a, b) => Math.abs(a.top - window.scrollY) - Math.abs(b.top - window.scrollY))[0];
     if (!next) return false;
     hydrateChapter(next); dirty = true; schedule();
     if (!next.group) return false;
