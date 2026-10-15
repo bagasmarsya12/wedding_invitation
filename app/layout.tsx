@@ -30,6 +30,7 @@ import "./invitation-audit.css";
 import "./photo-comments.css";
 import "./cms-prose.css";
 import "./stakk-spotlight.css";
+import "./archive-media.css";
 import { LanguageProvider } from "./language";
 import { VisitTracker } from "./visit-tracker";
 import { loadWebsite } from "@/lib/website-server";

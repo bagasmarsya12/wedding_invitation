@@ -21,7 +21,7 @@ export default async function ContentPreview({searchParams}:{searchParams:Promis
   for(const [key,value]of Object.entries(snapshot.copy)){if(value)stored[key]=value;else delete stored[key];}
   const content=resolveLandingContent(stored),blocks={...base.blocks,...snapshot.blocks},media={...base.stored};
   for(const [slot,key]of Object.entries(snapshot.media)){if(key)media['media.'+slot]=key;else delete media['media.'+slot];}
-  const photo=(slot:string)=>media['media.'+slot]?`/api/admin/editor/media/${slot}?key=${encodeURIComponent(media['media.'+slot])}`:null;
+  const photo=(slot:string)=>media['media.'+slot]?`/api/admin/editor/media/${slot}?key=${encodeURIComponent(media['media.'+slot])}${/\.gif$/i.test(media['media.'+slot])?'&motion=1':''}`:null;
   if (id === 'stakk') {
     const prefix = query.lang === 'en' ? '' : 'id.';
     const text = (key: string) => content.values[prefix + 'stakk.' + key];

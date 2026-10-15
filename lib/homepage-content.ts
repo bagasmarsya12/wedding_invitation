@@ -1,5 +1,5 @@
 import { loadWebsite } from "./website-server";
-import { db } from "./server";
+import { db, sha256 } from "./server";
 import { hasPublicContent, THE_MARK_TEASER, PHOTO_SLOTS, type LandingPhotos, type HomepageArchiveItem, type GiftCollectionPreview, type HomepageGift } from "./public-content";
 import { giftCollection } from "./gift-collections";
 
@@ -29,9 +29,11 @@ export async function loadHomepageContent() {
       else giftCollections.push({ category, count: 1, image: gift.image_url, title: gift.title });
     }
   }
+  const mediaVersions = new Map<string, string>();
+  if (media.status === 'fulfilled') await Promise.all(media.value.results.map(async row => { mediaVersions.set(row.key, await sha256(row.value)); }));
   const photo = (slot: string) => {
     const row = media.status === "fulfilled" ? media.value.results.find(item => item.key === `media.${slot}` && item.value) : undefined;
-    return row ? `/api/admin/media/${slot}?v=${encodeURIComponent(row.updated_at)}` : null;
+    return row ? `/api/admin/media/${slot}?v=${mediaVersions.get(row.key)}${/\.gif$/i.test(row.value)?'&motion=1':''}` : null;
   };
   const photos: LandingPhotos = { bagas: photo("bagas"), iga: photo("iga"), gallery: blocks.photos.map(item=>photo(item.slot)) };
   const arrivalPhotos = { map: photo('arrival-map'), parking: photo('arrival-parking'), entrance: photo('arrival-entrance') };

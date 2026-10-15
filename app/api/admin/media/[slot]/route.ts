@@ -1,5 +1,8 @@
 import { publishLegacySettings,EditorialConflict } from '@/lib/cms-editorial-server';
 import { bucket, db, requireAdmin, sameOriginMutation, privateJson, allowMutation } from "@/lib/server";
+import { archivePreviewVariant } from '@/lib/archive-media';
+import { serveArchivePreview } from '@/lib/archive-media-server';
+import { isArchivePhotoSlot } from '@/lib/cms-photo-upload';
 
 export const runtime = "nodejs";
 
@@ -71,6 +74,13 @@ export async function GET(request: Request) {
   if (!slot) return new Response("Not found", { status: 404 });
   const setting = await db().prepare("SELECT value FROM settings WHERE key = ? LIMIT 1").bind(`media.${slot}`).first<{ value: string }>();
   if (!setting?.value) return new Response("Not found", { status: 404 });
+  const preview = archivePreviewVariant(new URL(request.url).searchParams.get('preview'));
+  if (preview && isArchivePhotoSlot(slot)) {
+    const response = await serveArchivePreview(request, setting.value, preview);
+    if (response) return response;
+    // Missing video uses the poster; legacy image uploads without previews remain readable.
+    if (preview === 'motion') return new Response('Preview unavailable', { status: 404, headers: { 'cache-control': 'no-store' } });
+  }
   const object = await bucket().get(setting.value);
   if (!object) return new Response("Not found", { status: 404 });
   return new Response(object.body, {

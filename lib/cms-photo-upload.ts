@@ -5,7 +5,7 @@ export const MAX_ARCHIVE_GIF_BYTES = 20 * 1024 * 1024;
 export const PHOTO_LONG_EDGE = 3840;
 export const PHOTO_UPLOAD_HELP = 'JPG, PNG, WebP, atau AVIF · maks. 50 MB · disiapkan otomatis untuk web';
 export const ARCHIVE_PHOTO_ACCEPT = 'image/jpeg,image/png,image/webp,image/avif,image/gif';
-export const ARCHIVE_PHOTO_UPLOAD_HELP = 'Foto JPG, PNG, WebP, atau AVIF hingga 50 MB disiapkan otomatis. GIF hingga 20 MB disimpan utuh; animasinya berjalan otomatis.';
+export const ARCHIVE_PHOTO_UPLOAD_HELP = 'Foto JPG, PNG, WebP, atau AVIF hingga 50 MB. GIF hingga 20 MB. Preview album disiapkan otomatis; file asli tetap tersedia saat dibuka besar.';
 const TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 type PhotoOptions = {allowGif?:boolean};
 export const isArchivePhotoSlot = (slot:string) => /^gallery-[a-z0-9-]{1,52}$/.test(slot);
@@ -31,7 +31,7 @@ export function photoUploadDimensions(width: number, height: number, limit = PHO
 }
 
 type DecodedPhoto = { source: CanvasImageSource; width: number; height: number; close: () => void };
-async function decodePhoto(file: File): Promise<DecodedPhoto> {
+export async function decodePhoto(file: File): Promise<DecodedPhoto> {
   if (typeof createImageBitmap === 'function') {
     try {
       const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
@@ -46,7 +46,7 @@ async function decodePhoto(file: File): Promise<DecodedPhoto> {
     return { source: image, width: image.naturalWidth, height: image.naturalHeight, close: () => { image.src = ''; URL.revokeObjectURL(url); } };
   } catch (error) { URL.revokeObjectURL(url); throw error; }
 }
-function encodePhoto(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+export function encodePhoto(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Foto belum bisa disiapkan. Coba pilih kembali.')), type, quality));
 }
 export async function prepareCmsPhoto(file: File,options:PhotoOptions={}): Promise<File> {
