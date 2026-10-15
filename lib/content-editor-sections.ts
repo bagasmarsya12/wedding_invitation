@@ -14,6 +14,7 @@ const definitions = [
   ['gift','Tanda kasih','Pengantar hadiah, tombol pilihan, rekening dan tautan.',['gifts']],
   ['keepsake','Kartu kenangan','Pesan, penutup, hashtag serta semua tombol gambar dan video.',[]],
   ['jukebox','Jukebox & musik','Playlist, audio, catatan personal dan seluruh tombol jukebox.',['jukebox']],
+  ['stakk','Stakk','Landing page sebelum kamera Stakk dibuka.',[]],
   ['footer','Penutup','Ucapan akhir dan tautan setelah undangan.',['links']],
   ['navigation','Menu & interface','Menu, aksesibilitas dan label umum.',[]],
   ['seo','Judul & share','Judul website, deskripsi dan gambar saat link dibagikan.',['event']],

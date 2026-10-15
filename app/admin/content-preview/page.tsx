@@ -22,5 +22,17 @@ export default async function ContentPreview({searchParams}:{searchParams:Promis
   const content=resolveLandingContent(stored),blocks={...base.blocks,...snapshot.blocks},media={...base.stored};
   for(const [slot,key]of Object.entries(snapshot.media)){if(key)media['media.'+slot]=key;else delete media['media.'+slot];}
   const photo=(slot:string)=>media['media.'+slot]?`/api/admin/editor/media/${slot}?key=${encodeURIComponent(media['media.'+slot])}`:null;
+  if (id === 'stakk') {
+    const prefix = query.lang === 'en' ? '' : 'id.';
+    const text = (key: string) => content.values[prefix + 'stakk.' + key];
+    return <main style={{ minHeight: '100vh', background: '#f3eee5', color: '#21382c', padding: '32px 24px', textAlign: 'center' }}>
+      <p>Pratinjau privat · Stakk · {state.document.draft || query.revision ? 'Draf' : 'Konten live'}</p>
+      <img src="/assets/stakk-preview.jpg" alt="Contoh tumpukan foto Stakk" style={{ width: 'min(260px, 70vw)', margin: '24px auto', display: 'block' }} />
+      <p>{text('eyebrow')}</p><h1 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: 40, maxWidth: 440, margin: '20px auto' }}>{text('title')}</h1>
+      <p style={{ maxWidth: 440, margin: '20px auto', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{text('description')}</p>
+      <button type="button" disabled style={{ padding: '16px 36px', background: '#21382c', color: '#f3eee5', border: 0 }}>{text('cta')}</button>
+      <p>{text('hint')}</p><small>Pratinjau wording. Kamera tidak diaktifkan di CMS.</small>
+    </main>;
+  }
   return <PreviewInvitation section={id} language={query.lang==='en'?'en':'id'} title={state.label} draft={Boolean(state.document.draft)||Boolean(query.revision)} content={content} website={{...base.config,...snapshot.config}} blocks={blocks} arrival={snapshot.arrival??base.arrival} homepage={{...homepage,photos:{bagas:photo('bagas'),iga:photo('iga'),gallery:blocks.photos.map(p=>photo(p.slot))},arrivalPhotos:{map:photo('arrival-map'),parking:photo('arrival-parking'),entrance:photo('arrival-entrance')}}}/>;
 }

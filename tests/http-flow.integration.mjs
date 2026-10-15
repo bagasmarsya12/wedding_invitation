@@ -68,6 +68,14 @@ try {
   for (const stream of [server.stdout, server.stderr]) stream.on("data", chunk => { serverLog = (serverLog + chunk.toString()).slice(-10_000); });
   try {
     await waitFor(base);
+    const stakkResponse=await fetch(base+'/api/stakk',{headers:{origin:'https://stakk.iganyabagas.com'}});
+    assert.equal(stakkResponse.status,200);assert.equal(stakkResponse.headers.get('access-control-allow-origin'),'https://stakk.iganyabagas.com');
+    assert.equal(stakkResponse.headers.get('access-control-allow-credentials'),null);
+    const stakkCopy=await stakkResponse.json();assert.equal(stakkCopy.languages.id.cta,'Buka kamera');assert.deepEqual(Object.keys(stakkCopy).sort(),['languages','version']);
+    assert.equal((await fetch(base+'/api/stakk',{method:'OPTIONS',headers:{origin:'https://stakk.iganyabagas.com'}})).status,204);
+    assert.equal((await fetch(base+'/api/stakk',{headers:{origin:'https://evil.example'}})).status,403);
+    console.log('Compiled Stakk copy API: cross-origin allowlist, public defaults and no credentials: OK');
+
     assert.equal((await response(base, "/api/admin/state")).status, 403);
     assert.equal((await response(base, "/api/invite/invalid-token/rsvp")).status, 404);
     const invite = await fetch(new URL(`/invite/${a}`, base));

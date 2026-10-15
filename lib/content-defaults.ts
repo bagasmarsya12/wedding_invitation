@@ -12,6 +12,13 @@ export type ContentSection = { id: string; label: string; photo?: boolean; field
 export type ContentMap = Record<string, string>;
 
 const BASE_CONTENT_SECTIONS: ContentSection[] = [
+  { id: 'stakk', label: 'Stakk', fields: [
+    { key: 'eyebrow', label: 'Baris di atas judul', value: 'Bagas & Iga · 01.11.26' },
+    { key: 'title', label: 'Judul landing Stakk', value: 'Your turn in the stack.' },
+    { key: 'description', label: 'Penjelasan landing Stakk', value: 'Ten seconds, a few poses, a little keepsake. Make your own photo-stack video, finished with flowers.' },
+    { key: 'cta', label: 'Tombol buka kamera', value: 'Open camera' },
+    { key: 'hint', label: 'Catatan di bawah tombol', value: 'Photos and videos stay on your device.' },
+  ] },
   {id:"keepsake",label:"Keepsake & ucapan personal",fields:[
     {"key": "forLabel", "label": "Sapaan penerima", "value": "For"},
     {"key": "genericRecipient", "label": "Penerima umum", "value": "you"},
@@ -190,4 +197,12 @@ Object.assign(CONTENT_DEFAULTS, {
   'id.footer.stakkDescription': 'Sepuluh detik buat ganti pose. Hasilnya video tumpukan foto—buat Story, bukan buat revisi foto KTP.',
   'id.footer.stakkCta': 'Buka Stakk, pasang gaya',
   'id.footer.stakkHint': '',
+});
+
+Object.assign(CONTENT_DEFAULTS, {
+ 'id.stakk.eyebrow': 'Bagas & Iga · 01.11.26',
+ 'id.stakk.title': 'Giliranmu masuk ke tumpukan.',
+ 'id.stakk.description': 'Sepuluh detik, beberapa pose, satu kenangan. Buat video tumpukan fotomu sendiri dengan aksen bunga.',
+ 'id.stakk.cta': 'Buka kamera',
+ 'id.stakk.hint': 'Foto dan video tetap di perangkatmu.',
 });

@@ -18,6 +18,7 @@ type GroupDefinition = { title: string; keys: string[] };
 export type EditorFieldGroup = { title: string; fields: EditorField[]; advanced: boolean };
 const literal = (...values: string[]) => values.map(copyKey);
 const groups: Record<string, GroupDefinition[]> = {
+  stakk: [{ title: 'Landing page Stakk', keys: ['stakk.eyebrow', 'stakk.title', 'stakk.description', 'stakk.cta', 'stakk.hint'] }],
   hero: [
     { title: 'Amplop & sapaan', keys: ['hero.env greet', 'hero.env skip', ...literal('Open the invitation')] },
     { title: 'Pembuka undangan', keys: ['hero.hero head', 'hero.hero sub', ...literal('Continue')] },
@@ -81,9 +82,10 @@ export const editorFieldLabel = (field: EditorField) => labels[field.key] ?? fie
 export const defaultEditorMode = (section: string) => ({ details: 'event', story: 'story', archive: 'photos', gift: 'gifts', jukebox: 'jukebox', seo: 'event' }[section] ?? 'copy');
 export const directSaveMode = (mode: string) => ['gifts', 'transfers', 'entries', 'comments', 'jukebox'].includes(mode);
 export const editorModeSection = (mode: string) => ({ photos: 'archive', comments: 'archive', entries: 'archive', portraits: 'profil', gifts: 'gift', transfers: 'gift', jukebox: 'jukebox' }[mode]);
-export const sectionWebsiteTarget = (section: string) => ({ hero: '/#the-day', details: '/#details', profil: '/#profiles', story: '/#our-story', archive: '/#archive', rsvp: '/#leave-a-mark', gift: '/#gifts', keepsake: '/#closing-title', footer: '/#beyond', jukebox: '/', navigation: '/', seo: '/' }[section] ?? '/');
-export const sectionNavHint = (section: string) => ({hero:'Sapaan & pembuka',details:'Jadwal, lokasi & FAQ',profil:'Nama, tiga bagian & foto',story:'Bab & urutan cerita',archive:'Album, caption & komentar',rsvp:'Kehadiran & kartu ucapan',gift:'Barang, rekening & e-wallet',keepsake:'Pesan, gambar & video',jukebox:'Playlist, audio & teks',footer:'Kalimat & tautan akhir',navigation:'Label menu & tombol',seo:'Judul & gambar saat dibagikan'}[section] ?? 'Teks tambahan');
+export const sectionWebsiteTarget = (section: string) => ({ stakk: 'https://stakk.iganyabagas.com/', hero: '/#the-day', details: '/#details', profil: '/#profiles', story: '/#our-story', archive: '/#archive', rsvp: '/#leave-a-mark', gift: '/#gifts', keepsake: '/#closing-title', footer: '/#beyond', jukebox: '/', navigation: '/', seo: '/' }[section] ?? '/');
+export const sectionNavHint = (section: string) => ({stakk:'Landing sebelum kamera',hero:'Sapaan & pembuka',details:'Jadwal, lokasi & FAQ',profil:'Nama, tiga bagian & foto',story:'Bab & urutan cerita',archive:'Album, caption & komentar',rsvp:'Kehadiran & kartu ucapan',gift:'Barang, rekening & e-wallet',keepsake:'Pesan, gambar & video',jukebox:'Playlist, audio & teks',footer:'Kalimat & tautan akhir',navigation:'Label menu & tombol',seo:'Judul & gambar saat dibagikan'}[section] ?? 'Teks tambahan');
 export const sectionHelp = (section: string) => ({
+  stakk: 'Wording landing page stakk.iganyabagas.com. Simpan draf, cek Pratinjau, lalu Publikasikan. Muat ulang Stakk untuk melihat perubahan. Kamera baru dibuka setelah tombol ditekan.',
   hero: 'Sapaan di amplop dan kalimat pembuka. Nama, tanggal, dan lokasi mengikuti pengaturan acara.',
   details: 'Jadwal, peta, panduan kedatangan, FAQ, dan QR tamu berada dalam satu section.',
   profil: 'Judul, nama lengkap, dan tiga bagian untuk setiap mempelai. Foto bisa diganti di tab Foto mempelai.',
@@ -92,7 +94,7 @@ export const sectionHelp = (section: string) => ({
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
   gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tersedia lewat undangan personal. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',
-  footer: 'Pengantar dan tombol Stakk, serta kalimat dan tautan di akhir undangan. Stakk membuka kamera di tab baru. Hashtag mengikuti Kartu kenangan.',
+  footer: 'Pengantar dan tombol Stakk, serta kalimat dan tautan di akhir undangan. Stakk membuka landing page di tab baru. Wording landing diatur pada section Stakk. Hashtag mengikuti Kartu kenangan.',
   jukebox: 'Playlist dan kata-kata jukebox diatur bersama. Lagu tampil setelah audio diunggah dan lagu diaktifkan.',
   seo: 'Judul dan gambar saat undangan dibagikan. Aplikasi pesan dapat menyimpan gambar share lama sementara.',
 }[section] ?? 'Label menu, tombol, dan kondisi khusus. Pilih bahasa sebelum mengedit.');

@@ -9,6 +9,24 @@ export async function verifyEditorialFlows(base,cookie){
   const act=(id,state,op,extra={})=>request('/api/admin/editor',{section:id,version:state.document.version,op,...extra});
   assert.equal((await request('/api/admin/editor?section=hero',null,{auth:false})).status,403);
   assert.equal((await request('/api/admin/editor?section=unknown')).status,400);
+  // Stakk uses the existing draft/publish contract; its public endpoint never exposes drafts.
+  let stakk=(await read('stakk')).data;
+  assert.ok(stakk.live.copy['id.stakk.title']);
+  const stakkOriginal=structuredClone(stakk.live),stakkDraft=structuredClone(stakk.live);
+  stakkDraft.copy['id.stakk.title']='PRIVATE_STAKK_DRAFT';stakkDraft.copy['stakk.cta']='Camera fixture CTA';
+  let stakkResponse=await act('stakk',stakk,'save',{snapshot:stakkDraft});assert.equal(stakkResponse.status,200,stakkResponse.text);stakk=stakkResponse.data;
+  assert.ok(!(await request('/api/stakk',null,{auth:false})).text.includes('PRIVATE_STAKK_DRAFT'));
+  assert.ok((await request('/admin/content-preview?section=stakk')).text.includes('PRIVATE_STAKK_DRAFT'));
+  stakkResponse=await act('stakk',stakk,'publish');assert.equal(stakkResponse.status,200,stakkResponse.text);stakk=stakkResponse.data;
+  const publicStakk=await fetch(base+'/api/stakk');
+  assert.equal(publicStakk.status,200);assert.match(publicStakk.headers.get('cache-control'),/no-store/);
+  const publicCopy=await publicStakk.json();assert.equal(publicCopy.languages.id.title,'PRIVATE_STAKK_DRAFT');assert.equal(publicCopy.languages.en.cta,'Camera fixture CTA');
+  assert.deepEqual(Object.keys(publicCopy).sort(),['languages','version']);assert.deepEqual(Object.keys(publicCopy.languages.id).sort(),['cta','description','eyebrow','hint','title']);
+  assert.equal((await fetch(base+'/api/stakk',{headers:{origin:'https://evil.example'}})).status,403);
+
+  stakkResponse=await act('stakk',stakk,'save',{snapshot:stakkOriginal});assert.equal(stakkResponse.status,200);stakk=stakkResponse.data;
+  assert.equal((await act('stakk',stakk,'publish')).status,200);
+  console.log('Stakk CMS: private draft/preview, public bilingual publication, exact copy allowlist and CORS: OK');
   let hero=(await read('hero')).data;
   const key=Object.keys(hero.live.copy).find(k=>k.startsWith('id.'));
   assert.ok(key);const original=structuredClone(hero.live);

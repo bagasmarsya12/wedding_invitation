@@ -6,11 +6,12 @@ const hook=registerHooks({resolve(specifier,context,next){try{return next(specif
 const {CONTENT_ALIASES,resolveContentAliases,replacedContentAliases}=await import('../lib/content-aliases.ts');
 const {contentEditorSections}=await import('../lib/content-editor-sections.ts');
 const {sectionCopyKeys,validateSectionSnapshot}=await import('../lib/cms-editorial.ts');
-const {groupEditorFields}=await import('../lib/cms-field-guide.ts');
+const {groupEditorFields,sectionWebsiteTarget}=await import('../lib/cms-field-guide.ts');
 const {WEBSITE_DEFAULTS,defaultWebsiteBlocks}=await import('../lib/website-content.ts');
 const {CONTENT_DEFAULTS}=await import('../lib/content-defaults.ts');
 const {copyKey}=await import('../lib/copy-registry.ts');
 const {invitationMessage,invitationToken,DEFAULT_INVITATION_MESSAGE,validInvitationTemplate}=await import('../lib/invitation-message.ts');
+const {publicStakkContent,stakkCorsHeaders}=await import('../lib/stakk-content.ts');
 hook.deregister();
 
 test('section editor exposes live bilingual fields and collection tools without duplicate keys',()=>{
@@ -90,4 +91,21 @@ test('Stakk controls are bilingual and old footer revisions retain all existing 
  assert.deepEqual(restored.blocks.links,old.blocks.links);
  for(const key of added)assert.equal(restored.copy[key],'');
  assert.deepEqual(old.copy,copy,'Backfill must not mutate the stored revision');
+});
+
+test('Stakk has its own bilingual CMS section and only public landing copy crosses origins',()=>{
+ const section=contentEditorSections().find(section=>section.id==='stakk');
+ assert.equal(groupEditorFields(section)[0].fields.length,5);
+ assert.equal(sectionCopyKeys('stakk').length,10);
+ assert.equal(sectionWebsiteTarget('stakk'),'https://stakk.iganyabagas.com/');
+ const copy=Object.fromEntries(sectionCopyKeys('stakk').map(key=>[key,CONTENT_DEFAULTS[key]]));
+ const snapshot=validateSectionSnapshot('stakk',{copy,config:{},blocks:{},media:{}},{config:WEBSITE_DEFAULTS,blocks:defaultWebsiteBlocks()});
+ assert.ok(snapshot);assert.equal(snapshot.copy['id.stakk.cta'],'Buka kamera');
+ const response=publicStakkContent({...CONTENT_DEFAULTS,'id.stakk.title':'Owner copy','admin.secret':'do not expose','id.stakk.cta':''});
+ assert.equal(response.languages.id.title,'Owner copy');assert.equal(response.languages.id.cta,'Buka kamera');
+ assert.deepEqual(Object.keys(response.languages.id),['eyebrow','title','description','cta','hint']);
+ assert.ok(!JSON.stringify(response).includes('do not expose'));
+ assert.equal(stakkCorsHeaders('https://evil.example'),null);
+ assert.equal(stakkCorsHeaders('https://stakk.iganyabagas.com')['Access-Control-Allow-Origin'],'https://stakk.iganyabagas.com');
+ assert.equal(stakkCorsHeaders(null)['Access-Control-Allow-Origin'],undefined);
 });

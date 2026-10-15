@@ -2,6 +2,7 @@ import { PROFILE_LABEL_KEYS } from './profile-labels';
 // Live public copy fields. Event settings and repeatable collections have their own editors.
 import { PHOTO_COMMENT_KEYS } from './photo-comment-copy';
 export const ACTIVE_CONTENT_KEYS = [
+  'stakk.eyebrow', 'stakk.title', 'stakk.description', 'stakk.cta', 'stakk.hint',
   ...PHOTO_COMMENT_KEYS,
   ...PROFILE_LABEL_KEYS,
   "archive.desc",
