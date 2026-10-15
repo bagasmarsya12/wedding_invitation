@@ -111,6 +111,20 @@ try {
     assert.ok((await api(base,'/api/admin/state',cookie)).body.guests.every(row=>row.invitation_sent_at===null));
     console.log('bulk guest operations: auth, origin, validation, no partial invalid selection, 52-row batch, idempotent sent time, unchanged links: OK');
 
+    const family = await api(base, '/api/admin/state', cookie, {op:'create_guest',displayName:'Large Family Fixture',partyLimit:100,guestGroup:'family'});
+    assert.equal(family.status,201,JSON.stringify(family.body));
+    const familyToken = family.body.inviteUrl.split('/').at(-1);
+    assert.equal((await api(base,`/api/invite/${familyToken}/rsvp`,'',{attendance:'yes',partySize:100})).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'update_guest',id:family.body.guestId,displayName:'Large Family Fixture',partyLimit:50,status:'active',guestGroup:'family'})).status,200);
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'create_guest',displayName:'Over Limit Fixture',partyLimit:101})).status,400);
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'update_guest',id:family.body.guestId,displayName:'Large Family Fixture',partyLimit:101,status:'active',guestGroup:'family'})).status,400);
+    const familyImport = await api(base,'/api/admin/state',cookie,{op:'import_guests',csv:'displayName,partyLimit,reference,group\nFamily Import Fixture,100,family-large,family\n'});
+    assert.equal(familyImport.status,201,JSON.stringify(familyImport.body));
+    assert.equal(familyImport.body.links.length,1);
+    assert.equal((await api(base,'/api/admin/state',cookie,{op:'import_guests',csv:'displayName,partyLimit\nOver Limit Import Fixture,101\n'})).status,400);
+    assert.equal((await api(base,'/api/admin/state',cookie)).body.guests.find(row=>row.id===family.body.guestId).party_limit,50);
+    console.log('family allocations: create, edit, import and RSVP support 100 places; values above 100 rejected: OK');
+
     assert.equal((await api(base,'/api/admin/state',cookie,{op:'set_setting',key:'shipping_instructions',value:'Fixture shipping instructions to preserve.'})).status,200);
     const lifecycle={op:'set_lifecycle',phase:'wedding-day',rsvp:'off',gifts:'auto',marks:'on'};
     assert.equal((await api(base,'/api/admin/state','',lifecycle)).status,403);

@@ -7,6 +7,7 @@ import { GuestImporter } from "./guest-importer";
 import { ModerationManager } from "./moderation-manager";
 import { FormEvent, useEffect, useState } from "react";
 import { toCsv } from "@/lib/production";
+import { MAX_GUEST_PARTY_LIMIT } from '@/lib/guest-limits';
 import { useLanguage } from "../language";
 import { PasswordPanel } from "./password-panel";
 import { StaffPanel } from "./staff-panel";
@@ -157,7 +158,7 @@ export function AdminClient() {
     <GuestManager guests={state.guests} rsvps={state.rsvps} settings={state.settings} knownLinks={knownLinks} action={action} regenerate={regenerate} rememberLink={rememberLink} notify={setStatus} exportGuests={()=>void exportFile('guests')} />
     <details className="admin-panel admin-wide guest-create-tools"><summary>Tambah tamu & impor daftar</summary>
     <section className="admin-panel admin-create-guest"><header><p>Undangan personal</p><h2>Tambah tamu</h2></header>
-      <form onSubmit={event => submit(event, "create_guest")}><label>Nama tamu atau keluarga<input name="displayName" maxLength={120} required /></label><label>Email (opsional)<input name="email" type="email" /></label><label>Kuota orang<input name="partyLimit" type="number" min="1" max="20" defaultValue="1" required /></label><label>Kelompok<select name="guestGroup">{GUEST_GROUPS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></label><button>Buat link personal</button></form>
+      <form onSubmit={event => submit(event, "create_guest")}><label>Nama tamu atau keluarga<input name="displayName" maxLength={120} required /></label><label>Email (opsional)<input name="email" type="email" /></label><label>Kuota orang<input name="partyLimit" type="number" min="1" max={MAX_GUEST_PARTY_LIMIT} defaultValue="1" required /></label><label>Kelompok<select name="guestGroup">{GUEST_GROUPS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></label><button>Buat link personal</button></form>
       {inviteUrl && <output className="invite-output"><strong>Link ini tersimpan terenkripsi. Bisa disalin atau diekspor kembali dari CMS.</strong><input readOnly value={inviteUrl} aria-label="New invitation URL" /><button type="button" onClick={() => navigator.clipboard.writeText(inviteUrl).catch(() => setStatus("Copy failed. Select the link manually."))}>Salin link</button></output>}
     </section>
 

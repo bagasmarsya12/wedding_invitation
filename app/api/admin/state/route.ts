@@ -1,6 +1,7 @@
 import { loadWebsite } from "@/lib/website-server";
 import { GIFT_TRANSFER_SETTING, validateGiftTransfers } from '@/lib/gift-transfers';
 import { readGuestImport } from '@/lib/guest-import';
+import { MAX_GUEST_PARTY_LIMIT, validGuestPartyLimit } from '@/lib/guest-limits';
 import { sealInvitationToken, invitationVault } from '@/lib/invitation-vault';
 import { parseCsv, safeExternalUrl, safeMediaUrl, toCsv } from "@/lib/production";
 import { DEFAULT_INVITATION_MESSAGE, invitationMessage, invitationToken, validGuestGroup, validInvitationTemplate } from '@/lib/invitation-message';
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
     const displayName = cleanText(payload.displayName, 120);
     if (!displayName) return apiError("Guest name is required.");
     const partyLimit = Number(payload.partyLimit ?? 1);
-    if (!Number.isInteger(partyLimit) || partyLimit < 1 || partyLimit > 20) return apiError("Party limit must be between 1 and 20.");
+    if (!validGuestPartyLimit(partyLimit)) return apiError(`Party limit must be between 1 and ${MAX_GUEST_PARTY_LIMIT}.`);
     const email = cleanText(payload.email, 180);
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return apiError("Email address is invalid.");
     const token = randomInviteToken();
@@ -193,7 +194,7 @@ export async function POST(request: Request) {
     const partyLimit = Number(payload.partyLimit);
     const group = payload.guestGroup ?? 'unassigned';
     if (!validGuestGroup(group)) return apiError('Choose a valid guest group.');
-    if (!name || !["active", "revoked"].includes(status) || !Number.isInteger(partyLimit) || partyLimit < 1 || partyLimit > 20)
+    if (!name || !["active", "revoked"].includes(status) || !validGuestPartyLimit(partyLimit))
       return apiError("Guest name, status, or party limit is invalid.");
     const id=cleanText(payload.id,120);
     if(!await db().prepare("SELECT id FROM guests WHERE id = ?").bind(id).first())return apiError("Guest not found.",404);

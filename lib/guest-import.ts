@@ -1,5 +1,6 @@
 import { parseCsv } from './production';
 import { validGuestGroup } from './invitation-message';
+import { MAX_GUEST_PARTY_LIMIT, validGuestPartyLimit } from './guest-limits';
 export type ImportGuest = { row:number; displayName:string; partyLimit:number; email:string; reference:string; group:string };
 export type ImportIssue = {row:number;message:string};
 export function readGuestImport(csv:string): {records:ImportGuest[];issues:ImportIssue[]} {
@@ -17,7 +18,7 @@ export function readGuestImport(csv:string): {records:ImportGuest[];issues:Impor
     const group=({keluarga:'family',lainnya:'other','belum diatur':'unassigned'} as Record<string,string>)[rawGroup]??(rawGroup||'unassigned');
     let message='';
     if(!displayName || displayName.length>120) message='Nama wajib diisi, maksimal 120 karakter.';
-    else if(!Number.isInteger(partyLimit)||partyLimit<1||partyLimit>20) message='Kuota harus 1–20 orang.';
+    else if(!validGuestPartyLimit(partyLimit)) message=`Kuota harus 1–${MAX_GUEST_PARTY_LIMIT} orang.`;
     else if(email.length>180 || (email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) message='Email tidak valid.';
     else if(reference.length>120) message='Referensi maksimal 120 karakter.';
     else if(!validGuestGroup(group)) message='Grup: bagas, iga, family, other, unassigned.';
