@@ -1,5 +1,6 @@
 import { archivePreviewKey, previewByteRange, type ArchivePreview } from './archive-media';
 import { bucket, privateHeaders } from './server';
+import { mutableMediaResponse } from './media-response';
 
 function conditional(response: Response, request: Request) {
   const etag = response.headers.get('etag');
@@ -26,7 +27,7 @@ export async function serveArchivePreview(request: Request, originalKey: string,
   const cacheKey = new Request(new URL(`/__archive_preview_cache/${key}`, request.url));
   let cache: Cache | undefined;
   if (!privateView) {
-    try { cache = await caches.open('archive-previews-v1'); const hit = await cache.match(cacheKey); if (hit) return ranged(conditional(hit, request), request, variant); }
+    try { cache = await caches.open('archive-previews-v1'); const hit = await cache.match(cacheKey); if (hit) return ranged(conditional(mutableMediaResponse(hit), request), request, variant); }
     catch { /* R2 remains available when the edge cache is unavailable. */ }
   }
   const object = await bucket().get(key);

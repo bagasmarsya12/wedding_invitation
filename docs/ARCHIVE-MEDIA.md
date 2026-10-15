@@ -56,3 +56,9 @@ CMS encoder also preserved every frame and delay of a 12-frame gallery GIF.
 Unit, TypeScript, guest-flow and CMS integration checks cover key versioning,
 private drafts, publication/recovery, original-byte preservation, ETags and MP4
 range responses. Narrow browser QA is not a physical Samsung/iPhone benchmark.
+
+Cache hits are wrapped in a new Response before returning them to Vinext. The
+production Cache API supplies immutable headers, while the route adapter appends
+its own headers. A regression test reproduces the immutable-header guard and
+checks that media bytes and MIME survive the wrapper. Verify repeated live reads,
+not only cold misses, before completing a release.
