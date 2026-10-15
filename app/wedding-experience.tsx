@@ -18,6 +18,7 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { GardenBackground } from "./garden-background";
 import { ReplyStudio } from "./reply-studio";
 import { InvitationClosing } from "./invitation-closing";
+import { StakkSpotlight } from "./stakk-spotlight";
 import { GiftSection } from "./gift-section";
 import { ArchiveCollection } from "./archive-collection";
 import { GuestArchiveSession } from "./guest-archive-session";
@@ -580,9 +581,10 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
             <BotanicalImage src="/assets/botanicals/nephrolepis/frond-arched-01.webp" className="night-fern" />
             <BotanicalImage src="/assets/botanicals/dendrobium/branch-short.webp" className="night-orchid" />
           </div>
-          <div className="v2-beyond-copy">
+          <div className="v2-beyond-copy has-stakk">
             <p><T>Beyond the invitation</T></p>
             <h2 id="beyond-title"><T>The invitation ends here.</T><br /><T>The rest stays open.</T></h2>
+            <StakkSpotlight />
             <nav aria-label={t("Beyond the invitation")}>
               {destinations.map(item => <a key={item.href} href={item.href}><strong>{item.title[language]}</strong><span><FormattedText value={item.body[language]}/></span></a>)}
             </nav>

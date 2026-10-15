@@ -26,6 +26,8 @@ export function validateSectionSnapshot(id:string,input:unknown,base:{config:Web
   const copy={...(id==='profil'?upgradeProfileLabelCopy(input.copy):input.copy)},configInput=input.config,blocksInput=input.blocks;
   // Backfill only this newly introduced control when restoring an older keepsake revision.
   if(id==='keepsake')for(const key of ['keepsake.openHint','id.keepsake.openHint'])if(!(key in copy))copy[key]='';
+  // Older footer drafts and revisions keep their content when Stakk controls are added.
+  if(id==='footer')for(const field of ['stakkTitle','stakkDescription','stakkCta','stakkHint'])for(const key of [`footer.${field}`,`id.footer.${field}`])if(!(key in copy))copy[key]='';
   if(Object.keys(copy).length!==copyKeys.length||copyKeys.some(k=>typeof copy[k]!=='string')||Object.keys(copy).some(k=>!copyKeys.includes(k)))return null;
   for(const field of sectionDefinition(id)!.fields)for(const key of [field.key,`id.${field.key}`])if(!(isRichTextField(field.key)?validRichText(copy[key],field.limit):validPlainText(copy[key],field.limit)))return null;
   if(Object.keys(configInput).some(k=>!configKeys.includes(k as keyof WebsiteConfig))||configKeys.some(k=>!(k in configInput)))return null;

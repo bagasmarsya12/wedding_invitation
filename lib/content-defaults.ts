@@ -143,6 +143,10 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     { key: "gal d", label: "The Gallery — isi", value: "Then and now. Coming later." },
   ] },
   { id: "footer", label: "Footer", fields: [
+    { key: "stakkTitle", label: "Stakk — judul", value: "Your turn to find your good side." },
+    { key: "stakkDescription", label: "Stakk — penjelasan", value: "Ten seconds to strike a few poses. Take home a photo-stack video—for your Story, not your passport application." },
+    { key: "stakkCta", label: "Stakk — tombol", value: "Open Stakk, strike a pose" },
+    { key: "stakkHint", label: "Stakk — petunjuk", value: "" },
     { key: "edisi", label: "Label edisi", value: "Guest edition" },
     { key: "tahun", label: "Tahun", value: "2026" },
     { key: "made", label: "Baris made-with", value: "Made with unreasonable attention to detail and approximately 1 billion tokens." },
@@ -180,3 +184,10 @@ Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,
 Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);
 
 CONTENT_DEFAULTS['id.keepsake.openHint'] = 'Lihat kartumu · unduh gambar & video';
+
+Object.assign(CONTENT_DEFAULTS, {
+  'id.footer.stakkTitle': 'Sekarang giliranmu cari angle.',
+  'id.footer.stakkDescription': 'Sepuluh detik buat ganti pose. Hasilnya video tumpukan foto—buat Story, bukan buat revisi foto KTP.',
+  'id.footer.stakkCta': 'Buka Stakk, pasang gaya',
+  'id.footer.stakkHint': '',
+});

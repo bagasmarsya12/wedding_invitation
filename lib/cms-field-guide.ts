@@ -5,6 +5,7 @@ import { copyKey } from './copy-registry';
 const retiredControls = new Set([
   'profil.kicker', 'profil.b_cap', 'profil.i_cap', 'footer.edisi',
   'footer.amplop', 'guest.party',
+  'footer.stakkHint',
   ...['A reply from', 'our favourite people', 'Reply received', 'View the envelope again', 'Open purchase link', 'Object photograph', 'to be added'].map(copyKey),
   'useful.head', 'useful.sub', 'guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending',
   ...['For those who know one of us better.', 'Bagas, as himself.', 'Iga, as herself.', 'As observed by Iga', 'As observed by Bagas'].map(copyKey),
@@ -45,7 +46,10 @@ const groups: Record<string, GroupDefinition[]> = {
     { title: 'Penerima kartu', keys: ['keepsake.forLabel', 'keepsake.genericRecipient'] },
     { title: 'Unduhan gambar & video', keys: ['storyDownload.title', 'storyDownload.video', 'storyDownload.front', 'storyDownload.back'] },
   ],
-  footer: [{ title: 'Penutup undangan', keys: ['beyond.head', ...literal('The invitation ends here.', 'The rest stays open.', 'See you in Cimahi.', 'Thank you for being part of our day.'), ...literal('Made with unreasonable attention to detail', 'and approximately 1 billion tokens.')] }],
+  footer: [
+    { title: 'Stakk · kamera kenangan tamu', keys: ['footer.stakkTitle', 'footer.stakkDescription', 'footer.stakkCta'] },
+    { title: 'Penutup undangan', keys: ['beyond.head', ...literal('The invitation ends here.', 'The rest stays open.', 'See you in Cimahi.', 'Thank you for being part of our day.'), ...literal('Made with unreasonable attention to detail', 'and approximately 1 billion tokens.')] },
+  ],
 };
 export function groupEditorFields(section: EditorSection, query = '', values: Record<string, string> = {}): EditorFieldGroup[] {
   const search = query.trim().toLocaleLowerCase('id');
@@ -88,7 +92,7 @@ export const sectionHelp = (section: string) => ({
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
   gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tersedia lewat undangan personal. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',
-  footer: 'Kalimat dan tautan di akhir undangan. Hashtag mengikuti Kartu kenangan.',
+  footer: 'Pengantar dan tombol Stakk, serta kalimat dan tautan di akhir undangan. Stakk membuka kamera di tab baru. Hashtag mengikuti Kartu kenangan.',
   jukebox: 'Playlist dan kata-kata jukebox diatur bersama. Lagu tampil setelah audio diunggah dan lagu diaktifkan.',
   seo: 'Judul dan gambar saat undangan dibagikan. Aplikasi pesan dapat menyimpan gambar share lama sementara.',
 }[section] ?? 'Label menu, tombol, dan kondisi khusus. Pilih bahasa sebelum mengedit.');

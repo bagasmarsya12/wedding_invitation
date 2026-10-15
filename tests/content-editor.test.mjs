@@ -5,6 +5,9 @@ import {existsSync} from 'node:fs';
 const hook=registerHooks({resolve(specifier,context,next){try{return next(specifier,context);}catch(error){if(error.code==='ERR_MODULE_NOT_FOUND'&&specifier.startsWith('.')){const url=new URL(`${specifier}.ts`,context.parentURL);if(existsSync(url))return next(url.href,context);}throw error;}}});
 const {CONTENT_ALIASES,resolveContentAliases,replacedContentAliases}=await import('../lib/content-aliases.ts');
 const {contentEditorSections}=await import('../lib/content-editor-sections.ts');
+const {sectionCopyKeys,validateSectionSnapshot}=await import('../lib/cms-editorial.ts');
+const {groupEditorFields}=await import('../lib/cms-field-guide.ts');
+const {WEBSITE_DEFAULTS,defaultWebsiteBlocks}=await import('../lib/website-content.ts');
 const {CONTENT_DEFAULTS}=await import('../lib/content-defaults.ts');
 const {copyKey}=await import('../lib/copy-registry.ts');
 const {invitationMessage,invitationToken,DEFAULT_INVITATION_MESSAGE,validInvitationTemplate}=await import('../lib/invitation-message.ts');
@@ -69,4 +72,22 @@ test('photo comment copy and actions are editable inside the Archive section',()
  const archive=contentEditorSections().find(s=>s.id==='archive');
  for(const field of ['title','count','countOne','placeholder','send','reply','sendReply','like','pendingSent','signIn','delete','moreReplies'])assert.ok(archive.fields.some(f=>f.key===`photoComments.${field}`),field);
  for(const field of ['count','countOne'])for(const prefix of ['','id.'])assert.ok(CONTENT_DEFAULTS[prefix+'photoComments.'+field].includes('{{count}}'));
+});
+
+test('Stakk controls are bilingual and old footer revisions retain all existing copy and links',()=>{
+ const footer=contentEditorSections().find(section=>section.id==='footer');
+ const group=groupEditorFields(footer).find(group=>group.title.startsWith('Stakk'));
+ const added=group.fields.flatMap(field=>[field.key,`id.${field.key}`]);
+ assert.equal(added.length,6);
+ assert.ok(!group.fields.some(field=>field.key==='footer.stakkHint'));
+ for(const key of added)assert.ok(CONTENT_DEFAULTS[key]);
+ const blocks=defaultWebsiteBlocks(),copy=Object.fromEntries(sectionCopyKeys('footer').filter(key=>!added.includes(key)).map(key=>[key,CONTENT_DEFAULTS[key]]));
+ copy['beyond.head']='Kalimat pemilik yang harus tetap ada';
+ const old={copy,config:{},blocks:{links:blocks.links},media:{}};
+ const restored=validateSectionSnapshot('footer',old,{config:WEBSITE_DEFAULTS,blocks});
+ assert.ok(restored);
+ assert.equal(restored.copy['beyond.head'],copy['beyond.head']);
+ assert.deepEqual(restored.blocks.links,old.blocks.links);
+ for(const key of added)assert.equal(restored.copy[key],'');
+ assert.deepEqual(old.copy,copy,'Backfill must not mutate the stored revision');
 });
