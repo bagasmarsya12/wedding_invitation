@@ -9,7 +9,7 @@ export function shouldStartInvitationAudio(stored: string | null): boolean {
   if (!stored) return true;
   try {
     const preference = JSON.parse(stored);
-    // Respect a pause made earlier in this browser session.
-    return typeof preference?.wantedPlaying !== 'boolean' || preference.wantedPlaying;
+    // Legacy wantedPlaying=false also meant "never played". Only an explicit pause is a preference.
+    return preference?.autoplayPaused !== true;
   } catch { return true; }
 }

@@ -53,8 +53,10 @@ test('timeline formatting handles invalid and negative media times', () => {
 test('opening autoplay defaults on, respects an explicit pause and can be disabled in CMS', () => {
   assert.equal(shouldStartInvitationAudio(null),true);
   assert.equal(shouldStartInvitationAudio('{broken'),true);
-  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:false})),false);
+  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:false})),true);
   assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:true})),true);
+  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:false,autoplayPaused:true})),false);
+  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:false,autoplayPaused:false})),true);
   const legacy=config();delete legacy.autoplayOnOpen;
   assert.equal(validateJukeboxConfig(legacy).autoplayOnOpen,true);
   assert.equal(validateJukeboxConfig({...config(),autoplayOnOpen:false}).autoplayOnOpen,false);

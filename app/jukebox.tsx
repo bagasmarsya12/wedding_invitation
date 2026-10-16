@@ -53,6 +53,7 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
   const volumeRef = useRef(volume), lastVolume = useRef(config.defaultVolume || 0.3), restoreTime = useRef(0);
   const panel = useRef<HTMLElement>(null), opener = useRef<HTMLButtonElement>(null);
   const advance = useRef<() => void>(() => {}), lastSaved = useRef(0);
+  const autoplayPaused = useRef(false);
   const allowed = isJukeboxPage(path), index = Math.max(0, tracks.findIndex(track => track.id === trackId));
   const track = tracks[index];
   const copy = (key: JukeboxCopyKey) => config.copy[key][language];
@@ -60,7 +61,7 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
     const player = engine.current;
     if (!player) return;
     try { sessionStorage.setItem(JUKEBOX_SESSION_KEY, JSON.stringify({ trackId: currentId.current,
-      time: player.audio.src ? player.audio.currentTime : restoreTime.current, volume: volumeRef.current, wantedPlaying: player.wantedPlaying })); }
+      time: player.audio.src ? player.audio.currentTime : restoreTime.current, volume: volumeRef.current, wantedPlaying: player.wantedPlaying, autoplayPaused:autoplayPaused.current })); }
     catch { /* Session storage is optional. */ }
   };
   useEffect(() => { expandedRef.current = expanded; }, [expanded]);
@@ -73,6 +74,7 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
     let stored = null;
     try { stored = sessionStorage.getItem(JUKEBOX_SESSION_KEY); } catch { /* Private mode. */ }
     const session = parseJukeboxSession(stored, tracks, config.defaultVolume);
+    autoplayPaused.current = !shouldStartInvitationAudio(stored);
     currentId.current = session.trackId; volumeRef.current = session.volume; restoreTime.current = session.time;
     lastVolume.current = session.volume || config.defaultVolume || 0.3;
     player.setVolume(session.volume);
@@ -147,7 +149,8 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
     const player = engine.current;
     if (!player || !track) return;
     setFailed(false);
-    if (player.wantedPlaying) { setPlaying(false); await player.pause(); save(); return; }
+    if (player.wantedPlaying) { autoplayPaused.current=true; setPlaying(false); await player.pause(); save(); return; }
+    autoplayPaused.current=false;
     setLoading(true);
     try {
       if (!player.audio.getAttribute('src')) { player.audio.src = track.src; player.audio.load(); }
@@ -157,6 +160,7 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
   async function choose(next: number, shouldPlay: boolean) {
     const player = engine.current, selected = tracks[next];
     if (!player || !selected) return;
+    if (shouldPlay) autoplayPaused.current=false;
     currentId.current = selected.id; restoreTime.current = 0;
     setTrackId(selected.id); setTime(0); setDuration(selected.duration); setFailed(false); setLoading(shouldPlay);
     try { await player.select(selected.src, shouldPlay); save(); }
