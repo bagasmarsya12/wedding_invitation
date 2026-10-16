@@ -6,11 +6,14 @@ import { ArchiveMedia } from "./archive-media";
 import { PhotoViewer } from "../photo-viewer";
 import { PhotoCommentCard, usePhotoCommentCards } from "../photo-comment-card";
 import { archiveMaterial, ARCHIVE_POSITION_KEY, parseArchivePosition } from "@/lib/archive-collection";
+import { LandingPhoto } from '../landing-photo';
+import type { Localized } from '@/lib/website-content';
 
-export type ArchiveCard = { id?: string; slug: string; type: string; title: string; excerpt: string | null; media_url: string | null; entry_date?: string | null; location?: string | null };
+export type ArchiveCard = { id?: string; slug: string; type: string; title: string; excerpt: string | null; media_url: string | null; entry_date?: string | null; location?: string | null; gallery?:Localized };
+const photoKey = (entry:ArchiveCard) => `${entry.gallery?'gallery':'archive'}:${entry.id}`;
 
 export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
   const [photo, setPhoto] = useState<ArchiveCard | null>(null);
@@ -18,7 +21,8 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
   const workspace = useRef<HTMLDivElement>(null);
   const types = ["all", ...Array.from(new Set(entries.map(entry => entry.type)))];
   const visible = filter === "all" ? entries : entries.filter(entry => entry.type === filter);
-  const comments=usePhotoCommentCards(entries.filter(entry=>entry.id&&entry.media_url&&entry.type!=="audio").map(entry=>"archive:"+entry.id));
+  const comments=usePhotoCommentCards(entries.filter(entry=>entry.id&&entry.media_url&&entry.type!=="audio").map(photoKey));
+  const titleFor = (entry:ArchiveCard) => entry.gallery ? entry.gallery[language] || entry.gallery.en || entry.gallery.id : entry.slug==='the-mark'?t(entry.title):entry.title;
 
   useEffect(() => {
     let frame = 0, cancelled = false;
@@ -55,14 +59,14 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
     <div className={`collection-table${visible.length === 1 ? " is-single" : ""}`}>
       {visible.map(entry => {
         const open = selected === entry.slug;
-        const title = entry.slug === "the-mark" ? t(entry.title) : entry.title;
+        const title = titleFor(entry);
         const kind = archiveMaterial(entry.type);
         const id = `collection-${encodeURIComponent(entry.slug)}`;
         if(kind==="photo"&&entry.id&&entry.media_url)return <article className="collection-piece material-photo collection-photo-card" key={entry.slug} data-slug={entry.slug}>
           <div className="collection-sheet">
-            <button type="button" className="collection-photo-open" onClick={()=>setPhoto(entry)} aria-label={`${t("Photograph viewer")}: ${title}`}><ArchiveMedia key={entry.media_url} src={entry.media_url} title={title} type={entry.type}/></button>
-            <a className="collection-photo-caption" href={`/archive/${encodeURIComponent(entry.slug)}`} onClick={remember}>{title}</a>
-            <PhotoCommentCard photoKey={"archive:"+entry.id} overview={comments.data} error={comments.error} onRead={()=>setPhoto(entry)}/>
+            <button type="button" className="collection-photo-open" onClick={()=>setPhoto(entry)} aria-label={`${t("Photograph viewer")}: ${title}`}>{entry.gallery?<LandingPhoto key={entry.media_url} src={entry.media_url} alt={title} defer/>:<ArchiveMedia key={entry.media_url} src={entry.media_url} title={title} type={entry.type}/>}</button>
+            {entry.gallery?<button type="button" className="collection-photo-caption" onClick={()=>setPhoto(entry)}>{title}</button>:<a className="collection-photo-caption" href={`/archive/${encodeURIComponent(entry.slug)}`} onClick={remember}>{title}</a>}
+            <PhotoCommentCard photoKey={photoKey(entry)} overview={comments.data} error={comments.error} onRead={()=>setPhoto(entry)}/>
           </div>
         </article>;
         return <article className={`collection-piece material-${kind}${open ? " is-open" : ""}`} key={entry.slug} data-slug={entry.slug}
@@ -90,6 +94,6 @@ export function ArchiveCollection({ entries }: { entries: ArchiveCard[] }) {
     </div>
     {visible.length === 0 && <p className="collection-empty"><T>Nothing in this collection yet.</T></p>}
     <p className="collection-colophon"><T>Only what we really kept.</T></p>
-    <PhotoViewer photo={photo?.id && photo.media_url ? { key: `archive:${photo.id}`, src: photo.media_url, caption: photo.title } : null} onClose={() => setPhoto(null)} />
+    <PhotoViewer photo={photo?.id && photo.media_url ? { key: photoKey(photo), src: photo.media_url, caption: titleFor(photo) } : null} onClose={() => setPhoto(null)} />
   </div>;
 }

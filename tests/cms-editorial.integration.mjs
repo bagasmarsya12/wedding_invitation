@@ -145,6 +145,25 @@ export async function verifyEditorialFlows(base,cookie){
   const probe=await fetch(base+publicGifPath+'?preview=motion',{headers:{range:'bytes=0-1'}});assert.equal(probe.status,206);assert.equal(probe.headers.get('content-range'),`bytes 0-1/${motionFixture.length}`);assert.deepEqual(Buffer.from(await probe.arrayBuffer()),motionFixture.subarray(0,2));
   assert.equal((await fetch(base+publicGifPath+'?preview=motion',{headers:{range:'bytes=99999-'}})).status,416);
   assert.ok((await request('/')).text.includes(publicGifPath),'GIF reaches the homepage album');
+  // A new archive-only photo is public in the full album, but cannot expand the homepage.
+  const extraSlot='gallery-extra-fixture',extraUpload=await uploadGif('archive',extraSlot);
+  assert.equal(extraUpload.status,200);
+  const extended=structuredClone(album.live);
+  extended.blocks.photos.push({id:'archive-only-fixture',slot:extraSlot,caption:{id:'ARCHIVE_ONLY_SENTINEL',en:'ARCHIVE_ONLY_SENTINEL'},homepage:false});
+  extended.media[extraSlot]=extraUpload.data.key;
+  response=await act('archive',album,'save',{snapshot:extended});assert.equal(response.status,200,response.text);album=response.data;
+  assert.ok(!(await request('/archive')).text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').includes('ARCHIVE_ONLY_SENTINEL'));
+  response=await act('archive',album,'publish');assert.equal(response.status,200,response.text);album=response.data;
+  const markup=text=>text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  assert.ok(!markup((await request('/')).text).includes('ARCHIVE_ONLY_SENTINEL'));
+  const albumMarkup=markup((await request('/archive')).text);
+  assert.ok(albumMarkup.includes('ARCHIVE_ONLY_SENTINEL'));
+  assert.ok(!albumMarkup.includes('/archive/photo-archive-only-fixture'),'Gallery captions do not link to a nonexistent story route');
+  const featured=structuredClone(album.live);featured.blocks.photos.at(-1).homepage=true;
+  response=await act('archive',album,'save',{snapshot:featured});assert.equal(response.status,200,response.text);album=response.data;
+  response=await act('archive',album,'publish');assert.equal(response.status,200,response.text);album=response.data;
+  assert.ok(markup((await request('/')).text).includes('ARCHIVE_ONLY_SENTINEL'));
+  console.log('Album publication: archive-only default, fixed homepage selection, explicit featuring and real photo viewer links: OK');
   const albumBaseline=album.document.history.find(r=>r.kind==='baseline');
   response=await act('archive',album,'restore',{revision:albumBaseline.id});assert.equal(response.status,200);album=response.data;assert.deepEqual(album.document.draft,albumOriginal);
   response=await act('archive',album,'publish');assert.equal(response.status,200);assert.equal((await request(publicGifPath,null,{auth:false})).status,404);assert.equal((await request(publicGifPath+'?preview=card',null,{auth:false})).status,404,'An old edge cache cannot bypass the current publication mapping');assert.equal((await request(gifUpload.data.url)).status,200,'Original GIF remains recoverable');

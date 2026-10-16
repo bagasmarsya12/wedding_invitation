@@ -5,6 +5,7 @@ import { ArchiveCollection, type ArchiveCard } from "./archive-client";
 import { db } from "@/lib/server";
 import { ArchiveImage } from "./archive-media";
 import { hasPublicContent } from "@/lib/public-content";
+import { loadGalleryPhotos } from "@/lib/gallery-content";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,14 @@ const mark: ArchiveCard = {
 };
 
 export default async function ArchivePage() {
+  const photosPromise = loadGalleryPhotos();
   let custom: ArchiveCard[] = [];
   try {
     const result = await db().prepare("SELECT id, slug, type, title, excerpt, story, media_url, entry_date, location FROM archive_entries WHERE published = 1 AND visibility = 'public' ORDER BY COALESCE(featured_order, 999), created_at").all<ArchiveCard & { story: string | null }>();
     custom = result.results.filter(entry => entry.slug !== "the-mark" && hasPublicContent(entry.title) && (hasPublicContent(entry.story) || hasPublicContent(entry.excerpt))).map(entry => ({ ...entry, excerpt: hasPublicContent(entry.excerpt) ? entry.excerpt : null }));
   } catch { /* The built-in story remains available during an empty database state. */ }
+  const photos = await photosPromise;
+  const entries:ArchiveCard[] = [...photos.map(photo=>({id:photo.id,slug:`photo-${photo.id}`,type:'photograph',title:photo.caption.en,excerpt:null,media_url:photo.src,gallery:photo.caption})),mark,...custom];
   return (
     <main className="product-page archive-page archive-room">
       <header className="product-header"><a href="/"><T>Iga & Bagas</T></a><nav><a href="/"><T>Invitation</T></a></nav><LanguageSwitch /></header>
@@ -32,9 +36,10 @@ export default async function ArchivePage() {
         <ArchiveImage src="/assets/botanicals/combretum/canopy-branch.webp" decorative className="collection-canopy" />
       </section>
       <section className="collection-catalogue" id="collection">
-        <ArchiveCollection entries={[mark, ...custom]} />
+        <ArchiveCollection entries={entries} />
         <noscript>
           <style>{".archive-room .collection-workspace { display:none; }"}</style>
+          <div className="collection-table">{photos.map(photo=><figure key={photo.id} className="collection-piece material-photo"><img src={photo.src} alt={photo.caption.id||photo.caption.en} loading="lazy"/><figcaption>{photo.caption.id||photo.caption.en}</figcaption></figure>)}</div>
           <nav className="collection-no-script" aria-label="Archive stories"><p><T>Choose a story to read.</T></p>
             {[mark, ...custom].map(entry => <a key={entry.slug} href={`/archive/${encodeURIComponent(entry.slug)}`}>{entry.slug === "the-mark" ? <T>{entry.title}</T> : entry.title}</a>)}
           </nav>

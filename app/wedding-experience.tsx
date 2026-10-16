@@ -40,6 +40,7 @@ import { useGuestRsvp } from "./use-guest-rsvp";
 import { EMPTY_ARRIVAL_PHOTOS, type ArrivalPhotos } from "@/lib/arrival-content";
 import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
 import { EMPTY_PHOTOS, type LandingPhotos } from "@/lib/public-content";
+import { requestInvitationAudio } from '@/lib/invitation-audio';
 
 type Props = { keepsakeNote?:{note1:string;note2:string}; guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; giftItems?: HomepageGift[]; photos?: LandingPhotos; arrivalPhotos?:ArrivalPhotos };
 type MotionPreferences = { reduced: boolean; precise: boolean };
@@ -393,7 +394,7 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       if (infoOpen) setInfoOpen(false);
-      else if (!entered) {setEntered(true);setOpening(false);setLiftedLetter(null);}
+      else if (!entered) {requestInvitationAudio();setEntered(true);setOpening(false);setLiftedLetter(null);}
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
@@ -401,12 +402,13 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
 
   function openInvitation() {
     if (opening) return;
+    requestInvitationAudio();
     scrollTo({top:0,behavior:'instant'});
     if (reduced) setEntered(true);
     else {setCinematicEntry(true);setOpening(true);}
   }
 
-  function finishOpening() {setEntered(true);setOpening(false);setLiftedLetter(null);}
+  function finishOpening() {requestInvitationAudio();setEntered(true);setOpening(false);setLiftedLetter(null);}
 
   useEffect(() => {
     if (!opening) return;

@@ -9,7 +9,10 @@ export type WebsiteConfig = {
   metaTitle: string; metaDescription: string; ogImage: string; profilesEnabled: boolean; trackingEnabled: boolean;
 };
 export type TextBlock = { id: string; title: Localized; body: Localized };
-export type PhotoBlock = { id: string; slot: string; caption: Localized };
+export type PhotoBlock = { id: string; slot: string; caption: Localized; homepage?: boolean };
+export const MAX_ALBUM_PHOTOS = 100;
+// Older published albums retain their selection; the CMS creates new photos with false.
+export const isHomepagePhoto = (photo: PhotoBlock) => photo.homepage !== false;
 export type LinkBlock = TextBlock & { href: string };
 export type WebsiteBlocks = { story: TextBlock[]; faq: TextBlock[]; photos: PhotoBlock[]; links: LinkBlock[] };
 export const WEBSITE_DEFAULTS: WebsiteConfig = {
@@ -60,7 +63,7 @@ export function validateWebsiteBlocks(input: unknown): WebsiteBlocks | null {
   const localized=(v:unknown,max:number,rich=false)=>Boolean(v && typeof v==='object' && !Array.isArray(v) && ['en','id'].every(k=>(rich?validRichText:validPlainText)((v as Record<string,unknown>)[k],max)));
   const result: Record<string,unknown[]>={};
   for (const kind of ['story','faq','photos','links']) {
-    if (!Array.isArray(c[kind]) || (c[kind] as unknown[]).length>24) return null;
+    if (!Array.isArray(c[kind]) || (c[kind] as unknown[]).length>(kind==='photos'?MAX_ALBUM_PHOTOS:24)) return null;
     const seen=new Set<string>(); result[kind]=[];
     for(const raw of c[kind] as unknown[]) {
       if (!raw || typeof raw!=='object' || Array.isArray(raw)) return null;
@@ -69,7 +72,8 @@ export function validateWebsiteBlocks(input: unknown): WebsiteBlocks | null {
       seen.add(row.id);
       if(kind==='photos') {
         if(typeof row.slot!=='string' || !/^[a-z0-9-]{1,60}$/.test(row.slot) || !localized(row.caption,500)) return null;
-        result[kind].push({id:row.id,slot:row.slot,caption:row.caption});
+        if(row.homepage!==undefined&&typeof row.homepage!=='boolean')return null;
+        result[kind].push({id:row.id,slot:row.slot,caption:row.caption,...(row.homepage!==undefined?{homepage:row.homepage}:{})});
       } else {
         if(!localized(row.title,200) || !localized(row.body,2000,true)) return null;
         if(kind==='links') {

@@ -15,7 +15,7 @@ export async function PUT(request:Request) {
   const body=await readJsonBody(request,200_000); if(!body) return apiError('Invalid website content.');
   const changes:{key:string;value:unknown}[]=[];
   if(body.config!==undefined) { const config=validateWebsiteConfig(body.config); if(!config) return apiError('Check event date, times, names, coordinates, and HTTPS links.'); changes.push({key:'cms.website',value:config}); }
-  if(body.blocks!==undefined) { const blocks=validateWebsiteBlocks(body.blocks); if(!blocks) return apiError('Check block IDs, lengths, translations, and links. Maximum 24 items per collection.'); changes.push({key:'cms.blocks',value:blocks}); }
+  if(body.blocks!==undefined) { const blocks=validateWebsiteBlocks(body.blocks); if(!blocks) return apiError('Check block IDs, lengths, translations, and links. Maximum 100 photos, or 24 items in other collections.'); changes.push({key:'cms.blocks',value:blocks}); }
   if(body.arrival!==undefined) { const arrival=validateArrivalContent(body.arrival); if(!arrival) return apiError('Periksa teks dua bahasa, empat langkah kedatangan, dan nomor WhatsApp (atau kosongkan nomor).'); changes.push({key:'cms.arrival',value:arrival}); }
   if(!changes.length) return apiError('No website changes supplied.');
   if(!await allowMutation('admin-website',admin.userId,60,60_000)) return apiError('Please wait before saving again.',429);

@@ -90,7 +90,7 @@ export const sectionHelp = (section: string) => ({
   details: 'Jadwal, peta, panduan kedatangan, FAQ, dan QR tamu berada dalam satu section.',
   profil: 'Judul, nama lengkap, dan tiga bagian untuk setiap mempelai. Foto bisa diganti di tab Foto mempelai.',
   story: 'Bab cerita tampil berurutan di homepage. Judul section diatur melalui Teks & tombol.',
-  archive: 'Album foto adalah kartu-kartu di Arsip cinta kami. Cerita tambahan memiliki halaman sendiri di Arsip.',
+  archive: 'Semua foto tayang di Arsip kami. Pilihan homepage diatur per foto; foto baru tidak otomatis masuk homepage. Cerita tambahan tetap memiliki halaman sendiri.',
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
   gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tersedia lewat undangan personal. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',

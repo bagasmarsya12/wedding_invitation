@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { JUKEBOX_DEFAULTS, adjacentTrack, formatAudioTime, isJukeboxPage, parseJukeboxSession, playableTracks,
   validateJukeboxConfig } from '../lib/jukebox-playlist.ts';
+import { shouldStartInvitationAudio } from '../lib/invitation-audio.ts';
 
 const track = { id: 'track-a', title: 'One', artist: 'Iga & Bagas', src: '/audio/jukebox/test.mp3',
   artwork: '', pickedBy: 'Ours', note: { id: '', en: '' }, duration: 240, enabled: true };
@@ -48,4 +49,14 @@ test('jukebox is absent from staff, CMS, auth and check-in surfaces', () => {
 });
 test('timeline formatting handles invalid and negative media times', () => {
   assert.equal(formatAudioTime(240.9), '4:00'); assert.equal(formatAudioTime(Infinity), '0:00'); assert.equal(formatAudioTime(-1), '0:00');
+});
+test('opening autoplay defaults on, respects an explicit pause and can be disabled in CMS', () => {
+  assert.equal(shouldStartInvitationAudio(null),true);
+  assert.equal(shouldStartInvitationAudio('{broken'),true);
+  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:false})),false);
+  assert.equal(shouldStartInvitationAudio(JSON.stringify({wantedPlaying:true})),true);
+  const legacy=config();delete legacy.autoplayOnOpen;
+  assert.equal(validateJukeboxConfig(legacy).autoplayOnOpen,true);
+  assert.equal(validateJukeboxConfig({...config(),autoplayOnOpen:false}).autoplayOnOpen,false);
+  assert.equal(validateJukeboxConfig({...config(),autoplayOnOpen:'yes'}),null);
 });

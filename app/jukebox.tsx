@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from './language';
 import { JukeboxAudio } from '@/lib/jukebox-audio';
+import { INVITATION_OPEN_EVENT, shouldStartInvitationAudio } from '@/lib/invitation-audio';
 import { adjacentTrack, formatAudioTime, isJukeboxPage, JUKEBOX_SESSION_KEY, parseJukeboxSession, playableTracks,
   type JukeboxConfig, type JukeboxCopyKey, type PickedBy } from '@/lib/jukebox-playlist';
 
@@ -94,11 +95,24 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
       if (Date.now() - lastSaved.current > 2000) { lastSaved.current = Date.now(); save(); }
     };
     const onEnded = () => advance.current();
+    let openingRequested = false;
+    const onInvitationOpen = () => {
+      if (openingRequested || config.autoplayOnOpen === false || !isJukeboxPage(window.location.pathname) || !shouldStartInvitationAudio(stored)) return;
+      openingRequested = true;
+      if (player.wantedPlaying) return;
+      const first = tracks.find(item => item.id === currentId.current) ?? tracks[0];
+      if (!first) return;
+      if (!audio.getAttribute('src')) { audio.src = first.src; audio.load(); }
+      setLoading(true);
+      // No await before play: Safari needs this to run during the envelope click.
+      void player.play().then(save).catch(() => { setLoading(false); setResumeHint(true); });
+    };
     audio.addEventListener('play', onPlay); audio.addEventListener('pause', onPause);
     audio.addEventListener('waiting', onWaiting); audio.addEventListener('canplay', onReady);
     audio.addEventListener('error', onError); audio.addEventListener('loadedmetadata', onMetadata);
     audio.addEventListener('timeupdate', onTime); audio.addEventListener('ended', onEnded);
     window.addEventListener('pagehide', save);
+    window.addEventListener(INVITATION_OPEN_EVENT, onInvitationOpen);
     const onHidden = () => { if (document.visibilityState === 'hidden') save(); };
     document.addEventListener('visibilitychange', onHidden);
     return () => {
@@ -107,11 +121,12 @@ export function Jukebox({ config }: { config: JukeboxConfig }) {
       audio.removeEventListener('error', onError); audio.removeEventListener('loadedmetadata', onMetadata);
       audio.removeEventListener('timeupdate', onTime); audio.removeEventListener('ended', onEnded);
       window.removeEventListener('pagehide', save); document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener(INVITATION_OPEN_EVENT, onInvitationOpen);
       player.destroy(); engine.current = null;
     };
     // Only rebuild when actual audio sources change, not on language/panel changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackSignature]);
+  }, [trackSignature, config.autoplayOnOpen]);
   useEffect(() => {
     const inspect = () => setCovered(!!document.querySelector('.v2-world.is-locked, [aria-modal="true"]'));
     inspect();

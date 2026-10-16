@@ -47,13 +47,14 @@ export type JukeboxTrack = {
 export type JukeboxConfig = {
   version: 1;
   enabled: boolean;
+  autoplayOnOpen?: boolean;
   loop: boolean;
   defaultVolume: number;
   tracks: JukeboxTrack[];
   copy: JukeboxCopy;
 };
 export const JUKEBOX_DEFAULTS: JukeboxConfig = {
-  version: 1, enabled: true, loop: true, defaultVolume: 0.3,
+  version: 1, enabled: true, autoplayOnOpen: true, loop: true, defaultVolume: 0.3,
   tracks: [], copy: JUKEBOX_COPY,
 };
 const assetId = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -80,7 +81,7 @@ function artworkSource(src: string): boolean {
 export function validateJukeboxConfig(value: unknown): JukeboxConfig | null {
   if (!value || typeof value !== 'object') return null;
   const v = value as Record<string, unknown>;
-  if (v.version !== 1 || typeof v.enabled !== 'boolean' || typeof v.loop !== 'boolean' ||
+  if (v.version !== 1 || typeof v.enabled !== 'boolean' || (v.autoplayOnOpen!==undefined&&typeof v.autoplayOnOpen!=='boolean') || typeof v.loop !== 'boolean' ||
     typeof v.defaultVolume !== 'number' || !Number.isFinite(v.defaultVolume) || v.defaultVolume < 0 || v.defaultVolume > 1 ||
     !Array.isArray(v.tracks) || v.tracks.length > MAX_JUKEBOX_TRACKS || !v.copy || typeof v.copy !== 'object') return null;
   const copy = {} as JukeboxCopy;
@@ -102,7 +103,7 @@ export function validateJukeboxConfig(value: unknown): JukeboxConfig | null {
     ids.add(id);
     tracks.push({ id, title, artist, src, artwork, pickedBy: item.pickedBy as PickedBy, note, duration: item.duration, enabled: item.enabled });
   }
-  return { version: 1, enabled: v.enabled, loop: v.loop, defaultVolume: v.defaultVolume, tracks, copy };
+  return { version: 1, enabled: v.enabled, autoplayOnOpen: v.autoplayOnOpen !== false, loop: v.loop, defaultVolume: v.defaultVolume, tracks, copy };
 }
 export function playableTracks(config: JukeboxConfig): JukeboxTrack[] {
   return config.enabled ? config.tracks.filter(track => track.enabled && !!track.src) : [];
