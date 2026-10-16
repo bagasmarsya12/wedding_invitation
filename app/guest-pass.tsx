@@ -11,7 +11,7 @@ function PassFlowers() {
   return <div className="pass-garden" aria-hidden="true"><AtelierFloralAccent corner="top-left" className="pass-flower-top" /><AtelierFloralAccent corner="bottom-right" className="pass-flower-bottom" /></div>;
 }
 
-export function GuestPass({ token }: { token: string }) {
+export function GuestPass({ token, compact = false }: { token: string; compact?: boolean }) {
   const { t, language,website } = useLanguage();
   const display=weddingDisplay(website,language);
   const [pass, setPass] = useState<GuestPassData | null>(null);
@@ -47,11 +47,11 @@ export function GuestPass({ token }: { token: string }) {
     finally { setSaving(false); }
   }
   const actions = pass && <><button className="guest-pass-save" type="button" disabled={saving} onClick={save}><Download size={15} aria-hidden="true" /><T>{saving ? "Preparing image…" : "Save guest pass"}</T></button><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(pass.code); setCopied(true); } catch { setError("Copy unavailable. Select the code above to copy it."); } }}><T>{copied ? "Copied." : "Copy pass code"}</T></button></>;
-  return <><section className="guest-pass-inline" aria-labelledby="guest-pass-title">
+  return <><section className={`guest-pass-inline${compact ? ' is-compact' : ''}`} aria-labelledby="guest-pass-title">
     <div className="guest-pass-paper" aria-busy={!pass && !error}>
       <div className="guest-pass-copy">
         <h3 id="guest-pass-title"><QrCode size={17} aria-hidden="true" /><T>Your guest pass</T></h3>
-        {pass ? <><h4 dir="auto">{pass.guestName}</h4><p><T>Up to</T> {pass.partyLimit} <T>{pass.partyLimit === 1 ? "guest" : "guests"}</T></p><p className="guest-pass-help"><T>Show this QR at the entrance. Save the image before you leave.</T></p></> : !error && <p role="status"><T>Preparing your guest pass…</T></p>}
+        {pass ? <><h4 dir="auto">{pass.guestName}</h4><p className="guest-pass-help"><T>Show this QR at the entrance. Save the image before you leave.</T></p></> : !error && <p role="status"><T>Preparing your guest pass…</T></p>}
       </div>
       <div className="guest-pass-qr-wrap">
         {pass ? <><button className="guest-pass-qr-open" type="button" aria-label={t("Enlarge QR")} aria-haspopup="dialog" aria-controls="guest-pass-dialog" onClick={() => setOpen(true)}><PassFlowers /><span className="pass-preview-name">{display.names}</span><img className="pass-qr" src={pass.qrData} width="512" height="512" alt={t("Guest check-in QR code")} /><span className="pass-preview-date">{display.stamp}</span><span className="pass-preview-open"><Maximize2 size={12} aria-hidden="true" /><T>Enlarge QR</T></span></button><code>{pass.code}</code></> : <span className="guest-pass-qr-placeholder" aria-hidden="true" />}
@@ -69,7 +69,7 @@ export function GuestPass({ token }: { token: string }) {
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     }}>
       <header><h2 id="guest-pass-dialog-title"><T>Your guest pass</T></h2><button type="button" autoFocus aria-label={t("Close guest pass")} onClick={() => setOpen(false)}>×</button></header>
-      <div className="guest-pass-paper"><PassFlowers /><p className="pass-couple">{display.names}</p><p className="pass-date">{display.stamp}</p><h3 dir="auto">{pass.guestName}</h3><p><T>Up to</T> {pass.partyLimit} <T>{pass.partyLimit === 1 ? "guest" : "guests"}</T></p><img className="pass-qr" src={pass.qrData} width="512" height="512" alt={t("Guest check-in QR code")} /><p className="pass-venue">{display.venue}</p><code>{pass.code}</code></div>
+      <div className="guest-pass-paper"><PassFlowers /><p className="pass-couple">{display.names}</p><p className="pass-date">{display.stamp}</p><h3 dir="auto">{pass.guestName}</h3><img className="pass-qr" src={pass.qrData} width="512" height="512" alt={t("Guest check-in QR code")} /><p className="pass-venue">{display.venue}</p><code>{pass.code}</code></div>
       <p className="guest-pass-help"><T>Show this QR at the entrance. Save the image before you leave.</T></p><div className="guest-pass-actions">{actions}</div>
       {error && <p className="guest-pass-status" role="status"><T>{error}</T></p>}
     </dialog>}

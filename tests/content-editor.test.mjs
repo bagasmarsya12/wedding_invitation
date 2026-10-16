@@ -12,7 +12,29 @@ const {CONTENT_DEFAULTS}=await import('../lib/content-defaults.ts');
 const {copyKey}=await import('../lib/copy-registry.ts');
 const {invitationMessage,invitationToken,DEFAULT_INVITATION_MESSAGE,validInvitationTemplate}=await import('../lib/invitation-message.ts');
 const {publicStakkContent,stakkCorsHeaders}=await import('../lib/stakk-content.ts');
+const {ARRIVAL_DEFAULTS}=await import('../lib/arrival-content.ts');
+const {DAY_OF_KEYS}=await import('../lib/day-of-content.ts');
 hook.deregister();
+
+test('day-of copy belongs to arrival CMS and older drafts restore without losing event details',()=>{
+ const section=contentEditorSections().find(section=>section.id==='details');
+ const group=groupEditorFields(section).find(group=>group.title==='Tampilan hari H');
+ assert.deepEqual(group.fields.map(field=>field.key),DAY_OF_KEYS);
+ const added=new Set(DAY_OF_KEYS.flatMap(key=>[key,`id.${key}`]));
+ for(const key of added)assert.ok(CONTENT_DEFAULTS[key]);
+ const blocks=defaultWebsiteBlocks(),copy=Object.fromEntries(sectionCopyKeys('details').filter(key=>!added.has(key)).map(key=>[key,CONTENT_DEFAULTS[key]]));
+ copy['details.sub']='Kalimat pemilik tetap utuh';
+ const configKeys=['firstName','secondName','weddingDate','akadTime','receptionTime','venueName','venueCity','venueAddress','mapsUrl','longitude','latitude','profilesEnabled','trackingEnabled'];
+ const old={copy,config:Object.fromEntries(configKeys.map(key=>[key,WEBSITE_DEFAULTS[key]])),blocks:{faq:blocks.faq},arrival:structuredClone(ARRIVAL_DEFAULTS),media:{}};
+ const restored=validateSectionSnapshot('details',old,{config:WEBSITE_DEFAULTS,blocks});
+ assert.ok(restored);
+ assert.equal(restored.copy['details.sub'],copy['details.sub']);
+ assert.deepEqual(restored.config,old.config);
+ assert.deepEqual(restored.arrival,old.arrival);
+ assert.deepEqual(restored.blocks,old.blocks);
+ for(const key of added)assert.equal(restored.copy[key],'');
+ assert.deepEqual(old.copy,copy,'The stored old revision must not be mutated');
+});
 
 test('section editor exposes live bilingual fields and collection tools without duplicate keys',()=>{
   const sections=contentEditorSections(),keys=sections.flatMap(section=>section.fields.map(field=>field.key));

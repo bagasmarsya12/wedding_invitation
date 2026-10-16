@@ -186,7 +186,31 @@ try {
     assert.equal((await response(base, "/api/marks?cursor=invalid")).status, 400);
     console.log("public wall pagination: all approved cards, no duplicates or omissions: OK");
 
-    sql("INSERT INTO settings (key,value) VALUES ('site_phase','post-wedding') ON CONFLICT(key) DO UPDATE SET value='post-wedding';");
+    sql("INSERT INTO settings (key,value) VALUES ('site_phase','pre-wedding') ON CONFLICT(key) DO UPDATE SET value='pre-wedding';");
+    assert.equal((await response(base,`/hari-h/${a}`)).headers.get('location'),`/invite/${a}?view=full`);
+    assert.equal((await response(base,'/hari-h')).headers.get('location'),'/?view=full');
+    sql("UPDATE settings SET value='wedding-day' WHERE key='site_phase';");
+    for(const [path,destination] of [['/','/hari-h'],[`/invite/${a}`,`/hari-h/${a}`]]){
+      const moved=await response(base,path);assert.equal(moved.status,307);assert.equal(moved.headers.get('location'),destination);
+    }
+    const quick=await fetch(base+`/hari-h/${a}`,{redirect:'manual'});
+    assert.equal(quick.status,200);assert.match(quick.headers.get('cache-control'),/no-store/);assert.match(quick.headers.get('x-robots-tag'),/noindex/);
+    const quickMarkup=(await quick.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+    assert.ok(quickMarkup.includes('Hari ini Kami Menikah.'));
+    assert.ok(quickMarkup.includes(`href="/invite/${a}?view=full"`));
+    for(const id of ['profiles','details','archive','gifts','beyond','closing-title'])assert.ok(!quickMarkup.includes(`id="${id}"`),`Compact page must not render ${id}`);
+    for(const path of ['/?view=full',`/invite/${a}?view=full`]){
+      const full=await fetch(base+path,{redirect:'manual'});assert.equal(full.status,200);
+      const markup=(await full.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+      assert.ok(markup.includes('v2-grand-day'));assert.ok(markup.includes('id="profiles"'));assert.ok(!markup.includes('class="wedding-day"'));
+    }
+    assert.equal((await response(base,'/hari-h/invalid-token')).status,404);
+    const publicQuick=await fetch(base+'/hari-h');assert.equal(publicQuick.status,200);
+    const publicQuickMarkup=(await publicQuick.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+    assert.ok(publicQuickMarkup.includes('QR check-in tersedia lewat tautan undangan personalmu.'));assert.ok(!publicQuickMarkup.includes('id="guest-pass"'));
+    sql("UPDATE settings SET value='post-wedding' WHERE key='site_phase';");
+    assert.equal((await response(base,`/hari-h/${a}`)).headers.get('location'),`/invite/${a}?view=full`);
+    console.log('Wedding-day routes: automatic private redirect, one-section page, full-view escape, before/after phases, public and invalid links: OK');
     assert.equal((await response(base, "/api/site-state")).data.phase, "post-wedding");
     assert.equal((await response(base, `/api/invite/${a}/rsvp`, "POST", { attendance: "yes", partySize: 1 })).status, 403);
     sql("INSERT INTO settings (key,value) VALUES ('rsvp_enabled','on') ON CONFLICT(key) DO UPDATE SET value='on';");

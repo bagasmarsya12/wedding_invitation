@@ -7,8 +7,8 @@ export function VisitTracker({enabled}:{enabled:boolean}) {
   const path=usePathname();
   useEffect(()=>{
     if(!enabled || navigator.doNotTrack==='1' || (navigator as Navigator & {globalPrivacyControl?:boolean}).globalPrivacyControl) return;
-    const match=path.match(/^\/invite\/([A-Za-z0-9_-]{24,160})(?:\/(gifts|mark))?\/?$/);
-    const page=match ? match[2]==='gifts'?'gifts':match[2]==='mark'?'postcard':'invitation' : path==='/'?'home':/^\/archive(?:\/[^/]+)?$/.test(path)?'archive':path==='/gifts'?'gifts':null;
+    const match=path.match(/^\/(?:invite|hari-h)\/([A-Za-z0-9_-]{24,160})(?:\/(gifts|mark))?\/?$/);
+    const page=match ? match[2]==='gifts'?'gifts':match[2]==='mark'?'postcard':'invitation' : path==='/'||path==='/hari-h'?'home':/^\/archive(?:\/[^/]+)?$/.test(path)?'archive':path==='/gifts'?'gifts':null;
     if(!page) return;
     let sent=false;
     const send=()=>{

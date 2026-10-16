@@ -35,6 +35,7 @@ export function contentEditorSections(): EditorSection[] {
     if(group==='storyDownload')group='keepsake';
     if(group==='countdown'||group==='misc')group='hero';
     if(group==='peta')group='details';
+    if(group==='dayOf')group='details';
     if(group==='mark')group='rsvp';
     if(group==='beyond')group='footer';
     if(group==='gallery')group='archive';

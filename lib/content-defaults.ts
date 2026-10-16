@@ -7,6 +7,7 @@ import { indonesian } from './invitation-copy';
 import { copyKey, PUBLIC_COPY } from './copy-registry';
 import { GUEST_CONTENT_SECTIONS, GUEST_CONTENT_TRANSLATIONS } from './guest-content';
 import { PHOTO_COMMENT_COPY } from './photo-comment-copy';
+import { DAY_OF_COPY, DAY_OF_TRANSLATIONS } from './day-of-content';
 export type ContentField = { key: string; label: string; value: string };
 export type ContentSection = { id: string; label: string; photo?: boolean; fields: ContentField[] };
 export type ContentMap = Record<string, string>;
@@ -175,7 +176,7 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
   ] },
 ];
 
-export const CONTENT_SECTIONS: ContentSection[] = [...BASE_CONTENT_SECTIONS, ...GUEST_CONTENT_SECTIONS, ...EXTRA_CONTENT_SECTIONS, {id:'photoComments',label:'Komentar foto',fields:PHOTO_COMMENT_COPY.map(([key,label,value])=>({key,label,value}))}, {id:'copy',label:'Semua kata-kata & interface',fields:PUBLIC_COPY.map(value=>({key:copyKey(value).slice(5),label:value,value}))}];
+export const CONTENT_SECTIONS: ContentSection[] = [...BASE_CONTENT_SECTIONS, ...GUEST_CONTENT_SECTIONS, ...EXTRA_CONTENT_SECTIONS, {id:'dayOf',label:'Tampilan hari H',fields:DAY_OF_COPY.map(([key,label,value])=>({key,label,value}))}, {id:'photoComments',label:'Komentar foto',fields:PHOTO_COMMENT_COPY.map(([key,label,value])=>({key,label,value}))}, {id:'copy',label:'Semua kata-kata & interface',fields:PUBLIC_COPY.map(value=>({key:copyKey(value).slice(5),label:value,value}))}];
 const english: ContentMap = Object.fromEntries(CONTENT_SECTIONS.flatMap(section => section.fields.map(field => [section.id + '.' + field.key, field.value])));
 export const CONTENT_DEFAULTS: ContentMap = {...english,...Object.fromEntries(Object.entries(english).map(([key,value])=>['id.'+key,indonesian[value.trim()] ?? value])),...{'id.keepsake.forLabel': 'Untuk', 'id.keepsake.genericRecipient': 'kamu', 'id.keepsake.note1': 'Satu hari yang indah,', 'id.keepsake.note2': 'lebih indah karena kamu.', 'id.keepsake.love': 'Dengan sayang,', 'id.keepsake.editionLabel': 'Edisi tamu', 'id.keepsake.turn': 'Balik kartunya', 'id.keepsake.return': 'Kembali ke depan', 'id.keepsake.front': 'Sisi depan kartu', 'id.keepsake.back': 'Sisi belakang kartu', 'id.keepsake.hint': 'Dua sisi dari hari yang sama.'}};
 
@@ -189,6 +190,7 @@ Object.assign(CONTENT_DEFAULTS, EXTRA_CONTENT_TRANSLATIONS);
 Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,,value])=>['id.photoComments.'+key,value])));
 
 Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);
+Object.assign(CONTENT_DEFAULTS, DAY_OF_TRANSLATIONS);
 
 CONTENT_DEFAULTS['id.keepsake.openHint'] = 'Lihat kartumu · unduh gambar & video';
 

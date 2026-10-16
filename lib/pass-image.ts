@@ -22,8 +22,7 @@ export async function createPassImage(pass: GuestPassData, language: "en" | "id"
   let size = 42; ctx.font = `${size}px Georgia,serif`;
   while (ctx.measureText(pass.guestName).width > 700 && size > 16) { size -= 2; ctx.font = `${size}px Georgia,serif`; }
   ctx.direction = /[\u0590-\u08ff]/.test(pass.guestName) ? "rtl" : "ltr";
-  text(pass.guestName, 320, size, true); ctx.direction = "ltr";
-  text(language === "id" ? `Maksimal ${pass.partyLimit} tamu` : `Up to ${pass.partyLimit} ${pass.partyLimit === 1 ? "guest" : "guests"}`, 367, 26);
+  text(pass.guestName, 350, size, true); ctx.direction = "ltr";
   ctx.drawImage(image, 210, 425, 480, 480);
   text(display.venue, 972, 30, true); text(translate("Show this QR at the entrance"), 1017, 25);
   text(pass.code, 1074, 18);

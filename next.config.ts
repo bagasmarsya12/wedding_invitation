@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
       { source: "/", headers: security },
       { source: "/:path*", headers: security },
       { source: "/invite/:path*", headers: privatePage },
+      { source: "/hari-h/:path*", headers: privatePage },
+      { source: "/hari-h", headers: privatePage },
       { source: "/api/invite/:path*", headers: privatePage },
       { source: "/admin/:path*", headers: privatePage },
       { source: "/api/admin/:path*", headers: privatePage },

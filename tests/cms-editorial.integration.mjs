@@ -48,10 +48,18 @@ export async function verifyEditorialFlows(base,cookie){
   assert.ok(!(await request('/api/admin/state')).data.settings.some(s=>s.key.startsWith('cms.editor.')));
   assert.ok((await request('/api/admin/state?export=backup')).data.settings.some(s=>s.key.startsWith('cms.editor.')));
   let details=(await read('details')).data;const detailsDraft=structuredClone(details.live);detailsDraft.config.venueName='DRAFT_VENUE_SENTINEL';detailsDraft.blocks.faq=[{id:'fixture-faq',title:{id:'Pertanyaan draf',en:'Draft question'},body:{id:'Jawaban draf',en:'Draft answer'}}];
+  detailsDraft.copy['id.dayOf.title']='PRIVATE_DAY_OF_DRAFT';
   const websiteBefore=(await request('/api/admin/website')).data.config;
   response=await act('details',details,'save',{snapshot:detailsDraft});assert.equal(response.status,200,response.text);details=response.data;
   assert.equal((await request('/api/admin/website')).data.config.venueName,websiteBefore.venueName);
   assert.ok((await request('/admin/content-preview?section=details')).text.includes('DRAFT_VENUE_SENTINEL'));
+  const phaseBefore=(await request('/api/site-state',null,{auth:false})).data.phase;
+  const dayOfPreview=await request('/admin/content-preview?section=details&phase=wedding-day');
+  assert.equal(dayOfPreview.status,200);assert.ok(dayOfPreview.text.includes('PRIVATE_DAY_OF_DRAFT'));
+  assert.ok(dayOfPreview.text.includes('class="wedding-day"'));
+  assert.equal((await request('/api/site-state',null,{auth:false})).data.phase,phaseBefore,'Private preview must not change the live phase');
+  const noAuthDayOf=await request('/admin/content-preview?section=details&phase=wedding-day',null,{auth:false});
+  assert.ok([302,307].includes(noAuthDayOf.status));assert.ok(!noAuthDayOf.text.includes('PRIVATE_DAY_OF_DRAFT'));
   response=await act('details',details,'publish');assert.equal(response.status,200,response.text);details=response.data;
   const site=(await request('/api/admin/website')).data;assert.equal(site.config.venueName,'DRAFT_VENUE_SENTINEL');assert.equal(site.config.metaTitle,websiteBefore.metaTitle);assert.equal(site.blocks.faq[0].id,'fixture-faq');
   assert.ok((await request('/')).text.includes(draft.copy[key]),'Other section copy is preserved');

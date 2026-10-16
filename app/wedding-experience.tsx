@@ -41,8 +41,11 @@ import { EMPTY_ARRIVAL_PHOTOS, type ArrivalPhotos } from "@/lib/arrival-content"
 import { KeepsakeBotanicals, KeepsakeMonogram } from "./keepsake-botanicals";
 import { EMPTY_PHOTOS, type LandingPhotos } from "@/lib/public-content";
 import { requestInvitationAudio } from '@/lib/invitation-audio';
+import { phaseForDate } from '@/lib/production';
+import { useSiteState } from './use-site-state';
+import { useRouter } from 'next/navigation';
 
-type Props = { keepsakeNote?:{note1:string;note2:string}; guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; giftItems?: HomepageGift[]; photos?: LandingPhotos; arrivalPhotos?:ArrivalPhotos };
+type Props = { dayOfRedirect?: string; keepsakeNote?:{note1:string;note2:string}; guestName?: string; token?: string; partyLimit?: number; archiveItems?: HomepageArchiveItem[]; giftCollections?: GiftCollectionPreview[]; giftItems?: HomepageGift[]; photos?: LandingPhotos; arrivalPhotos?:ArrivalPhotos };
 type MotionPreferences = { reduced: boolean; precise: boolean };
 
 const MotionContext = createContext<MotionPreferences>({ reduced: false, precise: false });
@@ -50,7 +53,6 @@ const MotionContext = createContext<MotionPreferences>({ reduced: false, precise
 const MAPS_URL = WEDDING_VENUE.mapsUrl;
 const VENUE_CENTER: [number, number] = [107.5554364, -6.8755807];
 
-type SiteState = { phase?: string; rsvpEnabled?: boolean; giftsEnabled?: boolean; marksEnabled?: boolean };
 const DEFAULT_ARCHIVE: HomepageArchiveItem[] = [];
 const EMPTY_GIFTS: HomepageGift[] = [];
 
@@ -75,21 +77,12 @@ function MotionProvider({ children }: { children: ReactNode }) {
 
 function useExperienceClock() {
   const { language, website, tField } = useLanguage();
-  const [siteState, setSiteState] = useState<SiteState | null>(null);
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    fetch("/api/site-state")
-      .then(response => { if (!response.ok) throw new Error("Site state unavailable"); return response.json() as Promise<SiteState>; })
-      .then(state => { if (state) setSiteState(state); })
-      .catch(() => setSiteState({ rsvpEnabled: false, giftsEnabled: false, marksEnabled: false }));
-    const interval = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(interval);
-  }, []);
+  const { siteState, now } = useSiteState();
 
   return useMemo(() => {
     return {
       ...invitationClock(now, siteState?.phase, language, website.weddingDate),
+      isWeddingDay: (siteState?.phase ?? phaseForDate(now, undefined, website.weddingDate)) === 'wedding-day' && siteState !== null,
       countdown: (()=>{const clock=invitationClock(now,siteState?.phase,language,website.weddingDate);return tField(`countdown.${clock.state==='countdown'?'days':clock.state}`).replaceAll('{{days}}',String(clock.days));})(),
       ready: siteState !== null,
       rsvpEnabled: siteState?.rsvpEnabled === true,
@@ -312,7 +305,7 @@ function DestinationMap({ active }: { active: boolean }) {
   );
 }
 
-function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1, archiveItems = DEFAULT_ARCHIVE, giftItems = EMPTY_GIFTS, photos = EMPTY_PHOTOS, arrivalPhotos = EMPTY_ARRIVAL_PHOTOS }: Props) {
+function WeddingWorld({ dayOfRedirect, keepsakeNote, guestName = "", token = "", partyLimit = 1, archiveItems = DEFAULT_ARCHIVE, giftItems = EMPTY_GIFTS, photos = EMPTY_PHOTOS, arrivalPhotos = EMPTY_ARRIVAL_PHOTOS }: Props) {
   const { t, content, tField, language, website, blocks } = useLanguage();
   const display=weddingDisplay(website,language);
   const MAPS_URL=website.mapsUrl;
@@ -320,6 +313,8 @@ function WeddingWorld({ keepsakeNote, guestName = "", token = "", partyLimit = 1
   const reception={...WEDDING_EVENTS.reception,time:website.receptionTime,startsAt:`${website.weddingDate}T${website.receptionTime}:00+07:00`};
   const { reduced, precise } = useContext(MotionContext);
   const clock = useExperienceClock();
+  const router = useRouter();
+  useEffect(() => { if (dayOfRedirect && clock.isWeddingDay) router.replace(dayOfRedirect); }, [dayOfRedirect, clock.isWeddingDay, router]);
   const rootRef = useRef<HTMLDivElement>(null);
   const dayTitleRef = useRef<HTMLHeadingElement>(null);
   const [entered, setEntered] = useState(false);

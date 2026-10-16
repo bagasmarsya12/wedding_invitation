@@ -34,5 +34,5 @@ export default async function ContentPreview({searchParams}:{searchParams:Promis
       <p>{text('hint')}</p><small>Pratinjau wording. Kamera tidak diaktifkan di CMS.</small>
     </main>;
   }
-  return <PreviewInvitation section={id} language={query.lang==='en'?'en':'id'} title={state.label} draft={Boolean(state.document.draft)||Boolean(query.revision)} content={content} website={{...base.config,...snapshot.config}} blocks={blocks} arrival={snapshot.arrival??base.arrival} homepage={{...homepage,photos:{bagas:photo('bagas'),iga:photo('iga'),gallery:blocks.photos.map(p=>photo(p.slot))},arrivalPhotos:{map:photo('arrival-map'),parking:photo('arrival-parking'),entrance:photo('arrival-entrance')}}}/>;
+  return <PreviewInvitation weddingDay={query.phase==='wedding-day'} section={id} language={query.lang==='en'?'en':'id'} title={state.label} draft={Boolean(state.document.draft)||Boolean(query.revision)} content={content} website={{...base.config,...snapshot.config}} blocks={blocks} arrival={snapshot.arrival??base.arrival} homepage={{...homepage,photos:{bagas:photo('bagas'),iga:photo('iga'),gallery:blocks.photos.map(p=>photo(p.slot))},arrivalPhotos:{map:photo('arrival-map'),parking:photo('arrival-parking'),entrance:photo('arrival-entrance')}}}/>;
 }

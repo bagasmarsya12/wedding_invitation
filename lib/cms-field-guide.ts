@@ -25,6 +25,7 @@ const groups: Record<string, GroupDefinition[]> = {
     { title: 'Hitung mundur', keys: ['countdown.days', 'countdown.today', 'countdown.past', ...literal('The day we’ve been dreaming of is', 'And just like that,')] },
   ],
   details: [
+    { title: 'Tampilan hari H', keys: ['dayOf.title', 'dayOf.intro', 'dayOf.fullInvitation', 'dayOf.personalLinkHint'] },
     { title: 'Pengantar acara', keys: ['details.kicker', 'details.head', 'details.sub'] },
     { title: 'Akad & resepsi', keys: ['details.akad', 'details.resepsi', 'details.arah', ...literal('Akad', 'Reception', 'Save the date')] },
     { title: 'Panduan & QR', keys: ['guest.arrival', 'guest.faq', 'guest.access', 'guest.transport', 'guest.contact', ...literal('Save guest pass', 'Enlarge QR')] },
@@ -87,7 +88,7 @@ export const sectionNavHint = (section: string) => ({stakk:'Landing sebelum kame
 export const sectionHelp = (section: string) => ({
   stakk: 'Wording landing page stakk.iganyabagas.com. Simpan draf, cek Pratinjau, lalu Publikasikan. Muat ulang Stakk untuk melihat perubahan. Kamera baru dibuka setelah tombol ditekan.',
   hero: 'Sapaan di amplop dan kalimat pembuka. Nama, tanggal, dan lokasi mengikuti pengaturan acara.',
-  details: 'Jadwal, peta, panduan kedatangan, FAQ, dan QR tamu berada dalam satu section.',
+  details: 'Pada tanggal acara (WIB), link tamu otomatis menuju halaman hari H yang hanya berisi jadwal, petunjuk arah, tombol panitia, dan QR personal. Tombol undangan lengkap membuka tampilan awal. Cek lewat Pratinjau hari H; jadwal dan kontak memakai pengaturan yang sama.',
   profil: 'Judul, nama lengkap, dan tiga bagian untuk setiap mempelai. Foto bisa diganti di tab Foto mempelai.',
   story: 'Bab cerita tampil berurutan di homepage. Judul section diatur melalui Teks & tombol.',
   archive: 'Semua foto tayang di Arsip kami. Pilihan homepage diatur per foto; foto baru tidak otomatis masuk homepage. Cerita tambahan tetap memiliki halaman sendiri.',

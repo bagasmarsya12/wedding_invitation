@@ -1,0 +1,84 @@
+.wedding-day-view { background: #21382c; }
+.wedding-day-toolbar { position: absolute; z-index: 5; top: 1rem; right: clamp(1rem, 4vw, 3rem); color: #f6f0e3; }
+.wedding-day-toolbar .language-switch { border: 1px solid #bda97977; border-radius: 2rem; padding: .35rem .6rem; background: #21382c; }
+.wedding-day-toolbar .language-switch button { min-width: 36px; min-height: 36px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: .75rem; }
+.wedding-day-toolbar .language-switch button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: .3rem; }
+.v2-world .wedding-day {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: clamp(4.5rem, 8vw, 7rem) clamp(1rem, 5vw, 5rem) 3rem;
+  overflow: hidden;
+  background: #21382c;
+  scroll-margin-top: 0;
+}
+.wedding-day-garden { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.wedding-day-garden .wedding-day-flower-top { top: -4rem; right: -4rem; width: clamp(14rem, 30vw, 29rem); }
+.wedding-day-garden .wedding-day-flower-bottom { bottom: -5rem; left: -5rem; width: clamp(16rem, 30vw, 28rem); }
+.wedding-day-paper {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  width: min(100%, 48rem);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid #bda979;
+  border-radius: .3rem;
+  background: #f6f0e3 url('/atelier/assets/keepsake-paper.webp') center / 640px;
+  color: #21382c;
+  box-shadow: inset 0 0 0 5px #bda97924;
+}
+.wedding-day-paper.has-pass { width: min(100%, 66rem); grid-template-columns: minmax(0, 1fr) minmax(16rem, .75fr); column-gap: clamp(2rem, 5vw, 4rem); }
+.wedding-day-heading { grid-column: 1; }
+.wedding-day-couple { margin: 0 0 1.25rem; font: 400 1.5rem/1.2 var(--v2-serif); }
+.v2-world .wedding-day h1 { max-width: 13ch; margin: 0 0 .8rem; font: 400 clamp(2.6rem, 4.5vw, 4.1rem)/1.02 var(--v2-serif); letter-spacing: -.035em; }
+.wedding-day-intro { max-width: 43ch; margin: 0 0 .9rem; font: .875rem/1.65 var(--v2-sans); }
+.wedding-day-heading > time { font: 500 .8125rem/1.5 var(--v2-sans); }
+.wedding-day-schedule { grid-column: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 1rem; border-block: 1px solid #69745b44; }
+.wedding-day-schedule > div { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.wedding-day-schedule > div > span { display: grid; gap: .25rem; font: .75rem/1.4 var(--v2-sans); }
+.wedding-day-schedule time { font: 400 1.5rem/1.2 var(--v2-serif); }
+.wedding-day-arrival { grid-column: 1; }
+.wedding-day-venue { display: flex; align-items: flex-start; gap: .6rem; margin: 0 0 1rem; }
+.wedding-day-venue > svg { flex-shrink: 0; margin-top: .2rem; }
+.wedding-day-venue > span { display: grid; gap: .35rem; }
+.wedding-day-venue strong { font: 500 1.1rem/1.3 var(--v2-serif); }
+.wedding-day-venue span span { max-width: 45ch; font: .75rem/1.6 var(--v2-sans); }
+.wedding-day-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+.wedding-day-actions a { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .7rem .85rem; border: 1px solid #69745b77; border-radius: .2rem; text-decoration: none; font: 500 .8125rem/1.4 var(--v2-sans); }
+.v2-world .wedding-day-actions .wedding-day-directions { background: #21382c; color: #f6f0e3; border-color: #21382c; }
+.wedding-day-pass { grid-column: 2; grid-row: 1 / 4; align-self: center; min-width: 0; scroll-margin-top: 2rem; }
+.wedding-day .guest-pass-inline { margin: 0; }
+.wedding-day .guest-pass-inline .guest-pass-paper { display: flex; flex-direction: column; gap: .8rem; padding: 0; border: 0; background: transparent; text-align: center; }
+.v2-world .wedding-day .guest-pass-inline h3 { justify-content: center; margin-bottom: .4rem; font-size: .75rem; }
+.wedding-day .guest-pass-inline h4 { font-size: 1.65rem; }
+.wedding-day .guest-pass-inline .guest-pass-paper p { font-size: .75rem; }
+.wedding-day .guest-pass-inline .guest-pass-copy .guest-pass-help { display: none; }
+.wedding-day .guest-pass-inline .guest-pass-qr-wrap { width: min(100%, 13rem); margin-inline: auto; }
+.wedding-day .guest-pass-inline .guest-pass-actions { justify-content: center; gap: .5rem; }
+.wedding-day .guest-pass-inline .guest-pass-actions button { font-size: .75rem; padding: .6rem; }
+.wedding-day-public-note { grid-column: 1; margin: 0; font: .75rem/1.6 var(--v2-sans); color: #53604c; }
+.wedding-day-continue { grid-column: 1 / -1; display: flex; justify-self: start; align-items: center; gap: .65rem; min-height: 44px; padding-block: .4rem; font: .8125rem/1.5 var(--v2-sans); text-underline-offset: .25rem; }
+@media (max-width: 700px) {
+  .v2-world .wedding-day { padding: 4rem .75rem 2.5rem; }
+  .wedding-day-paper, .wedding-day-paper.has-pass { grid-template-columns: minmax(0, 1fr); padding: 1.25rem 1.1rem; gap: .9rem; }
+  .wedding-day-couple { margin-bottom: .75rem; font-size: 1.2rem; }
+  .v2-world .wedding-day h1 { max-width: 16ch; font-size: clamp(2.15rem, 8.5vw, 3rem); }
+  .wedding-day-intro { font-size: .8125rem; line-height: 1.55; }
+  .wedding-day-pass { grid-column: 1; grid-row: auto; padding-top: 1.1rem; border-top: 1px solid #69745b44; }
+  .wedding-day .guest-pass-inline.is-compact .guest-pass-paper { display: grid; grid-template-columns: minmax(0, 1fr) 8rem; gap: .7rem; text-align: left; }
+  .wedding-day .guest-pass-inline h3 { justify-content: flex-start; }
+  .wedding-day .guest-pass-inline h4 { font-size: 1.3rem; }
+  .wedding-day .guest-pass-inline .guest-pass-qr-wrap { grid-column: 2; grid-row: 1; width: 100%; }
+  .wedding-day .guest-pass-inline .guest-pass-actions { grid-column: 1 / -1; }
+  .wedding-day .guest-pass-inline .guest-pass-qr-open { padding: .5rem; gap: .3rem; }
+  .wedding-day .guest-pass-inline .pass-preview-name { font-size: .75rem; }
+  .wedding-day .guest-pass-inline .pass-preview-date { font-size: .5625rem; }
+  .wedding-day .guest-pass-inline .pass-preview-open { font-size: .625rem; }
+  .wedding-day .guest-pass-inline .guest-pass-qr-wrap code { font-size: .4375rem; overflow-wrap: anywhere; }
+  .wedding-day-schedule time { font-size: 1.4rem; }
+  .wedding-day-garden .wedding-day-flower-top { top: -4rem; right: -5rem; width: 17rem; }
+  .wedding-day-garden .wedding-day-flower-bottom { left: -6rem; bottom: -5rem; width: 19rem; }
+}
