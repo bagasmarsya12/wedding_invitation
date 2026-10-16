@@ -3,11 +3,12 @@ import { T, useLanguage } from "../../../language";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { GIFT_COLLECTIONS, type GiftCollection } from "@/lib/gift-collections";
 import { GiftTransfers } from '../../../gift-transfers';
+import { GiftBookingLink } from '../../../gift-booking-link';
 import type { GuestGiftTransfer } from '@/lib/gift-transfers';
 
 type Gift = { id: string; title: string; description: string | null; category: string; priceLabel: string | null; status: string; reservedByYou: boolean; reservedByName: string | null; shippingRequired: boolean };
 type Result = { error?: string; gifts?: Gift[]; guestName?: string; cashGiftDetails?: string | null; transferMethods?: GuestGiftTransfer[]; shippingInstructions?: string | null; enabled?: boolean };
-type Action = "reserve" | "release" | "purchased";
+type Action = "release" | "purchased";
 const CATEGORY_LABELS: Record<string, string> = { bagas: "For Bagas", iga: "For Iga", home: "For Our Home" };
 export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inline = false }: { token: string; guestName: string; initialCategory?: GiftCollection; inline?: boolean }) {
   const { t } = useLanguage();
@@ -16,7 +17,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
   const [shipping, setShipping] = useState<string | null>(null), [cashGift, setCashGift] = useState<string | null>(null);
   const [transfers, setTransfers] = useState<GuestGiftTransfer[]>([]);
   const [busy, setBusy] = useState(false), [enabled, setEnabled] = useState(true), [load, setLoad] = useState<"loading" | "ready" | "error">("loading");
-  const [revision, setRevision] = useState(0), [selectedId, setSelectedId] = useState<string | null>(null), [mode, setMode] = useState<Action>("reserve");
+  const [revision, setRevision] = useState(0), [selectedId, setSelectedId] = useState<string | null>(null), [mode, setMode] = useState<Action>("release");
   const pending = useRef(false), readEpoch = useRef(0), dialog = useRef<HTMLDialogElement>(null);
   const selected = gifts.find(gift => gift.id === selectedId);
   useEffect(() => {
@@ -58,7 +59,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
     event.preventDefault(); setCategory(GIFT_COLLECTIONS[next].key); event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role='tab']")[next]?.focus();
   }
   function openAction(gift: Gift, action: Action) { setMessage(""); setMode(action); setSelectedId(gift.id); }
-  const allowed = Boolean(selected && enabled && (mode === "reserve" ? selected.status === "available" : selected.reservedByYou && selected.status === "reserved"));
+  const allowed = Boolean(selected && enabled && selected.reservedByYou && selected.status === "reserved");
   async function act() {
     if (!selected || !allowed || pending.current || load !== "ready") return;
     pending.current = true; readEpoch.current++; setBusy(true); setMessage("");
@@ -68,7 +69,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
       if (data.gifts) setGifts(data.gifts);
       if (!response.ok) { if (response.status === 403) setEnabled(false); throw new Error(data.error || "Gift could not be updated."); }
       setIdentity(data.guestName || identity); setShipping(data.shippingInstructions ?? null);
-      setMessage(mode === "reserve" ? "Gift booked for you." : mode === "release" ? "Booking cancelled. The gift is available again." : "Marked as purchased.");
+      setMessage(mode === "release" ? "Booking cancelled. The gift is available again." : "Marked as purchased.");
       setSelectedId(null);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Gift could not be updated."); }
     finally { pending.current = false; setBusy(false); }
@@ -84,7 +85,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
       {load === "ready" && <div className="gift-grid">{visible.length === 0 && (inline ? <p className="gift-options-empty"><T field="gift.kosong" /></p> : <div className={`empty-catalogue gift-empty-${category}`}><span>{t(CATEGORY_LABELS[category])}</span><h2><T>A little space, for now.</T></h2><p><T>No items have been added to this category yet.</T></p><div className="gift-empty-niche" aria-hidden="true" /></div>)}
         {visible.map(gift => <article className={`gift-card is-text-only gift-card-${gift.category} ${gift.status !== "available" && !gift.reservedByYou ? "is-booked" : ""}`} key={gift.id}>
           <div className="gift-card-caption"><p className={`gift-availability is-${gift.status}`}><span aria-hidden="true" />{gift.status === "available" ? t("available") : <span className="gift-reserved-name">{t(gift.status === "purchased" ? "Purchased by" : "Booked by")} {bookedName(gift)}</span>}</p>{inline && <p className="gift-recipient"><T>{gift.category === "home" ? "For Iga & Bagas" : CATEGORY_LABELS[gift.category]}</T></p>}{inline ? <h4>{gift.title}</h4> : <h2>{gift.title}</h2>}<p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
-          <div className="gift-actions">{gift.status === "available" && <button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "reserve")}><T>Book this gift</T></button>}
+          <div className="gift-actions">{gift.status === "available" && <GiftBookingLink title={gift.title} disabled={!enabled || busy} />}
             {gift.reservedByYou && gift.status === "reserved" && <><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "release")}><T>Cancel booking</T></button><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "purchased")}><T>I’ve bought it</T></button></>}
             {!gift.reservedByYou && gift.status !== "available" && <button type="button" disabled aria-label={`${t("Booked by")} ${gift.reservedByName || t("another guest")}`}><T>Already booked</T></button>}
           </div></div></article>)}
@@ -93,12 +94,12 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
     </div>
     {!inline && (transfers.length > 0 || cashGift) && <aside aria-label={t('Cash gift')}><h2><T>Cash gift</T></h2><GiftTransfers methods={transfers} legacyDetails={cashGift} /></aside>}
     <dialog ref={dialog} className="gift-booking-sheet" aria-labelledby="gift-booking-title" onCancel={event => { if (busy) event.preventDefault(); else setSelectedId(null); }} onClose={() => setSelectedId(null)}>
-      <header><h2 id="gift-booking-title"><T>{mode === "reserve" ? "Book this gift" : mode === "release" ? "Cancel booking" : "I’ve bought it"}</T></h2><button type="button" disabled={busy} autoFocus aria-label={t("Close booking")} onClick={() => setSelectedId(null)}>×</button></header>
+      <header><h2 id="gift-booking-title"><T>{mode === "release" ? "Cancel booking" : "I’ve bought it"}</T></h2><button type="button" disabled={busy} autoFocus aria-label={t("Close booking")} onClick={() => setSelectedId(null)}>×</button></header>
       {selected && <><p>{selected.title}</p><div className="booking-identity"><T>Booked under</T><strong dir="auto">{identity}</strong></div>
-        <p><T>{mode === "reserve" ? "Your name will be visible to other invited guests beside this gift." : mode === "release" ? "Cancelling makes this gift available to another guest." : "This records your purchase and keeps the gift unavailable to other guests."}</T></p>
+        <p><T>{mode === "release" ? "Cancelling makes this gift available to another guest." : "This records your purchase and keeps the gift unavailable to other guests."}</T></p>
         {!allowed && selected.status !== "available" && <p><T>Booked by</T> {selected.reservedByName || t("another guest")}</p>}
         {message && <p role="status">{t(message)}</p>}
-        <button className="booking-confirm" type="button" disabled={!allowed || busy} onClick={act}><T>{busy ? "Saving your choice…" : mode === "reserve" ? "Confirm booking" : mode === "release" ? "Confirm cancellation" : "Confirm purchase"}</T></button>
+        <button className="booking-confirm" type="button" disabled={!allowed || busy} onClick={act}><T>{busy ? "Saving your choice…" : mode === "release" ? "Confirm cancellation" : "Confirm purchase"}</T></button>
       </>}
     </dialog>
   </>;

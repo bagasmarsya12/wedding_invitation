@@ -25,6 +25,8 @@
 .gift-options-panel .gift-collection-action { font-size:.78rem; }
 .gift-options-folio .gift-options-catalogue { display:flex; justify-content:center; align-items:center; gap:.6rem; width:fit-content; margin:1.5rem auto 0; padding:.9rem 1.2rem; background:#21382c; color:#f5f0e4; font-size:.85rem; text-decoration:none; }
 .gift-options-empty { text-align:center; margin:2rem auto; max-width:40ch; line-height:1.75; }
+.gift-actions .gift-booking-link { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.7rem .9rem; background:#21382c; border:1px solid #21382c; color:#f5f0e4; font:inherit; font-size:.8rem; letter-spacing:0; text-transform:none; text-decoration:none; text-align:center; }
+.gift-actions .gift-booking-link:focus-visible { outline:2px solid #98616b; outline-offset:4px; }
 .gift-transfer-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:2rem; }
 .gift-transfer-group { min-width:0; }
 .gift-transfer-method { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1rem; align-items:center; padding:1.4rem 0; border-bottom:1px solid #21382c30; min-width:0; }

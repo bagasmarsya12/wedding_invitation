@@ -4,6 +4,7 @@ import { GiftCatalogue } from './invite/[token]/gifts/gift-client';
 import { GiftTransfers } from './gift-transfers';
 import { AtelierFloralAccent } from './atelier-flowers';
 import { T } from './language';
+import { GiftBookingLink } from './gift-booking-link';
 import type { HomepageGift } from '@/lib/public-content';
 import type { GuestGiftTransfer } from '@/lib/gift-transfers';
 
@@ -33,7 +34,7 @@ export function GiftSection({ token, guestName = '', gifts }: { token?: string; 
       <div className="gift-options-items" aria-labelledby="gift-items-title">
         <h3 id="gift-items-title" className="gift-options-subtitle"><T>Gift an object</T></h3>
         {token ? <GiftCatalogue token={token} guestName={guestName} inline /> : gifts.length ? <div className="gift-grid">{gifts.map(gift => <article className="gift-card is-text-only" key={gift.id}>
-          <div className="gift-card-caption"><p className="gift-recipient"><T>{gift.category === 'home' ? 'For Iga & Bagas' : gift.category === 'iga' ? 'For Iga' : 'For Bagas'}</T></p><h4>{gift.title}</h4><p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}</div>
+          <div className="gift-card-caption"><p className="gift-recipient"><T>{gift.category === 'home' ? 'For Iga & Bagas' : gift.category === 'iga' ? 'For Iga' : 'For Bagas'}</T></p><h4>{gift.title}</h4><p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}<div className="gift-actions">{gift.status === 'available' ? <GiftBookingLink title={gift.title} disabled={!options?.enabled} /> : <button type="button" disabled><T>Already booked</T></button>}</div></div>
         </article>)}</div> : <p className="gift-options-empty"><T field="gift.kosong" /></p>}
       </div>
     </div>

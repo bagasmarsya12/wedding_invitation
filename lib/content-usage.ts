@@ -24,6 +24,8 @@ export const ACTIVE_CONTENT_KEYS = [
   "footer.stakkCta",
   "footer.stakkHint",
   "gift.cta",
+  "gift.bookingCta",
+  "gift.bookingMessage",
   "gift.desc",
   "gift.head",
   "gift.kosong",

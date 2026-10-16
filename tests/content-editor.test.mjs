@@ -59,7 +59,20 @@ test('gift item labels, transfer actions and empty/error states are editable in 
   const section = contentEditorSections().find(section=>section.id==='gift');
   const keys = new Set(section.fields.map(field=>field.key));
   for (const literal of ['Gift an object','For Iga & Bagas','Cash gift','Open DANA','Copy phone number','Copy account number','Opening the gift options…','Gift options are temporarily unavailable. Please try again.','Your presence is already a gift.','Send a little love via DANA.','Phone number','Account number']) assert.ok(keys.has(copyKey(literal)),literal);
-  for (const key of ['gift.head','gift.desc','gift.cta','gift.kosong']) assert.ok(keys.has(key),key);
+  for (const key of ['gift.head','gift.desc','gift.cta','gift.kosong','gift.bookingCta','gift.bookingMessage']) assert.ok(keys.has(key),key);
+});
+
+test('gift drafts from before WhatsApp booking restore without losing authored copy',()=>{
+  const added=new Set(['gift.bookingCta','gift.bookingMessage'].flatMap(key=>[key,`id.${key}`]));
+  const copy=Object.fromEntries(sectionCopyKeys('gift').filter(key=>!added.has(key)).map(key=>[key,CONTENT_DEFAULTS[key]]));
+  copy['id.gift.desc']='Pengantar tanda kasih milik pemilik';
+  const snapshot={copy,config:{},blocks:{},media:{}};
+  const restored=validateSectionSnapshot('gift',snapshot,{config:WEBSITE_DEFAULTS,blocks:defaultWebsiteBlocks()});
+  assert.ok(restored);
+  for(const [key,value] of Object.entries(copy))assert.equal(restored.copy[key],value,key);
+  for(const key of added)assert.equal(restored.copy[key],'');
+  assert.equal(Object.keys(snapshot.copy).length,sectionCopyKeys('gift').length-4);
+  assert.equal(validateSectionSnapshot('gift',{...snapshot,copy:{...copy,'gift.foreign':'reject me'}},{config:WEBSITE_DEFAULTS,blocks:defaultWebsiteBlocks()}),null);
 });
 
 test('reviewed invitation message fills owner-editable template with the existing private link',()=>{

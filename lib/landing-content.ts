@@ -15,7 +15,7 @@ export function resolveLandingContent(stored:ContentMap):ResolvedContent {
     if(fallback!==undefined)overrides[key.startsWith('id.')?`id:${CONTENT_DEFAULTS[key.slice(3)]}`:fallback]=value;
   }
   resolveContentAliases(values,stored);
-  return {values:Object.fromEntries(Object.entries(values).map(([k,v])=>[k,normalizeCoupleWording(v)])),overrides:Object.fromEntries(Object.entries(overrides).map(([k,v])=>[k,normalizeCoupleWording(v)]))};
+  return {values:Object.fromEntries(Object.entries(values).map(([k,v])=>[k,normalizeCoupleWording(v,k)])),overrides:Object.fromEntries(Object.entries(overrides).map(([k,v])=>[k,normalizeCoupleWording(v)]))};
 }
 
 /**
@@ -46,7 +46,7 @@ export const loadLandingContent = cache(async (): Promise<ResolvedContent> => {
     // Database unavailable: serve the static defaults rather than breaking the page.
   }
   resolveContentAliases(values,stored);
-  return { values: Object.fromEntries(Object.entries(values).map(([key,value])=>[key,normalizeCoupleWording(value)])), overrides: Object.fromEntries(Object.entries(overrides).map(([key,value])=>[key,normalizeCoupleWording(value)])) };
+  return { values: Object.fromEntries(Object.entries(values).map(([key,value])=>[key,normalizeCoupleWording(value,key)])), overrides: Object.fromEntries(Object.entries(overrides).map(([key,value])=>[key,normalizeCoupleWording(value)])) };
 });
 
 export function knownContentKeys(): string[] {

@@ -8,6 +8,7 @@ import { copyKey, PUBLIC_COPY } from './copy-registry';
 import { GUEST_CONTENT_SECTIONS, GUEST_CONTENT_TRANSLATIONS } from './guest-content';
 import { PHOTO_COMMENT_COPY } from './photo-comment-copy';
 import { DAY_OF_COPY, DAY_OF_TRANSLATIONS } from './day-of-content';
+import { GIFT_BOOKING_MESSAGE } from './gift-booking';
 export type ContentField = { key: string; label: string; value: string };
 export type ContentSection = { id: string; label: string; photo?: boolean; fields: ContentField[] };
 export type ContentMap = Record<string, string>;
@@ -132,6 +133,8 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     { key: "desc", label: "Deskripsi", value: "Your presence is already a gift. If you would like to send a little love, we have left a few ways here." },
     { key: "kosong", label: "Teks saat katalog kosong", value: "A few wishes for our home will find their place here." },
     { key: "cta", label: "Tombol", value: "Open the gift catalogue" },
+    { key: "bookingCta", label: "Tombol booking via WhatsApp", value: "Book this gift via WhatsApp" },
+    { key: "bookingMessage", label: "Pesan WhatsApp · {gift} diisi nama hadiah", value: GIFT_BOOKING_MESSAGE },
   ] },
   { id: "mark", label: "Leave a mark", fields: [
     { key: "head", label: "Heading", value: "Your reply" },
@@ -191,6 +194,7 @@ Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,
 
 Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);
 Object.assign(CONTENT_DEFAULTS, DAY_OF_TRANSLATIONS);
+CONTENT_DEFAULTS['id.gift.bookingCta'] = 'Booking Hadiah ini';
 
 CONTENT_DEFAULTS['id.keepsake.openHint'] = 'Lihat kartumu · unduh gambar & video';
 

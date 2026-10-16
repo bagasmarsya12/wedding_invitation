@@ -32,7 +32,7 @@ export function GiftManager({gifts,action,reload,notify}: Props) {
   };
   return <>
     <section className="admin-panel admin-wide">
-      <header className="cms-section-heading"><div><h2>Tambah hadiah</h2><p>Nama barang, untuk siapa, dan alasan dibutuhkan. Kartu tampil sebagai teks; tamu bisa booking lewat undangan personalnya.</p></div><a className="cms-button" href="/admin/gifts/preview" target="_blank" rel="noopener noreferrer">Pratinjau hadiah</a></header>
+      <header className="cms-section-heading"><div><h2>Tambah hadiah</h2><p>Nama barang, untuk siapa, dan alasan dibutuhkan. Tombol booking membuka draf WhatsApp ke Bagas (089681747474) dengan nama hadiah. Klik tidak otomatis mengunci hadiah; setelah dikonfirmasi lewat chat, matikan Tampilkan di website jika hadiah sudah cukup.</p></div><a className="cms-button" href="/admin/gifts/preview" target="_blank" rel="noopener noreferrer">Pratinjau hadiah</a></header>
       <form onSubmit={async event=> {
         event.preventDefault();
         const form=event.currentTarget;

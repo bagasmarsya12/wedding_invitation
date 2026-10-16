@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { GIFT_COLLECTIONS } from '@/lib/gift-collections';
 import { T } from '../../../language';
+import { GiftBookingLink } from '../../../gift-booking-link';
 
 type Gift = {id:string;title:string;description:string|null;recipient_category:string;price_label:string|null;status:string;published:number};
 export function GiftPreview({gifts}: {gifts:Gift[]}) {
@@ -14,7 +15,7 @@ export function GiftPreview({gifts}: {gifts:Gift[]}) {
       <p><T>{GIFT_COLLECTIONS.find(item=>item.key === gift.recipient_category)?.label ?? 'For Iga & Bagas'}</T></p>
       <h2>{gift.title}</h2><p>{gift.description}</p>{gift.price_label && <p>{gift.price_label}</p>}
       <div><span className="cms-badge">{gift.status}</span> <span className="cms-badge">{gift.published ? 'Visible to guests' : 'Draft'}</span></div>
-      <button className="paper-button" type="button" disabled><T>Book this gift</T></button>
+      <div className="gift-actions"><GiftBookingLink title={gift.title} disabled /></div>
     </article>)}</div>
     {!visible.length && <p>Add an item in CMS → Tanda kasih → Hadiah barang to fill this collection.</p>}
   </section>;

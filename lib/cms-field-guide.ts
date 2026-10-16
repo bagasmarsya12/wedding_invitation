@@ -5,7 +5,8 @@ import { copyKey } from './copy-registry';
 const retiredControls = new Set([
   'profil.kicker', 'profil.b_cap', 'profil.i_cap', 'footer.edisi',
   'footer.amplop', 'guest.party',
-  'footer.stakkHint',
+  'footer.stakkHint', 'gift.cta',
+  ...['Book this gift', 'Confirm booking', 'Your name will be visible to other invited guests beside this gift.'].map(copyKey),
   ...['A reply from', 'our favourite people', 'Reply received', 'View the envelope again', 'Open purchase link', 'Object photograph', 'to be added'].map(copyKey),
   'useful.head', 'useful.sub', 'guest.dress', 'guest.guide', 'guest.help', 'guest.contactPending',
   ...['For those who know one of us better.', 'Bagas, as himself.', 'Iga, as herself.', 'As observed by Iga', 'As observed by Bagas'].map(copyKey),
@@ -41,7 +42,7 @@ const groups: Record<string, GroupDefinition[]> = {
     { title: 'Pengantar kartu ucapan', keys: ['mark.head', 'mark.sub', 'mark.desc'] },
     { title: 'Kehadiran & kirim kartu', keys: ['rsvp.head', 'rsvp.hadir', ...literal('I can’t make it.', 'Send card', 'Preview my reply')] },
   ],
-  gift: [{ title: 'Pengantar tanda kasih', keys: ['gift.head', 'gift.desc', 'gift.kosong', ...literal('Gift an object', 'Cash gift', 'Open DANA', 'Copy phone number', 'Copy account number')] }],
+  gift: [{ title: 'Pengantar tanda kasih', keys: ['gift.head', 'gift.desc', 'gift.kosong', ...literal('Gift an object', 'Cash gift', 'Open DANA', 'Copy phone number', 'Copy account number')] }, { title: 'Booking lewat WhatsApp', keys: ['gift.bookingCta', 'gift.bookingMessage'] }],
   keepsake: [
     { title: 'Tombol pembuka kartu', keys: [...literal('Open your keepsake'), 'keepsake.openHint'] },
     { title: 'Pesan pada kartu', keys: ['keepsake.note1', 'keepsake.note2', 'keepsake.love', 'keepsake.hashtag'] },
@@ -93,7 +94,7 @@ export const sectionHelp = (section: string) => ({
   story: 'Bab cerita tampil berurutan di homepage. Judul section diatur melalui Teks & tombol.',
   archive: 'Semua foto tayang di Arsip kami. Pilihan homepage diatur per foto; foto baru tidak otomatis masuk homepage. Cerita tambahan tetap memiliki halaman sendiri.',
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
-  gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tersedia lewat undangan personal. Rekening dan e-wallet diatur pada tab terpisah.',
+  gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Tombol booking membuka draf WhatsApp ke Bagas di 089681747474; klik tidak otomatis mengunci hadiah. Label tombol dan pesan dapat diatur pada Teks & tombol. Gunakan {gift} untuk nama hadiah. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',
   footer: 'Pengantar dan tombol Stakk, serta kalimat dan tautan di akhir undangan. Stakk membuka landing page di tab baru. Wording landing diatur pada section Stakk. Hashtag mengikuti Kartu kenangan.',
   jukebox: 'Playlist dan kata-kata jukebox diatur bersama. Lagu tampil setelah audio diunggah dan lagu diaktifkan.',

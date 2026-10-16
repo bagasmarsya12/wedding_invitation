@@ -69,7 +69,7 @@
 .gift-availability.is-reserved { color:#8b6665; }.gift-availability.is-purchased { color:#676b60; }
 .gift-gallery-page .gift-actions { gap:.6rem; margin-top:1rem; }
 .gift-gallery-page .gift-actions :is(button,a) { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.75rem 1rem; font:.8rem/1.4 var(--bx-sans); text-transform:none; letter-spacing:0; }
-.gift-gallery-page .gift-actions button:first-child { color:#f7f2e7; background:#596949; border-color:#596949; }
+.gift-gallery-page .gift-actions :is(button:first-child,.gift-booking-link) { color:#f7f2e7; background:#596949; border-color:#596949; }
 .gift-gallery-page .gift-actions button:disabled { opacity:.5; cursor:default; }
 .gift-gallery-page .gift-actions > span { display:block; font:.8rem/1.6 var(--bx-sans); color:#76695a; }
 .gift-gallery-page .private-note { padding:1.5rem clamp(1.2rem,3vw,2rem); border-left:3px solid #62734c; background:#e3e7d8; color:#394438; }

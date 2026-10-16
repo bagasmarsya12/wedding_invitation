@@ -6,6 +6,7 @@ import { CONTENT_DEFAULTS } from './content-defaults';
 import { validateWebsiteBlocks, validateWebsiteConfig, type WebsiteBlocks, type WebsiteConfig } from './website-content';
 import { validateArrivalContent, type ArrivalContent } from './arrival-content';
 import { DAY_OF_KEYS } from './day-of-content';
+import { GIFT_BOOKING_KEYS } from './gift-booking';
 
 export type SectionSnapshot = { copy:Record<string,string>; config:Partial<WebsiteConfig>; blocks:Partial<WebsiteBlocks>; arrival?:ArrivalContent; media:Record<string,string|null> };
 export type Revision = { id:string; kind:'baseline'|'draft'|'published'|'restored'; at:string; author:string };
@@ -27,6 +28,7 @@ export function validateSectionSnapshot(id:string,input:unknown,base:{config:Web
   const copy={...(id==='profil'?upgradeProfileLabelCopy(input.copy):input.copy)},configInput=input.config,blocksInput=input.blocks;
   // Restoring a pre-feature arrival draft must preserve its authored content.
   if(id==='details')for(const field of DAY_OF_KEYS)for(const key of [field,`id.${field}`])if(!(key in copy))copy[key]='';
+  if(id==='gift')for(const field of GIFT_BOOKING_KEYS)for(const key of [field,`id.${field}`])if(!(key in copy))copy[key]='';
   // Backfill only this newly introduced control when restoring an older keepsake revision.
   if(id==='keepsake')for(const key of ['keepsake.openHint','id.keepsake.openHint'])if(!(key in copy))copy[key]='';
   // Older footer drafts and revisions keep their content when Stakk controls are added.
