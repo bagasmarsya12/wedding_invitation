@@ -61,6 +61,19 @@ try {
     console.log("admin authentication and server authorization: OK");
     await verifyEditorialFlows(base,cookie);
 
+    // A real download can contain AAC/MP4 despite its .mp3 filename.
+    const audioBytes=new Uint8Array(Buffer.from('0000001866747970646173680000000069736f366d703431','hex'));
+    const audioForm=new FormData();audioForm.set('file',new File([audioBytes],'Misnamed download.mp3',{type:'audio/mpeg'}));
+    const deniedAudio=await fetch(base+'/api/admin/jukebox/audio',{method:'POST',headers:{origin:base},body:audioForm});
+    assert.equal(deniedAudio.status,403);
+    const audioUpload=await fetch(base+'/api/admin/jukebox/audio',{method:'POST',headers:{cookie,origin:base},body:audioForm});
+    assert.equal(audioUpload.status,201);
+    const uploadedAudio=await audioUpload.json();
+    const streamedAudio=await fetch(base+uploadedAudio.src,{headers:{range:'bytes=0-15'}});
+    assert.equal(streamedAudio.status,206);assert.equal(streamedAudio.headers.get('content-type'),'audio/mp4');
+    assert.deepEqual(new Uint8Array(await streamedAudio.arrayBuffer()),audioBytes.slice(0,16));
+    console.log('Jukebox uploads: misnamed AAC container, authorized upload, correct MIME and byte ranges: OK');
+
     const csv = "displayName,partyLimit,email,reference\nFixture Household,2,,household-001\n";
     const first = await api(base, "/api/admin/state", cookie, { op: "import_guests", csv });
     assert.equal(first.status, 201, JSON.stringify(first.body));

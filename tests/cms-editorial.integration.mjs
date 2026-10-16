@@ -90,6 +90,7 @@ export async function verifyEditorialFlows(base,cookie){
   const proseDraft=structuredClone(proseOriginal);
   const prose=serializeRichText({type:'doc',content:[{type:'paragraph',attrs:{spaceAfter:'airy'},content:[{type:'text',text:'RICH_PROSE_FIXTURE',marks:[{type:'bold'}]}]},{type:'paragraph',content:[{type:'text',text:'Italic fixture',marks:[{type:'italic'}]},{type:'hardBreak'},{type:'text',text:'Next line'}]}]});
   proseDraft.copy['id.profil.i_known']=prose;
+  proseDraft.copy['profil.i_known']=prose;
   response=await act('profil',proseState,'save',{snapshot:proseDraft});assert.equal(response.status,200,response.text);proseState=response.data;
   assert.ok(!(await request('/')).text.includes('RICH_PROSE_FIXTURE'));
   const prosePreview=await request('/admin/content-preview?section=profil');

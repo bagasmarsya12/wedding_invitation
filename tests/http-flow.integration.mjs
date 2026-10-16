@@ -196,7 +196,8 @@ try {
     const quick=await fetch(base+`/hari-h/${a}`,{redirect:'manual'});
     assert.equal(quick.status,200);assert.match(quick.headers.get('cache-control'),/no-store/);assert.match(quick.headers.get('x-robots-tag'),/noindex/);
     const quickMarkup=(await quick.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
-    assert.ok(quickMarkup.includes('Hari ini Kami Menikah.'));
+    assert.ok(quickMarkup.includes('Today We’re Getting Married.'));
+    assert.match(quickMarkup, /<html[^>]*lang="en"/);
     assert.ok(quickMarkup.includes(`href="/invite/${a}?view=full"`));
     for(const id of ['profiles','details','archive','gifts','beyond','closing-title'])assert.ok(!quickMarkup.includes(`id="${id}"`),`Compact page must not render ${id}`);
     for(const path of ['/?view=full',`/invite/${a}?view=full`]){
@@ -207,7 +208,7 @@ try {
     assert.equal((await response(base,'/hari-h/invalid-token')).status,404);
     const publicQuick=await fetch(base+'/hari-h');assert.equal(publicQuick.status,200);
     const publicQuickMarkup=(await publicQuick.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
-    assert.ok(publicQuickMarkup.includes('QR check-in tersedia lewat tautan undangan personalmu.'));assert.ok(!publicQuickMarkup.includes('id="guest-pass"'));
+    assert.ok(publicQuickMarkup.includes('Your check-in QR is on your personal invitation link.'));assert.ok(!publicQuickMarkup.includes('id="guest-pass"'));
     sql("UPDATE settings SET value='post-wedding' WHERE key='site_phase';");
     assert.equal((await response(base,`/hari-h/${a}`)).headers.get('location'),`/invite/${a}?view=full`);
     console.log('Wedding-day routes: automatic private redirect, one-section page, full-view escape, before/after phases, public and invalid links: OK');

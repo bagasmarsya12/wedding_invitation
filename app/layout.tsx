@@ -87,7 +87,7 @@ export default async function RootLayout({
   // the authored literals inside <T>. Fails soft when the DB is unavailable.
   const [{ values, overrides },{config,blocks,arrival},jukebox] = await Promise.all([loadLandingContent(),loadWebsite(),loadJukebox()]);
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preload" href="/fonts/newsreader-latin-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/instrument-sans-latin-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />

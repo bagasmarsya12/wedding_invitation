@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { prepareCmsPhoto } from '@/lib/cms-photo-upload';
+import { prepareCmsAudio } from '@/lib/jukebox-media';
 import { JUKEBOX_COPY, JUKEBOX_DEFAULTS, MAX_AUDIO_BYTES, MAX_JUKEBOX_TRACKS, PICKED_BY, formatAudioTime,
   type JukeboxConfig, type JukeboxCopyKey, type JukeboxTrack, type PickedBy } from '@/lib/jukebox-playlist';
 
@@ -83,8 +84,9 @@ export function JukeboxManager({ notify, onDirtyChange }: { notify: (message: st
     if (!cover && !/\.(mp3|m4a)$/i.test(file.name)) { notify('Pilih file MP3 atau M4A.'); return; }
     setBusy(true); notify(cover ? 'Menyiapkan cover untuk web…' : 'Mengunggah audio…');
     try {
-      const form = new FormData(); form.set('file', cover ? await prepareCmsPhoto(file) : file);
-      const duration = cover ? null : readDuration(file);
+      const prepared = cover ? await prepareCmsPhoto(file) : await prepareCmsAudio(file);
+      const form = new FormData(); form.set('file', prepared);
+      const duration = cover ? null : readDuration(prepared);
       const slot = `jukebox-${track.id.replace('track_', '')}`;
       const response = await fetch(cover ? `/api/admin/media/${slot}` : '/api/admin/jukebox/audio', { method: 'POST', body: form });
       const result = await response.json() as { error?: string; src?: string; url?: string };

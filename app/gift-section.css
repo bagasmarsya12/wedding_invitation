@@ -28,7 +28,11 @@
 .gift-actions .gift-booking-link { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.7rem .9rem; background:#21382c; border:1px solid #21382c; color:#f5f0e4; font:inherit; font-size:.8rem; letter-spacing:0; text-transform:none; text-decoration:none; text-align:center; }
 .gift-actions .gift-booking-link:focus-visible { outline:2px solid #98616b; outline-offset:4px; }
 .gift-transfer-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:2rem; }
-.gift-transfer-group { min-width:0; }
+.gift-transfer-group { display:contents; }
+.gift-transfer-group:first-child .gift-transfer-method { grid-column:1; }
+.gift-transfer-group:nth-child(2) .gift-transfer-method { grid-column:2; }
+.gift-transfer-bca,.gift-transfer-mandiri { grid-row:1; }
+.gift-transfer-gopay,.gift-transfer-dana { grid-row:2; }
 .gift-transfer-method { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1rem; align-items:center; padding:1.4rem 0; border-bottom:1px solid #21382c30; min-width:0; }
 .gift-transfer-method h3 { margin:0 0 .3rem; font:400 1.7rem/1.2 var(--bx-serif); }
 .gift-transfer-recipient { margin:0; font-size:.8rem; line-height:1.5; overflow-wrap:anywhere; }
@@ -36,7 +40,7 @@
 .gift-transfer-destination p { margin:0; line-height:1.5; font-size:.9rem; }
 .gift-transfer-destination span { display:block; font-size:.72rem; margin-bottom:.3rem; opacity:.75; }
 .gift-transfer-destination strong { display:block; font-size:1.1rem; font-weight:500; letter-spacing:.04em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; user-select:all; }
-.gift-transfers .gift-transfer-action,.gift-options-folio .gift-transfer-action { display:inline-flex; justify-content:center; align-items:center; gap:.5rem; padding:.7rem .85rem; min-height:44px; border:1px solid #21382c70; background:transparent; color:inherit; font:inherit; font-size:.85rem; text-decoration:none; cursor:pointer; text-align:center; max-width:13rem; overflow-wrap:anywhere; }
+.gift-transfers .gift-transfer-action,.gift-options-folio .gift-transfer-action { display:inline-flex; justify-content:center; align-items:center; justify-self:end; gap:.5rem; width:10rem; padding:.5rem .85rem; min-height:3.75rem; border:1px solid #21382c70; background:transparent; color:inherit; font:inherit; font-size:.85rem; line-height:1.4; text-decoration:none; cursor:pointer; text-align:center; max-width:100%; overflow-wrap:anywhere; }
 .gift-transfer-legacy { margin:1rem 0; }
 .gift-transfer-legacy pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; line-height:1.75; }
 .gift-transfer-status { min-height:1.5em; margin:1rem 0 0; font-size:.8rem; }
@@ -54,6 +58,7 @@
   .gift-options-panel .gift-collection-caption { padding:.5rem 0; }
   .gift-options-panel .gift-collection-caption h3 { font-size:1.4rem; }
   .gift-transfer-list,.cms-transfer-fields { grid-template-columns:1fr; }
+  .gift-transfer-group { display:block; min-width:0; }
   .gift-options-folio { padding:1.5rem 1.15rem 1.25rem; }
   .gift-options-tabs { gap:1rem; }
   .gift-options-tabs button { font-size:.85rem; }

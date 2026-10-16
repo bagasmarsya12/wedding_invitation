@@ -28,7 +28,7 @@ type LanguageContextValue = {
 };
 const EMPTY: Record<string, string> = {};
 const LanguageContext = createContext<LanguageContextValue>({
-  language: "id" as Language,
+  language: "en" as Language,
   setLanguage: () => {},
   t: (text: string) => text,
   tField: () => "",
@@ -39,7 +39,7 @@ const LanguageContext = createContext<LanguageContextValue>({
 });
 const KEY = "bagas-iga:language:v1";
 
-export function LanguageProvider({ children, content, overrides: suppliedOverrides, website=WEBSITE_DEFAULTS, blocks=defaultWebsiteBlocks(), arrival=ARRIVAL_DEFAULTS,initialLanguage='id',persistLanguage=true }: { children: ReactNode; content?: Record<string, string>; overrides?: Record<string, string>; website?:WebsiteConfig; blocks?:WebsiteBlocks; arrival?:ArrivalContent;initialLanguage?:Language;persistLanguage?:boolean }) {
+export function LanguageProvider({ children, content, overrides: suppliedOverrides, website=WEBSITE_DEFAULTS, blocks=defaultWebsiteBlocks(), arrival=ARRIVAL_DEFAULTS,initialLanguage='en',persistLanguage=true }: { children: ReactNode; content?: Record<string, string>; overrides?: Record<string, string>; website?:WebsiteConfig; blocks?:WebsiteBlocks; arrival?:ArrivalContent;initialLanguage?:Language;persistLanguage?:boolean }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const overrides = suppliedOverrides && Object.keys(suppliedOverrides).length > 0 ? suppliedOverrides : EMPTY;
   const fields = content ?? EMPTY;
