@@ -49,13 +49,16 @@ export function PostcardWall({ ownIds, refresh = 0 }: { ownIds?: Set<string>; re
 
   useEffect(() => {
     const node = scrollRef.current;
-    if (!node || !cursor || busy || error) return;
-    const nearEnd = () => {
-      if (node.scrollWidth - node.clientWidth - node.scrollLeft < 160) void load(cursor);
+    if (!node) return;
+    const update = () => {
+      const remaining = node.scrollHeight - node.clientHeight - node.scrollTop;
+      if (cursor && !busy && !error && remaining < 240) void load(cursor);
     };
-    node.addEventListener("scroll", nearEnd, { passive: true });
-    nearEnd();
-    return () => node.removeEventListener("scroll", nearEnd);
+    node.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    update();
+    return () => { node.removeEventListener("scroll", update); observer.disconnect(); };
   }, [cursor, busy, error, load, marks.length]);
 
   const loadMore = useCallback(() => { if (cursor) void load(cursor); }, [cursor, load]);

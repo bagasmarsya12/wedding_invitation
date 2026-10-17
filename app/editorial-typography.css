@@ -206,7 +206,7 @@
 .v2-world .reply-studio :is(.caption,.mark-hint,.mark-editing-note,.char-count,.wall-caption,.reply-status,.product-status,.mark-empty) { font: 400 var(--ed-small)/1.6 var(--v2-sans); text-transform: none; letter-spacing: 0; }
 .v2-world .reply-studio :is(.mark-modes button,.mark-toolbar button,.font-option,.paper-button) { font-size: var(--ed-small); line-height: 1.5; text-transform: none; letter-spacing: .015em; }
 .v2-world .reply-studio .mark-wall > h2 { font-weight: 500; line-height: 1.3; }
-.v2-world .reply-studio .postcard-from { font-size: .8125rem; line-height: 1.5; text-transform: none; letter-spacing: 0; }
+.v2-world .reply-studio .mark-composer .postcard-from { font-size: .8125rem; line-height: 1.5; text-transform: none; letter-spacing: 0; }
 .v2-world .reply-studio .wall-caption :is(span,small) { font-size: var(--ed-small); line-height: 1.6; }
 .v2-world .reply-studio .pc-font-hand { --pc-font: Baskerville, "Iowan Old Style", Palatino, Georgia, serif; }
 .v2-world .reply-studio :is(input[type=text],input[type=number],select) { font-size: 1rem; line-height: 1.5; }
