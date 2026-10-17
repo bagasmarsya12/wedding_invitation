@@ -9,7 +9,7 @@
 .v2-profile-folio > header > h2 { max-width:20ch; font-size:clamp(2.8rem,4.3vw,4.5rem); letter-spacing:-.055em; line-height:1.02; }
 .v2-profile-folio .v2-person { max-width:68rem; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(3rem,7vw,7rem); }
 .v2-profile-folio .v2-person-iga { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); }
-.v2-profile-folio .v2-profile-portrait { width:min(100%,24rem); margin:0; isolation:isolate; translate:none; scale:none; }
+.v2-profile-folio .v2-profile-portrait { width:min(100%,24rem); margin:0; align-self:start; isolation:isolate; translate:none; scale:none; }
 .v2-profile-folio .v2-profile-portrait::before { inset:1.4rem -1.1rem 2.9rem 1.1rem; rotate:0deg; border-radius:1px; border:1px solid #87947755; background:#dedfcc66; z-index:-1; }
 .v2-profile-folio .v2-person-iga .v2-profile-portrait::before { inset:1.4rem 1.1rem 2.9rem -1.1rem; background:#dfccc266; border-color:#c88d9666; }
 .v2-profile-folio .v2-profile-print { display:block; padding:.75rem .75rem 1.3rem; border:1px solid #c8c0a780; border-radius:1px; aspect-ratio:auto; overflow:visible; background:#faf6ee; box-shadow:0 2px 0 #dcd5c5,6px 14px 24px #29272114; }
@@ -42,6 +42,10 @@
 .v2-profile-folio .v2-profile-join::before,.v2-profile-folio .v2-profile-join::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#87947766); }
 .v2-profile-folio .v2-profile-join::after { transform:scaleX(-1); }
 .v2-profile-folio .v2-profile-join img { width:2rem; height:3rem; object-fit:contain; mix-blend-mode:multiply; }
+/* Let each portrait accompany only its own story, with room for the floral edges. */
+@media(min-width:901px) and (min-height:36rem) {
+  .v2-profile-folio .v2-profile-portrait { position:sticky; top:clamp(4.5rem,8vh,6rem); }
+}
 @media(max-width:900px) {
   .v2-profile-folio > header { grid-template-columns:1fr; gap:1rem; }
   .v2-profile-folio > header > p { max-width:none; }
@@ -69,7 +73,7 @@
   .v2-profile-window::after,.v2-portrait-light { translate:none; }
 }
 
-/* Approved keepsake portrait: original frame size, a closer photo and paper above. */
+/* Keep the approved frame; bring the couple closer inside the supplied photo stack. */
 .v2-world .v2-profile-folio .v2-profile-print { border-radius:3px; padding:.85rem; background:#21382c; }
 .v2-world .v2-profile-folio .v2-profile-window { border-radius:1px; background:#f3eee7; }
 .v2-world .v2-profile-folio .v2-profile-window::before,
@@ -77,7 +81,7 @@
 .v2-world .v2-profile-folio .v2-profile-portrait::before { border-radius:3px; }
 .v2-world .v2-profile-folio .v2-profile-window.is-motion { --profile-photo-gap:8px; }
 .v2-world .v2-profile-folio .v2-profile-window.is-motion video {
-  transform:translateY(var(--profile-photo-gap)) scale(1.25); transform-origin:center;
+  transform:translateY(var(--profile-photo-gap)) scale(1.55); transform-origin:center;
 }
 .v2-world .v2-profile-folio .v2-profile-window.is-motion::after {
   display:block; inset:0 0 auto; height:var(--profile-photo-gap); z-index:2;

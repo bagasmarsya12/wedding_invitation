@@ -11,7 +11,7 @@ export function ProfilePortrait({ person, src, name, videoRef }: {
 }) {
   if (src) return <LandingPhoto key={src} className="v2-profile-window" src={src} alt={name} initial={person === "bagas" ? "B" : "I"} />;
   return <div className="landing-photo v2-profile-window has-photo is-motion">
-    <video ref={videoRef} src={`/assets/profiles/${person}-portrait-v2.mp4`}
+    <video ref={videoRef} src={`/assets/profiles/${person}-portrait-v3.mp4`}
       poster={`/assets/profiles/${person}-portrait.webp`} width={800} height={920}
       muted playsInline loop preload="none" disablePictureInPicture
       role="img" aria-label={name} data-profile-motion={person}>
