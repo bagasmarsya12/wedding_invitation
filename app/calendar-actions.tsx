@@ -1,16 +1,32 @@
 "use client";
 
 import { ArrowUpRight, CalendarDays, ChevronDown, Download } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { googleCalendarUrl, weddingCalendarEvent, type WeddingEventKey } from "@/lib/wedding-calendar";
 import { T, useLanguage } from "./language";
 
 export function CalendarActions({ eventKey }: { eventKey: WeddingEventKey }) {
+  const details = useRef<HTMLDetailsElement>(null);
   const { language, t, website } = useLanguage();
   const event = weddingCalendarEvent(eventKey,website)!;
   const label = event.label[language];
   const summaryLabel = t(eventKey === "akad" ? "Add Akad to calendar" : "Add Reception to calendar");
 
-  return <details className={`v2-calendar v2-calendar-${eventKey}`} name="wedding-calendar" onKeyDown={e => {
+  useEffect(() => {
+    const element = details.current;
+    if (!element) return;
+    const dismissOutside = (event: Event) => {
+      if (element.open && event.target instanceof Node && !element.contains(event.target)) element.open = false;
+    };
+    document.addEventListener("pointerdown", dismissOutside, true);
+    document.addEventListener("focusin", dismissOutside);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside, true);
+      document.removeEventListener("focusin", dismissOutside);
+    };
+  }, []);
+
+  return <details ref={details} className={`v2-calendar v2-calendar-${eventKey}`} name="wedding-calendar" onKeyDown={e => {
     if (e.key === "Escape" && e.currentTarget.open) {
       e.preventDefault();
       e.currentTarget.open = false;
