@@ -64,8 +64,9 @@
 .gift-gallery-page .gift-card-caption > h2 { margin:.5rem 0 .7rem; font:400 clamp(1.7rem,2.3vw,2.3rem)/1.2 var(--bx-serif); overflow-wrap:anywhere; letter-spacing:-.02em; }
 .gift-card-caption > p:not(.gift-availability) { max-width:45ch; margin:0; font:.9rem/1.65 var(--bx-sans); overflow-wrap:anywhere; }
 .gift-card-caption > small { display:block; margin-top:.8rem; color:#6f6c5b; font:.8rem/1.6 var(--bx-sans); }
-.gift-availability { display:flex; align-items:center; gap:.45rem; margin:0; font:.75rem/1.6 var(--bx-sans); color:#697156; }
-.gift-availability > span { width:5px; height:5px; flex:none; border-radius:50%; background:currentColor; }
+.gift-availability { display:flex; align-items:flex-start; gap:.45rem; min-width:0; margin:0; font:.75rem/1.6 var(--bx-sans); color:#697156; }
+.gift-availability > span[aria-hidden="true"] { width:5px; height:5px; flex:none; margin-top:.55em; border-radius:50%; background:currentColor; }
+.gift-availability > .gift-reserved-name { flex:1; min-width:0; }
 .gift-availability.is-reserved { color:#8b6665; }.gift-availability.is-purchased { color:#676b60; }
 .gift-gallery-page .gift-actions { gap:.6rem; margin-top:1rem; }
 .gift-gallery-page .gift-actions :is(button,a) { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.75rem 1rem; font:.8rem/1.4 var(--bx-sans); text-transform:none; letter-spacing:0; }
