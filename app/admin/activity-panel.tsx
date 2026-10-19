@@ -5,7 +5,7 @@ import { deviceCountLabel } from '@/lib/visit-activity';
 import { rowText as text, type AdminRow } from './admin-types';
 
 type Activity = {guests:AdminRow[];totals:Record<string,number>|null;recent:AdminRow[];trackingEnabled:boolean;error?:string};
-export function ActivityPanel({guests,rsvps,checkins,marks,reservations,notify,reload}:{guests:AdminRow[];rsvps:AdminRow[];checkins:AdminRow[];marks:AdminRow[];reservations:AdminRow[];notify:(message:string)=>void;reload:()=>Promise<void>}) {
+export function ActivityPanel({guests,rsvps,checkins,marks,gifts,notify,reload}:{guests:AdminRow[];rsvps:AdminRow[];checkins:AdminRow[];marks:AdminRow[];gifts:AdminRow[];notify:(message:string)=>void;reload:()=>Promise<void>}) {
   const [data,setData]=useState<Activity|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const [search,setSearch]=useState(''),[filter,setFilter]=useState('all'),[access,setAccess]=useState('active'),[sort,setSort]=useState('latest'),[page,setPage]=useState(0);
   const query=useDeferredValue(search.trim().toLocaleLowerCase('id'));
@@ -37,7 +37,7 @@ export function ActivityPanel({guests,rsvps,checkins,marks,reservations,notify,r
   return <>
     <section className="admin-panel admin-wide cms-dashboard">
       <header className="cms-section-heading"><div><h2>Ringkasan undangan</h2><p>Dari link dibagikan sampai tamu tiba.</p></div><button type="button" disabled={busy} onClick={()=>void load()}>{busy?'Memuat…':'Refresh aktivitas'}</button></header>
-      <dl className="cms-metrics">{[['Undangan aktif',guests.filter(g=>g.status==='active').length],['Link sudah dibuka',data?.totals?.opened??'—'],['Buka undangan tercatat',data?.totals?.link_opens??'—'],['Browser terdeteksi*',data?.totals?deviceCountLabel(data.totals):'—'],['RSVP masuk',rsvps.length],['Orang akan hadir',rsvps.reduce((n,r)=>n+(r.attendance==='yes'?Number(r.party_size)||0:0),0)],['Orang sudah tiba',checkins.reduce((n,r)=>n+(Number(r.party_size)||0),0)],['Mading perlu review',marks.filter(m=>m.moderation_status==='pending').length],['Hadiah dibooking',reservations.filter(r=>r.status==='reserved'||r.status==='purchased').length],['Sesi kunjungan',data?.totals?.sessions??'—']].map(([label,count])=><div key={String(label)}><dt>{label}</dt><dd>{count}</dd></div>)}</dl>
+      <dl className="cms-metrics">{[['Undangan aktif',guests.filter(g=>g.status==='active').length],['Link sudah dibuka',data?.totals?.opened??'—'],['Buka undangan tercatat',data?.totals?.link_opens??'—'],['Browser terdeteksi*',data?.totals?deviceCountLabel(data.totals):'—'],['RSVP masuk',rsvps.length],['Orang akan hadir',rsvps.reduce((n,r)=>n+(r.attendance==='yes'?Number(r.party_size)||0:0),0)],['Orang sudah tiba',checkins.reduce((n,r)=>n+(Number(r.party_size)||0),0)],['Mading perlu review',marks.filter(m=>m.moderation_status==='pending').length],['Hadiah dibooking',gifts.filter(r=>r.status==='reserved'||r.status==='purchased').length],['Sesi kunjungan',data?.totals?.sessions??'—']].map(([label,count])=><div key={String(label)}><dt>{label}</dt><dd>{count}</dd></div>)}</dl>
     </section>
     <section className="admin-panel admin-wide">
       <header className="cms-section-heading"><div><h2>Siapa yang membuka link</h2><p>Berapa kali undangan dibuka dan berapa perangkat/browser yang terdeteksi. Nama adalah pemilik link, termasuk bila linknya diteruskan.</p></div><a href="/api/admin/activity?export=csv" download>Unduh semua aktivitas CSV</a></header>

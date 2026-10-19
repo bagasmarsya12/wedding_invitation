@@ -151,7 +151,7 @@ export function AdminClient() {
       ))}
     </nav>
 
-    {tab === "dashboard" && <div className="admin-pane"><ActivityPanel guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} marks={state.marks} reservations={state.reservations} notify={setStatus} reload={load} /></div>}
+    {tab === "dashboard" && <div className="admin-pane"><ActivityPanel guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} marks={state.marks} gifts={state.gifts} notify={setStatus} reload={load} /></div>}
     {tab === "komentar" && <div className="admin-pane"><PhotoCommentsManager notify={setStatus} /></div>}
     {tab === "petugas" && <div className="admin-pane"><StaffPanel /></div>}
     <div hidden={tab !== "tamu"} className="admin-pane">

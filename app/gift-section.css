@@ -70,3 +70,5 @@
   .gift-transfers .gift-transfer-action { justify-self:start; max-width:100%; }
   .gift-transfer-destination { grid-row:auto; }
 }
+
+.gift-actions .gift-booked-state:disabled,.gift-gallery-page .gift-actions .gift-booked-state:disabled{opacity:1;cursor:default;background:#e5e9de;color:#46543f;border:1px solid #a4ae96;min-height:44px;padding:.7rem .9rem;line-height:1.5;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-transform:none;letter-spacing:0}

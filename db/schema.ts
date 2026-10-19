@@ -72,6 +72,8 @@ export const gifts = sqliteTable("gifts", {
   priceLabel: text("price_label"),
   status: text("status").notNull().default("available"),
   reservedByGuestId: text("reserved_by_guest_id").references(() => guests.id),
+  bookingName: text('booking_name'),
+  bookingAnonymous: integer('booking_anonymous', {mode:'boolean'}).notNull().default(false),
   reservedAt: text("reserved_at"),
   purchasedAt: text("purchased_at"),
   shippingRequired: integer("shipping_required", { mode: "boolean" }).notNull().default(false),

@@ -9,6 +9,7 @@ import { emptyGiftTransfers } from '../lib/gift-transfers.ts';
 import { verifyPhotoCommentFlows } from './photo-comments.integration.mjs';
 import { verifyEditorialFlows } from './cms-editorial.integration.mjs';
 import { verifyVisitActivity } from './visit-activity.integration.mjs';
+import { verifyManualGiftBooking } from './manual-gift-booking.integration.mjs';
 
 const root = new URL("..", import.meta.url).pathname;
 const wrangler = join(root, "node_modules/wrangler/bin/wrangler.js");
@@ -183,7 +184,11 @@ try {
     const publicOptions = await api(base, '/api/gift-options', '');
     assert.equal(publicOptions.status, 200);
     assert.match(publicOptions.headers.get('cache-control'), /no-store/);
-    assert.deepEqual(publicOptions.body, options.body);
+    const {gifts:publicGiftList,...publicPaymentOptions}=publicOptions.body;
+    assert.deepEqual(publicPaymentOptions, options.body);
+    assert.equal(publicGiftList.length,1);
+    assert.equal(publicGiftList[0].id,catalogue.body.gifts[0].id);
+    assert.equal(publicGiftList[0].reservedByName,null);
     assert.equal((await api(base, '/api/invite/invalid-token/gift-options', '')).status, 404);
     assert.equal((await api(base, `/api/invite/${token}/gifts`, '')).body.transferMethods.length, 2);
     assert.equal((await api(base, '/api/admin/state', cookie, { op:'set_setting',key:'gifts_enabled',value:'off' })).status, 200);
@@ -217,6 +222,7 @@ try {
     console.log("mark moderation and lifecycle admin control: OK");
     await verifyPhotoCommentFlows(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
     await verifyVisitActivity(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
+    await verifyManualGiftBooking(base,cookie,token);
   } catch (error) { console.error(log); throw error; }
 } finally {
   if (server && server.exitCode === null) {

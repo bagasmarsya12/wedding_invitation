@@ -135,6 +135,8 @@ const BASE_CONTENT_SECTIONS: ContentSection[] = [
     { key: "cta", label: "Tombol", value: "Open the gift catalogue" },
     { key: "bookingCta", label: "Tombol booking via WhatsApp", value: "Book this gift via WhatsApp" },
     { key: "bookingMessage", label: "Pesan WhatsApp · {gift} diisi nama hadiah", value: GIFT_BOOKING_MESSAGE },
+    { key: "bookedBy", label: "Status booking · {name} diisi nama pemesan", value: "Already booked by {name}" },
+    { key: "anonymousBooker", label: "Nama pengganti untuk pemesan anonim", value: "A dear friend" },
   ] },
   { id: "mark", label: "Leave a mark", fields: [
     { key: "head", label: "Heading", value: "Your reply" },
@@ -195,6 +197,8 @@ Object.assign(CONTENT_DEFAULTS,Object.fromEntries(PHOTO_COMMENT_COPY.map(([key,,
 Object.assign(CONTENT_DEFAULTS, PROFILE_LABEL_TRANSLATIONS);
 Object.assign(CONTENT_DEFAULTS, DAY_OF_TRANSLATIONS);
 CONTENT_DEFAULTS['id.gift.bookingCta'] = 'Booking Hadiah ini';
+CONTENT_DEFAULTS['id.gift.bookedBy'] = 'Sudah dibooking oleh {name}';
+CONTENT_DEFAULTS['id.gift.anonymousBooker'] = 'Teman terkasih';
 
 CONTENT_DEFAULTS['id.keepsake.openHint'] = 'Lihat kartumu · unduh gambar & video';
 

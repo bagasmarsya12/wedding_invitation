@@ -236,3 +236,9 @@
 .admin-page .activity-table th small{display:block;font-weight:400}
 .admin-page .activity-table td:nth-child(3){min-width:145px}
 .admin-page .activity-table td small{font-size:.7rem;line-height:1.4;margin-top:.25rem}
+
+.admin-page .cms-gift .cms-gift-booking-form{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;max-width:42rem}
+.admin-page .cms-gift-booking-preview{padding:1rem;border:1px solid #c4cbbb;background:#eef0e7}
+.admin-page .cms-gift-booking-preview strong,.admin-page .cms-gift-booking-preview small,.admin-page .cms-gift-overview p>small{display:block;margin-top:.35rem}
+.admin-page .cms-gift-booking-form .check{display:flex;align-items:flex-start;gap:.6rem}
+.admin-page .cms-gift-booking-form .check input{flex:0 0 auto;margin-top:.2rem}

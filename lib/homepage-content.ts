@@ -1,14 +1,14 @@
 import { loadWebsite } from "./website-server";
 import { db, sha256 } from "./server";
 import { hasPublicContent, THE_MARK_TEASER, PHOTO_SLOTS, type LandingPhotos, type HomepageArchiveItem, type GiftCollectionPreview, type HomepageGift } from "./public-content";
-import { giftCollection } from "./gift-collections";
+import { loadPublicGifts } from './public-gifts-server';
 
-/** Public presentation only. Guest identity, reservations and RSVP stay private. */
+/** Only published gift labels are public; guest IDs, RSVP and shipping stay private. */
 export async function loadHomepageContent() {
   const {blocks}=await loadWebsite();
   const [archive, gifts, media] = await Promise.allSettled([
     (async () => db().prepare("SELECT slug, type, title, excerpt, story, media_url FROM archive_entries WHERE published = 1 AND visibility = 'public' AND featured = 1 ORDER BY featured_order, created_at LIMIT 5").all<{ slug: string; type: string; title: string; excerpt: string | null; story: string | null; media_url: string | null }>())(),
-    (async () => db().prepare("SELECT id, recipient_category, title, description, image_url, price_label, status FROM gifts WHERE published = 1 ORDER BY sort_order, created_at, id").all<{ id: string; recipient_category: string; title: string; description: string | null; image_url: string | null; price_label: string | null; status: string }>())(),
+    loadPublicGifts(),
     db().prepare("SELECT key, value, updated_at FROM settings WHERE key LIKE 'media.%'").all<{ key: string; value: string; updated_at: string }>(),
   ]);
   const archiveItems: HomepageArchiveItem[] = [];
@@ -21,12 +21,12 @@ export async function loadHomepageContent() {
   const giftItems: HomepageGift[] = [];
   const giftCollections: GiftCollectionPreview[] = [];
   if (gifts.status === "fulfilled") {
-    for (const gift of gifts.value.results.filter(g => hasPublicContent(g.title))) {
-      const category = giftCollection(gift.recipient_category);
-      giftItems.push({id:gift.id,title:gift.title,description:gift.description,category,imageUrl:gift.image_url,priceLabel:gift.price_label,status:gift.status});
+    for (const gift of gifts.value) {
+      const category = gift.category;
+      giftItems.push(gift);
       const existing = giftCollections.find(g => g.category === category);
       if (existing) existing.count++;
-      else giftCollections.push({ category, count: 1, image: gift.image_url, title: gift.title });
+      else giftCollections.push({ category, count: 1, image: gift.imageUrl, title: gift.title });
     }
   }
   const mediaVersions = new Map<string, string>();

@@ -32,5 +32,5 @@ export const THE_MARK_TEASER: HomepageArchiveItem = {
 };
 export type GiftCollectionPreview = { category: "bagas" | "iga" | "home"; count: number; image: string | null; title: string };
 
-/** Published gift presentation and availability. No reservation identity or purchase URL. */
-export type HomepageGift = { id: string; title: string; description: string | null; category: "bagas" | "iga" | "home"; imageUrl: string | null; priceLabel: string | null; status: string };
+/** Published gifts expose only a booker's explicitly selected public name. */
+export type HomepageGift = { id: string; title: string; description: string | null; category: "bagas" | "iga" | "home"; imageUrl: string | null; priceLabel: string | null; status: string; reservedByName?:string|null; bookingAnonymous?:boolean };

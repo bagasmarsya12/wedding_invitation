@@ -26,6 +26,8 @@ export const ACTIVE_CONTENT_KEYS = [
   "gift.cta",
   "gift.bookingCta",
   "gift.bookingMessage",
+  "gift.bookedBy",
+  "gift.anonymousBooker",
   "gift.desc",
   "gift.head",
   "gift.kosong",

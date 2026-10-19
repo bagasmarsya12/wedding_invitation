@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { GIFT_COLLECTIONS } from '@/lib/gift-collections';
 import { T } from '../../../language';
 import { GiftBookingLink } from '../../../gift-booking-link';
+import { GiftBookedButton } from '../../../gift-booked-button';
 
-type Gift = {id:string;title:string;description:string|null;recipient_category:string;price_label:string|null;status:string;published:number};
+type Gift = {id:string;title:string;description:string|null;recipient_category:string;price_label:string|null;status:string;published:number;reservedByName:string|null;bookingAnonymous:boolean};
 export function GiftPreview({gifts}: {gifts:Gift[]}) {
   const [collection,setCollection] = useState('all');
   const visible = collection === 'all' ? gifts : gifts.filter(gift=>gift.recipient_category === collection);
@@ -15,7 +16,7 @@ export function GiftPreview({gifts}: {gifts:Gift[]}) {
       <p><T>{GIFT_COLLECTIONS.find(item=>item.key === gift.recipient_category)?.label ?? 'For Iga & Bagas'}</T></p>
       <h2>{gift.title}</h2><p>{gift.description}</p>{gift.price_label && <p>{gift.price_label}</p>}
       <div><span className="cms-badge">{gift.status}</span> <span className="cms-badge">{gift.published ? 'Visible to guests' : 'Draft'}</span></div>
-      <div className="gift-actions"><GiftBookingLink title={gift.title} disabled /></div>
+      <div className="gift-actions">{gift.status==='available'?<GiftBookingLink title={gift.title} disabled />:<GiftBookedButton name={gift.reservedByName} anonymous={gift.bookingAnonymous}/>}</div>
     </article>)}</div>
     {!visible.length && <p>Add an item in CMS → Tanda kasih → Hadiah barang to fill this collection.</p>}
   </section>;

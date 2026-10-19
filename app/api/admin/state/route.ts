@@ -1,5 +1,6 @@
 import { loadWebsite } from "@/lib/website-server";
 import { guestVisitSummarySql } from '@/lib/visit-activity';
+import { validateGiftBooking } from '@/lib/gift-booking';
 import { GIFT_TRANSFER_SETTING, validateGiftTransfers } from '@/lib/gift-transfers';
 import { readGuestImport } from '@/lib/guest-import';
 import { MAX_GUEST_PARTY_LIMIT, validGuestPartyLimit } from '@/lib/guest-limits';
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
       COALESCE(v.unidentified_sessions,0) unidentified_sessions, v.last_at
       FROM guests g LEFT JOIN (${guestVisitSummarySql}) v ON v.guest_id=g.id ORDER BY g.created_at DESC`).all(),
     db().prepare("SELECT r.*, g.display_name FROM rsvps r JOIN guests g ON g.id = r.guest_id ORDER BY r.updated_at DESC").all(),
-    db().prepare("SELECT f.id, f.title, f.description, f.recipient_category, f.image_url, f.purchase_url, f.price_label, f.status, f.reserved_by_guest_id, g.display_name AS reserved_by_name, f.reserved_at, f.purchased_at, f.shipping_required, f.sort_order, f.published, f.created_at FROM gifts f LEFT JOIN guests g ON g.id = f.reserved_by_guest_id ORDER BY f.sort_order, f.created_at, f.id").all(),
+    db().prepare("SELECT f.id, f.title, f.description, f.recipient_category, f.image_url, f.purchase_url, f.price_label, f.status, f.reserved_by_guest_id, g.display_name AS reserved_by_name, f.booking_name,f.booking_anonymous,f.updated_at, f.reserved_at, f.purchased_at, f.shipping_required, f.sort_order, f.published, f.created_at FROM gifts f LEFT JOIN guests g ON g.id = f.reserved_by_guest_id ORDER BY f.sort_order, f.created_at, f.id").all(),
     db().prepare("SELECT r.id, r.gift_id, r.guest_id, r.status, r.reserved_at, r.released_at, r.purchased_at, g.display_name AS guest_name, f.title AS gift_title FROM gift_reservations r JOIN guests g ON g.id = r.guest_id JOIN gifts f ON f.id = r.gift_id ORDER BY r.reserved_at DESC").all(),
     db().prepare("SELECT m.id, m.guest_id, m.author_name, m.message, m.drawing_key, m.visibility, m.moderation_status, m.created_at, g.display_name AS guest_name FROM guest_marks m JOIN guests g ON g.id=m.guest_id ORDER BY m.created_at DESC").all(),
     db().prepare("SELECT id, slug, type, title, excerpt, story, media_url, featured, featured_order, visibility, published, created_at FROM archive_entries ORDER BY created_at DESC").all(),
@@ -223,19 +224,41 @@ export async function POST(request: Request) {
     const current = await db().prepare('SELECT published, status FROM gifts WHERE id = ?').bind(id).first<{published:number;status:string}>();
     if (!current) return apiError('Gift not found.',404);
     const published = typeof payload.published === 'boolean' ? (payload.published ? 1 : 0) : current.published;
-    if (!published && current.status !== 'available') return apiError('Booked or purchased gifts must stay visible. Release an unpurchased booking before moving it to draft.',409);
-    const result = await db().prepare(`UPDATE gifts SET title = ?, description = ?, recipient_category = ?, image_url = ?, purchase_url = ?, price_label = ?, shipping_required = ?, published = ?, updated_at = ? WHERE id = ? AND (? = 1 OR status = 'available')`)
+    if (!published && current.published && current.status !== 'available') return apiError('Booked or purchased gifts must stay visible. Release an unpurchased booking before moving it to draft.',409);
+    const result = await db().prepare(`UPDATE gifts SET title = ?, description = ?, recipient_category = ?, image_url = ?, purchase_url = ?, price_label = ?, shipping_required = ?, published = ?, updated_at = ? WHERE id = ? AND (? = 1 OR status = 'available' OR published = 0)`)
       .bind(title, cleanText(payload.description, 500) || null, category, imageUrl, purchaseUrl, cleanText(payload.priceLabel, 80) || null, payload.shippingRequired ? 1 : 0, published, now, id, published).run();
     return result.meta.changes ? privateJson({ ok: true }) : apiError("Gift not found.", 404);
+  }
+
+  if (op === 'set_gift_booking') {
+    const booking=validateGiftBooking({name:payload.name,anonymous:payload.anonymous});
+    if(!booking||typeof payload.expectedUpdatedAt!=='string'||!payload.expectedUpdatedAt||payload.expectedUpdatedAt.length>60)return apiError('Isi nama pemesan atau pilih Teman terkasih, lalu muat data hadiah terbaru.');
+    const id=cleanText(payload.id,120);
+    const current=await db().prepare('SELECT status,updated_at FROM gifts WHERE id=?').bind(id).first<{status:string;updated_at:string}>();
+    if(!current)return apiError('Gift not found.',404);
+    if(!['available','reserved','purchased'].includes(current.status))return apiError('Status hadiah ini tidak bisa diubah.',409);
+    const result=await db().prepare(`UPDATE gifts SET status=CASE WHEN status='available' THEN 'reserved' ELSE status END,
+      booking_name=?,booking_anonymous=?,reserved_at=COALESCE(reserved_at,?),updated_at=? WHERE id=? AND updated_at=?`)
+      .bind(booking.name,booking.anonymous?1:0,now,now,id,payload.expectedUpdatedAt).run();
+    return result.meta.changes?privateJson({ok:true}):apiError('Data hadiah berubah. Muat ulang sebelum menyimpan booking.',409);
   }
 
   if (op === "admin_release_gift") {
     const giftId = cleanText(payload.id, 120);
     const database = db();
+    const current=await database.prepare('SELECT status,reserved_by_guest_id,updated_at FROM gifts WHERE id=?').bind(giftId).first<{status:string;reserved_by_guest_id:string|null;updated_at:string}>();
+    if(!current)return apiError('Gift not found.',404);
+    if(current.status!=='reserved')return apiError('Hanya booking yang belum dibeli yang bisa dibuka kembali.',409);
+    if(payload.expectedUpdatedAt!==undefined&&payload.expectedUpdatedAt!==current.updated_at)return apiError('Data hadiah berubah. Muat ulang sebelum membuka booking.',409);
+    if(!current.reserved_by_guest_id){
+      if(payload.expectedUpdatedAt!==current.updated_at)return apiError('Muat ulang data hadiah sebelum membuka booking.',409);
+      const result=await database.prepare(`UPDATE gifts SET status='available',booking_name=NULL,booking_anonymous=0,reserved_at=NULL,updated_at=? WHERE id=? AND status='reserved' AND reserved_by_guest_id IS NULL AND updated_at=?`).bind(now,giftId,current.updated_at).run();
+      return result.meta.changes?privateJson({ok:true}):apiError('Data hadiah berubah. Muat ulang sebelum membuka booking.',409);
+    }
     const results = await database.batch([
-      database.prepare(`UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, reserved_at = NULL, updated_at = ?
-        WHERE id = ? AND status = 'reserved'
-        AND EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND status = 'reserved')`).bind(now, giftId),
+      database.prepare(`UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, booking_name=NULL,booking_anonymous=0, reserved_at = NULL, updated_at = ?
+        WHERE id = ? AND status = 'reserved' AND updated_at=?
+        AND EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND status = 'reserved')`).bind(now, giftId,current.updated_at),
       database.prepare(`UPDATE gift_reservations SET status = 'released', released_at = ? WHERE gift_id = ? AND status = 'reserved'
         AND EXISTS (SELECT 1 FROM gifts WHERE id = gift_id AND status = 'available' AND updated_at = ?)`)
         .bind(now, giftId, now),

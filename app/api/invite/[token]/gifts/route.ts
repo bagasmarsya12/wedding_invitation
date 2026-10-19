@@ -1,17 +1,18 @@
 import { allowMutation, apiError, db, featureEnabled, guestFromToken, logFailure, privateJson, randomId, readJsonBody, sameOriginMutation } from "@/lib/server";
 import { loadGuestGiftOptions } from '@/lib/gift-transfers-server';
+import { publicGiftBooking } from '@/lib/gift-booking';
 
-type GiftRow = { id: string; title: string; description: string | null; recipient_category: string; image_url: string | null; price_label: string | null; purchase_url: string | null; status: string; reserved_by_guest_id: string | null; reserved_by_name: string | null; shipping_required: number };
+type GiftRow = { id: string; title: string; description: string | null; recipient_category: string; image_url: string | null; price_label: string | null; purchase_url: string | null; status: string; reserved_by_guest_id: string | null; booking_name:string|null;booking_anonymous:number; shipping_required: number };
 
 async function listGifts(guestId: string) {
   const rows = await db().prepare(`SELECT f.id, f.title, f.description, f.recipient_category, f.image_url, f.price_label, f.purchase_url,
-    f.status, f.reserved_by_guest_id, g.display_name AS reserved_by_name, f.shipping_required
-    FROM gifts f LEFT JOIN guests g ON g.id = f.reserved_by_guest_id WHERE f.published = 1 ORDER BY f.sort_order, f.created_at, f.id`).all<GiftRow>();
+    f.status, f.reserved_by_guest_id, f.booking_name,f.booking_anonymous, f.shipping_required
+    FROM gifts f WHERE f.published = 1 ORDER BY f.sort_order, f.created_at, f.id`).all<GiftRow>();
   return rows.results.map(gift => ({
     id: gift.id, title: gift.title, description: gift.description, category: gift.recipient_category,
     imageUrl: gift.image_url, priceLabel: gift.price_label, status: gift.status,
     reservedByYou: gift.reserved_by_guest_id === guestId,
-    reservedByName: gift.status !== "available" ? gift.reserved_by_name : null,
+    ...publicGiftBooking(gift),
     purchaseUrl: gift.reserved_by_guest_id === guestId ? gift.purchase_url : null,
     shippingRequired: Boolean(gift.shipping_required),
   }));
@@ -51,7 +52,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     let results: D1Result[];
     if (payload.action === "reserve") {
       results = await database.batch([
-        database.prepare("UPDATE gifts SET status = 'reserved', reserved_by_guest_id = ?, reserved_at = ?, updated_at = ? WHERE id = ? AND status = 'available' AND published = 1").bind(guest.id, now, now, giftId),
+        database.prepare("UPDATE gifts SET status = 'reserved', reserved_by_guest_id = ?, booking_name=NULL, booking_anonymous=1, reserved_at = ?, updated_at = ? WHERE id = ? AND status = 'available' AND published = 1").bind(guest.id, now, now, giftId),
         database.prepare(`INSERT INTO gift_reservations (id, gift_id, guest_id, surprise, status, reserved_at)
           SELECT ?, id, ?, 0, 'reserved', ? FROM gifts WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ? AND reserved_at = ?
           AND NOT EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND status IN ('reserved', 'purchased'))`)
@@ -59,7 +60,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       ]);
     } else if (payload.action === "release") {
       results = await database.batch([
-        database.prepare(`UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, reserved_at = NULL, updated_at = ?
+        database.prepare(`UPDATE gifts SET status = 'available', reserved_by_guest_id = NULL, booking_name=NULL, booking_anonymous=0, reserved_at = NULL, updated_at = ?
           WHERE id = ? AND status = 'reserved' AND reserved_by_guest_id = ?
           AND EXISTS (SELECT 1 FROM gift_reservations WHERE gift_id = gifts.id AND guest_id = ? AND status = 'reserved')`)
           .bind(now, giftId, guest.id, guest.id),

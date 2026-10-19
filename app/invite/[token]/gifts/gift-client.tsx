@@ -4,14 +4,15 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { GIFT_COLLECTIONS, type GiftCollection } from "@/lib/gift-collections";
 import { GiftTransfers } from '../../../gift-transfers';
 import { GiftBookingLink } from '../../../gift-booking-link';
+import { GiftBookedButton } from '../../../gift-booked-button';
 import type { GuestGiftTransfer } from '@/lib/gift-transfers';
 
-type Gift = { id: string; title: string; description: string | null; category: string; priceLabel: string | null; status: string; reservedByYou: boolean; reservedByName: string | null; shippingRequired: boolean };
+type Gift = { id: string; title: string; description: string | null; category: string; priceLabel: string | null; status: string; reservedByYou: boolean; reservedByName: string | null; bookingAnonymous?:boolean; shippingRequired: boolean };
 type Result = { error?: string; gifts?: Gift[]; guestName?: string; cashGiftDetails?: string | null; transferMethods?: GuestGiftTransfer[]; shippingInstructions?: string | null; enabled?: boolean };
 type Action = "release" | "purchased";
 const CATEGORY_LABELS: Record<string, string> = { bagas: "For Bagas", iga: "For Iga", home: "For Our Home" };
 export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inline = false }: { token: string; guestName: string; initialCategory?: GiftCollection; inline?: boolean }) {
-  const { t } = useLanguage();
+  const { t,tField } = useLanguage();
   const [gifts, setGifts] = useState<Gift[]>([]), [identity, setIdentity] = useState(guestName);
   const [category, setCategory] = useState<GiftCollection>(initialCategory), [message, setMessage] = useState("");
   const [shipping, setShipping] = useState<string | null>(null), [cashGift, setCashGift] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
     } catch (error) { setMessage(error instanceof Error ? error.message : "Gift could not be updated."); }
     finally { pending.current = false; setBusy(false); }
   }
-  const bookedName = (gift: Gift) => gift.reservedByYou ? t("you") : gift.reservedByName || t("another guest");
+  const bookedName = (gift: Gift) => gift.reservedByYou ? t("you") : gift.reservedByName || tField('gift.anonymousBooker');
   return <>
     {!inline && <div className="catalogue-tabs" role="tablist" aria-label={t("Gift collections")}>{GIFT_COLLECTIONS.map(({ key, label }, index) => <button type="button" role="tab" id={`gift-tab-${key}`} aria-controls="gift-collection-panel" aria-selected={category === key} tabIndex={category === key ? 0 : -1} className={category === key ? "is-active" : ""} onKeyDown={event => browse(event, index)} onClick={() => setCategory(key)} key={key}>{t(label)}</button>)}</div>}
     {(message || !enabled) && <p className="product-status" role="status">{t(message || "Gift reservations are currently closed.")}</p>}
@@ -87,7 +88,7 @@ export function GiftCatalogue({ token, guestName, initialCategory = "bagas", inl
           <div className="gift-card-caption"><p className={`gift-availability is-${gift.status}`}><span aria-hidden="true" />{gift.status === "available" ? t("available") : <span className="gift-reserved-name">{t(gift.status === "purchased" ? "Purchased by" : "Booked by")} {bookedName(gift)}</span>}</p>{inline && <p className="gift-recipient"><T>{gift.category === "home" ? "For Iga & Bagas" : CATEGORY_LABELS[gift.category]}</T></p>}{inline ? <h4>{gift.title}</h4> : <h2>{gift.title}</h2>}<p className="gift-reason">{gift.description}</p>{gift.priceLabel && <small>{gift.priceLabel}</small>}
           <div className="gift-actions">{gift.status === "available" && <GiftBookingLink title={gift.title} disabled={!enabled || busy} />}
             {gift.reservedByYou && gift.status === "reserved" && <><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "release")}><T>Cancel booking</T></button><button type="button" disabled={!enabled || busy} onClick={() => openAction(gift, "purchased")}><T>I’ve bought it</T></button></>}
-            {!gift.reservedByYou && gift.status !== "available" && <button type="button" disabled aria-label={`${t("Booked by")} ${gift.reservedByName || t("another guest")}`}><T>Already booked</T></button>}
+            {gift.status !== "available" && <GiftBookedButton name={gift.reservedByName} anonymous={gift.bookingAnonymous} />}
           </div></div></article>)}
       </div>}
       {load === "ready" && !inline && <button type="button" className="gift-refresh" disabled={busy} onClick={reload}><T>Refresh the collection</T></button>}

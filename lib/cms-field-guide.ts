@@ -42,7 +42,7 @@ const groups: Record<string, GroupDefinition[]> = {
     { title: 'Pengantar kartu ucapan', keys: ['mark.head', 'mark.sub', 'mark.desc'] },
     { title: 'Kehadiran & kirim kartu', keys: ['rsvp.head', 'rsvp.hadir', ...literal('I can’t make it.', 'Send card', 'Preview my reply')] },
   ],
-  gift: [{ title: 'Pengantar tanda kasih', keys: ['gift.head', 'gift.desc', 'gift.kosong', ...literal('Gift an object', 'Cash gift', 'Open DANA', 'Copy phone number', 'Copy account number')] }, { title: 'Booking lewat WhatsApp', keys: ['gift.bookingCta', 'gift.bookingMessage'] }],
+  gift: [{ title: 'Pengantar tanda kasih', keys: ['gift.head', 'gift.desc', 'gift.kosong', ...literal('Gift an object', 'Cash gift', 'Open DANA', 'Copy phone number', 'Copy account number')] }, { title: 'Booking hadiah', keys: ['gift.bookingCta', 'gift.bookingMessage', 'gift.bookedBy', 'gift.anonymousBooker'] }],
   keepsake: [
     { title: 'Tombol pembuka kartu', keys: [...literal('Open your keepsake'), 'keepsake.openHint'] },
     { title: 'Pesan pada kartu', keys: ['keepsake.note1', 'keepsake.note2', 'keepsake.love', 'keepsake.hashtag'] },
@@ -94,7 +94,7 @@ export const sectionHelp = (section: string) => ({
   story: 'Bab cerita tampil berurutan di homepage. Judul section diatur melalui Teks & tombol.',
   archive: 'Semua foto tayang di Arsip kami. Pilihan homepage diatur per foto; foto baru tidak otomatis masuk homepage. Cerita tambahan tetap memiliki halaman sendiri.',
   rsvp: 'Pengantar dan tombol untuk menjawab kehadiran serta mengirim kartu ucapan.',
-  gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Tombol booking membuka draf WhatsApp ke Bagas di 089681747474; klik tidak otomatis mengunci hadiah. Label tombol dan pesan dapat diatur pada Teks & tombol. Gunakan {gift} untuk nama hadiah. Rekening dan e-wallet diatur pada tab terpisah.',
+  gift: 'Kartu hadiah menampilkan nama barang, penerima, dan alasan dibutuhkan. Booking tetap dikonfirmasi lewat WhatsApp ke Bagas di 089681747474. Setelah dikonfirmasi, buka Atur booking untuk mengisi nama atau memilih Teman terkasih; tombol hadiah akan nonaktif. Label tombol, pesan, dan status dua bahasa ada pada Teks & tombol. Gunakan {gift} untuk nama hadiah dan {name} untuk pemesan. Rekening dan e-wallet diatur pada tab terpisah.',
   keepsake: 'Pesan bawaan kartu untuk semua tamu. Pesan khusus seseorang diatur dari Tamu & link → Edit / pesan.',
   footer: 'Pengantar dan tombol Stakk, serta kalimat dan tautan di akhir undangan. Stakk membuka landing page di tab baru. Wording landing diatur pada section Stakk. Hashtag mengikuti Kartu kenangan.',
   jukebox: 'Playlist dan kata-kata jukebox diatur bersama. Lagu tampil setelah audio diunggah dan lagu diaktifkan.',
