@@ -1,6 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { browserVisitId, visitSession } from '@/lib/visit-activity';
 
 /** First-party page activity; invitation tokens never leave this origin. */
 export function VisitTracker({enabled}:{enabled:boolean}) {
@@ -14,17 +15,13 @@ export function VisitTracker({enabled}:{enabled:boolean}) {
     const send=()=>{
       if(sent || document.visibilityState!=='visible') return;
       sent=true;
-      let session=crypto.randomUUID();
-      let token=match?.[1]??'';
+      let identity={session:crypto.randomUUID() as string,token:match?.[1]??''};
+      let device:string|null=null;
       try {
-        const stored=JSON.parse(sessionStorage.getItem('bagas-iga:visit:v1') || 'null') as {id?:string;at?:number;token?:string}|null;
-        if(stored?.id && stored.at && Date.now()-stored.at<30*60_000) {
-          session=stored.id as typeof session;
-          if(!token)token=stored.token??'';
-        }
-        sessionStorage.setItem('bagas-iga:visit:v1',JSON.stringify({id:session,at:Date.now(),token}));
+        identity=visitSession(sessionStorage,identity.token,Date.now(),()=>crypto.randomUUID());
       } catch {/* storage is optional */}
-      void fetch('/api/visits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({session,page,token}),keepalive:true}).catch(()=>{});
+      try { device=browserVisitId(localStorage,()=>crypto.randomUUID()); } catch {/* storage is optional */}
+      void fetch('/api/visits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...identity,page,device}),keepalive:true}).catch(()=>{});
     };
     send(); document.addEventListener('visibilitychange',send);
     return ()=>document.removeEventListener('visibilitychange',send);

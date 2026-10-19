@@ -8,6 +8,7 @@ import { createServer } from "node:net";
 import { emptyGiftTransfers } from '../lib/gift-transfers.ts';
 import { verifyPhotoCommentFlows } from './photo-comments.integration.mjs';
 import { verifyEditorialFlows } from './cms-editorial.integration.mjs';
+import { verifyVisitActivity } from './visit-activity.integration.mjs';
 
 const root = new URL("..", import.meta.url).pathname;
 const wrangler = join(root, "node_modules/wrangler/bin/wrangler.js");
@@ -215,6 +216,7 @@ try {
     assert.equal((await api(base, "/api/site-state", "")).body.phase, "post-wedding");
     console.log("mark moderation and lifecycle admin control: OK");
     await verifyPhotoCommentFlows(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
+    await verifyVisitActivity(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
   } catch (error) { console.error(log); throw error; }
 } finally {
   if (server && server.exitCode === null) {

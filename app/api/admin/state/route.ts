@@ -1,4 +1,5 @@
 import { loadWebsite } from "@/lib/website-server";
+import { guestVisitSummarySql } from '@/lib/visit-activity';
 import { GIFT_TRANSFER_SETTING, validateGiftTransfers } from '@/lib/gift-transfers';
 import { readGuestImport } from '@/lib/guest-import';
 import { MAX_GUEST_PARTY_LIMIT, validGuestPartyLimit } from '@/lib/guest-limits';
@@ -44,7 +45,10 @@ export async function GET(request: Request) {
     }
     if (kind) return apiError("Unsupported export.");
     const [guests, rsvps, gifts, reservations, marks, archive, settings, checkins] = await Promise.all([
-    db().prepare("SELECT id, display_name, email, party_limit, status, guest_group, invitation_sent_at, invitation_token_enc IS NOT NULL AS has_saved_link, created_at FROM guests ORDER BY created_at DESC").all(),
+    db().prepare(`SELECT g.id, g.display_name, g.email, g.party_limit, g.status, g.guest_group, g.invitation_sent_at, g.invitation_token_enc IS NOT NULL AS has_saved_link, g.created_at,
+      COALESCE(v.link_opens,0) link_opens, COALESCE(v.sessions,0) sessions, COALESCE(v.devices,0) devices,
+      COALESCE(v.unidentified_sessions,0) unidentified_sessions, v.last_at
+      FROM guests g LEFT JOIN (${guestVisitSummarySql}) v ON v.guest_id=g.id ORDER BY g.created_at DESC`).all(),
     db().prepare("SELECT r.*, g.display_name FROM rsvps r JOIN guests g ON g.id = r.guest_id ORDER BY r.updated_at DESC").all(),
     db().prepare("SELECT f.id, f.title, f.description, f.recipient_category, f.image_url, f.purchase_url, f.price_label, f.status, f.reserved_by_guest_id, g.display_name AS reserved_by_name, f.reserved_at, f.purchased_at, f.shipping_required, f.sort_order, f.published, f.created_at FROM gifts f LEFT JOIN guests g ON g.id = f.reserved_by_guest_id ORDER BY f.sort_order, f.created_at, f.id").all(),
     db().prepare("SELECT r.id, r.gift_id, r.guest_id, r.status, r.reserved_at, r.released_at, r.purchased_at, g.display_name AS guest_name, f.title AS gift_title FROM gift_reservations r JOIN guests g ON g.id = r.guest_id JOIN gifts f ON f.id = r.gift_id ORDER BY r.reserved_at DESC").all(),

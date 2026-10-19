@@ -47,7 +47,7 @@ console.log(`deploy config ready: ${ids.worker_name} → ${ids.worker_url}`);
 const run = args => execFileSync("npx", ["wrangler", ...args], { cwd: REPO, stdio: "inherit" });
 const wranglerConfig = ["--config", "dist/server/wrangler.deploy.json"];
 
-const migrations = ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql", "0005_guest_passes.sql", "0006_cms_operations.sql", "0007_staff_mode.sql", "0008_cms_workspace.sql", "0009_photo_comments.sql"];
+const migrations = ["0000_cooing_anthem.sql", "0001_flat_mephistopheles.sql", "0002_brainy_robbie_robertson.sql", "0003_guest_mark_style.sql", "0004_guest_mark_font.sql", "0005_guest_passes.sql", "0006_cms_operations.sql", "0007_staff_mode.sql", "0008_cms_workspace.sql", "0009_photo_comments.sql", "0010_visit_devices.sql"];
 const migrationIndex = process.argv.indexOf("--migration");
 const selectedMigration = migrationIndex >= 0 ? process.argv[migrationIndex + 1] : null;
 if (migrationIndex >= 0 && !migrations.includes(selectedMigration)) throw new Error("Choose a known drizzle migration filename.");

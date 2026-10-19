@@ -227,3 +227,12 @@
 .admin-page .cms-workspace-v3 .cms-personal-message-link{margin-top:1rem;border-radius:4px}
 @media(max-width:1000px){.admin-page .cms-workspace-v3 .cms-editor-shell{grid-template-columns:180px minmax(0,1fr);gap:1.25rem}.admin-page .cms-workspace-v3 .cms-current-section{display:block}.admin-page .cms-workspace-v3 .cms-current-section>a{display:inline-block;margin-top:.6rem}.admin-page .cms-workspace-v3 .cms-collection-editor.is-photos{grid-template-columns:1fr}}
 @media(max-width:750px){.admin-page .cms-workspace-v3{padding:1rem}.admin-page .cms-workspace-v3>.cms-section-heading{flex-wrap:wrap}.admin-page .cms-workspace-v3 .cms-editor-shell{grid-template-columns:1fr;gap:1rem}.admin-page .cms-workspace-v3 .cms-section-nav{position:static;display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid #c4cbbb;padding:0 0 .7rem;max-height:none}.admin-page .cms-workspace-v3 .cms-section-nav button{flex-shrink:0;min-width:155px;min-height:58px}.admin-page .cms-workspace-v3 .cms-editor-language{align-items:start;flex-direction:column;gap:.4rem}.admin-page .cms-workspace-v3 .cms-publishing{top:4px;padding:.85rem}.admin-page .cms-workspace-v3 .cms-publishing-actions{gap:.4rem}.admin-page .cms-workspace-v3 .cms-publishing-actions>button{flex:1 1 auto;font-size:.75rem;padding:.5rem .6rem}.admin-page .cms-workspace-v3 .cms-publishing-actions>.cms-publish-primary{flex-basis:100%}.admin-page .cms-workspace-v3 .cms-field-group{margin-top:1.2rem}.admin-page .cms-workspace-v3 .cms-subtabs{overflow-x:auto;flex-wrap:nowrap}.admin-page .cms-workspace-v3 .cms-subtabs button{white-space:nowrap}.admin-page .cms-workspace-v3 .cms-block>.cms-section-heading{flex-wrap:wrap}.admin-page .cms-workspace-v3 .cms-block .cms-actions{width:100%}.admin-page .cms-workspace-v3 .cms-block .cms-actions button{flex-grow:1}}
+
+/* Link activity keeps names visible while browsing a wide report. */
+.admin-page .activity-table{min-width:1120px}
+.admin-page .activity-table thead th{z-index:2}
+.admin-page .activity-table tbody th{position:sticky;left:0;top:auto;min-width:200px;max-width:260px;background:#f7f5ec;white-space:normal;z-index:1}
+.admin-page .activity-table tbody tr:nth-child(even) th{background:#f1f2e9}
+.admin-page .activity-table th small{display:block;font-weight:400}
+.admin-page .activity-table td:nth-child(3){min-width:145px}
+.admin-page .activity-table td small{font-size:.7rem;line-height:1.4;margin-top:.25rem}

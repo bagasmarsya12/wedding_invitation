@@ -159,6 +159,7 @@ export const pageVisits = sqliteTable("page_visits", {
   id: text("id").primaryKey(),
   guestId: text("guest_id").references(() => guests.id, { onDelete: "cascade" }),
   sessionHash: text("session_hash").notNull(),
+  deviceHash: text("device_hash"),
   page: text("page").notNull(),
   views: integer("views").notNull().default(1),
   firstAt: text("first_at").notNull().default(sql`CURRENT_TIMESTAMP`),
