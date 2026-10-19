@@ -167,7 +167,7 @@ export function AdminClient() {
 
     </details></div>
     <div hidden={tab !== "kehadiran"} className="admin-pane">
-      <AttendanceManager guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} exportFile={kind=>void exportFile(kind)} reload={load} notify={setStatus}/>
+      <AttendanceManager action={action} guests={state.guests} rsvps={state.rsvps} checkins={state.checkins} exportFile={kind=>void exportFile(kind)} reload={load} notify={setStatus}/>
     </div>
 
     <div hidden={tab !== "pengaturan"} className="admin-pane">

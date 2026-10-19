@@ -5,7 +5,7 @@ import { GIFT_TRANSFER_SETTING, validateGiftTransfers } from '@/lib/gift-transfe
 import { readGuestImport } from '@/lib/guest-import';
 import { MAX_GUEST_PARTY_LIMIT, validGuestPartyLimit } from '@/lib/guest-limits';
 import { sealInvitationToken, invitationVault } from '@/lib/invitation-vault';
-import { parseCsv, safeExternalUrl, safeMediaUrl, toCsv } from "@/lib/production";
+import { parseCsv, safeExternalUrl, safeMediaUrl, toCsv, validateRsvp } from "@/lib/production";
 import { DEFAULT_INVITATION_MESSAGE, invitationMessage, invitationToken, validGuestGroup, validInvitationTemplate } from '@/lib/invitation-message';
 import { allowMutation, apiError, cleanText, db, logFailure, privateHeaders, privateJson, randomId, randomInviteToken, readJsonBody, requireAdmin, sameOriginMutation, sha256 } from "@/lib/server";
 
@@ -149,6 +149,27 @@ export async function POST(request: Request) {
     if (typeof payload.sent !== 'boolean') return apiError('Choose sent or not sent.');
     const result = await db().prepare('UPDATE guests SET invitation_sent_at = CASE WHEN ? THEN COALESCE(invitation_sent_at, ?) ELSE NULL END, updated_at = ? WHERE id = ?').bind(payload.sent ? 1 : 0,now,now,cleanText(payload.id,120)).run();
     return result.meta.changes ? privateJson({ok:true}) : apiError('Guest not found.',404);
+  }
+
+  if (op === 'set_guest_rsvp') {
+    if (payload.expectedUpdatedAt!==null&&(typeof payload.expectedUpdatedAt!=='string'||!payload.expectedUpdatedAt||payload.expectedUpdatedAt.length>60))return apiError('Muat ulang jawaban tamu sebelum menyimpan.');
+    const id=cleanText(payload.id,120);
+    const current=await db().prepare(`SELECT g.status,g.party_limit,r.updated_at AS rsvp_updated_at FROM guests g LEFT JOIN rsvps r ON r.guest_id=g.id WHERE g.id=?`).bind(id).first<{status:string;party_limit:number;rsvp_updated_at:string|null}>();
+    if(!current)return apiError('Tamu tidak ditemukan.',404);
+    if(current.status!=='active')return apiError('Akses tamu ini sudah dicabut. Aktifkan kembali sebelum mengatur RSVP.',409);
+    if(current.rsvp_updated_at!==payload.expectedUpdatedAt)return apiError('Jawaban tamu sudah berubah. Muat ulang sebelum menyimpan RSVP.',409);
+    const valid=validateRsvp(payload.attendance,payload.partySize,current.party_limit);
+    if(!valid||typeof payload.partySize!=='number')return apiError('Pilih hadir atau tidak hadir, dengan jumlah orang sesuai kuota undangan.');
+    const previousTime=Date.parse(current.rsvp_updated_at??'');
+    const updatedAt=new Date(Math.max(Date.now(),Number.isFinite(previousTime)?previousTime+1:0)).toISOString();
+    // Update only the RSVP answer/count. Notes, creation time, invitations and
+    // actual check-ins are independent and must remain untouched.
+    const result=await db().prepare(`INSERT INTO rsvps (id,guest_id,attendance,party_size,created_at,updated_at)
+      SELECT ?,g.id,?,?,?,? FROM guests g WHERE g.id=? AND g.status='active' AND g.party_limit>=?
+      ON CONFLICT(guest_id) DO UPDATE SET attendance=excluded.attendance,party_size=excluded.party_size,updated_at=excluded.updated_at
+      WHERE ? IS NOT NULL AND rsvps.updated_at=?`)
+      .bind(randomId('rsvp'),valid.attendance,valid.partySize,updatedAt,updatedAt,id,valid.partySize,payload.expectedUpdatedAt,payload.expectedUpdatedAt).run();
+    return result.meta.changes?privateJson({ok:true}):apiError('Data tamu atau jawabannya berubah. Muat ulang sebelum menyimpan RSVP.',409);
   }
 
   if (op === 'update_guests_bulk') {

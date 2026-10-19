@@ -242,3 +242,8 @@
 .admin-page .cms-gift-booking-preview strong,.admin-page .cms-gift-booking-preview small,.admin-page .cms-gift-overview p>small{display:block;margin-top:.35rem}
 .admin-page .cms-gift-booking-form .check{display:flex;align-items:flex-start;gap:.6rem}
 .admin-page .cms-gift-booking-form .check input{flex:0 0 auto;margin-top:.2rem}
+
+/* Manual RSVP shares the existing attendance status and totals. */
+.admin-page .cms-rsvp-edit{display:block;margin-top:.4rem;padding:.3rem .5rem;font-size:.72rem;white-space:nowrap}
+.cms-rsvp-dialog{max-width:36rem}.cms-rsvp-dialog .cms-section-heading{align-items:flex-start}.cms-rsvp-dialog h2{font-size:1.35rem}.cms-rsvp-dialog form label small{display:block;margin-top:.35rem;font-weight:400}.cms-rsvp-dialog .cms-actions{display:flex;gap:.65rem;flex-wrap:wrap}
+.cms-rsvp-dialog form label{display:grid;gap:.4rem}.cms-rsvp-dialog :is(input,select){width:100%;padding:.7rem;border:1px solid #bcc5b4;background:#faf8ef;font:inherit;color:inherit}.cms-rsvp-dialog :is(input,select):focus-visible{outline:2px solid #657450;outline-offset:2px}

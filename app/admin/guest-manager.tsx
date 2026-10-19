@@ -5,6 +5,7 @@ import { rowText as text, type AdminAction, type AdminRow } from './admin-types'
 import {formatAdminTime} from '@/lib/admin-time';
 import { MAX_GUEST_PARTY_LIMIT } from '@/lib/guest-limits';
 import { deviceCountLabel } from '@/lib/visit-activity';
+import { AdminRsvpDialog } from './admin-rsvp-dialog';
 
 type Props={guests:AdminRow[];rsvps:AdminRow[];settings:AdminRow[];knownLinks:Record<string,string>;action:AdminAction;regenerate:(id:string)=>Promise<void>;rememberLink:(id:string,url:string)=>void;notify:(message:string)=>void;exportGuests:()=>void};
 type Modal={id:string;kind:'share'|'edit'|'qr'};
@@ -14,6 +15,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
   const query=useDeferredValue(search.trim().toLocaleLowerCase('id'));
   const [modal,setModal]=useState<Modal|null>(null),[link,setLink]=useState(''),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const [qr,setQr]=useState<{qrData:string;code:string}|null>(null);
+  const [rsvpGuestId,setRsvpGuestId]=useState<string|null>(null);
   const [chosen,setChosen]=useState<Set<string>>(()=>new Set()),[bulkField,setBulkField]=useState<'sent'|'group'>('sent'),[bulkSent,setBulkSent]=useState('sent'),[bulkGroup,setBulkGroup]=useState('unassigned');
   const allCheckbox=useRef<HTMLInputElement>(null);
   const dialog=useRef<HTMLDialogElement>(null);
@@ -32,6 +34,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
   async function markSent(row:AdminRow){setBusy(true);try{const result=await action('mark_invitation_sent',{id:text(row.id),sent:!row.invitation_sent_at});if(result)notify(`Status pengiriman ${text(row.display_name)} diperbarui.`);}finally{setBusy(false);}}
   async function applyBulk(){if(!selectedIds.length)return;setBusy(true);try{const result=await action('update_guests_bulk',{ids:selectedIds,field:bulkField,value:bulkField==='sent'?bulkSent==='sent':bulkGroup});if(result){setChosen(new Set());notify(`${result.updated??selectedIds.length} tamu diperbarui.`);}}finally{setBusy(false);}}
   const selected=guests.find(r=>r.id===modal?.id);
+  const rsvpGuest=guests.find(row=>row.id===rsvpGuestId);
   useEffect(()=>{if(modal)dialog.current?.showModal();},[modal]);
   const close=()=>{dialog.current?.close();setModal(null);setMessage('');setError('');setQr(null);};
   function reset(){setSearch('');setGroup('all');setAttendance('all');setSent('all');setAccess('active');setPage(0);setChosen(new Set());}
@@ -76,7 +79,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
         <tbody>{visible.map((row,index)=>{const id=text(row.id),reply=responses.get(id),response=text(reply?.attendance)||'pending';return <tr key={id}>
           <td className="cms-selection-cell"><input type="checkbox" checked={chosen.has(id)} disabled={busy} onChange={()=>selectOne(id)} aria-label={`Pilih ${text(row.display_name)}`}/></td><td>{currentPage*pageSize+index+1}</td><th scope="row"><strong>{text(row.display_name)}</strong>{Boolean(row.email)&&<small>{text(row.email)}</small>}</th>
           <td>{GUEST_GROUPS.find(g=>g.key===row.guest_group)?.label||'Belum diatur'}</td><td>{text(row.party_limit)} orang</td>
-          <td><span className={`cms-badge is-${response}`}>{response==='yes'?'Hadir':response==='no'?'Berhalangan':'Belum menjawab'}</span>{response==='yes'&&<small>{text(reply?.party_size)} orang</small>}</td>
+          <td><span className={`cms-badge is-${response}`}>{response==='yes'?'Hadir':response==='no'?'Berhalangan':'Belum menjawab'}</span>{response==='yes'&&<small>{text(reply?.party_size)} orang</small>}<button type="button" className="cms-rsvp-edit" disabled={busy||row.status!=='active'} onClick={()=>setRsvpGuestId(id)} aria-label={`Atur RSVP ${text(row.display_name)}`}>Atur RSVP</button></td>
           <td><strong>{Number(row.link_opens)||0} kali</strong>{Boolean(row.last_at)&&<small>{formatAdminTime(row.last_at)}</small>}</td><td>{deviceCountLabel(row)}{Number(row.unidentified_sessions)>0&&<small>Ada sesi tanpa ID perangkat</small>}</td>
           <td><button className="cms-sent-toggle" type="button" aria-pressed={Boolean(row.invitation_sent_at)} aria-label={`Tandai ${text(row.display_name)} ${row.invitation_sent_at?'belum':'sudah'} dikirim`} disabled={busy} onClick={()=>void markSent(row)}>{row.invitation_sent_at?'Sudah dikirim ✓':'Tandai sudah dikirim'}</button>{Boolean(row.invitation_sent_at)&&<small>{formatAdminTime(row.invitation_sent_at)}</small>}</td><td>{row.status==='active'?'Aktif':'Dicabut'}</td>
           <td><div className="guest-row-actions"><button className="guest-primary" type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'copy')} aria-label={`Salin pesan WA untuk ${text(row.display_name)}`}>Salin pesan WA</button><button type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'link')} aria-label={`Salin link ${text(row.display_name)}`}>Link</button><button type="button" disabled={busy||row.status!=='active'} onClick={()=>void share(row,'qr')} aria-label={`Lihat QR ${text(row.display_name)}`}>QR</button><button type="button" disabled={busy} onClick={()=>{setError('');setModal({id,kind:'edit'});}} aria-label={`Edit tamu ${text(row.display_name)}`}>Edit</button></div></td>
@@ -84,6 +87,7 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
       </div>
       <div className="guest-pagination"><label>Baris per halaman<select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(0);}}>{[25,50,100].map(n=><option value={n} key={n}>{n}</option>)}</select></label><span>{filtered.length?currentPage*pageSize+1:0}–{Math.min((currentPage+1)*pageSize,filtered.length)} dari {filtered.length}</span><div><button type="button" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}>Sebelumnya</button><span>{currentPage+1} / {pages}</span><button type="button" disabled={currentPage+1>=pages} onClick={()=>setPage(currentPage+1)}>Berikutnya</button></div></div>
       <p className="cms-muted">Salin pesan WA memakai template dan link personal tamu. Setelah mengirim pesan, tandai langsung di kolom Pengiriman atau pilih beberapa tamu untuk menandainya bersama.</p>
+      <p className="cms-muted">Tamu mengonfirmasi lewat chat? Gunakan Atur RSVP di kolom RSVP untuk menandai hadir atau tidak hadir. Jawabannya ikut masuk ke rekap; check-in hari H tetap terpisah.</p>
       <p className="cms-muted">Dibuka menghitung tampilan halaman link personal, termasuk buka ulang. *Perangkat adalah browser dengan ID acak tersimpan, bukan jumlah orang. Hitungan dimulai sejak fitur aktif; ≥ berarti masih ada sesi tanpa ID perangkat. Detail dan unduhan aktivitas ada di Ringkasan.</p>
     </section>
     <details className="admin-panel admin-wide cms-message-template"><summary>Template pesan WhatsApp</summary><p>Gunakan {'{{nama}}'} dan {'{{link}}'}. Opsional: {'{{tanggal}}'} dan {'{{lokasi}}'}.</p><form onSubmit={e=>{e.preventDefault();void action('set_setting',{key:'invitation_message_template',value:new FormData(e.currentTarget).get('value')});}}><label>Pesan<textarea key={template} name="value" defaultValue={template} rows={10} maxLength={2000} required /></label><button>Simpan template pesan</button></form></details>
@@ -97,5 +101,6 @@ export function GuestManager({guests,rsvps,settings,knownLinks,action,regenerate
       {modal.kind==='share'&&<><p>Link tersimpan akan terisi otomatis. Jika link lama belum tersimpan, tempel link yang pernah dibagikan untuk memverifikasinya.</p><label>Link undangan personal<input type="url" value={link} onChange={e=>{setLink(e.target.value);setMessage('');setError('');}} /></label><button type="button" disabled={busy||!link.trim()} onClick={async()=>{setBusy(true);try{await prepare(modal.id,link);setError('');}catch(e){setError(e instanceof Error?e.message:'Pesan belum bisa disiapkan.');}finally{setBusy(false);}}}>Siapkan pesan</button>{message&&<><label>Pesan WA<textarea readOnly value={message} rows={10}/></label><div className="cms-actions"><button type="button" onClick={async()=>{try{await navigator.clipboard.writeText(message);notify('Pesan tersalin.');}catch{setError('Pilih dan salin pesan secara manual.');}}}>Salin pesan</button><a className="cms-button" href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Buka draf WhatsApp</a></div></>}</>}
       {modal.kind==='qr'&&(qr?<><img className="cms-guest-qr" src={qr.qrData} alt={`QR masuk ${text(selected.display_name)}`}/><code>{qr.code}</code><p>Petugas penerima tamu memindai QR ini saat kedatangan.</p><a className="cms-button" href={qr.qrData} download={`qr-${text(selected.id)}.svg`}>Unduh QR</a></>:<p role="status">Menyiapkan QR…</p>)}
     </dialog>}
+    {rsvpGuest&&<AdminRsvpDialog guest={rsvpGuest} reply={responses.get(text(rsvpGuest.id))} action={action} notify={notify} onClose={()=>setRsvpGuestId(null)}/>}
   </>;
 }

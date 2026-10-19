@@ -9,6 +9,7 @@ import { emptyGiftTransfers } from '../lib/gift-transfers.ts';
 import { verifyPhotoCommentFlows } from './photo-comments.integration.mjs';
 import { verifyEditorialFlows } from './cms-editorial.integration.mjs';
 import { verifyVisitActivity } from './visit-activity.integration.mjs';
+import { verifyAdminRsvp } from './admin-rsvp.integration.mjs';
 import { verifyManualGiftBooking } from './manual-gift-booking.integration.mjs';
 
 const root = new URL("..", import.meta.url).pathname;
@@ -223,6 +224,7 @@ try {
     await verifyPhotoCommentFlows(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
     await verifyVisitActivity(base,cookie,sql=>execFileSync(process.execPath,[wrangler,"d1","execute","DB","--command",sql,"--local","--config",config,"--persist-to",state],{cwd:root,timeout:20_000,stdio:["ignore","pipe","pipe"]}));
     await verifyManualGiftBooking(base,cookie,token);
+    await verifyAdminRsvp(base,cookie);
   } catch (error) { console.error(log); throw error; }
 } finally {
   if (server && server.exitCode === null) {
